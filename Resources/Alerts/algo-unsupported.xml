@@ -1,8 +1,0 @@
-<?xml version="1.0" standalone="yes" ?>
-<alert type="error">
-	<instruction>Unsupported algorithm</instruction>
-	<content>The ^0 algorithm ^1 is not supported in this version of Salt.</content>
-	<buttons>
-		<button title="OK" cmd="1" default='true'/>
-	</buttons>
-</alert>
