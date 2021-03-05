@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=Salt Terminal
+Comment=Alternative command line and SSH terminal
+Comment[nl]=Alternatieve opdracht prompt en SSH terminal
+TryExec=salt
+Exec=__EXE__
+Icon=__ICON__
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;
+Keywords=Run;
+MimeType=x-scheme-handler/ssh
+Actions=New
+
+[Desktop Action New]
+Name=New Terminal
+Name[nl]=Nieuwe terminal
+Exec=__EXE__
+

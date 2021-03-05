@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<dialog title="Preferences">
+	<vbox padding="8">
+		<hbox>
+			<listbox id="page-selector" bind="top bottom" height="80" width="60" padding="8">
+				<listitem>Appearance</listitem>
+				<listitem>Connection</listitem>
+				<listitem>Security</listitem>
+				<listitem>Beeps</listitem>
+				<listitem>Environment</listitem>
+				<listitem>Protocols</listitem>
+			</listbox>
+			<pager id="pages" bind="left top" margin-left="5">
+				<page id="page1">
+					<hbox>
+						<caption margin-top="3" width="50" text="Font"/>
+						<popup bind="left top" id="font" width="80" />
+						<popup bind="left top" id="size" width="25">
+							<option>8</option>
+							<option>9</option>
+							<option>10</option>
+							<option>11</option>
+							<option>12</option>
+							<option>14</option>
+							<option>18</option>
+							<option>24</option>
+							<option>32</option>
+						</popup>
+					</hbox>
+					<hbox>
+						<caption margin-top="3" width="50" text="Color"/>
+						<swatch id="back-color" color="#aaaaaa" />
+					</hbox>
+					<hbox>
+						<caption margin-top="3" width="50" text="Buffer"/>
+						<edittext style="number" id="buffer" width="30" />
+						<caption margin-top="3" text="lines" />
+					</hbox>
+					
+					<checkbox margin-top="10" bind="top left" id="block-cursor" title="Block Cursor" />
+					<checkbox bind="top left" id="blink-cursor" title="Blinking Cursor" />
+					<checkbox bind="top left" id="ignore-color" title="Ignore colors (monochrome mode)" />
+					<checkbox bind="top left" id="show-status-bar" title="Show Statusbar" />
+				</page>
+				<page id="page2">
+					<hbox>
+						<caption margin-top="3" width="50" text="TERM type"/>
+						<edittext id="terminal-type" width="30" />
+					</hbox>
+					<hbox>
+						<caption margin-top="3" width="50" text="Answer-back"/>
+						<edittext id="answer-back" width="50" />
+					</hbox>
+					<checkbox margin-top="10" bind="top left" id="forward-x11" title="Forward X11" />
+					<checkbox bind="top left" id="udk-with-shift" title="User Defined Keys require shift key" />
+				</page>
+				<page id="page3">
+					<checkbox bind="top left" id="use-certificate" title="Use Certficates for authentication" />
+					<checkbox margin-left="10" bind="top left" id="forward-agent" title="Forward ssh-agent (may require a restart)" />
+					<checkbox margin-left="10" bind="top left" id="act-as-pageant" title="Provide SSH authentication to other programs (Pageant)" />
+				</page>
+				<page id="page4">
+					<checkbox bind="top left" id="audible-beep" title="Use audible beep (sound)" />
+					<checkbox bind="top left" id="graphical-beep" title="Use graphical beep (blink screen)" />
+				</page>
+				<page id="page5">
+					<caption text="Enter NAME=VALUE pairs here" />
+					<edittext bind="top left right bottom" id="env" style="multiline" width="200" height="100" />
+				</page>
+				<page id="page6">
+					<caption text="Key exchange protocols" />
+					<edittext bind="top left right bottom" id="kex" style="multiline" width="200" height="100" />
+					<caption text="Encryption protocols" />
+					<edittext bind="top left right bottom" id="enc" style="multiline" width="200" height="100" />
+					<caption text="Message digest (MAC) protocols" />
+					<edittext bind="top left right bottom" id="mac" style="multiline" width="200" height="100" />
+					<caption text="Compression protocols" />
+					<edittext bind="top left right bottom" id="cmp" style="multiline" width="200" height="100" />
+					<button bind="right bottom" title="Reset" id="reset-protocols" />
+				</page>
+			</pager>
+		</hbox>
+	</vbox>
+	<hbox margin-top="4" bind="left right bottom">
+		<vbox bind="left right" /> <!-- expandable filler -->
+		<button bind="right bottom" title="OK" id="ok" default="true" />
+		<button bind="right bottom" title="Cancel" id="cancel" />
+		<button bind="right bottom" title="Apply" id="apply" />
+	</hbox>
+</dialog>

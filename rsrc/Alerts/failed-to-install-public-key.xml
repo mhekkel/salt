@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?>
+<alert type="error">
+	<instruction>Failed to install public key</instruction>
+	<content>Something went wrong trying to write the public key. Please make sure the file .ssh/authorized_keys is writable.</content>
+	<buttons>
+		<button title="OK" cmd="1" default='true'/>
+	</buttons>
+</alert>

@@ -1,0 +1,78 @@
+<?xml version="1.0" standalone="yes"?>
+<menubar>
+	<menu id='filemenu' label="Connection">
+		<item label="Open Terminal" cmd='new ' />
+		<item label="Connect…" cmd='Conn' />
+		<menu id='recentmenu' label="Connect Recent" special="recent-session">
+			<item label="Clear Menu" cmd='recC' />
+			<item label="-" />
+			<item label="dummy" cmd="0000" />
+		</menu>
+		<item label="Duplicate" cmd='clon' />
+		<item label="Disconnect" cmd='Disc' />
+<!--		<item label="Explore" cmd='Brws' />-->
+		<item label="-" />
+		<item label="Renew Keys" cmd='ReKy'/>
+		<menu id='tunnelmenu' label="Tunnel">
+			<item label="Port Forwarding…" cmd='TnlP'/>
+			<item label="SOCKS5 Proxy…" cmd='TnlS'/>
+			<item label="HTTP Proxy…" cmd='TnlH'/>
+		</menu>
+		<item label="-" />
+		<menu id='public-key' special='public-keys' label="Install Public Key" />
+		<menu id='motp' special='totps' label="One Time Passwords">
+			<item label="Add new TOTP Hash" cmd='+otp' />
+			<item label="-" />
+			<item label="dummy" cmd="0000" />
+		</menu>
+		<item label="-" />
+		<item label="Close" cmd='clos'/>
+		<item label="-" />
+		<item label="Quit" cmd='quit'/>
+	</menu>
+	<menu id='editmenu' label="Edit">
+		<item label="Copy" cmd='copy'/>
+		<item label="Paste" cmd='past'/>
+		<item label="-" />
+		<item label="Select All" cmd='sall'/>
+		<item label="-"/>
+		<item label="Find…" cmd="Find" />
+		<item label="Find Next" cmd="FndN" />
+		<item label="Find Previous" cmd="FndP" />
+		<item label="-"/>
+		<item label="Preferences" cmd='pref' />
+<!--		<item label="-"/>-->
+<!--		<item label="Debug Update" cmd='dbug' />-->
+	</menu>
+	<menu id='termmenu' label="Terminal">
+		<item label="Reset" cmd='rset'/>
+		<item label="Reset and clear" cmd='rstc'/>
+		<item label="-" />
+		<item label="UTF-8 Encoding" cmd='enU8' />
+		<item label="Backspace sends DEL" cmd='tBsD' />
+		<item label="Delete sends DEL" cmd='tDlD' />
+		<item label="VT220 Keyboard" cmd='tVTk' />
+		<item label="Alt sends Escape" cmd='tEsc' />
+		<item label="Old XTerm Function Keys" cmd='tOlF' />
+		<item label="-" />
+		<menu id='signalmenu' label="Send Signal">
+			<item label="STOP" cmd='STOP' />
+			<item label="CONT" cmd='CONT' />
+			<item label="INT " cmd='INT ' />
+			<item label="HUP " cmd='HUP ' />
+			<item label="TERM" cmd='TERM' />
+			<item label="KILL" cmd='KILL' />
+		</menu>
+	</menu>
+	<menu id='' label="Window" special="window">
+		<item label="Next Terminal" cmd='nxtt'/>
+		<item label="Previous Terminal" cmd='prvt'/>
+		<item label="-" />
+	</menu>
+	<menu id='' label="Help">
+		<item label="About…" cmd='abou'/>
+<!--		-->
+<!--		<item label="Test" cmd='test'/>-->
+<!--		-->
+	</menu>
+</menubar>

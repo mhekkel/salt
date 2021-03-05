@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<dialog title="Find">
+	<vbox bind="left top right bottom">
+		<hbox bind="left top right">
+			<caption margin-top="3" text="Find" width="36" />
+			<combobox id='what' bind="left top right"/>
+		</hbox>
+		<hbox bind="left top right" margin-left="40">
+			<checkbox id='ignore-case' title="Ignore case" />
+			<checkbox id='wrap-around' title="Wrap around" />
+		</hbox>
+	</vbox>
+	<hbox bind="left right bottom" margin-top="7">
+		<vbox bind="left right" /> <!-- expandable filler -->
+		<button bind="right bottom" title="Find" id="ok" default="true" />
+	</hbox>
+</dialog>
