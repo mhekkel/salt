@@ -1,0 +1,486 @@
+E–1 ANSI Control Functions Index by Final Character
+Control Function Description Reference
+BEL Bell
+BS Backspace
+OSC 2 1 ; <name> Set Window Title DECSWT
+OSC 2 L ; <name> Set Icon Name DECSIN
+ESC # 3 Double Height Line Top DECDHL
+ESC # 4 Double Height Line Bottom DECDHL
+ESC # 5 Single Width Line DECSWL
+ESC # 6 Double Width Line DECDWL
+ESC 6 Back Index DECBI
+ESC 7 Save Cursor DECSC
+ESC 8 Restore Cursor DECRC
+ESC # 8 Screen Alignment Pattern DECALN
+ESC 9 Forward Index DECFI
+ESC xx Display PC character xx (hex) (SCO Console) SCODPCC
+ESC ) 1 DDD1 - Set DECRLM, DECHEBM, and
+DECHCEM
+DDD1
+ESC ) B DDD2 - ASCII to G1; reset DECRLM2 DDD2
+ESC ( 1 DDD3 - ASCII to G0 DDD3
+A
+CSI Pl A Cursor Up CUU
+CSI Pn a Horizontal Position Relative HPR
+B
+CSI Pl B Cursor Down CUD
+(continued on next page)
+ANSI Control Function Index E–1
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+C
+CSI Pc C Cursor Forward CUF
+CSI c or CSI 0 c Device Attributes DA1
+CSI ? Psc ; PS1 ; ... Psn c Response to Device Attributes DA1
+CSI > c or CSI > 0 c Secondary Device Attributes DA2
+CSI > 64; Pv; 0 c VT520 response to Sec Device Attributes (VT
+keyboard)
+DA2
+CSI > 64; Pv; 1 c VT520 response to Sec Device Attributes (PC
+keyboard)
+DA2
+CSI > 65; Pv; 0 c VT525 response to Sec Device Attributes (VT
+keyboard)
+DA2
+CSI > 65; Pv; 1 c VT525 response to Sec Device Attributes (PC
+keyboard)
+DA2
+CSI = c or CSI = 0 c Tertiary Device Attributes DA3
+CSI ? 1; 2 c VT100 terminal ID DECTID
+CSI ? 1; 0 c VT101 terminal ID DECTID
+CSI ? 6 c VT102 terminal ID DECTID
+CSI ? 62; 1; 2; 7; 8 c VT220 North American DECTID
+CSI ? 62; 1; 2; 7; 8; 9 c VT220 International DECTID
+CSI ? 63; 1; 2; 7; 8 c VT320 North American DECTID
+CSI ? 63; 1; 2; 7; 8; 9 c VT320 International DECTID
+CSI ? 64; 1; 2; 6; 7; 8; 9; 15; 18; 21 c VT420 DECTID
+CSI ? 65;1;2;6;7;8;9;12;23;24;46 c VT520 level 1 DECTID
+CSI ? 65;1;2;6;7;8;9;12;15;18;19;
+21;23;24;42;44;45;46 c
+VT520 level 2-4 DECTID
+CSI ? 65;1;2;7;9;12;18;19;21;23;24;
+42;44;45;46 c
+VT520 level 4 DECTID
+CSI ? 65;1;2;6;7;8;9;12;15;18;19;21;
+22;23;24;42;44;45;46 c
+VT525 level 2-4 DECTID
+CSI ? 65;1;2;7;9;12;18;19;21;22;23;
+24;42;44;45;46 c
+VT525 level 5 DECTID
+ESC c Reset to Initial state RIS
+D
+CSI Pc D Cursor Backward CUB
+CSI Pn d Vertical Line Position Absolute VPA
+ESC D Index IND
+E
+CSI Pn E Cursor Next Line CNL
+CSI Pn e Vertical Position Relative VPR
+ESC E Next Line NEL
+(continued on next page)
+E–2 ANSI Control Function Index
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+F
+CSI Pl ; Pc f Horizontal/Vertical Position HVP
+CSI Pn F Cursor Previous Line CPL
+ESC SP F Send 7-bit C1 Control character to host S7C1T
+G
+CSI Pn G Cursor Horizontal Absolute CHA
+CSI Ps g Clear Tabs TBC
+ESC SP G Send 8-bit C1 Control character to host S8C1T
+H
+CSI Pl ; Pc H Cursor Position CUP
+CSI P1...Pn h Set Mode SM
+CSI ? 1 h Set Cursor Keys mode (application) DECCKM
+CSI 2 h Set Keyboard Action Mode KAM
+CSI 3 h Set Show Control Character Mode CRM
+CSI ? 3 h Set Column Mode (132 columns) DECCOLM
+CSI 4 h Set Insert Mode IRM
+CSI ? 4 h Set Scrolling Mode (smooth) DECSCLM
+CSI ? 5 h Set Screen Mode (light) DECSCNM
+CSI ? 6 h Set Origin Mode (in margins) DECOM
+CSI ? 7 h Set Autowrap Mode DECAWM
+CSI ? 8 h Set Autorepeat mode DECARM
+CSI 12 h Set Send/Receive mode (Local echo off) SRM
+CSI ? 18 h Set Print Form Feed Mode DECPFF
+CSI ? 19 h Set Printer Extent Mode DECPEX
+CSI 20 h Set Line Feed/New Line (NL) LNM
+CSI ? 25 h Set Text Cursor Enable Mode (visible) DECTCEM
+CSI ? 34 h Set Right-to-Left Mode DECRLM
+CSI ? 35 h Set Hebrew Keyboard Map Mode DECHEBM
+CSI ? 36 h Set Hebrew Encoding Mode to 8-bit characters DECHEM
+CSI ? 42 h Set National 7-bit character DECNRCM
+CSI ? 57 h Set N.A./Greek Selection to N.A. DECNAKB
+CSI ? 58 h Set (enter) ProPrinter Emulation Mode DECIPEM
+CSI ? 60 h Set Horizontal Cursor DECHCCM
+CSI ? 61 h Set Vertical Cursor Coupling DECVCCM
+CSI ? 64 h Set Page Cursor Coupling DECPCCM
+CSI ? 66 h Set Numeric Keypad Mode DECNKM
+CSI ? 67 h Set Backarrow key mode (BS) DECBKM
+CSI ? 68 h Set Data Processing Keys DECKBUM
+CSI ? 69 h Set Vertical Split Screen Mode DECVSSM
+CSI ? 73 h Set Transmit Rate Limiting DECXRLM
+CSI ? 81 h Set Key Position Mode DECKPM
+(continued on next page)
+ANSI Control Function Index E–3
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+H
+CSI ? 95 h Set no clear screen on column change DECNCSM
+CSI ? 96 h Set Right-to-Left Copy DECRLCM
+CSI 97 h Set CRT Save Mode DECCRTSM
+CSI ? 98 h Set Auto Resize DECARSM
+CSI ? 99 h Set Modem Control Mode DECMCM
+CSI ? 100 h Set Auto Answerback Mode DECAAM
+CSI ? 101 h Set Conceal Answerback Message DECCANSM
+CSI ? 102 h Set Ignore Null Mode DECNULM
+CSI ? 103 h Set Half-Duplex Mode DECHDPXM
+CSI ? 104 h Set Enable Secondary Keyboard Language Mode DECESKM
+CSI ? 106 h Set Overscan Mode DECOSCNM
+CSI ? 108 h Set Num Lock Mode DECNUMLK
+CSI ? 109 h Set Caps Lock Mode DECCAPSLK
+CSI ? 110 h Set Keyboard LED’s Host Indicator Mode DECKLHIM
+CSI ? 111 h Set Framed Windows Mode DECFWM
+CSI ? 112 h Set Review Previous Lines DECRPL
+CSI ? 113 h Set Host Wake-Up Mode DECHWUM
+CSI ? 114 h Set Alternate Text Color Underline Mode DECATCUM
+CSI ? 115 h Set Alternate Text Color Blink Mode DECATCBM
+CSI ? 116 h Set Bold and Blink Style Mode DECBBSM
+CSI ? 117 h Set Erase Color Mode DECECM
+ESC H Set Horizontal Tabs HTS
+I
+CSI Pn I Cursor Horizontal Forward Tab CHT
+CSI Ps i Media Copy MC
+CSI 6 i Start Printer-to-Host Session MC
+CSI 7 i Stop Printer-to-Host Session MC
+CSI ? Ps i Media Copy (DEC) MC
+CSI ? 8 i Stop Printer-to-Host Session MC
+CSI ? 9 i Start Printer-to-Host Session MC
+ESC I Dscs Designate Character Set SCS
+J
+CSI Ps J Erase in Display ED
+CSI ? Ps J Selective Erase in Display DECSED
+K
+CSI Ps K Erase in Line EL
+CSI ? Ps K Selective Erase in Line DECSEL
+(continued on next page)
+E–4 ANSI Control Function Index
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+L
+CSI Pn L Insert Line IL
+CSI P1...Pn l Reset Mode RM
+CSI ? 1 l Reset Cursor Keys mode (Cursor) DECCKM
+CSI 2 l Reset Keyboard Action Mode KAM
+CSI ? 2 l ANSI Mode DECANM
+CSI 3 l Reset Show Control Character Mode CRM
+CSI ? 3 l Reset Column Mode (80 columns) DECCOLM
+CSI 4 l Reset Insert Mode (Replace) IRM
+CSI ? 4 l Reset Scrolling Mode (jump) DECSCLM
+CSI ? 5 l Reset Screen Mode (dark) DECSCNM
+CSI ? 6 l Reset Origin Mode (upper left) DECOM
+CSI ? 7 l Reset Autowrap Mode DECAWM
+CSI ? 8 l Reset Autorepeat mode DECARM
+CSI 12 l Reset Send/Receive mode (Local echo on) SRM
+CSI ? 18 l Reset Print Form Feed Mode DECPFF
+CSI ? 19 l Reset Printer Extent Mode DECPEX
+CSI 20 l Reset Line Feed (LF)/New Line LNM
+CSI ? 25 l Reset Text Cursor Enable Mode (invisible) DECTCEM
+CSI ? 34 l Reset Right-to-Left Mode DECRLM
+CSI ? 35 l Reset Hebrew Keyboard Map Mode to N.A. DECHEBM
+CSI ? 36 l Reset Hebrew Encoding Mode to 7-bit characters DECHCEM
+CSI ? 42 l Reset Multinational 8-bit characters DECNRCM
+CSI ? 57 l Reset N.A./Greek Selection to Greek DECNAKB
+CSI ? 58 l Reset (return from) ProPrinter Emulation Mode DECIPEM
+CSI ? 60 l Reset Horizontal Cursor DECHCCM†
+CSI ? 61 l Reset Vertical Cursor Coupling DECVCCM
+CSI ? 64 l Reset Page Cursor Coupling DECPCCM
+CSI ? 66 l Reset Numeric Keypad Mode DECNKM
+CSI ? 67 l Reset Backarrow key mode (DEL) DECBKM
+CSI ? 68 l Reset to Typewriter Keys DECKBUM
+CSI ? 69 l Reset Vertical Split Screen Mode DECVSSM
+CSI ? 73 l Reset Transmit Rate Limiting DECXRLM
+CSI ? 81 l Reset Key Position Mode DECKPM
+CSI ? 95 l Reset no clear screen on column change DECNCSM
+CSI ? 96 l Reset Right-to-Left Copy DECRLCM
+CSI 97 l Reset CRT Save Mode DECCRTSM
+CSI ? 98 l Reset Auto Resize DECARSM
+CSI ? 99 l Reset Modem Control Mode DECMCM
+CSI ? 100 l Reset Auto Answerback Mode DECAAM
+CSI ? 101 l Reset Conceal Answerback Message Mode DECCANSM
+CSI ? 102 l Reset Ignore Null Mode DECNULM
+CSI ? 103 l Reset Half-Duplex Mode DECHDPXM
+CSI ? 104 l Reset Enable Secondary Keyboard Language Mode
+to Primary keyboard mapping
+DECESKM
+CSI ? 106 l Reset Overscan Mode DECOSCNM
+CSI ? 108 l Reset Num Lock Mode DECNUMLK
+CSI ? 109 l Reset Caps Lock Mode DECCAPSLK
+CSI ? 110 l Reset Keyboard LED’s Host Indicator Mode DECKLHIM
+CSI ? 111 l Reset Framed Windows Mode DECFWM
+CSI ? 112 l Reset Review Previous Lines DECRPL
+(continued on next page)
+ANSI Control Function Index E–5
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+L
+CSI ? 113 l Reset Host Wake-Up Mode DECHWUM
+CSI ? 114 l Set Alternate Text Color Underline Mode DECATCUM
+CSI ? 115 l Reset Alternate Text Color Blink Mode DECATCBM
+CSI ? 116 l Reset Bold and Blink Style Mode DECBBSM
+CSI ? 117 l Reset Erase Color Mode DECECM
+M
+CSI Pn M Delete Line(s) DL
+CSI Ps; . . . ; Ps m Select Graphic Rendition SGR
+ESC M Reverse Index RI
+N
+CSI 0 n DSR—Operating Status Response DSR–Op
+CSI 3 n DSR—Operating Status Response DSR–Op
+CSI 5 n DSR—Operating Status Request DSR–Op
+CSI 6 n Cursor Position Report Request or DSR—CPR CPR or
+DSR–CPR
+CSI ? 6 n Extended Cursor Position Request, or
+DSR—Extended CPR
+DECXCPR,
+DSR–ExCPR
+CSI ? 10 n DSR—Printer Port Response DSR–Print
+CSI ? 11 n DSR—Printer Port Response DSR–Print
+CSI ? 13 n DSR—Printer Port Response DSR–Print
+CSI ? 15 n DSR—Printer Port Request DSR–Print
+CSI ? 18 n DSR—Printer Port Response DSR–Print
+CSI ? 19 n DSR—Printer Port Response DSR–Print
+CSI ? 20 n DSR—User-Defined Keys Response DSR–UDK
+CSI ? 21 n DSR—User-Defined Keys Response DSR–UDK
+CSI ? 25 n DSR—User-Defined Keys Request DSR–UDK
+CSI ? 26 n DSR—Keyboard Status Request DSR–KeyBd
+CSI ? 27 ; Pn; Pst; Ptyp n DSR—Keyboard Response DSR–KeyBd
+CSI ? 62 n DSR—Macro Space Report Request DECDMAC,
+DSR–MSR
+CSI ? 63; Pid n Memory Checksum Report Request or
+DSR—Memory Checksum Request
+DECCKSR,
+DSR–Mem
+CSI ? 70 n DSR—Data Integrity Report Response DSR–Data
+CSI ? 71 n DSR—Data Integrity Report Response DSR–Data
+CSI ? 73 n DSR—Data Integrity Report Response DSR–Data
+CSI ? 75 n DSR—Data Integrity Report Request DSR–Data
+CSI ? Ps n Response to Device Status Report DSR
+ESC N Single Shift Two SS
+ESC n Locking Shift Two LS
+O
+ESC O Single Shift Three SS
+ESC o Locking Shift Three LS
+(continued on next page)
+E–6 ANSI Control Function Index
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+P
+CSI Pn P Delete Character DCH
+CSI Pn SP P Page Position Absolute PPA
+CSI Pr + p Secure Reset DECSR
+CSI Ps p Select Set-Up Language DECSSL
+CSI Ps - p Auto Repeat Rate DECARR
+CSI Ps SP p Set Scroll Speed DECSSCLS
+CSI Pa $ p Request Mode (ANSI) Host to Terminal DECRQM
+CSI ? Pd $ p Request Mode (DEC) Host to Terminal DECRQM
+CSI ! p Soft Terminal Reset DECSTR
+CSI Ps * p Select ProPrinter Character Set DECSPPCS
+CSI Ps ) p Select Digital Printed Data Type DECSDPT
+CSI 6 Ps1 ; Ps2 ; " p Select Conformance Level DECSCL
+CSI Ps1; Ps2 , p Load Time of Day DECLTOD
+DCS Ps $ p D...D ST Restore Terminal State DECRSTS
+DCS 2 $ p D...D ST Color Table Restore DECCTR
+DCS 2 $ p Pc;Pu;Px;Py;Pz/ ST Color Table Restore DECCTR
+Q
+CSI Pn SP Q Page Position Relative PPR
+CSI Pr * q Secure Reset Confirmation DECSRC
+CSI Ps - q CRT Saver Timing DECCRTST
+CSI Ps q Load LEDs DECLL
+CSI Ps SP q Set Cursor Style DECSCUSR
+CSI Ps " q Select Character Protection Attribute DECSCA
+CSI Ps1 , q Select Terminal ID DECTID
+CSI Ps $ q Select Disconnect Delay Time DECSDDT
+CSI Pf1; PC1; ...Pfn; Pcn + q Enable Local Functions DECELF
+DCS $ q D...D ST Request Selection or Setting DECRQSS
+ESC Q Fn String Define Function Key (SCO Console) SCODFK
+R
+CSI Pl; Pc R Response to Cursor Position Report (CSI 6 n) or
+DSR—CPR
+CPR or
+DSR–CPR
+CSI Pl; Pc; Pp R Response to Extended Cursor Position Request
+(CSI ? 6 n) or DSR—Extended CPR
+DECXCPR,
+DSR–ExCPR
+CSI Pn SP R Page Position Backwards PPB
+CSI Ps * r Select Communication Speed DECSCS
+CSI Ps - r Energy Saver Timing DECSEST
+CSI Ps1; Ps2 * r Select Communication Speed DECSCS
+CSI ? Ps1; Ps2 r Enter/Exit PCTerm Mode DECPCTERM
+CSI Ps SP r Set Key Click Volume DECSKCV
+CSI Pt ; Pb r Set Top and Bottom Margin DECSTBM
+CSI Pt;Pl;Pb;Pr; Ps1;...Psn $ r Change Attribute in Rectangle DECCARA
+CSI Pm1;Pf1;...Pmn;Pfn + r Select Modifier Key Reporting DECSMKR
+DCS Ps r D...D ST Load Banner Message DECLBAN
+DCS Ps $ r D...D ST Report Selection or Setting DECRQSS
+(continued on next page)
+ANSI Control Function Index E–7
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+S
+CSI s Save Current Cursor Position (SCO Console) SCOSC
+CSI Pn S Pan Down SU
+CSI Pl ; Pr s Set Left and Right Margin DECSLRM
+CSI Ps $ s Select Printer Type DECSPRTT
+CSI Ps * s Select Flow Control Type DECSFC
+CSI Ps1; Ps2; Ps3; Ps4 * s Select Flow Control DECSFC
+DCS 1 $ s D...D ST Reply to Terminal State Report to Host DECTSR
+DCS 2 $ s D...D ST Color Table Report DECCTR
+DCS Ps $ s D...D ST Reply to Terminal State Report DECRQTSR
+T
+CSI Pn T Pan Up SD
+CSI Pn t Set Lines Per Page DECSLPP
+CSI Ps SP t Set Warning Bell Volume DECSWBV
+CSI Pt;Pl;Pb;Pr Ps1;...Psn $ t Reverse Attribute in Rectangle DECRARA
+DCS Ps $ t D...D ST Restore Presentation State DECRSPS
+U
+CSI u Restore Saved Cursor Position (SCO Console) SCORC
+CSI Pn U Next Page NP
+CSI & u Request User-Preferred Supplemental Set DECRQUPSS
+CSI 1 $ u Request Terminal State Report DECTSR
+CSI Ps $ u Request Terminal State Report DECRQTSR
+CSI 2; Pu $ u Color Table Request DECCTR
+CSI Ps , u Key Type Inquiry DECRQKT
+CSI Ps SP u Set Margin Bell Volume DECSMBV
+CSI Ps * u Select Communication Port DECSCP
+CSI Ps1; Ps2 * u Select Communication Port DECSCP
+CSI Ps " u Set Transmit Rate Limit DECSTRL
+CSI Ps1; Ps2 " u Set Transmit Rate Limit DECSTRL
+DCS 1 $ u D...D ST Cursor Information Report DECCIR
+DCS 2 $ u D...D ST Tab Stop Report DECTABSR
+DCS Ps ! u Dscs ST Assign User-Preferred Supp Set DECAUPSS
+V
+CSI Pn V Preceding Page PP
+CSI Ps SP v Set Lock Key Style DECSLCK
+CSI " v Request Displayed Extent DECRQDE
+CSI Ps1 ; Ps2 , v Report Key Type DECRPKT
+CSIPts;Pls;Pbs;Prs;Pps;Ptd;Pld;Ppd$v Copy Rectangular Area DECCRA
+DCS Ps v D...D ST Load Answerback Message DECLANS
+W
+CSI ? 5 W Set Tab at every 8 columns DECST8C
+CSI Ps + w Set Port Parameter DECSPP
+CSI Ps1 ; Ps2 , w Key Definition Inquiry DECRQKD
+(continued on next page)
+E–8 ANSI Control Function Index
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+W
+CSI Ps1; Ps2; Ps3; Ps4 + w Set Port Parameter DECSPP
+CSI Ph;Pw;Pml;Pmt;Pmp; " w Report Displayed Extent DECRPDE
+CSI Ps $ w Request Presentation State Report DECRQPSR
+X
+CSI Pn X Erase Character(s) ECH
+CSI & x Enable Session DECES
+CSI Pch; Pt;Pl;Pb;Pr $ x Fill Rectangular Area DECFRA
+CSI Pn1;Pn2;Pn3;Pn4 , x Session Page Memory Allocation DECSPMA
+CSI Ps * x Select Attribute and Change Extent DECSACE
+CSI + x Program Key Free Memory Inquiry DECRQPKFM
+DCS " x D...D ST Program Function Key DECPFK
+Y
+CSI Pa; Ps $ y Report Mode (ANSI) Terminal to Host DECRPM
+CSI ? Pd; Ps $ y Report Mode (DEC) Terminal to Host DECRPM
+CSI Pid;Pp;Pt;Pl;Pb;Pr * y Request Checksum of Rectangle Area DECRQCRA
+CSI 4 ; Ps ; ... ; Ps y Invoke Confidence Test DECTST
+CSI Ps1; Ps2 + y Program Key Free Memory Report DECPKFMR
+CSI Ps , y Update Session DECUS
+DCS " y D...D ST Program Alphanumeric Key DECPAK
+Z
+CSI Pt;Pl;Pb;Pr $ z Erase Rectangular Area DECERA
+CSI Pid * z Invoke Macro DECINVM
+CSI Pn Z Cursor Backward Tabulation CBT
+CSI Ps , z Down Line Load Allocation DECDLDA
+CSI Ps + z Program Key Action DECPKA
+DCS Pid;Pdt;Pen ! z D...D ST Define Macro DECDMAC
+DCS " z D...D ST Copy Key Default DECCKD
+ESC Z Identify Device (Use DA1 instead.) DECID
+Other Characters
+APC : ppp mm ST Extended Keyboard Report DECEKBD
+CSI Pn @ Insert Character ICH
+CSI Ps1;Ps2;Ps3 , | Assign Color DECAC
+CSI Pn * | Select number of lines per screen DECSNLS
+CSI $ | Set 80 columns per page DECSCPP
+CSI Ps $ | Set Ps columns per page DECCOLM
+CSI 80 $ | Set 80 columns per page DECSCPP
+CSI 132 $ | Set 132 columns per page DECSCPP
+DCS ! | D...D ST Report Terminal Unit ID, response
+to Tertiary Device Attributes
+DA3 and
+DECRPTUI
+DCS Ps1; Ps2; Ps3 | D...D ST User Defined Key DECUDK
+ESC | Locking Shift Three Right LS
+(continued on next page)
+ANSI Control Function Index E–9
+ANSI Control Function Index
+E.1 ANSI Index by Final Character
+Table E–1 (Cont.) ANSI Control Functions Index by Final Character
+Control Function Description Reference
+Other Characters
+CSI Pn * { Macro Space Report Response DECMSR,
+DSR–MSR
+CSI Ps ) { Select Color Look-Up Table DECSTGLT
+CSI Ps , { Select Zero Symbol DECSZS
+CSI Pt;Pl;Pb;Pr $ { Selective Erase Rectangular Area DECSERA
+DCS ! { D...D ST Set Terminal Unit ID DECSTUI
+DCS Pfn; Pcn; Pe; Pcmw; Pss; Pu;
+Pcmh; Pcss f <Dscs>
+<sixel-font-patterns> ST
+Dynamically Redefinable Character Sets Extension
+(Down-line Load)
+DECDLD
+CSI Pn ’ } Insert Column DECIC
+CSI Ps $ } Select Active Status Display DECSASD
+CSI Ps1; Ps2; Ps3 , g Alternate Text Colors DECATC
+CSI Ps1; Ps2 SP g Keyboard Language Selection DECKBD
+CSI Pk1; Pf1; Pk2; Pf2.....* g Local Function Key Control DECLFKC
+DCS " g D...D ST Report Function Key Definition DECRPFK
+ESC } Locking Shift Two Right LS
+CSI Pn ‘ Horizontal Position Absolute HPA
+CSI Pn ’ ~ Delete Column(s) DECDC
+CSI Ps SP ~ Terminal Mode Emulation DECTME
+CSI Ps $ ~ Set Status Display (Line) Type DECSSDT
+CSI Ps1 ; Ps2 ~ Function Key DECFNK
+CSI D...D , ~ Play Sound DECPS
+DCS " ~ D...D ST Report all Modifiers/Alphanumeric Key State DECRPAK
+DCS Pid ! ~ D...D ST Response to Memory Checksum Report Request DECRQCRA,
+DECCKSR, or
+DSR–Mem
+ESC ~ Locking Shift One Right LS
+ESC ( Dscs G0 94-character set SCS
+ESC ) Dscs G1 94-character set SCS
+ESC * Dscs G2 94-character set SCS
+ESC + Dscs G3 94-character set SCS
+ESC - Dscs G1 96-character set SCS
+ESC . Dscs G2 96-character set SCS
+ESC / Dscs G3 96-character set SCS
+ESC = Set Keypad Application Mode DECKPAM
+ESC < Exit ANSI (VT52) Mode DECANM
+ESC > Reset Keypad to numeric characters DECKPNM
+S0 Locking Shift One LS
+E–10 ANSI Control Function Index
+Gloss

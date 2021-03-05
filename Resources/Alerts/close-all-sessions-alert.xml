@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?>
+<alert type="warning">
+	<content>Are you sure want to close all sessions?</content>
+	<buttons>
+		<button title="Close" cmd="1"/>
+		<button title="Cancel" cmd="2"/>
+	</buttons>
+</alert>

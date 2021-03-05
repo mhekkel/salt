@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0AED3C93-8094-CEE5-EC3A-C09CB5D36E38}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libassh</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Boost\include\boost-1_55;$(SolutionDir)\..\libassh;$(SolutionDir)\..\..\cryptopp-562;$(SolutionDir)\..\..\zlib-1.2.8;$(SolutionDir)..\..\libzeep</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Boost\include\boost-1_55;$(SolutionDir)\..\libassh;$(SolutionDir)\..\..\cryptopp-562;$(SolutionDir)\..\..\zlib-1.2.8;$(SolutionDir)..\..\libzeep</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\libassh\assh\channel.hpp" />
+    <ClInclude Include="..\..\libassh\assh\config.hpp" />
+    <ClInclude Include="..\..\libassh\assh\connection.hpp" />
+    <ClInclude Include="..\..\libassh\assh\connection_pool.hpp" />
+    <ClInclude Include="..\..\libassh\assh\debug.hpp" />
+    <ClInclude Include="..\..\libassh\assh\error.hpp" />
+    <ClInclude Include="..\..\libassh\assh\hash.hpp" />
+    <ClInclude Include="..\..\libassh\assh\key_exchange.hpp" />
+    <ClInclude Include="..\..\libassh\assh\packet.hpp" />
+    <ClInclude Include="..\..\libassh\assh\port_forwarding.hpp" />
+    <ClInclude Include="..\..\libassh\assh\proxy_cmd.hpp" />
+    <ClInclude Include="..\..\libassh\assh\sftp_channel.hpp" />
+    <ClInclude Include="..\..\libassh\assh\ssh_agent.hpp" />
+    <ClInclude Include="..\..\libassh\assh\terminal_channel.hpp" />
+    <ClInclude Include="..\..\libassh\assh\x11_channel.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\libassh\src\channel.cpp" />
+    <ClCompile Include="..\..\libassh\src\connection.cpp" />
+    <ClCompile Include="..\..\libassh\src\connection_pool.cpp" />
+    <ClCompile Include="..\..\libassh\src\debug.cpp" />
+    <ClCompile Include="..\..\libassh\src\error.cpp" />
+    <ClCompile Include="..\..\libassh\src\key_exchange.cpp" />
+    <ClCompile Include="..\..\libassh\src\packet.cpp" />
+    <ClCompile Include="..\..\libassh\src\port_forwarding.cpp" />
+    <ClCompile Include="..\..\libassh\src\proxy_cmd.cpp" />
+    <ClCompile Include="..\..\libassh\src\sftp_channel.cpp" />
+    <ClCompile Include="..\..\libassh\src\ssh_agent.cpp" />
+    <ClCompile Include="..\..\libassh\src\terminal_channel.cpp" />
+    <ClCompile Include="..\..\libassh\src\win_ssh_agent_impl.cpp" />
+    <ClCompile Include="..\..\libassh\src\x11_channel.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

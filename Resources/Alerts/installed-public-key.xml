@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?>
+<alert type="information">
+	<instruction>Public Key installed</instruction>
+	<content>A public key for identity ^0 was added to the file ~/.ssh/authorized_keys at ^1. Please check this file to make sure is correct.</content>
+	<buttons>
+		<button title="OK" cmd="1" default='true'/>
+	</buttons>
+</alert>

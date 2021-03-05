@@ -1,0 +1,9 @@
+<?xml version="1.0" standalone="yes" ?>
+<alert type="information">
+	<instruction>Not an OpenSSH server</instruction>
+	<content>You seem to be connected to a server that runs another server than OpenSSH. Click continue to generate a key anyway.</content>
+	<buttons>
+		<button title="Cancel" cmd="1" default='true'/>
+		<button title="Continue" cmd="2"/>
+	</buttons>
+</alert>

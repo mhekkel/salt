@@ -1,0 +1,90 @@
+/*
+	CSS voor de nieuwe site
+*/
+
+body {
+	font-family: "Verdana";
+	font-size: 95%;
+}
+
+a {
+	color: #666;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+h1, h2, h3 {
+	color: #666;
+}
+
+div.head {
+	border-bottom: 1px solid #666;
+	padding-left: 1em;
+}
+
+.head h1 {
+	font-size: 200%;
+	color: #777;
+}
+
+div.left {
+	padding: 1em;
+	float: left;
+	width: 6em;
+}
+
+.left ul {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.left li > ul {
+	padding: 0.5em;
+	padding-right: 0;
+	font-size: 90%;
+}
+
+.left ul li {
+	margin-bottom: 0.2em;
+}
+
+ul.loc {
+	list-style: none;
+	padding: 0px;
+	margin: 0.2em;
+	display: inline;
+}
+
+ul.loc li {
+	color: #666;
+	display: inline;
+	font-size: x-small;
+}
+
+ul.loc li + li:before {
+	content: "  »  ";
+}
+
+div.right {
+	margin-left: 8em;
+}
+
+.code {
+	border: 1px solid gray;
+	padding: 0.3em;
+	background-color: #eee;
+	white-space: pre;
+	font-family: "Consolas", fixed;
+	font-size: 90%;
+}
+
+.footer {
+	border-top: 1px solid #666;
+	padding-top: 0.4em;
+	margin-top: 2em;
+	font-size: x-small;
+}

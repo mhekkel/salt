@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<link href="./manual.css" type="text/css" rel="stylesheet" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Tips &amp; Tricks</title>
+    <meta name="author" content="Maarten L. Hekkelma" />
+    <meta name="generator" content="Japi" />
+</head>
+<body>
+	<div class="head">
+		<h1>Hekkelman</h1>
+	</div>
+	
+	<div class="left">
+		<ul>
+			<li><a href="./index.html">Home</a></li>
+			<li><a href="./software.html">Software</a></li>
+			<li>
+				<ul>
+					<li><a href="./salt.html">Salt</a></li>
+					<li>
+						<ul>
+							<li><a href="./software.html">About</a></li>
+							<li><a href="./software.html">Tips & Tricks</a></li>
+							<li><a href="./software.html">Download</a></li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li><a href="./research.html">Research</a></li>
+		</ul>
+	</div>
+	<div class="right">
+		<ul class="loc">
+			<li><a href="./index.html">Home</a></li>
+			<li><a href="./software.html">Software</a></li>
+			<li><a href="./salt.html">Salt</a></li>
+			<li>Tips &amp; Tricks</li>
+		</ul>
+		
+		<h2>Tips and tricks</h2>
+		<p>To make life easier for anyone seriously using Salt as a terminal, I've collected some ideas here.</p>
+		
+		<h3>Terminfo</h3>
+		
+		<p>Many terminals have been produced, and even more emulators exist for these 'glass' terminals. The capabilities of each of 	these are different of course. In the old days, software used to consult the <code>termcap</code> database to find out what the 	current terminal was capable of. The current terminal, that's what is defined in the TERM environment variable.</p>
+	
+		<p>The old termcap file has been replaced on modern Unix computer with terminfo. There's a good manual page for terminfo (5) 	and if you download the source code you can have a look at a very large terminfo source file containing descriptions for many 	terminals. The usual Linux distribution these days comes with a subset of this large set of terminal definitions.</p>
+	
+		<p>Salt is a vt220 emulator. That means it is somewhere in between the most dumb and most fancy terminal types. But Salt has 	mapped two keys that are not defined in the vt220 terminfo entry, the Home and End keys. Not all software uses terminfo 	strictly and e.g. Bash recognizes the Home and End keys sent by Salt without a problem. But e.g. Vim does not, and so we have 	to hack the terminfo databank a little. Fortunately, that's very easy.</p>
+	
+		<p>What we need is a very small terminfo source file:</p>
+		
+		<div class="code"># This is a terminfo source file for the Salt-2.0 Terminal Emulator
+#
+salt|Salt Terminal Emulator,
+	khome=\E[1~,kend=\E[4~,
+	use=vt220,
+</div>
+	
+		<p>Copy that source and paste it in a file, e.g. salt.src. Then execute the command:</p>
+	
+		<div class="code">tic salt.src</div>
+		
+		<p>Assuming you're not root, this will create a ./terminfo directory in your HOME. In this directory you can find the compiled 	salt terminfo entry. To use this terminfo entry, you can change the TERM environmental variable to 'salt', e.g. by editing 	your .profile or .bashrc. Alternatively you can change the TERM string in the Preferences dialog of Salt, but I don't recommend 	that.</p>
+	
+		<h3>Salt and Vim</h3>
+		
+		<p>If you've read and followed the Terminfo tip above, you have a terminfo entry for salt by now. If you don't change the TERM 	variable, you still can use the terminfo entry by setting term in vim:</p>
+	
+		<div class="code">:set term=salt</div>
+		
+		<p>You can do this from your .vimrc file as well.</p>
+	
+	</div>
+
+</body>
+</html>
