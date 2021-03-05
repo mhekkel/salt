@@ -1,26 +1,26 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <boost/regex.hpp>
 
-#include <assh/port_forwarding.hpp>
-#include <assh/connection.hpp>
+#include <pinch/port_forwarding.hpp>
+#include <pinch/connection.hpp>
 
 #include <zeep/crypto.hpp>
 
-#include "MPreferences.h"
-#include "MPortForwardingDialog.h"
-#include "MHTTPProxy.h"
-#include "MError.h"
-#include "MAlerts.h"
+#include "MPreferences.hpp"
+#include "MPortForwardingDialog.hpp"
+#include "MHTTPProxy.hpp"
+#include "MError.hpp"
+#include "MAlerts.hpp"
 
 using namespace std;
 
 // --------------------------------------------------------------------
 
-MPortForwardingDialog::MPortForwardingDialog(MWindow* inTerminal, assh::basic_connection* inConnection)
+MPortForwardingDialog::MPortForwardingDialog(MWindow* inTerminal, pinch::basic_connection* inConnection)
 	: MDialog("port-forwarding-dialog")
 	, mConnection(inConnection)
 {
@@ -78,7 +78,7 @@ bool MPortForwardingDialog::OKClicked()
 
 // --------------------------------------------------------------------
 
-MSOCKS5ProxyDialog::MSOCKS5ProxyDialog(MWindow* inTerminal, assh::basic_connection* inConnection)
+MSOCKS5ProxyDialog::MSOCKS5ProxyDialog(MWindow* inTerminal, pinch::basic_connection* inConnection)
 	: MDialog("socks5-proxy-dialog")
 	, mConnection(inConnection)
 {
@@ -119,7 +119,7 @@ bool MSOCKS5ProxyDialog::OKClicked()
 
 // --------------------------------------------------------------------
 
-MHTTPProxyDialog::MHTTPProxyDialog(MWindow* inTerminal, assh::basic_connection* inConnection)
+MHTTPProxyDialog::MHTTPProxyDialog(MWindow* inTerminal, pinch::basic_connection* inConnection)
 	: MDialog("http-proxy-dialog")
 	, mConnection(inConnection)
 {

@@ -1,9 +1,9 @@
 // Copyright Maarten L. Hekkelman 2017
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
-#include "MTerminalColours.h"
+#include "MTerminalColours.hpp"
 
 const MColor k256AnsiColors[256] = {
 

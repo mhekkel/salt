@@ -3,8 +3,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MSalt.h"
-#include <assh/config.hpp>
+#include "MSalt.hpp"
+#include <pinch/config.hpp>
 
 #include <fstream>
 
@@ -18,16 +18,16 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/asio/spawn.hpp>
 
-#include <assh/connection.hpp>
+#include <pinch/connection.hpp>
 
 #include <zeep/http/webapp.hpp>
 #include <zeep/http/message-parser.hpp>
 #include <zeep/crypto.hpp>
 
-#include "MHTTPProxy.h"
-#include "MPreferences.h"
-#include "MResources.h"
-#include "MApplication.h"
+#include "MHTTPProxy.hpp"
+#include "MPreferences.hpp"
+#include "MResources.hpp"
+#include "MApplication.hpp"
 
 #if defined(_MSC_VER)
 
@@ -43,7 +43,7 @@
 #endif
 
 using namespace std;
-using namespace assh;
+using namespace pinch;
 
 namespace ip = boost::asio::ip;
 namespace zh = zeep::http;
@@ -753,8 +753,8 @@ void MHTTPProxy::log_error(const boost::system::error_code& ec)
 #endif
 
 	if (m_log and
-		ec != assh::error::make_error_code(assh::error::channel_closed) and
-		ec != assh::error::make_error_code(assh::error::connection_lost) and
+		ec != pinch::error::make_error_code(pinch::error::channel_closed) and
+		ec != pinch::error::make_error_code(pinch::error::connection_lost) and
 		ec != boost::asio::error::make_error_code(boost::asio::error::eof))
 	{
 		*m_log << "ERROR: " << ec.message() << endl;

@@ -1,7 +1,7 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <regex>
 
@@ -11,26 +11,26 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <assh/ssh_agent.hpp>
+#include <pinch/ssh_agent.hpp>
 
 #include <cryptopp/base64.h>
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include <cryptopp/md5.h>
 
-#include "MAcceleratorTable.h"
-#include "MMenu.h"
-#include "MSaltApp.h"
-#include "MTerminalWindow.h"
-#include "MConnectDialog.h"
-#include "MPreferences.h"
-#include "MPreferencesDialog.h"
-#include "MSaltVersion.h"
-#include "MPreferences.h"
-#include "MUtils.h"
-#include "MAlerts.h"
-#include "MError.h"
-#include "MResources.h"
-#include "MAddTOTPHashDialog.h"
+#include "MAcceleratorTable.hpp"
+#include "MMenu.hpp"
+#include "MSaltApp.hpp"
+#include "MTerminalWindow.hpp"
+#include "MConnectDialog.hpp"
+#include "MPreferences.hpp"
+#include "MPreferencesDialog.hpp"
+#include "MSaltVersion.hpp"
+#include "MPreferences.hpp"
+#include "MUtils.hpp"
+#include "MAlerts.hpp"
+#include "MError.hpp"
+#include "MResources.hpp"
+#include "MAddTOTPHashDialog.hpp"
 
 #if defined(_MSC_VER)
 #pragma comment (lib, "libassh")
@@ -89,7 +89,7 @@ void MSaltApp::Initialise()
 	MApplication::Initialise();
 	
 	if (Preferences::GetBoolean("act-as-pageant", true))
-		assh::ssh_agent::instance().expose_pageant(true);
+		pinch::ssh_agent::instance().expose_pageant(true);
 	
 	// recent menu
 
@@ -118,14 +118,14 @@ void MSaltApp::Initialise()
 	}
 	
 	// set preferred algorithms
-	mConnectionPool.set_algorithm(assh::encryption, assh::both_directions,
-		Preferences::GetString("enc", assh::kEncryptionAlgorithms));
-	mConnectionPool.set_algorithm(assh::verification, assh::both_directions,
-		Preferences::GetString("mac", assh::kMacAlgorithms));
-	mConnectionPool.set_algorithm(assh::compression, assh::both_directions,
-		Preferences::GetString("cmp", assh::kCompressionAlgorithms));
-	mConnectionPool.set_algorithm(assh::keyexchange, assh::both_directions,
-		Preferences::GetString("kex", assh::kKeyExchangeAlgorithms));
+	mConnectionPool.set_algorithm(pinch::encryption, pinch::both_directions,
+		Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
+	mConnectionPool.set_algorithm(pinch::verification, pinch::both_directions,
+		Preferences::GetString("mac", pinch::kMacAlgorithms));
+	mConnectionPool.set_algorithm(pinch::compression, pinch::both_directions,
+		Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
+	mConnectionPool.set_algorithm(pinch::keyexchange, pinch::both_directions,
+		Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
 }
 
 void MSaltApp::SaveGlobals()
@@ -298,7 +298,7 @@ void MSaltApp::UpdatePublicKeyMenu(
 {
 	inMenu->RemoveItems(0, inMenu->CountItems());
 	
-	assh::ssh_agent& agent(assh::ssh_agent::instance());
+	pinch::ssh_agent& agent(pinch::ssh_agent::instance());
 	for (auto key = agent.begin(); key != agent.end(); ++key)
 		inMenu->AppendItem(key->get_comment(), cmd_DropPublicKey);
 }
@@ -354,13 +354,13 @@ void MSaltApp::OpenRecent(const string& inRecent)
 			uint16 proxy_port = m[6].matched ? boost::lexical_cast<uint16>(m[6]) : 22;
 			string proxy_cmd  = m[7];
 			
-			assh::basic_connection* connection = mConnectionPool.get(
+			pinch::basic_connection* connection = mConnectionPool.get(
 				user, host, port, proxy_user, proxy_host, proxy_port, proxy_cmd);
 			w = MTerminalWindow::Create(host, user, port, command, connection);
 		}
 		else
 		{
-			assh::basic_connection* connection = mConnectionPool.get(user, host, port);
+			pinch::basic_connection* connection = mConnectionPool.get(user, host, port);
 			w = MTerminalWindow::Create(host, user, port, command, connection);
 		}
 
@@ -433,7 +433,7 @@ void MSaltApp::Open(const string& inFile)
 		uint16 port = m[4].matched ? boost::lexical_cast<uint16>(m[4]) : 22;
 		string command;
 		
-		assh::basic_connection* connection = mConnectionPool.get(user, host, port);
+		pinch::basic_connection* connection = mConnectionPool.get(user, host, port);
 		MWindow* w = MTerminalWindow::Create(host, user, port, command, connection);
 		w->Select();
 	}

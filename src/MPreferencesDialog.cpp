@@ -1,7 +1,7 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <sstream>
 
@@ -9,14 +9,14 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "MPreferencesDialog.h"
-#include "MTerminalWindow.h"
-#include "MPreferences.h"
-#include "MDevice.h"
-#include "MSaltApp.h"
-#include "MColorPicker.h"
-#include "MControls.h"
-#include "MAlerts.h"
+#include "MPreferencesDialog.hpp"
+#include "MTerminalWindow.hpp"
+#include "MPreferences.hpp"
+#include "MDevice.hpp"
+#include "MSaltApp.hpp"
+#include "MColorPicker.hpp"
+#include "MControls.hpp"
+#include "MAlerts.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;
@@ -101,10 +101,10 @@ MPreferencesDialog::MPreferencesDialog()
 		env << s << endl;
 	SetText("env", env.str());
 	
-	SetText("enc", Preferences::GetString("enc", assh::kEncryptionAlgorithms));
-	SetText("mac", Preferences::GetString("mac", assh::kMacAlgorithms));
-	SetText("kex", Preferences::GetString("kex", assh::kKeyExchangeAlgorithms));
-	SetText("cmp", Preferences::GetString("cmp", assh::kCompressionAlgorithms));
+	SetText("enc", Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
+	SetText("mac", Preferences::GetString("mac", pinch::kMacAlgorithms));
+	SetText("kex", Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
+	SetText("cmp", Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
 
 //	SetEnabled("apply", false);
 }
@@ -146,7 +146,7 @@ void MPreferencesDialog::Apply()
 	Preferences::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
 
 	// commit pageant setting
-	assh::ssh_agent::instance().expose_pageant(IsChecked("act-as-pageant"));
+	pinch::ssh_agent::instance().expose_pageant(IsChecked("act-as-pageant"));
 
 	string answerback = GetText("answer-back");
 	ba::replace_all(answerback, "\\r", "\r");
@@ -179,11 +179,11 @@ void MPreferencesDialog::Apply()
 	Preferences::SetArray("env", env);
 	
 	// protocols
-	struct { assh::algorithm type; const char* conf; const char* desc; string def; } kAlgs[] = {
-		{ assh::encryption, "enc", "encryption", assh::kEncryptionAlgorithms },
-		{ assh::verification, "mac", "verification", assh::kMacAlgorithms },
-		{ assh::keyexchange, "kex", "key exchange", assh::kKeyExchangeAlgorithms },
-		{ assh::compression, "cmp", "compression", assh::kCompressionAlgorithms }
+	struct { pinch::algorithm type; const char* conf; const char* desc; string def; } kAlgs[] = {
+		{ pinch::encryption, "enc", "encryption", pinch::kEncryptionAlgorithms },
+		{ pinch::verification, "mac", "verification", pinch::kMacAlgorithms },
+		{ pinch::keyexchange, "kex", "key exchange", pinch::kKeyExchangeAlgorithms },
+		{ pinch::compression, "cmp", "compression", pinch::kCompressionAlgorithms }
 	};
 	
 	auto& connectionPool = static_cast<MSaltApp*>(gApp)->GetConnectionPool();
@@ -213,7 +213,7 @@ void MPreferencesDialog::Apply()
 		{
 			string algo = ba::join(v, ",");
 			Preferences::SetString(alg.conf, algo);
-			connectionPool.set_algorithm(alg.type, assh::both_directions, algo);
+			connectionPool.set_algorithm(alg.type, pinch::both_directions, algo);
 		}
 	}
 	
@@ -229,10 +229,10 @@ void MPreferencesDialog::ButtonClicked(const string& inID)
 	}
 	else if (inID == "reset-protocols")
 	{
-		SetText("enc", assh::kEncryptionAlgorithms);
-		SetText("mac", assh::kMacAlgorithms);
-		SetText("kex", assh::kKeyExchangeAlgorithms);
-		SetText("cmp", assh::kCompressionAlgorithms);
+		SetText("enc", pinch::kEncryptionAlgorithms);
+		SetText("mac", pinch::kMacAlgorithms);
+		SetText("kex", pinch::kKeyExchangeAlgorithms);
+		SetText("cmp", pinch::kCompressionAlgorithms);
 	}
 	else
 		MDialog::ButtonClicked(inID);

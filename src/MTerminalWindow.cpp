@@ -1,28 +1,28 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <cryptopp/base64.h>
 
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "MTerminalWindow.h"
-#include "MControls.h"
-#include "MTerminalView.h"
-#include "MSaltApp.h"
-#include "MPreferences.h"
-#include "MMenu.h"
-#include "MResources.h"
-#include "MAuthDialog.h"
-#include "MStrings.h"
-#include "MPortForwardingDialog.h"
-#include "MSearchPanel.h"
-#include "MAnimation.h"
-#include "MAlerts.h"
-#include "MTerminalChannel.h"
-#include "MError.h"
+#include "MTerminalWindow.hpp"
+#include "MControls.hpp"
+#include "MTerminalView.hpp"
+#include "MSaltApp.hpp"
+#include "MPreferences.hpp"
+#include "MMenu.hpp"
+#include "MResources.hpp"
+#include "MAuthDialog.hpp"
+#include "MStrings.hpp"
+#include "MPortForwardingDialog.hpp"
+#include "MSearchPanel.hpp"
+#include "MAnimation.hpp"
+#include "MAlerts.hpp"
+#include "MTerminalChannel.hpp"
+#include "MError.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;
@@ -34,7 +34,7 @@ class MSshTerminalWindow : public MTerminalWindow
 {
   public:
 	MSshTerminalWindow(const string& inUser, const string& inHost, uint16 inPort,
-							const string& inSSHCommand, assh::basic_connection* inConnection);
+							const string& inSSHCommand, pinch::basic_connection* inConnection);
 
 	MTerminalWindow*	Clone()
 	{
@@ -49,23 +49,23 @@ class MSshTerminalWindow : public MTerminalWindow
 
 	void				RequestedPassword();
 	void				KeyboardInteractive(const string& name, const string& language,
-							const vector<assh::basic_connection::prompt>& prompts);
+							const vector<pinch::prompt>& prompts);
 
 	void				ReceivedPassword(vector<string>& inPassword);
 	MEventIn<void(vector<string>&)>						eRecvPassword;
 
-	void				DropPublicKey(assh::ssh_private_key inKey);
+	void				DropPublicKey(pinch::ssh_private_key inKey);
 
-	assh::basic_connection*
+	pinch::basic_connection*
 						mConnection;
 	string				mUser, mServer;
 	uint16				mPort;
 	string				mSSHCommand;
-	assh::channel_ptr	mKeyDropper;
+	pinch::channel_ptr	mKeyDropper;
 };
 
 MSshTerminalWindow::MSshTerminalWindow(const string& inUser, const string& inHost, uint16 inPort,
-	const string& inSSHCommand, assh::basic_connection* inConnection)
+	const string& inSSHCommand, pinch::basic_connection* inConnection)
 	: MTerminalWindow(
 		MTerminalChannel::Create(inConnection),
 		inSSHCommand)
@@ -129,7 +129,7 @@ bool MSshTerminalWindow::ProcessCommand(
 	{
 		case cmd_DropPublicKey:
 		{
-			assh::ssh_agent& agent(assh::ssh_agent::instance());
+			pinch::ssh_agent& agent(pinch::ssh_agent::instance());
 			
 			if (inItemIndex < agent.size())
 			{
@@ -174,7 +174,7 @@ bool MSshTerminalWindow::ProcessCommand(
 
 void MSshTerminalWindow::RequestedPassword()
 {
-	vector<assh::basic_connection::prompt> prompts(1);
+	vector<pinch::prompt> prompts(1);
 	
 //	p[0] = MStrings::GetIndString(1011, 2);
 	prompts[0].str = _("Password");
@@ -191,7 +191,7 @@ void MSshTerminalWindow::RequestedPassword()
 }
 
 void MSshTerminalWindow::KeyboardInteractive(const string& name, const string& instruction,
-	const vector<assh::basic_connection::prompt>& prompts)
+	const vector<pinch::prompt>& prompts)
 {
 	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
 		instruction.empty() ? FormatString("Please enter the requested info for account ^0", mUser) : instruction,
@@ -211,10 +211,10 @@ void MSshTerminalWindow::ReceivedPassword(vector<string>& inPassword)
 		mConnection->response(inPassword);
 }
 
-void MSshTerminalWindow::DropPublicKey(assh::ssh_private_key inKeyToDrop)
+void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 {
 	// create the public key
-	assh::opacket p;
+	pinch::opacket p;
 	p << inKeyToDrop;
 	
 	string blob;
@@ -233,7 +233,7 @@ void MSshTerminalWindow::DropPublicKey(assh::ssh_private_key inKeyToDrop)
 		string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
 	string comment = inKeyToDrop.get_comment();
 	
-	mKeyDropper.reset(new assh::exec_channel(mConnection, command, [this, comment](const string&, int status)
+	mKeyDropper.reset(new pinch::exec_channel(mConnection, command, [this, comment](const string&, int status)
 	{
 		if (status == 0)
 			DisplayAlert(this, "installed-public-key", comment, this->mServer);
@@ -597,7 +597,7 @@ MTerminalWindow* MTerminalWindow::Create(boost::asio::io_service& inIOService)
 }
 
 MTerminalWindow* MTerminalWindow::Create(const string& inUser, const string& inHost, uint16 inPort,
-	const string& inSSHCommand, assh::basic_connection* inConnection)
+	const string& inSSHCommand, pinch::basic_connection* inConnection)
 {
 	return new MSshTerminalWindow(inUser, inHost, inPort, inSSHCommand, inConnection);
 }						

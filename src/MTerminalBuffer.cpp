@@ -1,12 +1,12 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
-#include "MTerminalBuffer.h"
-#include "MPreferences.h"
-#include "MError.h"
-#include "MUnicode.h"
+#include "MTerminalBuffer.hpp"
+#include "MPreferences.hpp"
+#include "MError.hpp"
+#include "MUnicode.hpp"
 
 using namespace std;
 

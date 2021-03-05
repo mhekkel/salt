@@ -1,17 +1,17 @@
 // Copyright Maarten L. Hekkelman 2013
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
-#include "MResources.h"
-#include "MSearchPanel.h"
-#include "MDevice.h"
-#include "MControls.h"
-#include "MSound.h"
-#include "MCommands.h"
-#include "MPreferences.h"
-#include "MStrings.h"
-#include "MCanvas.h"
+#include "MResources.hpp"
+#include "MSearchPanel.hpp"
+#include "MDevice.hpp"
+#include "MControls.hpp"
+#include "MSound.hpp"
+#include "MCommands.hpp"
+#include "MPreferences.hpp"
+#include "MStrings.hpp"
+#include "MCanvas.hpp"
 
 using namespace std;
 

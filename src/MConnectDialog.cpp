@@ -1,23 +1,23 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <boost/regex.hpp>
 #include <boost/format.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "MConnectDialog.h"
-#include "MTerminalWindow.h"
-#include "MTerminalView.h"
-#include "MPreferences.h"
-#include "MPreferencesDialog.h"
-#include "MSound.h"
-#include "MFile.h"
-#include "MSaltApp.h"
-#include "MStrings.h"
-#include "MAuthDialog.h"
+#include "MConnectDialog.hpp"
+#include "MTerminalWindow.hpp"
+#include "MTerminalView.hpp"
+#include "MPreferences.hpp"
+#include "MPreferencesDialog.hpp"
+#include "MSound.hpp"
+#include "MFile.hpp"
+#include "MSaltApp.hpp"
+#include "MStrings.hpp"
+#include "MAuthDialog.hpp"
 
 using namespace std;
 
@@ -119,7 +119,7 @@ void MConnectDialog::ButtonClicked(const string& inID)
 				key += line + "\n";
 			}
 
-			assh::ssh_agent::instance().add(key, pemFile.filename().string(),
+			pinch::ssh_agent::instance().add(key, pemFile.filename().string(),
 				MAuthDialog::RequestSimplePassword(_("Adding Private Key"),
 						FormatString("Please enter password for the private key ^0", pemFile.filename().string())));
 		}
@@ -163,11 +163,11 @@ bool MConnectDialog::OKClicked()
 		if (host.empty() or user.empty())
 			break;
 
-		assh::connection_pool& pool(static_cast<MSaltApp*>(gApp)->GetConnectionPool());
+		pinch::connection_pool& pool(static_cast<MSaltApp*>(gApp)->GetConnectionPool());
 		
 		if (not IsChecked("use-proxy"))
 		{
-			assh::basic_connection* connection(pool.get(user, host, boost::lexical_cast<uint16>(port)));
+			auto connection = pool.get(user, host, boost::lexical_cast<uint16>(port));
 			w = MTerminalWindow::Create(user, host, boost::lexical_cast<uint16>(port), command, connection);
 			break;
 		}
@@ -189,7 +189,7 @@ bool MConnectDialog::OKClicked()
 		if (proxy_host.empty() or proxy_user.empty() or proxy_cmd.empty())
 			break;
 		
-		assh::basic_connection* connection(
+		std::shared_ptr<pinch::basic_connection> connection(
 			pool.get(user, host, boost::lexical_cast<uint16>(port),
 				proxy_user, proxy_host, boost::lexical_cast<uint16>(proxy_port), proxy_cmd));
 

@@ -1,21 +1,21 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
-#include "MAcceleratorTable.h"
-#include "MMenu.h"
-#include "MLibTestApp.h"
-#include "MPreferences.h"
-#include "MUtils.h"
-#include "MAlerts.h"
-#include "MWindow.h"
-#include "MControls.h"
+#include "MAcceleratorTable.hpp"
+#include "MMenu.hpp"
+#include "MLibTestApp.hpp"
+#include "MPreferences.hpp"
+#include "MUtils.hpp"
+#include "MAlerts.hpp"
+#include "MWindow.hpp"
+#include "MControls.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;

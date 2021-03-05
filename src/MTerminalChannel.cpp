@@ -3,7 +3,7 @@
 
 #define BOOST_ASIO_HAS_MOVE 1
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -24,11 +24,11 @@
 
 #include <fstream>
 
-#include <assh/terminal_channel.hpp>
+#include <pinch/terminal_channel.hpp>
 
-#include "MTerminalChannel.h"
-#include "MUtils.h"
-#include "MError.h"
+#include "MTerminalChannel.hpp"
+#include "MUtils.hpp"
+#include "MError.hpp"
 
 using namespace std;
 //namespace ba = boost::algorithm;
@@ -74,7 +74,7 @@ void MTerminalChannel::KeepAliveIfNeeded()
 class MSshTerminalChannel : public MTerminalChannel
 {
   public:
-	MSshTerminalChannel(assh::basic_connection* inConnection);
+	MSshTerminalChannel(pinch::basic_connection* inConnection);
 	~MSshTerminalChannel();
 	
 	virtual void SetMessageCallback(MessageCallback&& inMessageCallback);
@@ -100,13 +100,13 @@ class MSshTerminalChannel : public MTerminalChannel
 	virtual void ReadData(ReadCallback&& inCallback);
 
   private:
-	shared_ptr<assh::terminal_channel> mChannel;
+	shared_ptr<pinch::terminal_channel> mChannel;
 	boost::asio::streambuf mResponse;
 };
 
-MSshTerminalChannel::MSshTerminalChannel(assh::basic_connection* inConnection)
+MSshTerminalChannel::MSshTerminalChannel(pinch::basic_connection* inConnection)
 	: MTerminalChannel(inConnection->get_io_service())
-	, mChannel(new assh::terminal_channel(inConnection))
+	, mChannel(new pinch::terminal_channel(inConnection))
 {
 }
 
@@ -144,8 +144,8 @@ void MSshTerminalChannel::Open(const string& inTerminalType,
 		[this, inOpenCallback](const boost::system::error_code& ec)
 		{
 			mConnectionInfo = vector<string>({
-				mChannel->get_connection_parameters(assh::client2server),
-				mChannel->get_connection_parameters(assh::server2client),
+				mChannel->get_connection_parameters(pinch::client2server),
+				mChannel->get_connection_parameters(pinch::server2client),
 				mChannel->get_key_exchange_algoritm()
 			});
 
@@ -339,7 +339,7 @@ void MPtyTerminalChannel::Open(const string& inTerminalType,
 		
 		mPty.close();
 	
-		inOpenCallback(assh::error::make_error_code(assh::error::channel_closed));
+		inOpenCallback(pinch::error::make_error_code(pinch::error::channel_closed));
 	}
 }
 
@@ -479,7 +479,7 @@ void MPtyTerminalChannel::ReadData(ReadCallback&& inCallback)
 // --------------------------------------------------------------------
 // MTerminalChannel factory
 
-MTerminalChannel* MTerminalChannel::Create(assh::basic_connection* inConnection)
+MTerminalChannel* MTerminalChannel::Create(pinch::basic_connection* inConnection)
 {
 	return new MSshTerminalChannel(inConnection);
 }

@@ -3,7 +3,7 @@
 
 #define BOOST_ASIO_HAS_MOVE 1
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <cmath>
 #include <map>
@@ -21,29 +21,29 @@
 #include <boost/iostreams/copy.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "MTerminalView.h"
-#include "MDevice.h"
-#include "MControls.h"
-#include "MWindow.h"
-#include "MUtils.h"
-#include "MCommands.h"
-#include "MClipboard.h"
-#include "MSound.h"
-#include "MApplication.h"
-#include "MPreferences.h"
-#include "MPreferencesDialog.h"
-#include "MSaltApp.h"
-#include "MTerminalBuffer.h"
-#include "MVT220CharSets.h"
-#include "MStrings.h"
-#include "MSearchPanel.h"
-#include "MAnimation.h"
-#include "MCSICommands.h"
-#include "MError.h"
+#include "MTerminalView.hpp"
+#include "MDevice.hpp"
+#include "MControls.hpp"
+#include "MWindow.hpp"
+#include "MUtils.hpp"
+#include "MCommands.hpp"
+#include "MClipboard.hpp"
+#include "MSound.hpp"
+#include "MApplication.hpp"
+#include "MPreferences.hpp"
+#include "MPreferencesDialog.hpp"
+#include "MSaltApp.hpp"
+#include "MTerminalBuffer.hpp"
+#include "MVT220CharSets.hpp"
+#include "MStrings.hpp"
+#include "MSearchPanel.hpp"
+#include "MAnimation.hpp"
+#include "MCSICommands.hpp"
+#include "MError.hpp"
 
-#include "MTerminalColours.h"
+#include "MTerminalColours.hpp"
 
-#include "X11/MPrimary.h"
+#include "X11/MPrimary.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;

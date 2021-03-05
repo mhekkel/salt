@@ -8,20 +8,20 @@
 	Created Friday November 21 2003 19:38:34
 */
 
-#include "MLib.h"
+#include "MLib.hpp"
 
 #include <cmath>
 #include <boost/lexical_cast.hpp>
 
-#include <assh/connection.hpp>
+#include <pinch/channel.hpp>
 
-#include "MAuthDialog.h"
-#include "MAlerts.h"
-#include "MStrings.h"
+#include "MAuthDialog.hpp"
+#include "MAlerts.hpp"
+#include "MStrings.hpp"
 
 using namespace std;
 
-MAuthDialog::MAuthDialog(std::string inTitle, std::string inInstruction, const vector<assh::basic_connection::prompt>& prompts)
+MAuthDialog::MAuthDialog(std::string inTitle, std::string inInstruction, const vector<pinch::prompt>& prompts)
 	: MDialog("auth-dialog")
 	, ePulse(this, &MAuthDialog::Pulse)
 	, mSentCredentials(false)
@@ -100,7 +100,7 @@ function<bool(string&)> MAuthDialog::RequestSimplePassword(
 		
 		try
 		{
-			vector<assh::basic_connection::prompt> prompts(1);
+			vector<pinch::prompt> prompts(1);
 	
 			prompts[0].str = _("Password");
 			prompts[0].echo = false;

@@ -1,15 +1,15 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <cryptopp/base32.h>
 
-#include "MPreferences.h"
-#include "MAddTOTPHashDialog.h"
-#include "MError.h"
-#include "MAlerts.h"
-#include "MUtils.h"
+#include "MPreferences.hpp"
+#include "MAddTOTPHashDialog.hpp"
+#include "MError.hpp"
+#include "MAlerts.hpp"
+#include "MUtils.hpp"
 
 using namespace std;
 

@@ -1,17 +1,17 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.h"
+#include "MSalt.hpp"
 
 #include <boost/bind.hpp>
 
-#include "MExploreBrowserWindow.h"
-#include "MExploreBrowserView.h"
-#include "MStrings.h"
+#include "MExploreBrowserWindow.hpp"
+#include "MExploreBrowserView.hpp"
+#include "MStrings.hpp"
 
 using namespace std;
 
-MExploreBrowserWindow::MExploreBrowserWindow(assh::basic_connection* inConnection)
+MExploreBrowserWindow::MExploreBrowserWindow(pinch::basic_connection* inConnection)
 	: MWindow("Explore", MRect(0, 0, 640, 480),
 		 MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate),
 		"terminal-window-menu")
@@ -56,7 +56,7 @@ void MExploreBrowserWindow::ChannelOpened(const boost::system::error_code& ec)
 	else
 	{
 		mStatusbar->SetStatusText(0, _("Connected"), false);
-		mStatusbar->SetStatusText(1, mSFTPChannel.get_connection_parameters(assh::client2server), false);
+		mStatusbar->SetStatusText(1, mSFTPChannel.get_connection_parameters(pinch::client2server), false);
 		
 		mSFTPChannel.read_dir(".", boost::bind(&MExploreBrowserWindow::ReadDir, this, _1, _2, _3, _4));
 	}
@@ -64,7 +64,7 @@ void MExploreBrowserWindow::ChannelOpened(const boost::system::error_code& ec)
 
 bool MExploreBrowserWindow::ReadDir(const boost::system::error_code& ec,
 	const string& inName, const string& inLongName,
-	const assh::sftp_channel::file_attributes& attr)
+	const pinch::sftp_channel::file_attributes& attr)
 {
 	Item item = { inName, inLongName, attr };
 	mItems.push_back(item);
