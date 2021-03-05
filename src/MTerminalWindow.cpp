@@ -149,20 +149,21 @@ bool MSshTerminalWindow::ProcessCommand(
 		}
 
 		case cmd_Rekey:
-			mConnection->rekey();
+#warning "fix"
+			// mConnection->rekey();
 			break;
 
-		case cmd_ForwardPort:
-			new MPortForwardingDialog(this, mConnection);
-			break;
+		// case cmd_ForwardPort:
+		// 	new MPortForwardingDialog(this, mConnection);
+		// 	break;
 		
-		case cmd_ProxySOCKS:
-			new MSOCKS5ProxyDialog(this, mConnection);
-			break;
+		// case cmd_ProxySOCKS:
+		// 	new MSOCKS5ProxyDialog(this, mConnection);
+		// 	break;
 		
-		case cmd_ProxyHTTP:
-			new MHTTPProxyDialog(this, mConnection);
-			break;
+		// case cmd_ProxyHTTP:
+		// 	new MHTTPProxyDialog(this, mConnection);
+		// 	break;
 		
 		default:
 			result = MTerminalWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
@@ -207,8 +208,9 @@ void MSshTerminalWindow::ReceivedPassword(vector<string>& inPassword)
 {
 	if (inPassword.empty())
 		mConnection->disconnect();
-	else
-		mConnection->response(inPassword);
+#warning "fix"
+	// else
+	// 	mConnection->response(inPassword);
 }
 
 void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
@@ -254,7 +256,8 @@ class MPtyTerminalWindow : public MTerminalWindow
 	
 	MTerminalWindow*	Clone()
 	{
-		return new MPtyTerminalWindow(mChannel->GetIOService());
+		// return new MPtyTerminalWindow(mChannel->GetIOService());
+		return new MPtyTerminalWindow(static_cast<MSaltApp*>(gApp)->GetIOService());
 	}
 	
 };
@@ -473,7 +476,8 @@ bool MTerminalWindow::AllowClose(bool inLogOff)
 
 void MTerminalWindow::Close()
 {
-	mAnimationManager->Stop();
+#warning "fix"
+	// mAnimationManager->Stop();
 	mTerminalView->Destroy();
 
 	mChannel->GetIOService().post([this]()

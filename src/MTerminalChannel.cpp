@@ -29,6 +29,7 @@
 #include "MTerminalChannel.hpp"
 #include "MUtils.hpp"
 #include "MError.hpp"
+#include "MSaltApp.hpp"
 
 using namespace std;
 //namespace ba = boost::algorithm;
@@ -37,8 +38,8 @@ using namespace std;
 // --------------------------------------------------------------------
 // MTerminalChannel
 
-MTerminalChannel::MTerminalChannel(boost::asio::io_context& inIOService)
-	: mIOContext(inIOService)
+MTerminalChannel::MTerminalChannel(boost::asio::io_service& inIOService)
+	: mIOService(inIOService)
 	, mRefCount(1)
 {
 }
@@ -105,7 +106,7 @@ class MSshTerminalChannel : public MTerminalChannel
 };
 
 MSshTerminalChannel::MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection)
-	: MTerminalChannel(inConnection->get_executor().context())
+	: MTerminalChannel(static_cast<MSaltApp*>(gApp)->GetIOService())
 	, mChannel(new pinch::terminal_channel(inConnection))
 {
 }
@@ -262,7 +263,7 @@ class MPtyTerminalChannel : public MTerminalChannel
 MPtyTerminalChannel::MPtyTerminalChannel(boost::asio::io_context& inIOContext)
 	: MTerminalChannel(inIOContext)
 	, mPid(-1)
-	, mPty(mIOContext)
+	, mPty(mIOService)
 {
 }
 

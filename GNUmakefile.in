@@ -77,20 +77,6 @@ OBJECTS = \
 	MTerminalColours.o \
 	MTerminalView.o \
 	MTerminalWindow.o \
-	channel.o \
-	connection.o \
-	connection_pool.o \
-	debug.o \
-	error.o \
-	key_exchange.o \
-	packet.o \
-	port_forwarding.o \
-	posix_ssh_agent_impl.o \
-	proxy_cmd.o \
-	sftp_channel.o \
-	ssh_agent.o \
-	terminal_channel.o \
-	x11_channel.o \
 	MAcceleratorTable.o \
 	MAlerts.o \
 	MAnimation.o \

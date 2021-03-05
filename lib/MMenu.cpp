@@ -108,27 +108,27 @@ MMenu* MMenu::Create(
 
 	if (inXMLNode->name() == "menu")
 	{
-		label = GetLocalisedStringForContext("menu", inXMLNode->attr("label"));
+		label = GetLocalisedStringForContext("menu", inXMLNode->get_attribute("label"));
 		if (label.length() == 0)
 			THROW(("Invalid menu specification, label is missing"));
 	}
 	
-	string special = inXMLNode->attr("special");
+	string special = inXMLNode->get_attribute("special");
 
 	MMenu* menu = new MMenu(label, inPopup);
 	menu->mSpecial = special;
 
 	for (auto item: *inXMLNode)
 	{
-		if (item.qname() == "item")
+		if (item.name() == "item")
 		{
-			label = GetLocalisedStringForContext("menu", item.attr("label"));
+			label = GetLocalisedStringForContext("menu", item.get_attribute("label"));
 			
 			if (label == "-")
 				menu->AppendSeparator();
 			else
 			{
-				string cs = item.attr("cmd").c_str();
+				string cs = item.get_attribute("cmd").c_str();
 
 				if (cs.length() != 4)
 					THROW(("Invalid menu item specification, cmd is not correct"));
@@ -137,15 +137,15 @@ MMenu* MMenu::Create(
 				for (int i = 0; i < 4; ++i)
 					cmd |= cs[i] << ((3 - i) * 8);
 				
-				if (item.attr("check") == "radio")
+				if (item.get_attribute("check") == "radio")
 					menu->AppendRadioItem(label, cmd);
-				else if (item.attr("check") == "checkbox")
+				else if (item.get_attribute("check") == "checkbox")
 					menu->AppendCheckItem(label, cmd);
 				else
 					menu->AppendItem(label, cmd);
 			}
 		}
-		else if (item.qname() == "menu")
+		else if (item.name() == "menu")
 			menu->AppendMenu(Create(&item, false));
 	}
 	
@@ -354,7 +354,7 @@ MMenuBar* MMenuBar::Create(zeep::xml::element* inXMLNode)
 	
 	for (auto item: *inXMLNode)
 	{
-		if (item.qname() == "menu")
+		if (item.name() == "menu")
 			result->AppendMenu(MMenu::Create(&item, false));
 	}
 	
@@ -394,11 +394,11 @@ void MMenuBar::AddToWindow(MWindowImpl* inWindowImpl)
 //MMenu* MMenubar::CreateMenu(
 //	xml::element*	inXMLNode)
 //{
-//	string label = inXMLNode->attr("label");
+//	string label = inXMLNode->get_attribute("label");
 //	if (label.length() == 0)
 //		THROW(("Invalid menu specification, label is missing"));
 //	
-//	string special = inXMLNode->attr("special");
+//	string special = inXMLNode->get_attribute("special");
 //
 //	MMenu* menu;
 //
@@ -412,13 +412,13 @@ void MMenuBar::AddToWindow(MWindowImpl* inWindowImpl)
 //		{
 //			if (item.qname() == "item")
 //			{
-//				label = item.attr("label");
+//				label = item.get_attribute("label");
 //				
 //				if (label == "-")
 //					menu->AppendSeparator();
 //				else
 //				{
-//					string cs = item.attr("cmd").c_str();
+//					string cs = item.get_attribute("cmd").c_str();
 //	
 //					if (cs.length() != 4)
 //						THROW(("Invalid menu item specification, cmd is not correct"));
@@ -427,9 +427,9 @@ void MMenuBar::AddToWindow(MWindowImpl* inWindowImpl)
 //					for (int i = 0; i < 4; ++i)
 //						cmd |= cs[i] << ((3 - i) * 8);
 //					
-//					if (item.attr("check") == "radio")
+//					if (item.get_attribute("check") == "radio")
 //						menu->AppendRadioItem(label, cmd);
-//					else if (item.attr("check") == "checkbox")
+//					else if (item.get_attribute("check") == "checkbox")
 //						menu->AppendCheckItem(label, cmd);
 //					else
 //						menu->AppendItem(label, cmd);

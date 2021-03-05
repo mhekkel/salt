@@ -34,7 +34,7 @@ class MTerminalChannel
 	virtual void SendSignal(const std::string& inSignal) = 0;
 	virtual void ReadData(ReadCallback&& inCallback) = 0;
 	
-	boost::asio::io_context& GetIOContext() { return mIOContext; }
+	boost::asio::io_service& GetIOService() { return mIOService; }
 	
 	static MTerminalChannel* Create(std::shared_ptr<pinch::basic_connection> inConnection);
 	static MTerminalChannel* Create(boost::asio::io_service& inIOService);
@@ -48,7 +48,7 @@ class MTerminalChannel
 	
   protected:
 
-	MTerminalChannel(boost::asio::io_context& inIOContext);
+	MTerminalChannel(boost::asio::io_service& inIOService);
 	virtual ~MTerminalChannel();
 
 	uint32_t mTerminalWidth, mTerminalHeight, mPixelWidth, mPixelHeight;
@@ -56,7 +56,7 @@ class MTerminalChannel
 	OpenCallback mOpenCB;
 	MessageCallback mMessageCB;
 	
-	boost::asio::io_context& mIOContext;
+	boost::asio::io_service& mIOService;
 	std::vector<std::string> mConnectionInfo;
 	uint32_t mRefCount;
 };
