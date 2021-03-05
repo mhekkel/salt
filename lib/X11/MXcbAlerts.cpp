@@ -45,8 +45,8 @@ namespace ba = boost::algorithm;
 //		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
 //	
 //	string instruction, content;
-//	vector<pair<string,uint32> > btns;
-//	int32 defaultButton = -1;
+//	vector<pair<string,uint32_t> > btns;
+//	int32_t defaultButton = -1;
 //	GtkMessageType type = GTK_MESSAGE_INFO;
 //	
 //	if (root->get_attribute("type") == "warning")
@@ -93,7 +93,7 @@ namespace ba = boost::algorithm;
 //				if (button->qname() == "button")
 //				{
 //					string label = GetLocalisedStringForContext(inResourceName, button->get_attribute("title"));
-//					uint32 cmd = stoul(button->get_attribute("cmd"));
+//					uint32_t cmd = stoul(button->get_attribute("cmd"));
 //
 //					if (button->get_attribute("default") == "true")
 //						defaultButton = cmd;
@@ -119,9 +119,9 @@ namespace ba = boost::algorithm;
 //	return dlg;
 //}
 
-int32 DisplayAlert(MWindow* inParent, const string& inResourceName, vector<string>& inArgs)
+int32_t DisplayAlert(MWindow* inParent, const string& inResourceName, vector<string>& inArgs)
 {
-	int32 result = -1;
+	int32_t result = -1;
 
 //	try
 //	{

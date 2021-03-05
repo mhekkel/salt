@@ -23,9 +23,9 @@ namespace fs = boost::filesystem;
 
 COLORREF kDialogBackgroundColorRef((COLORREF)::GetSysColor(COLOR_BTNFACE));
 const MColor kDialogBackgroundColor(
-			static_cast<uint8>((kDialogBackgroundColorRef >>  0) & 0x000000FF),
-			static_cast<uint8>((kDialogBackgroundColorRef >>  8) & 0x000000FF),
-			static_cast<uint8>((kDialogBackgroundColorRef >> 16) & 0x000000FF));
+			static_cast<uint8_t>((kDialogBackgroundColorRef >>  0) & 0x000000FF),
+			static_cast<uint8_t>((kDialogBackgroundColorRef >>  8) & 0x000000FF),
+			static_cast<uint8_t>((kDialogBackgroundColorRef >> 16) & 0x000000FF));
 
 #ifdef UNICODE
 #if defined _M_IX86
@@ -174,7 +174,7 @@ void MWinApplicationImpl::Pulse()
 
 bool MWinApplicationImpl::IsAcceleratorKeyDown(MSG& inMessage)
 {
-	uint32 keyCode = 0, modifiers = 0;
+	uint32_t keyCode = 0, modifiers = 0;
 	string text;
 
 	GetModifierState(modifiers, false);
@@ -279,15 +279,15 @@ bool MWinApplicationImpl::IsAcceleratorKeyDown(MSG& inMessage)
 	//if (modifiers & kControlKey and modifiers & kShiftKey)
 	//{
 	//	WORD ch = 0;
-	//	uint8 keystate[256] = {};
+	//	uint8_t keystate[256] = {};
 	//	keystate[VK_SHIFT] = 0x80;
-	//	uint32 vsc = ::MapVirtualKeyW(inMessage.wParam, MAPVK_VK_TO_VSC);
+	//	uint32_t vsc = ::MapVirtualKeyW(inMessage.wParam, MAPVK_VK_TO_VSC);
 	//	if (::ToAscii(inMessage.wParam, vsc, keystate, &ch, 0) == 1)
 	//		keyCode = ch;
 	//}
 
 	bool result = false;
-	uint32 cmd;
+	uint32_t cmd;
 
 	if (MAcceleratorTable::Instance().IsAcceleratorKey(keyCode, modifiers, cmd))
 	{

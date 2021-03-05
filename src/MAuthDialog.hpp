@@ -38,6 +38,6 @@ class MAuthDialog : public MDialog
 	bool				RequestSimplePassword(const std::string& inDialogTitle,
 							const std::string& inInstruction, std::string& outPassword);
 	
-	int32				mFields;
+	int32_t				mFields;
 	bool				mSentCredentials;
 };

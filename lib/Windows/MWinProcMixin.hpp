@@ -40,7 +40,7 @@ class MWinProcMixin
 
 	typedef boost::function<bool(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)> MNotification;
 
-	void			AddNotify(uint32 inCode, HWND inHWND, MNotification inCallback)
+	void			AddNotify(uint32_t inCode, HWND inHWND, MNotification inCallback)
 					{
 						MNotifyHandler h = { inHWND, inCode };
 						mNotificationHandlers[h] = inCallback;
@@ -51,9 +51,9 @@ class MWinProcMixin
 
 	virtual bool	WMDrawItem(DRAWITEMSTRUCT* inDrawItemStruct);
 	
-	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	virtual bool	DispatchCharacter(const std::string& inText, bool inRepeat);
-	virtual bool	DispatchCommand(uint32 inCommand, uint32 inModifiers);
+	virtual bool	DispatchCommand(uint32_t inCommand, uint32_t inModifiers);
 
 	virtual void	CreateParams(DWORD& outStyle, DWORD& outExStyle,
 						std::wstring& outClassName, HMENU& outMenu);

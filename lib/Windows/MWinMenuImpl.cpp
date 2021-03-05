@@ -41,8 +41,8 @@ MWinMenuImpl::~MWinMenuImpl()
 	
 	try
 	{
-		uint32 cnt = ::GetMenuItemCount(mMenuHandle);
-		for (uint32 i = 0; i < cnt; ++i)
+		uint32_t cnt = ::GetMenuItemCount(mMenuHandle);
+		for (uint32_t i = 0; i < cnt; ++i)
 		{
 			MENUITEMINFOW info = { sizeof(MENUITEMINFO), MIIM_SUBMENU };
 			if (::GetMenuItemInfoW(mMenuHandle, i, true, &info))
@@ -67,7 +67,7 @@ void MWinMenuImpl::SetTarget(
 }
 
 void MWinMenuImpl::SetItemState(
-	uint32				inIndex,
+	uint32_t				inIndex,
 	bool				inEnabled,
 	bool				inChecked)
 {
@@ -88,13 +88,13 @@ void MWinMenuImpl::SetItemState(
 
 void MWinMenuImpl::AppendItem(
 	const string&	inLabel,
-	uint32			inCommand)
+	uint32_t			inCommand)
 {
 	/* Add it to the fMenuHandle */
 	MENUITEMINFOW lWinItem = { sizeof(MENUITEMINFOW) };
 	wstring label = c2w(inLabel);
 
-	uint32 keyCode, modifiers;
+	uint32_t keyCode, modifiers;
 	if (MAcceleratorTable::Instance().GetAcceleratorKeyForCommand(inCommand, keyCode, modifiers))
 	{
 		wstring shortcut;
@@ -212,7 +212,7 @@ void MWinMenuImpl::AppendSeparator()
 
 void MWinMenuImpl::AppendCheckbox(
 	const string&	inLabel,
-	uint32			inCommand)
+	uint32_t			inCommand)
 {
 	/* Add it to the fMenuHandle */
 	MENUITEMINFOW lWinItem = { sizeof(MENUITEMINFOW) };
@@ -228,7 +228,7 @@ void MWinMenuImpl::AppendCheckbox(
 
 void MWinMenuImpl::AppendRadiobutton(
 	const string&	inLabel,
-	uint32			inCommand)
+	uint32_t			inCommand)
 {
 	/* Add it to the fMenuHandle */
 	MENUITEMINFOW lWinItem = { sizeof(MENUITEMINFOW) };
@@ -242,21 +242,21 @@ void MWinMenuImpl::AppendRadiobutton(
 	THROW_IF_WIN_ERROR(::InsertMenuItemW(mMenuHandle, ::GetMenuItemCount(mMenuHandle) + 1, TRUE, &lWinItem));
 }
 
-uint32 MWinMenuImpl::CountItems() const
+uint32_t MWinMenuImpl::CountItems() const
 {
 	return ::GetMenuItemCount(mMenuHandle);
 }
 
 void MWinMenuImpl::RemoveItems(
-	uint32				inFirstIndex,
-	uint32				inCount)
+	uint32_t				inFirstIndex,
+	uint32_t				inCount)
 {
-	for (uint32 i = inFirstIndex; i < inFirstIndex + inCount; ++i)
+	for (uint32_t i = inFirstIndex; i < inFirstIndex + inCount; ++i)
 		::RemoveMenu(mMenuHandle, inFirstIndex, MF_BYPOSITION);
 }
 
 string MWinMenuImpl::GetItemLabel(
-	uint32			inIndex) const
+	uint32_t			inIndex) const
 {
 	MENUITEMINFOW info = { sizeof(MENUITEMINFOW), MIIM_STRING };
 	THROW_IF_WIN_ERROR(::GetMenuItemInfoW(mMenuHandle, inIndex, true, &info));
@@ -270,7 +270,7 @@ string MWinMenuImpl::GetItemLabel(
 	return w2c(info.dwTypeData);
 }
 
-void MWinMenuImpl::SetItemCommand(uint32 inIndex, uint32 inCommand)
+void MWinMenuImpl::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
 {
 	MENUITEMINFOW info = { sizeof(MENUITEMINFOW), MIIM_ID };
 	::GetMenuItemInfoW(mMenuHandle, inIndex, true, &info);
@@ -278,8 +278,8 @@ void MWinMenuImpl::SetItemCommand(uint32 inIndex, uint32 inCommand)
 	::SetMenuItemInfoW(mMenuHandle, inIndex, true, &info);
 }
 
-uint32 MWinMenuImpl::GetItemCommand(
-	uint32			inIndex) const
+uint32_t MWinMenuImpl::GetItemCommand(
+	uint32_t			inIndex) const
 {
 	MENUITEMINFOW info = { sizeof(MENUITEMINFOW), MIIM_ID };
 	::GetMenuItemInfoW(mMenuHandle, inIndex, true, &info);
@@ -288,7 +288,7 @@ uint32 MWinMenuImpl::GetItemCommand(
 }
 
 MMenu* MWinMenuImpl::GetSubmenu(
-	uint32			inIndex) const
+	uint32_t			inIndex) const
 {
 	MENUITEMINFOW info = { sizeof(MENUITEMINFOW), MIIM_SUBMENU };
 	THROW_IF_WIN_ERROR(::GetMenuItemInfoW(mMenuHandle, inIndex, true, &info));
@@ -301,8 +301,8 @@ MMenu* MWinMenuImpl::GetSubmenu(
 
 void MWinMenuImpl::Popup(
 	MWindow*		inWindow,
-	int32			inX,
-	int32			inY,
+	int32_t			inX,
+	int32_t			inY,
 	bool			inBottomMenu)
 {
 	MWinWindowImpl* impl = dynamic_cast<MWinWindowImpl*>(inWindow->GetImpl());

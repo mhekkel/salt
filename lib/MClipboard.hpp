@@ -14,7 +14,7 @@
 #include <string>
 #include "MTypes.hpp"
 
-const uint32
+const uint32_t
 	kClipboardRingSize = 7;
 
 class MClipboard
@@ -50,7 +50,7 @@ class MClipboard
 						mImpl;
 
 	Data*				mRing[kClipboardRingSize];
-	uint32				mCount;
+	uint32_t				mCount;
 };
 
 #endif // MCLIPBOARD_H

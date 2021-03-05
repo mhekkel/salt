@@ -271,15 +271,15 @@ void SetBoolean(
 	SetString(inName, inValue ? "true" : "false");
 }
 
-int32 GetInteger(
+int32_t GetInteger(
 	const char*	inName,
-	int32		inDefaultValue)
+	int32_t		inDefaultValue)
 {
-	int32 result = inDefaultValue;
+	int32_t result = inDefaultValue;
 
 	try
 	{
-		result = boost::lexical_cast<int32>(GetString(
+		result = boost::lexical_cast<int32_t>(GetString(
 			inName, boost::lexical_cast<string>(inDefaultValue)));
 	}
 	catch (...)
@@ -291,7 +291,7 @@ int32 GetInteger(
 
 void SetInteger(
 	const char*	inName,
-	int32		inValue)
+	int32_t		inValue)
 {
 	SetString(inName, boost::lexical_cast<string>(inValue));
 }

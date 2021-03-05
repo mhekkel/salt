@@ -39,7 +39,7 @@ struct MResourceFileImp
 	void		AddEntry(
 					fs::path	inPath,
 					const char*	inData,
-					uint32		inSize);
+					uint32_t		inSize);
 };
 
 MResourceFile::MResourceFile(
@@ -62,9 +62,9 @@ MResourceFile::~MResourceFile()
 void MResourceFileImp::AddEntry(
 	fs::path		inPath,
 	const char*		inData,
-	uint32			inSize)
+	uint32_t			inSize)
 {
-	uint32 node = 0;	// start at root
+	uint32_t node = 0;	// start at root
 	
 	for (fs::path::iterator p = inPath.begin(); p != inPath.end(); ++p)
 	{
@@ -85,7 +85,7 @@ void MResourceFileImp::AddEntry(
 		}
 		
 		// lookup the path element in the current directory
-		uint32 next = m_index[node].m_child;
+		uint32_t next = m_index[node].m_child;
 		for (;;)
 		{
 			const char* name = &m_name[0] + m_index[next].m_name;
@@ -133,7 +133,7 @@ void MResourceFileImp::AddEntry(
 void MResourceFile::Add(
 	const string&	inPath,
 	const void*		inData,
-	uint32			inSize)
+	uint32_t			inSize)
 {
 	mImpl->AddEntry(inPath, static_cast<const char*>(inData), inSize);
 }
@@ -149,7 +149,7 @@ void MResourceFile::Add(
 
 	filebuf* b = f.rdbuf();
 	
-	uint32 size = b->pubseekoff(0, ios::end, ios::in);
+	uint32_t size = b->pubseekoff(0, ios::end, ios::in);
 	b->pubseekoff(0, ios::beg, ios::in);
 	
 	char* text = new char[size];

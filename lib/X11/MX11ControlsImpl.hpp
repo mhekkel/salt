@@ -60,7 +60,7 @@ class MX11ControlImpl : public CONTROL::MImpl, public MXcbBasicControl
 	virtual void	FrameResized()								{ MXcbBasicControl::FrameResized(); }
 //	virtual void	MarginsChanged()							{ MXcbBasicControl::MarginsChanged(); }
 //	virtual void	Draw(MRect inBounds)						{ MXcbBasicControl::AddedToWindow(); }
-//	virtual void	Click(int32 inX, int32 inY)					{ MXcbBasicControl::AddedToWindow(); }
+//	virtual void	Click(int32_t inX, int32_t inY)					{ MXcbBasicControl::AddedToWindow(); }
 	virtual void	ActivateSelf()								{ MXcbBasicControl::ActivateSelf(); }
 	virtual void	DeactivateSelf()							{ MXcbBasicControl::DeactivateSelf(); }
 	virtual void	EnableSelf()								{ MXcbBasicControl::EnableSelf(); }
@@ -105,7 +105,7 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 
 	virtual void	DrawWidget();
 
-	virtual void	GetIdealSize(int32& outWidth, int32& outHeight);
+	virtual void	GetIdealSize(int32_t& outWidth, int32_t& outHeight);
 
 	virtual void	Clicked();
 
@@ -141,7 +141,7 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //	virtual void	AddedToWindow();
 //
 //	virtual void	Append(MXcbWinMixin* inChild, MControlPacking inPacking,
-//						bool inExpand, bool inFill, uint32 inPadding);
+//						bool inExpand, bool inFill, uint32_t inPadding);
 //
 //  private:
 //
@@ -162,20 +162,20 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 ////	virtual void	ShowSelf();
 ////	virtual void	HideSelf();
 //
-//	virtual int32	GetValue() const;
-//	virtual void	SetValue(int32 inValue);
+//	virtual int32_t	GetValue() const;
+//	virtual void	SetValue(int32_t inValue);
 //	
-//	virtual int32	GetTrackValue() const;
+//	virtual int32_t	GetTrackValue() const;
 //
-//	virtual void	SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-//						int32 inScrollUnit,  int32 inPageSize, int32 inValue);
+//	virtual void	SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+//						int32_t inScrollUnit,  int32_t inPageSize, int32_t inValue);
 //
-//	virtual int32	GetMinValue() const;
-////	virtual void	SetMinValue(int32 inValue);
-//	virtual int32	GetMaxValue() const;
-////	virtual void	SetMaxValue(int32 inValue);
+//	virtual int32_t	GetMinValue() const;
+////	virtual void	SetMinValue(int32_t inValue);
+//	virtual int32_t	GetMaxValue() const;
+////	virtual void	SetMaxValue(int32_t inValue);
 ////
-////	virtual void	SetViewSize(int32 inValue);
+////	virtual void	SetViewSize(int32_t inValue);
 //
 //	MSlot<void()>	eValueChanged;
 //	void			ValueChanged();
@@ -184,10 +184,10 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //class MX11StatusbarImpl : public MX11ControlImpl<MStatusbar>
 //{
 //  public:
-//	MX11StatusbarImpl(MStatusbar* inControl, uint32 inPartCount, MStatusBarElement inParts[]);
+//	MX11StatusbarImpl(MStatusbar* inControl, uint32_t inPartCount, MStatusBarElement inParts[]);
 //
 //	virtual void CreateWidget();
-//	virtual void SetStatusText(uint32 inPartNr, const std::string& inText, bool inBorder);
+//	virtual void SetStatusText(uint32_t inPartNr, const std::string& inText, bool inBorder);
 //	virtual void AddedToWindow();
 //
 //  private:
@@ -212,7 +212,7 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //
 //	virtual void	SetChoices(const std::vector<std::string>& inChoices);
 //
-//	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+//	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 //	virtual void	OnChanged();
 //
 //  private:
@@ -226,8 +226,8 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //	
 //	virtual void	SetChoices(const std::vector<std::string>& inChoices);
 //
-//	virtual int32	GetValue() const;
-//	virtual void	SetValue(int32 inValue);
+//	virtual int32_t	GetValue() const;
+//	virtual void	SetValue(int32_t inValue);
 //	
 //	virtual void	SetText(const std::string& inText);
 //	virtual std::string
@@ -236,7 +236,7 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //	virtual void	CreateWidget();
 //	virtual void	AddedToWindow();
 //
-//	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+//	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 //
 //  private:
 //	std::vector<std::string>
@@ -246,7 +246,7 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //class MX11EdittextImpl : public MX11ControlImpl<MEdittext>
 //{
 //public:
-//					MX11EdittextImpl(MEdittext* inEdittext, uint32 inFlags);
+//					MX11EdittextImpl(MEdittext* inEdittext, uint32_t inFlags);
 //	
 //	virtual void	CreateWidget();
 //
@@ -256,14 +256,14 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //					GetText() const;
 //	virtual void	SetText(const std::string& inText);
 //
-//	virtual uint32	GetFlags() const						{ return mFlags; }
+//	virtual uint32_t	GetFlags() const						{ return mFlags; }
 //
-//	virtual void	SetPasswordChar(uint32 inUnicode);
+//	virtual void	SetPasswordChar(uint32_t inUnicode);
 //
-//	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+//	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 //
 //protected:
-//	uint32			mFlags;
+//	uint32_t			mFlags;
 //};
 //
 //class MX11CaptionImpl : public MX11ControlImpl<MCaption>
@@ -335,8 +335,8 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //
 //	virtual void	AddPage(const std::string& inLabel, MView* inPage);
 //	
-//	virtual void	SelectPage(uint32 inPage);
-//	virtual uint32	GetSelectedPage() const;
+//	virtual void	SelectPage(uint32_t inPage);
+//	virtual uint32_t	GetSelectedPage() const;
 //
 //  private:
 //	struct MPage
@@ -382,8 +382,8 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //
 //	virtual void	AddItem(const std::string& inLabel);
 //
-//	virtual int32	GetValue() const;
-//	virtual void	SetValue(int32 inValue);
+//	virtual int32_t	GetValue() const;
+//	virtual void	SetValue(int32_t inValue);
 //
 //  private:
 //
@@ -393,7 +393,7 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //
 //	std::vector<std::string> mItems;
 //	GtkListStore*	mStore;
-//	int32			mNr;
+//	int32_t			mNr;
 //};
 //
 //class MX11ListViewImpl : public MX11ControlImpl<MListView>
@@ -417,13 +417,13 @@ class MX11ButtonImpl : public MX11ControlImpl<MButton>
 //  public:
 //	MX11BoxControlImpl(MBoxControl* inControl,
 //		bool inHorizontal, bool inHomogeneous, bool inExpand, bool inFill,
-//		uint32 inSpacing, uint32 inPadding);
+//		uint32_t inSpacing, uint32_t inPadding);
 //
 //	virtual void CreateWidget();
 //
 //	virtual void Append(MXcbWinMixin* inChild, MControlPacking inPacking,
-//		bool inExpand, bool inFill, uint32 inPadding);
+//		bool inExpand, bool inFill, uint32_t inPadding);
 //
 //	bool mHorizontal, mHomogeneous, mExpand, mFill;
-//	uint32 mSpacing, mPadding;
+//	uint32_t mSpacing, mPadding;
 //};

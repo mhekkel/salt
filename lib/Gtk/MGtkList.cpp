@@ -87,8 +87,8 @@
 //
 //bool MListRowBase::GetParentAndPosition(
 //	MListRowBase*&		outParent,
-//	uint32&				outPosition,
-//	uint32				inObjectColumn)
+//	uint32_t&				outPosition,
+//	uint32_t				inObjectColumn)
 //{
 //	bool result = false;
 //
@@ -135,7 +135,7 @@
 //{
 //  public:
 //					MListColumnEditedListener(
-//						uint32				inColumnNr,
+//						uint32_t				inColumnNr,
 //						MListBase*			inList,
 //						GtkCellRenderer*	inRenderer,
 //						bool				inListenToToggle,
@@ -189,7 +189,7 @@
 //					
 //	MSlot<void(gchar*,gchar*)>				eEdited;
 //
-//	uint32			mColumnNr;
+//	uint32_t			mColumnNr;
 //	MListBase*		mList;
 //};
 //
@@ -348,7 +348,7 @@
 //}
 //
 //void MListBase::SetColumnTitle(
-//	uint32			inColumnNr,
+//	uint32_t			inColumnNr,
 //	const string&	inTitle)
 //{
 //	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
@@ -358,7 +358,7 @@
 //}
 //
 //void MListBase::SetExpandColumn(
-//	uint32			inColumnNr)
+//	uint32_t			inColumnNr)
 //{
 //	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
 //	if (column == NULL)
@@ -367,7 +367,7 @@
 //}
 //
 //void MListBase::SetColumnAlignment(
-//	uint32				inColumnNr,
+//	uint32_t				inColumnNr,
 //	float				inAlignment)
 //{
 //	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
@@ -379,7 +379,7 @@
 //}
 //
 //void MListBase::SetColumnEditable(
-//	uint32			inColumnNr,
+//	uint32_t			inColumnNr,
 //	bool			inEditable)
 //{
 //	if (inColumnNr < mRenderers.size())
@@ -395,7 +395,7 @@
 //}
 //
 //void MListBase::SetColumnToggleable(
-//	uint32			inColumnNr,
+//	uint32_t			inColumnNr,
 //	bool			inToggleable)
 //{
 //	if (inColumnNr < mRenderers.size())
@@ -403,7 +403,7 @@
 //}
 //
 //void MListBase::SetListOfOptionsForColumn(
-//	uint32					inColumnNr,
+//	uint32_t					inColumnNr,
 //	const vector<string>&	inOptions)
 //{
 //	if (inColumnNr >= mRenderers.size())
@@ -562,7 +562,7 @@
 //
 //void MListBase::SelectRowAndStartEditingColumn(
 //	MListRowBase*		inRow,
-//	uint32				inColumnNr)
+//	uint32_t				inColumnNr)
 //{
 //	GtkTreePath* path = inRow->GetTreePath();
 //	if (path != nullptr)

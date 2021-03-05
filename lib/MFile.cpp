@@ -39,8 +39,8 @@ namespace ba = boost::algorithm;
 
 // These are declarations of file attribute I/O routines, very OS specific
 // and so moved to the OS implemention part.
-int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize);
-int32 write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize);
+int32_t read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize);
+int32_t write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize);
 
 bool FileIsReadOnly(const fs::path& inPath);
 
@@ -237,7 +237,7 @@ bool MFileImpl::IsModifiedOnDisk()
 //
 //struct MSFTPFileImpl : public MFileImpl
 //{
-//					MSFTPFileImpl(const string& inHost, const string& inUser, uint16 inPort, const fs::path& inPath);
+//					MSFTPFileImpl(const string& inHost, const string& inUser, uint16_t inPort, const fs::path& inPath);
 //	virtual			~MSFTPFileImpl();
 //
 //	virtual string	GetURL() const;
@@ -255,17 +255,17 @@ bool MFileImpl::IsModifiedOnDisk()
 //
 //	void			ChannelMessage(const string& inMessage);
 //	void			ChannelError(const string& inError);
-//	void			SendData(int64 inOffset, uint32 inMaxSize, string& outData);
-//	void			ReceiveData(const string& inData, int64 inOffset, int64 inFileSize);
+//	void			SendData(int64_t inOffset, uint32_t inMaxSize, string& outData);
+//	void			ReceiveData(const string& inData, int64_t inOffset, int64_t inFileSize);
 //	void			FileClosed();
 //
 //	MSftpChannel*	mChannel;
 //	string			mHost, mUser;
-//	uint16			mPort;
+//	uint16_t			mPort;
 //	string			mData;
 //};
 //
-//MSFTPFileImpl::MSFTPFileImpl(const string& inHost, const string& inUser, uint16 inPort, const fs::path& inPath)
+//MSFTPFileImpl::MSFTPFileImpl(const string& inHost, const string& inUser, uint16_t inPort, const fs::path& inPath)
 //	: MFileImpl(inPath)
 //	, mHost(inHost)
 //	, mUser(inUser)
@@ -382,7 +382,7 @@ bool MFileImpl::IsModifiedOnDisk()
 //		mChannel->WriteFile(mPath.string());
 //}
 //
-//void MSFTPFileImpl::ReceiveData(const string& inData, int64 inOffset, int64 inFileSize)
+//void MSFTPFileImpl::ReceiveData(const string& inData, int64_t inOffset, int64_t inFileSize)
 //{
 //	mData += inData;
 //
@@ -395,9 +395,9 @@ bool MFileImpl::IsModifiedOnDisk()
 //		mIODocument->IOProgress(float(inOffset + inData.length()) / inFileSize, _("Receiving data"));
 //}
 //
-//void MSFTPFileImpl::SendData(int64 inOffset, uint32 inMaxSize, string& outData)
+//void MSFTPFileImpl::SendData(int64_t inOffset, uint32_t inMaxSize, string& outData)
 //{
-//	int64 n = inMaxSize;
+//	int64_t n = inMaxSize;
 //
 //	if (n > mData.length() - inOffset)
 //		n = mData.length() - inOffset;
@@ -623,9 +623,9 @@ bool MFile::IsReadOnly() const
 	return mImpl != nullptr and mImpl->IsReadOnly();
 }
 
-int32 MFile::ReadAttribute(const char* inName, void* outData, uint32 inDataSize) const
+int32_t MFile::ReadAttribute(const char* inName, void* outData, uint32_t inDataSize) const
 {
-	int32 result = 0;
+	int32_t result = 0;
 	
 	if (IsLocal())
 		result = read_attribute(GetPath(), inName, outData, inDataSize);
@@ -633,9 +633,9 @@ int32 MFile::ReadAttribute(const char* inName, void* outData, uint32 inDataSize)
 	return result;
 }
 
-int32 MFile::WriteAttribute(const char* inName, const void* inData, uint32 inDataSize) const
+int32_t MFile::WriteAttribute(const char* inName, const void* inData, uint32_t inDataSize) const
 {
-	uint32 result = 0;
+	uint32_t result = 0;
 	
 	if (IsLocal())
 	{
@@ -827,7 +827,7 @@ bool MDeepFileIteratorImp::Next(
 
 MFileIterator::MFileIterator(
 	const fs::path&	inDirectory,
-	uint32			inFlags)
+	uint32_t			inFlags)
 	: mImpl(nullptr)
 {
 	if (inFlags & kFileIter_Deep)

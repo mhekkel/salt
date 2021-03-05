@@ -17,7 +17,7 @@ using namespace std;
 
 namespace {
 
-const int32
+const int32_t
 	kAskSaveChanges_Save = 3,
 	kAskSaveChanges_Cancel = 2,
 	kAskSaveChanges_DontSave = 1,
@@ -59,10 +59,10 @@ void MController::SetDocument(
 }
 
 bool MController::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool handled = false;
 	
@@ -104,9 +104,9 @@ bool MController::ProcessCommand(
 }
 
 bool MController::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -152,8 +152,8 @@ bool MController::UpdateCommandStatus(
 }
 
 bool MController::HandleKeyDown(
-	uint32			inKeyCode,
-	uint32			inModifiers,
+	uint32_t			inKeyCode,
+	uint32_t			inModifiers,
 	bool			inRepeat)
 {
 	bool handled = false;

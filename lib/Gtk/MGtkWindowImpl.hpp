@@ -28,7 +28,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual void	AddMenubarWidget(GtkWidget* inWidget);
 	virtual void	AddStatusbarWidget(MGtkWidgetMixin* inChild);
 	virtual void	Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-						bool inExpand, bool inFill, uint32 inPadding);
+						bool inExpand, bool inFill, uint32_t inPadding);
 
 	virtual void	SetTitle(std::string inTitle);
 
@@ -40,7 +40,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual void	Select();
 	virtual void	Close();
 
-	virtual void	ResizeWindow(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void	ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	virtual void	SetWindowPosition(MRect inBounds, bool inTransition);
 	virtual void	GetWindowPosition(MRect& outBounds) const;
@@ -49,18 +49,18 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual void	Validate(MRect inRect);
 	virtual void	UpdateNow();
 
-	virtual void	ScrollRect(MRect inRect, int32 inDeltaH, int32 inDeltaV);
+	virtual void	ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV);
 	
-	virtual bool	GetMouse(int32& outX, int32& outY, uint32& outModifiers);
-	virtual bool	WaitMouseMoved(int32 inX, int32 inY);
+	virtual bool	GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers);
+	virtual bool	WaitMouseMoved(int32_t inX, int32_t inY);
 
 	virtual void	SetCursor(MCursor inCursor);
 	virtual void	ObscureCursor();
 
-	virtual void	ConvertToScreen(int32& ioX, int32& ioY) const;
-	virtual void	ConvertFromScreen(int32& ioX, int32& ioY) const;
+	virtual void	ConvertToScreen(int32_t& ioX, int32_t& ioY) const;
+	virtual void	ConvertFromScreen(int32_t& ioX, int32_t& ioY) const;
 
-	virtual uint32	GetModifiers() const;
+	virtual uint32_t	GetModifiers() const;
 
 	MWindow*		GetWindow() const						{ return mWindow; }
 	
@@ -68,7 +68,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 
   protected:
 
-	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, const std::string& inText);
+	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string& inText);
 
 	virtual bool	OnDestroy();
 	virtual bool	OnDelete(GdkEvent* inEvent);

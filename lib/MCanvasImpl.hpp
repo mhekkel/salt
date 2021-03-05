@@ -23,7 +23,7 @@ class MCanvasImpl : public MControlImpl<MCanvas>
 	virtual void	StartDrag() = 0;
 
 	static MCanvasImpl*
-					Create(MCanvas* inCanvas, uint32 inWidth, uint32 inHeight);
+					Create(MCanvas* inCanvas, uint32_t inWidth, uint32_t inHeight);
 };
 
 #endif

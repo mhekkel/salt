@@ -36,7 +36,7 @@ class MLibTestWindow : public MWindow
 MLibTestWindow::MLibTestWindow()
 	: MWindow("Nieuw venster", MRect(0, 0, 400, 400), MWindowFlags(0), "terminal-window-menu")
 {
-	int32 partWidths[5] = { 250, 250, 45, -1 };
+	int32_t partWidths[5] = { 250, 250, 45, -1 };
 	mStatusbar = new MStatusbar("status", MRect(0, 0, 16, 400), 4, partWidths);
 	AddChild(mStatusbar);
 }
@@ -88,7 +88,7 @@ MApplication* MApplication::Create(MApplicationImpl* inImpl)
 
 // --------------------------------------------------------------------
 
-bool MLibTestApp::ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers)
+bool MLibTestApp::ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool result = true;
 
@@ -135,7 +135,7 @@ bool MLibTestApp::ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 i
 	return result;
 }
 
-bool MLibTestApp::UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked)
+bool MLibTestApp::UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked)
 {
 	bool result = true;
 

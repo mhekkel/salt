@@ -34,7 +34,7 @@ using namespace std;
 //
 //}
 //
-//MXcbCanvasImpl::MXcbCanvasImpl(MCanvas* inCanvas, uint32 inWidth, uint32 inHeight)
+//MXcbCanvasImpl::MXcbCanvasImpl(MCanvas* inCanvas, uint32_t inWidth, uint32_t inHeight)
 //	: MXcbControlImpl(inCanvas, "canvas")
 //{
 //	RequestSize(inWidth, inHeight);
@@ -55,7 +55,7 @@ using namespace std;
 //	g_object_set_data(G_OBJECT(GetWidget()), "m-canvas", this);
 //}
 //
-//bool MXcbCanvasImpl::OnMouseDown(int32 inX, int32 inY, uint32 inButtonNr, uint32 inClickCount, uint32 inModifiers)
+//bool MXcbCanvasImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers)
 //{
 //	bool result = false;
 //	
@@ -80,13 +80,13 @@ using namespace std;
 //	return result;
 //}
 //
-//bool MXcbCanvasImpl::OnMouseMove(int32 inX, int32 inY, uint32 inModifiers)
+//bool MXcbCanvasImpl::OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 //{
 //	mControl->MouseMove(inX, inY, inModifiers);
 //	return true;
 //}
 //
-//bool MXcbCanvasImpl::OnMouseUp(int32 inX, int32 inY, uint32 inModifiers)
+//bool MXcbCanvasImpl::OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 //{
 //	mControl->MouseUp(inX, inY, inModifiers);
 //	return true;
@@ -143,12 +143,12 @@ using namespace std;
 //
 //	if (not result)
 //	{
-//		const uint32 kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+//		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 //
 //PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
 //		
-//	    uint32 modifiers = MapModifier(inEvent->state & kValidModifiersMask);
-//		uint32 keyValue = MapKeyCode(inEvent->keyval);
+//	    uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+//		uint32_t keyValue = MapKeyCode(inEvent->keyval);
 //
 //		if (keyValue >= 0x60 and keyValue <= 0x7f and modifiers == kControlKey)
 //		{
@@ -167,7 +167,7 @@ using namespace std;
 //			{
 //				char s[8] = {};
 //				char* sp = s;
-//				uint32 length = MEncodingTraits<kEncodingUTF8>::WriteUnicode(sp, ch);
+//				uint32_t length = MEncodingTraits<kEncodingUTF8>::WriteUnicode(sp, ch);
 //				
 //				string text(s, length);
 //				result = mControl->HandleCharacter(text, mAutoRepeat);
@@ -198,9 +198,9 @@ using namespace std;
 //
 //bool MXcbCanvasImpl::OnScrollEvent(GdkEventScroll* inEvent)
 //{
-//	int32 x = inEvent->x;
-//	int32 y = inEvent->y;
-//    uint32 modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+//	int32_t x = inEvent->x;
+//	int32_t y = inEvent->y;
+//    uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
 //	
 //	switch (inEvent->direction)
 //	{
@@ -233,7 +233,7 @@ using namespace std;
 //}
 //
 
-MCanvasImpl* MCanvasImpl::Create(MCanvas* inCanvas, uint32 inWidth, uint32 inHeight)
+MCanvasImpl* MCanvasImpl::Create(MCanvas* inCanvas, uint32_t inWidth, uint32_t inHeight)
 {
 	return new MXcbCanvasImpl(inCanvas, inWidth, inHeight);
 }

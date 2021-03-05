@@ -6,7 +6,7 @@
 #include "MControls.hpp"
 #include "MP2PEvents.hpp"
 
-const uint32
+const uint32_t
 	kSearchPanelHeight = 28,
 	cmd_HideSearchPanel	= 'hidS';
 
@@ -24,12 +24,12 @@ class MSearchPanel : public MBoxControl
 
 	virtual			~MSearchPanel();
 
-	virtual bool	HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 
 	std::string		GetSearchString() const;
 	bool			GetIgnoreCase() const;
 
-	uint32			GetHeight() const;
+	uint32_t			GetHeight() const;
 
 	MEventOut<void(MSearchDirection)>	eSearch;
 	MEdittext*		GetTextBox() const				{ return mTextBox; }

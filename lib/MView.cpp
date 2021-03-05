@@ -171,7 +171,7 @@ void MView::SetFrame(
 
 		if (mScroller != nullptr)
 		{
-			int32 minWidth, minHeight;
+			int32_t minWidth, minHeight;
 			mScroller->GetTargetMinimalDimensions(minWidth, minHeight);
 		
 			if (mFrame.width < minWidth)
@@ -216,8 +216,8 @@ void MView::SetBindings(
 }
 
 void MView::MoveFrame(
-	int32			inXDelta,
-	int32			inYDelta)
+	int32_t			inXDelta,
+	int32_t			inYDelta)
 {
 	if (mWillDraw)
 		Invalidate();
@@ -236,8 +236,8 @@ void MView::MoveFrame(
 }
 
 void MView::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	if (mWillDraw)
 		Invalidate();
@@ -252,7 +252,7 @@ void MView::ResizeFrame(
 	}
 	else
 	{
-		int32 minWidth, minHeight;
+		int32_t minWidth, minHeight;
 		mScroller->GetTargetMinimalDimensions(minWidth, minHeight);
 		
 		if (mFrame.width < minWidth)
@@ -269,7 +269,7 @@ void MView::ResizeFrame(
 		if (not child->IsVisible())
 			continue;
 		
-		int32 dx = 0, dy = 0, dw = 0, dh = 0;
+		int32_t dx = 0, dy = 0, dw = 0, dh = 0;
 		
 		if (child->mBindRight)
 		{
@@ -297,10 +297,10 @@ void MView::ResizeFrame(
 }
 
 void MView::GetMargins(
-	int32&	outLeftMargin,
-	int32&	outTopMargin,
-	int32&	outRightMargin,
-	int32&	outBottomMargin) const
+	int32_t&	outLeftMargin,
+	int32_t&	outTopMargin,
+	int32_t&	outRightMargin,
+	int32_t&	outBottomMargin) const
 {
 	outLeftMargin = mLeftMargin;
 	outTopMargin = mTopMargin;
@@ -309,16 +309,16 @@ void MView::GetMargins(
 }
 
 void MView::SetMargins(
-	int32	inLeftMargin,
-	int32	inTopMargin,
-	int32	inRightMargin,
-	int32	inBottomMargin)
+	int32_t	inLeftMargin,
+	int32_t	inTopMargin,
+	int32_t	inRightMargin,
+	int32_t	inBottomMargin)
 {
-	int32 dx = inLeftMargin - mLeftMargin;
-	int32 dy = inTopMargin - mTopMargin;
+	int32_t dx = inLeftMargin - mLeftMargin;
+	int32_t dy = inTopMargin - mTopMargin;
 	
-	//int32 dw = (mLeftMargin + mRightMargin) - (inLeftMargin + inRightMargin);
-	//int32 dh = (mTopMargin + mBottomMargin) - (inTopMargin + inBottomMargin);
+	//int32_t dw = (mLeftMargin + mRightMargin) - (inLeftMargin + inRightMargin);
+	//int32_t dh = (mTopMargin + mBottomMargin) - (inTopMargin + inBottomMargin);
 	
 	mLeftMargin = inLeftMargin;
 	mTopMargin = inTopMargin;
@@ -381,9 +381,9 @@ void MView::Invalidate(
 	}
 }
 
-void MView::ScrollBy(int32 inDeltaX, int32 inDeltaY)
+void MView::ScrollBy(int32_t inDeltaX, int32_t inDeltaY)
 {
-	int32 x, y;
+	int32_t x, y;
 	GetScrollPosition(x, y);
 	
 	MScrollbar* scrollbar = mScroller ? mScroller->GetHScrollbar() : nullptr;
@@ -418,20 +418,20 @@ void MView::ScrollBy(int32 inDeltaX, int32 inDeltaY)
 	}
 }
 
-void MView::ScrollTo(int32 inX, int32 inY)
+void MView::ScrollTo(int32_t inX, int32_t inY)
 {
 	ScrollBy(inX - mBounds.x, inY - mBounds.y);
 }
 
-void MView::GetScrollPosition(int32& outX, int32& outY) const
+void MView::GetScrollPosition(int32_t& outX, int32_t& outY) const
 {
 	outX = mBounds.x;
 	outY = mBounds.y;
 }
 
 void MView::GetScrollUnit(
-	int32&			outScrollUnitX,
-	int32&			outScrollUnitY) const
+	int32_t&			outScrollUnitX,
+	int32_t&			outScrollUnitY) const
 {
 	if (mScroller != nullptr)
 		mScroller->GetTargetScrollUnit(outScrollUnitX, outScrollUnitY);
@@ -442,8 +442,8 @@ void MView::GetScrollUnit(
 }
 
 void MView::SetScrollUnit(
-	int32			inScrollUnitX,
-	int32			inScrollUnitY)
+	int32_t			inScrollUnitX,
+	int32_t			inScrollUnitY)
 {
 	if (mScroller != nullptr)
 		mScroller->SetTargetScrollUnit(inScrollUnitX, inScrollUnitY);
@@ -453,8 +453,8 @@ void MView::SetScrollUnit(
 
 void MView::ScrollRect(
 	MRect			inRect,
-	int32			inX,
-	int32			inY)
+	int32_t			inX,
+	int32_t			inY)
 {
 	if (mParent != nullptr)
 	{
@@ -479,9 +479,9 @@ void MView::SetCursor(
 }
 
 void MView::AdjustCursor(
-	int32			inX,
-	int32			inY,
-	uint32			inModifiers)
+	int32_t			inX,
+	int32_t			inY,
+	uint32_t			inModifiers)
 {
 	if (mParent != nullptr)
 	{
@@ -498,7 +498,7 @@ void MView::ObscureCursor()
 		mParent->ObscureCursor();
 }
 
-bool MView::ActivateOnClick(int32 inX, int32 inY, uint32 inModifiers)
+bool MView::ActivateOnClick(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	return true;
 }
@@ -508,17 +508,17 @@ void MView::TrackMouse(bool inTrackMove, bool inTrackExit)
 }
 
 void MView::MouseDown(
-	int32			inX,
-	int32			inY,
-	uint32			inClickCount,
-	uint32			inModifiers)
+	int32_t			inX,
+	int32_t			inY,
+	uint32_t			inClickCount,
+	uint32_t			inModifiers)
 {
 }
 
 void MView::MouseMove(
-	int32			inX,
-	int32			inY,
-	uint32			inModifiers)
+	int32_t			inX,
+	int32_t			inY,
+	uint32_t			inModifiers)
 {
 }
 
@@ -527,18 +527,18 @@ void MView::MouseExit()
 }
 
 void MView::MouseUp(
-	int32			inX,
-	int32			inY,
-	uint32			inModifiers)
+	int32_t			inX,
+	int32_t			inY,
+	uint32_t			inModifiers)
 {
 }
 
 void MView::MouseWheel(
-	int32			inX,
-	int32			inY,
-	int32			inDeltaX,
-	int32			inDeltaY,
-	uint32			inModifiers)
+	int32_t			inX,
+	int32_t			inY,
+	int32_t			inDeltaX,
+	int32_t			inDeltaY,
+	uint32_t			inModifiers)
 {
 	if (mParent != nullptr)
 	{
@@ -548,8 +548,8 @@ void MView::MouseWheel(
 }
 
 void MView::ShowContextMenu(
-	int32			inX,
-	int32			inY)
+	int32_t			inX,
+	int32_t			inY)
 {
 	if (mParent != nullptr)
 	{
@@ -793,9 +793,9 @@ bool MView::IsActive() const
 }
 
 void MView::GetMouse(
-	int32&			outX,
-	int32&			outY,
-	uint32&			outModifiers) const
+	int32_t&			outX,
+	int32_t&			outY,
+	uint32_t&			outModifiers) const
 {
 	if (mParent != nullptr)
 	{
@@ -804,9 +804,9 @@ void MView::GetMouse(
 	}
 }
 
-uint32 MView::GetModifiers() const
+uint32_t MView::GetModifiers() const
 {
-	uint32 result = 0;
+	uint32_t result = 0;
 
 	MWindow* w = GetWindow();
 	if (w != nullptr)
@@ -815,7 +815,7 @@ uint32 MView::GetModifiers() const
 	return result;
 }
 
-uint32 MView::CountPages(
+uint32_t MView::CountPages(
 	MDevice&		inDevice)
 {
 	return 1;
@@ -835,7 +835,7 @@ MHandler* MView::FindFocus()
 	return result;
 }
 
-MView* MView::FindSubView(int32 inX, int32 inY) const
+MView* MView::FindSubView(int32_t inX, int32_t inY) const
 {
 	const MView* result = this;
 
@@ -872,40 +872,40 @@ MView* MView::FindSubViewByID(const string& inID) const
 	return const_cast<MView*>(result);
 }
 
-void MView::ConvertToParent(int32& ioX, int32& ioY) const
+void MView::ConvertToParent(int32_t& ioX, int32_t& ioY) const
 {
 	ioX += mFrame.x - mBounds.x + mLeftMargin;
 	ioY += mFrame.y - mBounds.y + mTopMargin;
 }
 
-void MView::ConvertFromParent(int32& ioX, int32& ioY) const
+void MView::ConvertFromParent(int32_t& ioX, int32_t& ioY) const
 {
 	ioX -= mFrame.x - mBounds.x + mLeftMargin;
 	ioY -= mFrame.y - mBounds.y + mTopMargin;
 }
 
-void MView::ConvertToWindow(int32& ioX, int32& ioY) const
+void MView::ConvertToWindow(int32_t& ioX, int32_t& ioY) const
 {
 	ConvertToParent(ioX, ioY);
 	if (mParent != nullptr)
 		mParent->ConvertToWindow(ioX, ioY);
 }
 
-void MView::ConvertFromWindow(int32& ioX, int32& ioY) const
+void MView::ConvertFromWindow(int32_t& ioX, int32_t& ioY) const
 {
 	if (mParent != nullptr)
 		mParent->ConvertFromWindow(ioX, ioY);
 	ConvertFromParent(ioX, ioY);
 }
 
-void MView::ConvertToScreen(int32& ioX, int32& ioY) const
+void MView::ConvertToScreen(int32_t& ioX, int32_t& ioY) const
 {
 	ConvertToParent(ioX, ioY);
 	if (mParent != nullptr)
 		mParent->ConvertToScreen(ioX, ioY);
 }
 
-void MView::ConvertFromScreen(int32& ioX, int32& ioY) const
+void MView::ConvertFromScreen(int32_t& ioX, int32_t& ioY) const
 {
 	if (mParent != nullptr)
 		mParent->ConvertFromScreen(ioX, ioY);
@@ -952,7 +952,7 @@ void MHBox::RecalculateLayout()
 	mBounds.y = mTopMargin;
 	mBounds.width = mBounds.height = 0;
 	
-	int32 x = mBounds.x, y = mBounds.y;
+	int32_t x = mBounds.x, y = mBounds.y;
 	
 	for (MView* child: mChildren)
 	{
@@ -985,7 +985,7 @@ void MHBox::RecalculateLayout()
 				child->ResizeFrame(0, mBounds.height - f.height);
 			else if (f.y != y)
 			{
-				int32 dy = y - f.y;
+				int32_t dy = y - f.y;
 				if (f.height < mBounds.height)
 					dy += (mBounds.height - f.height) / 2;
 				child->MoveFrame(0, dy);
@@ -998,8 +998,8 @@ void MHBox::RecalculateLayout()
 }
 
 void MHBox::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	mFrame.width += inWidthDelta;
 	mFrame.height += inHeightDelta;
@@ -1007,8 +1007,8 @@ void MHBox::ResizeFrame(
 	mBounds.width += inWidthDelta;
 	mBounds.height += inHeightDelta;
 	
-	uint32 n = 0;	// count the resizing children
-	uint32 cw = 0;	// and the width of the non-resizing children
+	uint32_t n = 0;	// count the resizing children
+	uint32_t cw = 0;	// and the width of the non-resizing children
 	
 	for (MView* child: mChildren)
 	{
@@ -1026,11 +1026,11 @@ void MHBox::ResizeFrame(
 	}
 	
 	// now re-layout the children
-	uint32 w = mFrame.width - (mLeftMargin + mRightMargin + (mChildren.size() - 1) * mSpacing);	// the available width
-	uint32 rw = 0;
+	uint32_t w = mFrame.width - (mLeftMargin + mRightMargin + (mChildren.size() - 1) * mSpacing);	// the available width
+	uint32_t rw = 0;
 	if (w > cw)
 		rw = w - cw;		// the width to divide
-	int32 x = mLeftMargin;
+	int32_t x = mLeftMargin;
 	
 	for (MView* child: mChildren)
 	{
@@ -1042,7 +1042,7 @@ void MHBox::ResizeFrame(
 		child->GetFrame(frame);
 		child->MoveFrame(x - frame.x, 0);
 
-		int32 dw = frame.width, dy = 0, dh = 0;
+		int32_t dw = frame.width, dy = 0, dh = 0;
 		bool bl, bt, br, bb;
 		child->GetBindings(bl, bt, br, bb);
 
@@ -1078,7 +1078,7 @@ void MVBox::RecalculateLayout()
 	mBounds.y = mTopMargin;
 	mBounds.width = mBounds.height = 0;
 	
-	int32 x = mBounds.x, y = mBounds.y;
+	int32_t x = mBounds.x, y = mBounds.y;
 	
 	for (MView* child: mChildren)
 	{
@@ -1114,8 +1114,8 @@ void MVBox::RecalculateLayout()
 }
 
 void MVBox::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	mFrame.width += inWidthDelta;
 	mFrame.height += inHeightDelta;
@@ -1123,8 +1123,8 @@ void MVBox::ResizeFrame(
 	mBounds.width += inWidthDelta;
 	mBounds.height += inHeightDelta;
 	
-	uint32 n = 0;	// count the resizing children
-	uint32 ch = 0;	// and the height of the non-resizing children
+	uint32_t n = 0;	// count the resizing children
+	uint32_t ch = 0;	// and the height of the non-resizing children
 	
 	for (MView* child: mChildren)
 	{
@@ -1142,11 +1142,11 @@ void MVBox::ResizeFrame(
 	}
 	
 	// now re-layout the children
-	uint32 h = mFrame.height - (mTopMargin + mBottomMargin + (mChildren.size() - 1) * mSpacing);	// the available height
-	uint32 rh = 0;
+	uint32_t h = mFrame.height - (mTopMargin + mBottomMargin + (mChildren.size() - 1) * mSpacing);	// the available height
+	uint32_t rh = 0;
 	if (h > ch)
 		rh = h - ch;		// the height to divide
-	int32 y = mTopMargin;
+	int32_t y = mTopMargin;
 	
 	for (MView* child: mChildren)
 	{
@@ -1158,7 +1158,7 @@ void MVBox::ResizeFrame(
 		child->GetFrame(frame);
 		child->MoveFrame(0, y - frame.y);
 
-		int32 dh = frame.height, dx = 0, dw = 0;
+		int32_t dh = frame.height, dx = 0, dw = 0;
 		bool bl, bt, br, bb;
 		child->GetBindings(bl, bt, br, bb);
 
@@ -1189,7 +1189,7 @@ void MVBox::ResizeFrame(
 }
 
 MTable::MTable(const std::string& inID, MRect inBounds, MView* inChildren[],
-	uint32 inColumns, uint32 inRows, int32 inHSpacing, int32 inVSpacing)
+	uint32_t inColumns, uint32_t inRows, int32_t inHSpacing, int32_t inVSpacing)
 	: MView(inID, inBounds)
 	, mColumns(inColumns)
 	, mRows(inRows)
@@ -1197,12 +1197,12 @@ MTable::MTable(const std::string& inID, MRect inBounds, MView* inChildren[],
 	, mVSpacing(inVSpacing)
 	, mGrid(mRows * mColumns)
 {
-	vector<int32> widths(mColumns);
-	vector<int32> heights(mRows);
+	vector<int32_t> widths(mColumns);
+	vector<int32_t> heights(mRows);
 	
-	for (uint32 r = 0; r < mRows; ++r)
+	for (uint32_t r = 0; r < mRows; ++r)
 	{
-		for (uint32 c = 0; c < mColumns; ++c)
+		for (uint32_t c = 0; c < mColumns; ++c)
 		{
 			int ix = r * mColumns + c;
 			
@@ -1223,13 +1223,13 @@ MTable::MTable(const std::string& inID, MRect inBounds, MView* inChildren[],
 		}
 	}
 	
-	int32 x, y = 0;
+	int32_t x, y = 0;
 	
-	for (uint32 r = 0; r < mRows; ++r)
+	for (uint32_t r = 0; r < mRows; ++r)
 	{
 		x = 0;
 	
-		for (uint32 c = 0; c < mColumns; ++c)
+		for (uint32_t c = 0; c < mColumns; ++c)
 		{
 			int ix = r * mColumns + c;
 	
@@ -1240,7 +1240,7 @@ MTable::MTable(const std::string& inID, MRect inBounds, MView* inChildren[],
 			mGrid[ix]->GetFrame(frame);
 			
 			// compensate (vertical center in row)
-			int32 dy = y - frame.y;
+			int32_t dy = y - frame.y;
 			if (frame.height < heights[r])
 				dy += (heights[r] - frame.height) / 2;
 			
@@ -1264,14 +1264,14 @@ void MTable::RecalculateLayout()
 	mBounds.y = mTopMargin;
 	mBounds.width = mBounds.height = 0;
 
-	int32 y = mBounds.y;
+	int32_t y = mBounds.y;
 
 	// resize rows
-	for (uint32 rx = 0; rx < mRows; ++rx)
+	for (uint32_t rx = 0; rx < mRows; ++rx)
 	{
-		int32 height = 0;
+		int32_t height = 0;
 		
-		for (uint32 cx = 0; cx < mColumns; ++cx)
+		for (uint32_t cx = 0; cx < mColumns; ++cx)
 		{
 			MView* v = mGrid[rx * mColumns + cx];
 			if (v == nullptr or not v->IsVisible())
@@ -1284,7 +1284,7 @@ void MTable::RecalculateLayout()
 				height = f.y + f.height;
 		}
 
-		for (uint32 cx = 0; cx < mColumns; ++cx)
+		for (uint32_t cx = 0; cx < mColumns; ++cx)
 		{
 			MView* v = mGrid[rx * mColumns + cx];
 			if (v == nullptr or not v->IsVisible() or v->HeightResizable() == false)
@@ -1307,12 +1307,12 @@ void MTable::RecalculateLayout()
 		}
 	}
 	
-	int32 x = mBounds.x;
+	int32_t x = mBounds.x;
 	
-	for (uint32 cx = 0; cx < mColumns; ++cx)
+	for (uint32_t cx = 0; cx < mColumns; ++cx)
 	{
-		int32 width = 0;
-		for (uint32 rx = 0; rx < mRows; ++rx)
+		int32_t width = 0;
+		for (uint32_t rx = 0; rx < mRows; ++rx)
 		{
 			MView* child = mGrid[rx * mColumns + cx];
 			
@@ -1340,8 +1340,8 @@ void MTable::RecalculateLayout()
 }
 
 void MTable::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	mFrame.width += inWidthDelta;
 	mFrame.height += inHeightDelta;
@@ -1350,11 +1350,11 @@ void MTable::ResizeFrame(
 	mBounds.height += inHeightDelta;
 	
 	// resize rows
-	for (uint32 rx = 0; rx < mRows; ++rx)
+	for (uint32_t rx = 0; rx < mRows; ++rx)
 	{
-		int32 height = 0;
+		int32_t height = 0;
 		
-		for (uint32 cx = 0; cx < mColumns; ++cx)
+		for (uint32_t cx = 0; cx < mColumns; ++cx)
 		{
 			MView* v = mGrid[rx * mColumns + cx];
 			if (v == nullptr or not v->IsVisible())
@@ -1367,7 +1367,7 @@ void MTable::ResizeFrame(
 				height = f.y + f.height;
 		}
 
-		for (uint32 cx = 0; cx < mColumns; ++cx)
+		for (uint32_t cx = 0; cx < mColumns; ++cx)
 		{
 			MView* v = mGrid[rx * mColumns + cx];
 			if (v == nullptr or not v->IsVisible() or v->HeightResizable() == false)
@@ -1386,12 +1386,12 @@ void MTable::ResizeFrame(
 	
 	if (inWidthDelta != 0)
 	{
-		uint32 n = 0;
+		uint32_t n = 0;
 		vector<bool> resizable(mColumns);
 
-		for (uint32 cx = 0; cx < mColumns; ++cx)
+		for (uint32_t cx = 0; cx < mColumns; ++cx)
 		{
-			for (uint32 rx = 0; rx < mRows; ++rx)
+			for (uint32_t rx = 0; rx < mRows; ++rx)
 			{
 				MView* child = mGrid[rx * mColumns + cx];
 
@@ -1406,12 +1406,12 @@ void MTable::ResizeFrame(
 		
 		if (n > 0)
 		{
-			for (uint32 cx = 0; cx < mColumns; ++cx)
+			for (uint32_t cx = 0; cx < mColumns; ++cx)
 			{
-				int32 delta = inWidthDelta / n;
-				int32 dx = 0;
+				int32_t delta = inWidthDelta / n;
+				int32_t dx = 0;
 				
-				for (uint32 rx = 0; rx < mRows; ++rx)
+				for (uint32_t rx = 0; rx < mRows; ++rx)
 				{
 					MView* child = mGrid[rx * mColumns + cx];
 					
@@ -1432,10 +1432,10 @@ void MTable::ResizeFrame(
 
 void MTable::AddChild(
 	MView*			inView,
-	uint32			inColumn,
-	uint32			inRow,
-	int32			inColumnSpan,
-	int32			inRowSpan)
+	uint32_t			inColumn,
+	uint32_t			inRow,
+	int32_t			inColumnSpan,
+	int32_t			inRowSpan)
 {
 	MView::AddChild(inView);
 	
@@ -1512,16 +1512,16 @@ MViewScroller::MViewScroller(const string& inID,
 }
 
 void MViewScroller::MoveFrame(
-	int32			inXDelta,
-	int32			inYDelta)
+	int32_t			inXDelta,
+	int32_t			inYDelta)
 {
 	MView::MoveFrame(inXDelta, inYDelta);
 	AdjustScrollbars();
 }
 
 void MViewScroller::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	mFrame.width += inWidthDelta;
 	mFrame.height += inHeightDelta;
@@ -1529,7 +1529,7 @@ void MViewScroller::ResizeFrame(
 	mBounds.width += inWidthDelta;
 	mBounds.height += inHeightDelta;
 	
-	int32 dx = 0, dy = 0;
+	int32_t dx = 0, dy = 0;
 	
 	if (mHScrollbar != nullptr)
 	{
@@ -1558,7 +1558,7 @@ void MViewScroller::ResizeFrame(
 
 void MViewScroller::AdjustScrollbars()
 {
-	int32 dx = 0, dy = 0;
+	int32_t dx = 0, dy = 0;
 	
 	MRect targetFrame;
 	mTarget->GetFrame(targetFrame);
@@ -1585,8 +1585,8 @@ void MViewScroller::AdjustScrollbars()
 }
 
 void MViewScroller::SetTargetScrollUnit(
-	int32			inScrollUnitX,
-	int32			inScrollUnitY)
+	int32_t			inScrollUnitX,
+	int32_t			inScrollUnitY)
 {
 	assert(inScrollUnitY > 0 and inScrollUnitX > 0);
 //	if (inScrollUnitX < 1 or inScrollUnitY < 1)
@@ -1596,16 +1596,16 @@ void MViewScroller::SetTargetScrollUnit(
 }
 
 void MViewScroller::GetTargetScrollUnit(
-	int32&			outScrollUnitX,
-	int32&			outScrollUnitY) const
+	int32_t&			outScrollUnitX,
+	int32_t&			outScrollUnitY) const
 {
 	outScrollUnitX = mScrollUnitX;
 	outScrollUnitY = mScrollUnitY;
 }
 
 void MViewScroller::GetTargetMinimalDimensions(
-	int32&			outMinWidth,
-	int32&			outMinHeight) const
+	int32_t&			outMinWidth,
+	int32_t&			outMinHeight) const
 {
 	outMinWidth = mBounds.width;
 	if (mVScrollbar)
@@ -1620,7 +1620,7 @@ void MViewScroller::VScroll(MScrollMessage inScrollMsg)
 	MRect bounds;
 	mTarget->GetBounds(bounds);
 
-	int32 dy = 0;
+	int32_t dy = 0;
 
 	switch (inScrollMsg)
 	{
@@ -1658,7 +1658,7 @@ void MViewScroller::HScroll(MScrollMessage inScrollMsg)
 	MRect bounds;
 	mTarget->GetBounds(bounds);
 
-	int32 dx = 0;
+	int32_t dx = 0;
 
 	switch (inScrollMsg)
 	{
@@ -1692,14 +1692,14 @@ void MViewScroller::HScroll(MScrollMessage inScrollMsg)
 }
 
 void MViewScroller::MouseWheel(
-	int32			inX,
-	int32			inY,
-	int32			inDeltaX,
-	int32			inDeltaY,
-	uint32			inModifiers)
+	int32_t			inX,
+	int32_t			inY,
+	int32_t			inDeltaX,
+	int32_t			inDeltaY,
+	uint32_t			inModifiers)
 {
-	const int32 kWheelAcceleration = 3;
-	int32 dx = 0, dy = 0;
+	const int32_t kWheelAcceleration = 3;
+	int32_t dx = 0, dy = 0;
 
 	if (mHScrollbar != nullptr)
 		dx = -(inDeltaX * mScrollUnitX * kWheelAcceleration);
@@ -1723,7 +1723,7 @@ void MPager::AddPage(MView* inPage)
 	AddChild(inPage);
 }
 
-void MPager::SelectPage(uint32 inPage)
+void MPager::SelectPage(uint32_t inPage)
 {
 	if (inPage < mChildren.size())
 	{

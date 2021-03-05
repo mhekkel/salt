@@ -16,16 +16,16 @@ class MDocApplication : public MApplication
 						~MDocApplication();
 
 	virtual void		Initialise();
-	virtual bool		UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex,
+	virtual bool		UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex,
 							bool& outEnabled, bool& outChecked);
-	virtual bool		ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex,
-							uint32 inModifiers);
+	virtual bool		ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex,
+							uint32_t inModifiers);
 	virtual void		UpdateSpecialMenu(const std::string& inMenuKind, MMenu* inMenu);
 	virtual void		UpdateWindowMenu(MMenu* inMenu);
 	virtual void		UpdateRecentMenu(MMenu* inMenu);
 
 	void				AddToRecentMenu(std::string inURL);
-	const std::string&	GetRecent(uint32 inIndex);
+	const std::string&	GetRecent(uint32_t inIndex);
 
 	virtual MWindow*	DisplayDocument(MDocument* inDocument) = 0;
 	virtual bool		CloseAll(MCloseReason inReason);
@@ -43,7 +43,7 @@ class MDocApplication : public MApplication
 	virtual void		DoQuit();
 	virtual bool		AllowQuit(bool inLogOff);
 	virtual void		DoSaveAll();
-	virtual void		DoSelectWindowFromWindowMenu(uint32 inIndex);
+	virtual void		DoSelectWindowFromWindowMenu(uint32_t inIndex);
 
 	virtual void		SaveGlobals();
 

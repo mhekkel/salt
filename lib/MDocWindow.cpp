@@ -77,9 +77,9 @@ string MDocWindow::GetUntitledTitle()
 }
 
 bool MDocWindow::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -101,10 +101,10 @@ bool MDocWindow::UpdateCommandStatus(
 }
 
 bool MDocWindow::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool handled = true;
 

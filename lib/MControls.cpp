@@ -66,62 +66,62 @@ MScrollbar::MScrollbar(const string& inID, MRect inBounds)
 {
 }
 
-int32 MScrollbar::GetValue() const
+int32_t MScrollbar::GetValue() const
 {
 	return mImpl->GetValue();
 }
 
-void MScrollbar::SetValue(int32 inValue)
+void MScrollbar::SetValue(int32_t inValue)
 {
 	mImpl->SetValue(inValue);
 }
 
-int32 MScrollbar::GetTrackValue() const
+int32_t MScrollbar::GetTrackValue() const
 {
 	return mImpl->GetTrackValue();
 }
 
-void MScrollbar::SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-	int32 inScrollUnit, int32 inPageSize, int32 inValue)
+void MScrollbar::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 {
 	mImpl->SetAdjustmentValues(inMinValue, inMaxValue,
 		inScrollUnit, inPageSize, inValue);
 }
 
-//void MScrollbar::SetMinValue(int32 inMinValue)
+//void MScrollbar::SetMinValue(int32_t inMinValue)
 //{
 //	mImpl->SetMinValue(inMinValue);
 //}
 
-int32 MScrollbar::GetMinValue() const
+int32_t MScrollbar::GetMinValue() const
 {
 	return mImpl->GetMinValue();
 }
 	
-//void MScrollbar::SetMaxValue(int32 inMaxValue)
+//void MScrollbar::SetMaxValue(int32_t inMaxValue)
 //{
 //	mImpl->SetMaxValue(inMaxValue);
 //}
 
-int32 MScrollbar::GetMaxValue() const
+int32_t MScrollbar::GetMaxValue() const
 {
 	return mImpl->GetMaxValue();
 }
 
-//void MScrollbar::SetViewSize(int32 inViewSize)
+//void MScrollbar::SetViewSize(int32_t inViewSize)
 //{
 //	mImpl->SetViewSize(inViewSize);
 //}
 
 // --------------------------------------------------------------------
 
-MStatusbar::MStatusbar(const string& inID, MRect inBounds, uint32 inPartCount, MStatusBarElement inParts[])
+MStatusbar::MStatusbar(const string& inID, MRect inBounds, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MControl<MStatusbarImpl>(inID, inBounds, MStatusbarImpl::Create(this, inPartCount, inParts))
 {
 	SetBindings(true, false, true, true);
 }
 
-void MStatusbar::SetStatusText(uint32 inPartNr, const string& inText, bool inBorder)
+void MStatusbar::SetStatusText(uint32_t inPartNr, const string& inText, bool inBorder)
 {
 	mImpl->SetStatusText(inPartNr, inText, inBorder);
 }
@@ -155,12 +155,12 @@ MPopup::MPopup(const string& inID, MRect inBounds)
 {
 }
 
-void MPopup::SetValue(int32 inValue)
+void MPopup::SetValue(int32_t inValue)
 {
 	mImpl->SetValue(inValue);
 }
 
-int32 MPopup::GetValue() const
+int32_t MPopup::GetValue() const
 {
 	return mImpl->GetValue();
 }
@@ -182,7 +182,7 @@ void MPopup::SetChoices(const vector<string>& inChoices)
 
 // --------------------------------------------------------------------
 
-MEdittext::MEdittext(const string& inID, MRect inBounds, uint32 inFlags)
+MEdittext::MEdittext(const string& inID, MRect inBounds, uint32_t inFlags)
 	: MControl<MEdittextImpl>(inID, inBounds, MEdittextImpl::Create(this, inFlags))
 {
 }
@@ -197,12 +197,12 @@ string MEdittext::GetText() const
 	return mImpl->GetText();
 }
 
-uint32 MEdittext::GetFlags() const
+uint32_t MEdittext::GetFlags() const
 {
 	return mImpl->GetFlags();
 }
 
-void MEdittext::SetPasswordChar(uint32 inUnicode)
+void MEdittext::SetPasswordChar(uint32_t inUnicode)
 {
 	mImpl->SetPasswordChar(inUnicode);
 }
@@ -300,12 +300,12 @@ void MNotebook::AddPage(const string& inLabel, MView* inPage)
 //	}
 }
 
-void MNotebook::SelectPage(uint32 inPage)
+void MNotebook::SelectPage(uint32_t inPage)
 {
 	mImpl->SelectPage(inPage);
 }
 
-uint32 MNotebook::GetSelectedPage() const
+uint32_t MNotebook::GetSelectedPage() const
 {
 	return mImpl->GetSelectedPage();
 }
@@ -339,12 +339,12 @@ void MListBox::AddItem(const string& inLabel)
 	mImpl->AddItem(inLabel);
 }
 
-int32 MListBox::GetValue() const
+int32_t MListBox::GetValue() const
 {
 	return mImpl->GetValue();
 }
 
-void MListBox::SetValue(int32 inValue)
+void MListBox::SetValue(int32_t inValue)
 {
 	mImpl->SetValue(inValue);
 }
@@ -366,7 +366,7 @@ void MListView::AddItem(const string& inLabel)
 // Gtk specific controls
 
 MBoxControl::MBoxControl(const std::string& inID, MRect inBounds, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32 inSpacing, uint32 inPadding)
+		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 	: MControl(inID, inBounds, MBoxControlImpl::Create(this,
 		inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding))
 {

@@ -17,22 +17,22 @@ public:
 
 	virtual void		SetTarget(MHandler* inHandler) = 0;
 
-	virtual void		SetItemState(uint32 inItem, bool inEnabled, bool inChecked) = 0;
+	virtual void		SetItemState(uint32_t inItem, bool inEnabled, bool inChecked) = 0;
 
-	virtual void		AppendItem(const std::string& inLabel, uint32 inCommand) = 0;
+	virtual void		AppendItem(const std::string& inLabel, uint32_t inCommand) = 0;
 	virtual void		AppendSubmenu(MMenu* inSubmenu) = 0;
 	virtual void		AppendSeparator() = 0;
-	virtual void		AppendCheckbox(const std::string& inLabel, uint32 inCommand) = 0;
-	virtual void		AppendRadiobutton(const std::string& inLabel, uint32 inCommand) = 0;
-	virtual uint32		CountItems() const = 0;
-	virtual void		RemoveItems(uint32 inFirstIndex, uint32 inCount) = 0;
+	virtual void		AppendCheckbox(const std::string& inLabel, uint32_t inCommand) = 0;
+	virtual void		AppendRadiobutton(const std::string& inLabel, uint32_t inCommand) = 0;
+	virtual uint32_t		CountItems() const = 0;
+	virtual void		RemoveItems(uint32_t inFirstIndex, uint32_t inCount) = 0;
 
-	virtual std::string	GetItemLabel(uint32 inIndex) const = 0;
-	virtual void		SetItemCommand(uint32 inIndex, uint32 inCommand) = 0;
-	virtual uint32		GetItemCommand(uint32 inIndex) const = 0;
-	virtual MMenu*		GetSubmenu(uint32 inIndex) const = 0;
+	virtual std::string	GetItemLabel(uint32_t inIndex) const = 0;
+	virtual void		SetItemCommand(uint32_t inIndex, uint32_t inCommand) = 0;
+	virtual uint32_t		GetItemCommand(uint32_t inIndex) const = 0;
+	virtual MMenu*		GetSubmenu(uint32_t inIndex) const = 0;
 
-	virtual void		Popup(MWindow* inHandler, int32 inX, int32 inY, bool inBottomMenu) = 0;
+	virtual void		Popup(MWindow* inHandler, int32_t inX, int32_t inY, bool inBottomMenu) = 0;
 	virtual void		AddToWindow(MWindowImpl* inWindow) = 0;
 	
 	virtual void		MenuUpdated() = 0;

@@ -39,7 +39,7 @@ struct MCommandToString
 	char mCommandString[10];
 	
 	MCommandToString(
-		uint32			inCommand)
+		uint32_t			inCommand)
 	{
 		strcpy(mCommandString, "MCmd_xxxx");
 		
@@ -133,7 +133,7 @@ MMenu* MMenu::Create(
 				if (cs.length() != 4)
 					THROW(("Invalid menu item specification, cmd is not correct"));
 				
-				uint32 cmd = 0;
+				uint32_t cmd = 0;
 				for (int i = 0; i < 4; ++i)
 					cmd |= cs[i] << ((3 - i) * 8);
 				
@@ -154,21 +154,21 @@ MMenu* MMenu::Create(
 
 void MMenu::AppendItem(
 	const string&	inLabel,
-	uint32			inCommand)
+	uint32_t			inCommand)
 {
 	mImpl->AppendItem(inLabel, inCommand);
 }
 
 void MMenu::AppendRadioItem(
 	const string&	inLabel,
-	uint32			inCommand)
+	uint32_t			inCommand)
 {
 	mImpl->AppendRadiobutton(inLabel, inCommand);
 }
 
 void MMenu::AppendCheckItem(
 	const string&	inLabel,
-	uint32			inCommand)
+	uint32_t			inCommand)
 {
 	mImpl->AppendCheckbox(inLabel, inCommand);
 }
@@ -184,31 +184,31 @@ void MMenu::AppendMenu(
 	mImpl->AppendSubmenu(inMenu);
 }
 
-uint32 MMenu::CountItems()
+uint32_t MMenu::CountItems()
 {
 	return mImpl->CountItems();
 }
 
 void MMenu::RemoveItems(
-	uint32			inFromIndex,
-	uint32			inCount)
+	uint32_t			inFromIndex,
+	uint32_t			inCount)
 {
 	mImpl->RemoveItems(inFromIndex, inCount);
 }
 
 string MMenu::GetItemLabel(
-	uint32				inIndex) const
+	uint32_t				inIndex) const
 {
 	return mImpl->GetItemLabel(inIndex);
 }
 
-void MMenu::SetItemCommand(uint32 inIndex, uint32 inCommand)
+void MMenu::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
 {
 	mImpl->SetItemCommand(inIndex, inCommand);
 }
 
-uint32 MMenu::GetItemCommand(
-	uint32				inIndex) const
+uint32_t MMenu::GetItemCommand(
+	uint32_t				inIndex) const
 {
 	return mImpl->GetItemCommand(inIndex);
 }
@@ -218,7 +218,7 @@ void MMenu::SetTarget(MHandler* inTarget)
 	mTarget = inTarget;
 	mImpl->SetTarget(inTarget);
 
-	for (uint32 i = 0; i < CountItems(); ++i)
+	for (uint32_t i = 0; i < CountItems(); ++i)
 	{
 		MMenu* subMenu = mImpl->GetSubmenu(i);
 		if (subMenu != nullptr)
@@ -231,7 +231,7 @@ void MMenu::UpdateCommandStatus()
 	if (not mSpecial.empty())
 		gApp->UpdateSpecialMenu(mSpecial, this);
 
-	for (uint32 i = 0; i < CountItems(); ++i)
+	for (uint32_t i = 0; i < CountItems(); ++i)
 	{
 		MMenu* subMenu = mImpl->GetSubmenu(i);
 		if (subMenu != nullptr)
@@ -265,7 +265,7 @@ void MMenu::UpdateCommandStatus()
 //	{
 //		MMenuItem* item = *mi;
 //		
-//		uint32 key, mod;
+//		uint32_t key, mod;
 //		
 //		if (at.GetAcceleratorKeyForCommand(item.mCommand, key, mod))
 //		{
@@ -294,8 +294,8 @@ void MMenu::UpdateCommandStatus()
 
 void MMenu::Popup(
 	MWindow*			inHandler,
-	int32				inX,
-	int32				inY,
+	int32_t				inX,
+	int32_t				inY,
 	bool				inBottomMenu)
 {
 	mImpl->Popup(inHandler, inX, inY, inBottomMenu);
@@ -310,8 +310,8 @@ void MMenu::Popup(
 
 	//gtk_widget_show_all(mGtkMenu);
 
-	//int32 button = 0;
-	//uint32 time = 0;
+	//int32_t button = 0;
+	//uint32_t time = 0;
 	//if (inEvent != nullptr)
 	//{
 	//	button = inEvent->button;
@@ -423,7 +423,7 @@ void MMenuBar::AddToWindow(MWindowImpl* inWindowImpl)
 //					if (cs.length() != 4)
 //						THROW(("Invalid menu item specification, cmd is not correct"));
 //					
-//					uint32 cmd = 0;
+//					uint32_t cmd = 0;
 //					for (int i = 0; i < 4; ++i)
 //						cmd |= cs[i] << ((3 - i) * 8);
 //					

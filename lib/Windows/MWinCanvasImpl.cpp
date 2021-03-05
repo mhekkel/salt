@@ -93,7 +93,7 @@ HRESULT __stdcall MDropTarget::DragEnter(
 		if (stgmed.tymed & TYMED_HGLOBAL)
 		{
 			void** p = (void**)::GlobalLock(stgmed.hGlobal);
-			uint32 len = ::GlobalSize(stgmed.hGlobal);
+			uint32_t len = ::GlobalSize(stgmed.hGlobal);
 			if (p != nullptr)
 			{
 				mSource = (MCanvas*)*p;
@@ -124,11 +124,11 @@ HRESULT __stdcall MDropTarget::DragEnter(
 				*pdwEffect = DROPEFFECT_COPY;
 		
 				HDROP drop = (HDROP)::GlobalLock(stgmed.hGlobal);
-				uint32 len = ::GlobalSize(stgmed.hGlobal);
+				uint32_t len = ::GlobalSize(stgmed.hGlobal);
 				if (drop != nullptr)
 				{
-					uint32 n = ::DragQueryFile(drop, 0xFFFFFFFF, nullptr, 0);
-					for (uint32 i = 0; i < n; ++i)
+					uint32_t n = ::DragQueryFile(drop, 0xFFFFFFFF, nullptr, 0);
+					for (uint32_t i = 0; i < n; ++i)
 					{
 						wchar_t path[1024];
 						if (::DragQueryFile(drop, i, path, sizeof(path)) != 0)
@@ -166,7 +166,7 @@ HRESULT __stdcall MDropTarget::DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdw
 	{
 		GetEffect(grfKeyState, *pdwEffect);
 	
-		int32 x(pt.x), y(pt.y);
+		int32_t x(pt.x), y(pt.y);
 		mTarget->ConvertFromScreen(x, y);
 	
 		if (not mTarget->DragWithin(x, y))
@@ -185,7 +185,7 @@ HRESULT __stdcall MDropTarget::Drop(IDataObject *pDataObj, DWORD grfKeyState, PO
 
 	HRESULT result = S_FALSE;
 
-	int32 x(pt.x), y(pt.y);
+	int32_t x(pt.x), y(pt.y);
 	mTarget->ConvertFromScreen(x, y);
 
 	if (not mFiles.empty())
@@ -207,7 +207,7 @@ HRESULT __stdcall MDropTarget::Drop(IDataObject *pDataObj, DWORD grfKeyState, PO
 				if (stgmed.tymed & TYMED_HGLOBAL)
 				{
 					const wchar_t* wtext = (const wchar_t*)::GlobalLock(stgmed.hGlobal);
-					uint32 len = ::GlobalSize(stgmed.hGlobal);
+					uint32_t len = ::GlobalSize(stgmed.hGlobal);
 					if (wtext != nullptr)
 					{
 						unique_ptr<MDecoder> decoder(MDecoder::GetDecoder(kEncodingUTF16LE, wtext, len));
@@ -338,7 +338,7 @@ HRESULT __stdcall MDropSource::GetData(FORMATETC *pformatetc, STGMEDIUM *pmedium
 			pmedium->tymed = TYMED_HGLOBAL;
 			pmedium->pUnkForRelease = nullptr;
 
-			uint32 len = (wtext.length() + 1) * sizeof(wchar_t);
+			uint32_t len = (wtext.length() + 1) * sizeof(wchar_t);
 			pmedium->hGlobal = ::GlobalAlloc(GMEM_FIXED, len);
 			if (pmedium->hGlobal != nullptr)
 			{
@@ -351,7 +351,7 @@ HRESULT __stdcall MDropSource::GetData(FORMATETC *pformatetc, STGMEDIUM *pmedium
 			pmedium->tymed = TYMED_HGLOBAL;
 			pmedium->pUnkForRelease = nullptr;
 
-			uint32 len = sizeof(void*);
+			uint32_t len = sizeof(void*);
 			pmedium->hGlobal = ::GlobalAlloc(GMEM_FIXED, len);
 			if (pmedium->hGlobal != nullptr)
 			{
@@ -478,8 +478,8 @@ ID2D1RenderTargetPtr MWinCanvasImpl::GetRenderTarget()
 }
 	
 void MWinCanvasImpl::MoveFrame(
-	int32			inXDelta,
-	int32			inYDelta)
+	int32_t			inXDelta,
+	int32_t			inYDelta)
 {
 	mControl->MView::MoveFrame(inXDelta, inYDelta);
 
@@ -514,8 +514,8 @@ void MWinCanvasImpl::MoveFrame(
 }
 
 void MWinCanvasImpl::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	mControl->MView::ResizeFrame(inWidthDelta, inHeightDelta);
 
@@ -659,7 +659,7 @@ bool MWinCanvasImpl::WMPaint(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM i
 			lUpdateRect.right - lUpdateRect.left, lUpdateRect.bottom - lUpdateRect.top);
 
 		//mControl->ConvertFromWindow(update.x, update.y);
-		int32 sx, sy;
+		int32_t sx, sy;
 		mControl->GetScrollPosition(sx, sy);
 		update.x += sx;
 		update.y += sy;
@@ -764,7 +764,7 @@ bool MWinCanvasImpl::WMWindowPosChanged(HWND inHWnd, UINT inUMsg, WPARAM inWPara
 	return false;
 }
 
-void MWinCanvasImpl::MapXY(int32& ioX, int32& ioY)
+void MWinCanvasImpl::MapXY(int32_t& ioX, int32_t& ioY)
 {
 	POINT p = { ioX, ioY };
 	::MapWindowPoints(GetHandle(), static_cast<MWinWindowImpl*>(mControl->GetWindow()->GetImpl())->GetHandle(), (LPPOINT)&p, 1);
@@ -789,11 +789,11 @@ bool MWinCanvasImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	::SetFocus(inHWnd);
 	::SetCapture(inHWnd);
 
-	uint32 modifiers;
+	uint32_t modifiers;
 	::GetModifierState(modifiers, false);
 	
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
 	if (mLastClickTime + GetDblClickTime() > GetLocalTime())
 		mClickCount = mClickCount % 3 + 1;
@@ -811,12 +811,12 @@ bool MWinCanvasImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 
 bool MWinCanvasImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 {
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
 	MapXY(x, y);
 
-	uint32 modifiers;
+	uint32_t modifiers;
 	::GetModifierState(modifiers, false);
 
 	mControl->ConvertFromWindow(x, y);
@@ -836,12 +836,12 @@ bool MWinCanvasImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM
 {
 	::ReleaseCapture();
 
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
 	MapXY(x, y);
 
-	uint32 modifiers;
+	uint32_t modifiers;
 	::GetModifierState(modifiers, false);
 
 	mControl->ConvertFromWindow(x, y);
@@ -857,8 +857,8 @@ bool MWinCanvasImpl::WMSetCursor(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	{
 		if (mControl->IsActive())
 		{
-			int32 x, y;
-			uint32 modifiers = 0;
+			int32_t x, y;
+			uint32_t modifiers = 0;
 
 			POINT p;
 			::GetCursorPos(&p);
@@ -899,7 +899,7 @@ bool MWinCanvasImpl::IsFocus() const
 
 // --------------------------------------------------------------------
 
-MCanvasImpl* MCanvasImpl::Create(MCanvas* inCanvas, uint32 inWidth, uint32 inHeight)
+MCanvasImpl* MCanvasImpl::Create(MCanvas* inCanvas, uint32_t inWidth, uint32_t inHeight)
 {
 	return new MWinCanvasImpl(inCanvas);
 }

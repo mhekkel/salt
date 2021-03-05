@@ -259,9 +259,9 @@ void MWindow::BeFocus()
 }
 
 bool MWindow::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -282,10 +282,10 @@ bool MWindow::UpdateCommandStatus(
 }
 
 bool MWindow::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool result = true;	
 	
@@ -305,8 +305,8 @@ bool MWindow::ProcessCommand(
 }
 
 void MWindow::ResizeFrame(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	ResizeWindow(inWidthDelta, inHeightDelta);
 	//MView::ResizeFrame(0, 0);
@@ -318,8 +318,8 @@ void MWindow::ResizeFrame(
 }
 
 void MWindow::ResizeWindow(
-	int32			inWidthDelta,
-	int32			inHeightDelta)
+	int32_t			inWidthDelta,
+	int32_t			inHeightDelta)
 {
 	mImpl->ResizeWindow(inWidthDelta, inHeightDelta);
 }
@@ -337,22 +337,22 @@ void MWindow::SetWindowPosition(
 	mImpl->SetWindowPosition(inPosition, inTransition);
 }
 
-void MWindow::ConvertToScreen(int32& ioX, int32& ioY) const
+void MWindow::ConvertToScreen(int32_t& ioX, int32_t& ioY) const
 {
 	mImpl->ConvertToScreen(ioX, ioY);
 }
 
-void MWindow::ConvertFromScreen(int32& ioX, int32& ioY) const
+void MWindow::ConvertFromScreen(int32_t& ioX, int32_t& ioY) const
 {
 	mImpl->ConvertFromScreen(ioX, ioY);
 }
 
-void MWindow::GetMouse(int32& outX, int32& outY, uint32& outModifiers) const
+void MWindow::GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers) const
 {
 	mImpl->GetMouse(outX, outY, outModifiers);
 }
 
-uint32 MWindow::GetModifiers() const
+uint32_t MWindow::GetModifiers() const
 {
 	return mImpl->GetModifiers();
 }
@@ -362,7 +362,7 @@ void MWindow::Invalidate(MRect inRect)
 	mImpl->Invalidate(inRect);
 }
 
-void MWindow::ScrollRect(MRect inRect, int32 inX, int32 inY)
+void MWindow::ScrollRect(MRect inRect, int32_t inX, int32_t inY)
 {
 	mImpl->ScrollRect(inRect, inX, inY);
 }

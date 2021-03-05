@@ -40,8 +40,8 @@ double GetLocalTime()
 			li.LowPart = tm.dwLowDateTime;
 			li.HighPart = tm.dwHighDateTime;
 		
-			// Prevent Ping Pong comment. VC cannot convert UNSIGNED int64 to double. SIGNED is ok. (No more long)
-			sDiff = static_cast<double>(static_cast<int64>(li.QuadPart));
+			// Prevent Ping Pong comment. VC cannot convert UNSIGNED int64_t to double. SIGNED is ok. (No more long)
+			sDiff = static_cast<double>(static_cast<int64_t>(li.QuadPart));
 			sDiff /= 1e7;
 		}
 	}	
@@ -51,7 +51,7 @@ double GetLocalTime()
 	li.LowPart = tm.dwLowDateTime;
 	li.HighPart = tm.dwHighDateTime;
 	
-	double result = static_cast<double>(static_cast<__int64> (li.QuadPart));
+	double result = static_cast<double>(static_cast<__int64_t> (li.QuadPart));
 	result /= 1e7;
 	return result - sDiff;
 }
@@ -63,13 +63,13 @@ wstring c2w(const string& s)
 
 	for (string::const_iterator i = s.begin(); i != s.end(); ++i)
 	{
-		uint32 ch = static_cast<unsigned char>(*i);
+		uint32_t ch = static_cast<unsigned char>(*i);
 
 		if (ch & 0x0080)
 		{
 			if ((ch & 0x0E0) == 0x0C0)
 			{
-				uint32 ch1 = static_cast<unsigned char>(*(i + 1));
+				uint32_t ch1 = static_cast<unsigned char>(*(i + 1));
 				if ((ch1 & 0x0c0) == 0x080)
 				{
 					ch = ((ch & 0x01f) << 6) | (ch1 & 0x03f);
@@ -78,8 +78,8 @@ wstring c2w(const string& s)
 			}
 			else if ((ch & 0x0F0) == 0x0E0)
 			{
-				uint32 ch1 = static_cast<unsigned char>(*(i + 1));
-				uint32 ch2 = static_cast<unsigned char>(*(i + 2));
+				uint32_t ch1 = static_cast<unsigned char>(*(i + 1));
+				uint32_t ch2 = static_cast<unsigned char>(*(i + 2));
 				if ((ch1 & 0x0c0) == 0x080 and (ch2 & 0x0c0) == 0x080)
 				{
 					ch = ((ch & 0x00F) << 12) | ((ch1 & 0x03F) << 6) | (ch2 & 0x03F);
@@ -88,9 +88,9 @@ wstring c2w(const string& s)
 			}
 			else if ((ch & 0x0F8) == 0x0F0)
 			{
-				uint32 ch1 = static_cast<unsigned char>(*(i + 1));
-				uint32 ch2 = static_cast<unsigned char>(*(i + 2));
-				uint32 ch3 = static_cast<unsigned char>(*(i + 3));
+				uint32_t ch1 = static_cast<unsigned char>(*(i + 1));
+				uint32_t ch2 = static_cast<unsigned char>(*(i + 2));
+				uint32_t ch3 = static_cast<unsigned char>(*(i + 3));
 				if ((ch1 & 0x0c0) == 0x080 and (ch2 & 0x0c0) == 0x080 and (ch3 & 0x0c0) == 0x080)
 				{
 					ch = ((ch & 0x007) << 18) | ((ch1 & 0x03F) << 12) | ((ch2 & 0x03F) << 6) | (ch3 & 0x03F);
@@ -121,11 +121,11 @@ string w2c(const wstring& s)
 
 	for (wstring::const_iterator i = s.begin(); i != s.end(); ++i)
 	{
-		uint32 uc = static_cast<uint16>(*i);
+		uint32_t uc = static_cast<uint16_t>(*i);
 
 		if (uc >= 0x0D800 and uc <= 0x0DBFF)
 		{
-			wchar_t ch = static_cast<uint16>(*(i + 1));
+			wchar_t ch = static_cast<uint16_t>(*(i + 1));
 			if (ch >= 0x0DC00 and ch <= 0x0DFFF)
 			{
 				uc = (uc << 16) | ch;
@@ -209,7 +209,7 @@ void __signal_throw(
 #endif
 
 MWinException::MWinException(
-	int32				inHResult,
+	int32_t				inHResult,
 	const char*			inMsg,
 	...)
 {
@@ -327,7 +327,7 @@ void delay(double inSeconds)
 		::Sleep(static_cast<unsigned long>(inSeconds * 1000));
 }
 
-void GetModifierState(uint32& outModifiers, bool inAsync)
+void GetModifierState(uint32_t& outModifiers, bool inAsync)
 {
 	outModifiers = 0;
 	if (inAsync)
@@ -640,7 +640,7 @@ struct MWinMsgDesc {
 	{ "WM_USER", WM_USER },
 };
 
-void LogWinMsg(const char* inWhere, uint32 inMsg)
+void LogWinMsg(const char* inWhere, uint32_t inMsg)
 {
 	MWinMsgDesc* d;
 	for (d = kWinMsgDesc; d->mnemonic != nullptr; ++d)

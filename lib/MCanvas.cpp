@@ -29,15 +29,15 @@ MCanvas::~MCanvas()
 }
 
 //void MCanvas::MoveFrame(
-//	int32			inXDelta,
-//	int32			inYDelta)
+//	int32_t			inXDelta,
+//	int32_t			inYDelta)
 //{
 //	mImpl->MoveFrame(inXDelta, inYDelta);
 //}
 //
 //void MCanvas::ResizeFrame(
-//	int32			inWidthDelta,
-//	int32			inHeightDelta)
+//	int32_t			inWidthDelta,
+//	int32_t			inHeightDelta)
 //{
 //	mImpl->ResizeFrame(inWidthDelta, inHeightDelta);
 //}
@@ -59,7 +59,7 @@ void MCanvas::DragEnter()
 {
 }
 
-bool MCanvas::DragWithin(int32 inX, int32 inY)
+bool MCanvas::DragWithin(int32_t inX, int32_t inY)
 {
 	return false;
 }
@@ -68,12 +68,12 @@ void MCanvas::DragLeave()
 {
 }
 
-bool MCanvas::Drop(bool inMove, int32 inX, int32 inY, const string& inText)
+bool MCanvas::Drop(bool inMove, int32_t inX, int32_t inY, const string& inText)
 {
 	return false;
 }
 
-bool MCanvas::Drop(int32 inX, int32 inY, const boost::filesystem::path& inFile)
+bool MCanvas::Drop(int32_t inX, int32_t inY, const boost::filesystem::path& inFile)
 {
 	try
 	{

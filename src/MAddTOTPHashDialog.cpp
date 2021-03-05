@@ -54,7 +54,7 @@ bool MAddTOTPHashDialog::OKClicked()
 		if (size < 8) // or (size % 8) != 0)
 			throw runtime_error("invalid hash");
 
-		vector<uint8> h(size);
+		vector<uint8_t> h(size);
 	    decoder.Get(h.data(), size);
 	    
 	    vector<string> totp;

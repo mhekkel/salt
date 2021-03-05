@@ -78,10 +78,10 @@ void MApplication::Open(const string& inURI)
 }
 
 bool MApplication::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool result = true;
 
@@ -113,9 +113,9 @@ bool MApplication::ProcessCommand(
 }
 
 bool MApplication::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -150,7 +150,7 @@ void MApplication::UpdateWindowMenu(MMenu* inMenu)
 {
 }
 
-void MApplication::DoSelectWindowFromWindowMenu(uint32 inIndex)
+void MApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)
 {
 }	
 

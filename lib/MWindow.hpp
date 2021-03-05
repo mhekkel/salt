@@ -71,16 +71,16 @@ class MWindow : public MView, public MHandler
 
 	virtual void			BeFocus();
 
-	virtual bool			UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked);
+	virtual bool			UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked);
 
-	virtual bool			ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers);
+	virtual bool			ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
 	MEventOut<void(MWindow*)>
 							eWindowClosed;
 
-	virtual void			ResizeFrame(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void			ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
-	virtual void			ResizeWindow(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void			ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	void					GetWindowPosition(MRect& outPosition);
 
@@ -91,14 +91,14 @@ class MWindow : public MView, public MHandler
 	MWindowImpl*			GetImpl() const					{ return mImpl; }
 
 	// coordinate manipulations
-	virtual void			ConvertToScreen(int32& ioX, int32& ioY) const;
-	virtual void			ConvertFromScreen(int32& ioX, int32& ioY) const;
+	virtual void			ConvertToScreen(int32_t& ioX, int32_t& ioY) const;
+	virtual void			ConvertFromScreen(int32_t& ioX, int32_t& ioY) const;
 
-	virtual void			GetMouse(int32& outX, int32& outY, uint32& outModifiers) const;
-	virtual uint32			GetModifiers() const;
+	virtual void			GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers) const;
+	virtual uint32_t			GetModifiers() const;
 
 	virtual void			Invalidate(MRect inRect);
-	virtual void			ScrollRect(MRect inRect, int32 inX, int32 inY);
+	virtual void			ScrollRect(MRect inRect, int32_t inX, int32_t inY);
 
 	virtual void			SetCursor(MCursor inCursor);
 	virtual void			ObscureCursor();
@@ -132,5 +132,5 @@ class MWindow : public MView, public MHandler
 // clean way to work with bitfields
 inline MWindowFlags operator|(MWindowFlags f1, MWindowFlags f2)
 {
-	return MWindowFlags(uint32(f1) | uint32(f2));
+	return MWindowFlags(uint32_t(f1) | uint32_t(f2));
 }

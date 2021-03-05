@@ -92,7 +92,7 @@
 //
 //void MPrinter::OnDrawPage(
 //	GtkPrintContext*	inContext,
-//	int32				inPage)
+//	int32_t				inPage)
 //{
 //	MRect update = GetPrintBounds(inContext);
 //	MDevice dev(inContext, update, inPage);
@@ -104,25 +104,25 @@
 //{
 //	GtkPageSetup* setup = gtk_print_operation_get_default_page_setup(mPrint);
 //	
-//	uint32 margin[4];
-//	margin[0] = static_cast<uint32>(gtk_page_setup_get_left_margin(setup, GTK_UNIT_POINTS));
+//	uint32_t margin[4];
+//	margin[0] = static_cast<uint32_t>(gtk_page_setup_get_left_margin(setup, GTK_UNIT_POINTS));
 //	if (margin[0] == 0)
 //		margin[0] = 15;
 //	
-//	margin[1] = static_cast<uint32>(gtk_page_setup_get_top_margin(setup, GTK_UNIT_POINTS));
+//	margin[1] = static_cast<uint32_t>(gtk_page_setup_get_top_margin(setup, GTK_UNIT_POINTS));
 //	if (margin[1] == 0)
 //		margin[1] = 30;
 //	
-//	margin[2] = static_cast<uint32>(gtk_page_setup_get_right_margin(setup, GTK_UNIT_POINTS));
+//	margin[2] = static_cast<uint32_t>(gtk_page_setup_get_right_margin(setup, GTK_UNIT_POINTS));
 //	if (margin[2] == 0)
 //		margin[2] = 15;
 //	
-//	margin[3] = static_cast<uint32>(gtk_page_setup_get_bottom_margin(setup, GTK_UNIT_POINTS));
+//	margin[3] = static_cast<uint32_t>(gtk_page_setup_get_bottom_margin(setup, GTK_UNIT_POINTS));
 //	if (margin[3] == 0)
 //		margin[3] = 30;
 //	
-//	uint32 width = static_cast<uint32>(gtk_print_context_get_width(inContext));
-//	uint32 height = static_cast<uint32>(gtk_print_context_get_height(inContext));
+//	uint32_t width = static_cast<uint32_t>(gtk_print_context_get_width(inContext));
+//	uint32_t height = static_cast<uint32_t>(gtk_print_context_get_height(inContext));
 //	
 //	return MRect(margin[0], margin[1], width - margin[0] - margin[2], height - margin[1] - margin[3]);
 //}

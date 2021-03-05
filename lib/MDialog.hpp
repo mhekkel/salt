@@ -39,8 +39,8 @@ class MDialog : public MWindow
 	std::string		GetText(const std::string& inID) const;
 	void			SetText(const std::string& inID, const std::string& inText);
 
-	int32			GetValue(const std::string& inID) const;
-	void			SetValue(const std::string& inID, int32 inValue);
+	int32_t			GetValue(const std::string& inID) const;
+	void			SetValue(const std::string& inID, int32_t inValue);
 
 	// checkboxes
 	bool			IsChecked(const std::string& inID) const;
@@ -61,20 +61,20 @@ class MDialog : public MWindow
 	void			SetEnabled(const std::string& inID, bool inEnabled);
 	void			SetVisible(const std::string& inID, bool inVisible);
 
-	void			SetPasswordChar(const std::string& inID, uint32 inUnicode = 0x2022);
+	void			SetPasswordChar(const std::string& inID, uint32_t inUnicode = 0x2022);
 
 	virtual void	ButtonClicked(const std::string& inID);
 	virtual void	CheckboxChanged(const std::string& inID, bool inValue);
 	virtual void	RadiobuttonChanged(const std::string& inID, bool inValue);
 	virtual void	TextChanged(const std::string& inID, const std::string& inText);
-	virtual void	ValueChanged(const std::string& inID, int32 inValue);
+	virtual void	ValueChanged(const std::string& inID, int32_t inValue);
 	virtual void	ColorChanged(const std::string& inID, MColor inColor);
 
 	MEventIn<void(const std::string&)>						eButtonClicked;
 	MEventIn<void(const std::string&,bool)>					eCheckboxClicked;
 	MEventIn<void(const std::string&,bool)>					eRadiobuttonClicked;
 	MEventIn<void(const std::string&,const std::string&)>	eTextChanged;
-	MEventIn<void(const std::string&,int32)>				eValueChanged;
+	MEventIn<void(const std::string&,int32_t)>				eValueChanged;
 	MEventIn<void(const std::string&,MColor)>				eColorChanged;
 
   protected:

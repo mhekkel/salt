@@ -48,8 +48,8 @@ class MFile
 	std::time_t	GetModDate() const;
 	bool		IsModifiedOnDisk() const;
 
-	int32		ReadAttribute(const char* inName, void* outData, uint32 inDataSize) const;
-	int32		WriteAttribute(const char* inName, const void* inData, uint32 inDataSize) const;
+	int32_t		ReadAttribute(const char* inName, void* outData, uint32_t inDataSize) const;
+	int32_t		WriteAttribute(const char* inName, const void* inData, uint32_t inDataSize) const;
 
 	// IO to/from MDocument.
 	void		Load(MDocument* inDocument);
@@ -82,7 +82,7 @@ enum {
 class MFileIterator
 {
   public:
-					MFileIterator(const fs::path& inDirectory, uint32 inFlags);
+					MFileIterator(const fs::path& inDirectory, uint32_t inFlags);
 
 					~MFileIterator();
 

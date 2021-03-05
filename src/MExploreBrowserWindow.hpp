@@ -13,7 +13,7 @@ class MExploreBrowserView;
 class MExploreBrowserWindow : public MWindow
 {
   public:
-					MExploreBrowserWindow(pinch::basic_connection* inConnection);
+					MExploreBrowserWindow(std::shared_ptr<pinch::basic_connection> inConnection);
 					~MExploreBrowserWindow();
 
 	virtual void	Close();

@@ -19,12 +19,12 @@ void DisplayError(const boost::system::error_code& inError);
 
 // the actual implementation
 
-int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, std::vector<std::string>& inArguments);
+int32_t DisplayAlert(MWindow* inParent, const std::string& inResourceName, std::vector<std::string>& inArguments);
 
 #if 0
 
 template<class T, typename... Args>
-int32 DisplayAlert(const std::string& inResourceName, std::vector<std::string>& inArguments, const T& inArgument, const Args&... inMoreArguments)
+int32_t DisplayAlert(const std::string& inResourceName, std::vector<std::string>& inArguments, const T& inArgument, const Args&... inMoreArguments)
 {
 	inArguments.push_back(boost::lexical_cast<std::string>(inArgument));
 	return DisplayAlert(inResourceName, inArguments, inMoreArguments...);
@@ -32,14 +32,14 @@ int32 DisplayAlert(const std::string& inResourceName, std::vector<std::string>& 
 
 #else
 
-inline int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName)
+inline int32_t DisplayAlert(MWindow* inParent, const std::string& inResourceName)
 {
 	std::vector<std::string> args;
 	return DisplayAlert(inParent, inResourceName, args);
 }
 
 template<class T0>
-int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0)
+int32_t DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0)
 {
 	std::vector<std::string> args;
 	args.push_back(boost::lexical_cast<std::string>(inArgument0));
@@ -47,7 +47,7 @@ int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T
 }
 
 template<class T0, class T1>
-int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0, const T1& inArgument1)
+int32_t DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0, const T1& inArgument1)
 {
 	std::vector<std::string> args;
 	args.push_back(boost::lexical_cast<std::string>(inArgument0));
@@ -56,7 +56,7 @@ int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T
 }
 
 template<class T0, class T1, class T2>
-int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0, const T1& inArgument1, const T2& inArgument2)
+int32_t DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0, const T1& inArgument1, const T2& inArgument2)
 {
 	std::vector<std::string> args;
 	args.push_back(boost::lexical_cast<std::string>(inArgument0));
@@ -66,7 +66,7 @@ int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T
 }
 
 template<class T0, class T1, class T2, class T3>
-int32 DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0, const T1& inArgument1, const T2& inArgument2, const T3& inArgument3)
+int32_t DisplayAlert(MWindow* inParent, const std::string& inResourceName, const T0& inArgument0, const T1& inArgument1, const T2& inArgument2, const T3& inArgument3)
 {
 	std::vector<std::string> args;
 	args.push_back(boost::lexical_cast<std::string>(inArgument0));

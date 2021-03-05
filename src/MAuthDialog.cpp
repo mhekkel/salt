@@ -32,7 +32,7 @@ MAuthDialog::MAuthDialog(std::string inTitle, std::string inInstruction, const v
 	
 	SetText("instruction", inInstruction);
 	
-	int32 id = 1;
+	int32_t id = 1;
 	for (auto prompt: prompts)
 	{
 		SetVisible("label-" + boost::lexical_cast<string>(id), true);
@@ -65,7 +65,7 @@ bool MAuthDialog::OKClicked()
 {
 	vector<string> args;
 	
-	for (int32 id = 1; id <= mFields; ++id)
+	for (int32_t id = 1; id <= mFields; ++id)
 		args.push_back(GetText("edit-" + boost::lexical_cast<string>(id)));
 	
 	eAuthInfo(args);

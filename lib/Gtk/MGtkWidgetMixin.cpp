@@ -86,7 +86,7 @@ void MGtkWidgetMixin::OnShow()
 	PRINT(("MGtkWidgetMixin::OnShow"));
 }
 
-void MGtkWidgetMixin::RequestSize(int32 inWidth, int32 inHeight)
+void MGtkWidgetMixin::RequestSize(int32_t inWidth, int32_t inHeight)
 {
 	mRequestedWidth = inWidth;
 	mRequestedHeight = inHeight;
@@ -127,7 +127,7 @@ void MGtkWidgetMixin::SetWidget(GtkWidget* inWidget)
 }
 
 void MGtkWidgetMixin::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32 inPadding)
+	bool inExpand, bool inFill, uint32_t inPadding)
 {
 	assert(false);
 }
@@ -191,8 +191,8 @@ bool MGtkWidgetMixin::IsActive() const
 bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton* inEvent)
 {
 	PRINT(("MGtkWidgetMixin::OnButtonPressEvent(%ld, %ld) [%s] ",
-		static_cast<int32>(inEvent->x),
-		static_cast<int32>(inEvent->y), G_OBJECT_TYPE_NAME(mWidget)));
+		static_cast<int32_t>(inEvent->x),
+		static_cast<int32_t>(inEvent->y), G_OBJECT_TYPE_NAME(mWidget)));
 
 	bool result = true;
 	
@@ -202,7 +202,7 @@ bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton* inEvent)
 	{
 		result = false;
 		
-		uint32 clickCount;
+		uint32_t clickCount;
 		switch (inEvent->type)
 		{
 			case GDK_BUTTON_PRESS:	clickCount = 1; break;
@@ -211,9 +211,9 @@ bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton* inEvent)
 			default: PRINT(("Unknown event type for button press: %x", inEvent->type)); return false;
 		}
 		
-		uint32 modifiers = MapModifier(inEvent->state);
-		int32 x = static_cast<int32>(inEvent->x);
-		int32 y = static_cast<int32>(inEvent->y);
+		uint32_t modifiers = MapModifier(inEvent->state);
+		int32_t x = static_cast<int32_t>(inEvent->x);
+		int32_t y = static_cast<int32_t>(inEvent->y);
 	
 		if (OnMouseDown(x, y, inEvent->button, clickCount, modifiers))
 		{
@@ -231,7 +231,7 @@ bool MGtkWidgetMixin::OnMotionNotifyEvent(GdkEventMotion* inEvent)
 {
 //	PRINT(("MGtkWidgetMixin::OnMotionNotifyEvent (%s)", G_OBJECT_TYPE_NAME(mWidget)));
 
-	int32 x, y;
+	int32_t x, y;
 	GdkModifierType state;
 	
 	if (inEvent->is_hint)
@@ -247,12 +247,12 @@ bool MGtkWidgetMixin::OnMotionNotifyEvent(GdkEventMotion* inEvent)
 	}
 	else
 	{
-		x = static_cast<int32>(inEvent->x);
-		y = static_cast<int32>(inEvent->y);
+		x = static_cast<int32_t>(inEvent->x);
+		y = static_cast<int32_t>(inEvent->y);
 		state = GdkModifierType(inEvent->state);
 	}
 
-	uint32 modifiers = MapModifier(state);
+	uint32_t modifiers = MapModifier(state);
 	
 	return OnMouseMove(x, y, modifiers);
 }
@@ -275,9 +275,9 @@ bool MGtkWidgetMixin::OnButtonReleaseEvent(GdkEventButton* inEvent)
 
 	gtk_grab_remove(GetWidget());
 
-	uint32 modifiers = MapModifier(inEvent->state);
-	int32 x = static_cast<int32>(inEvent->x);
-	int32 y = static_cast<int32>(inEvent->y);
+	uint32_t modifiers = MapModifier(inEvent->state);
+	int32_t x = static_cast<int32_t>(inEvent->x);
+	int32_t y = static_cast<int32_t>(inEvent->y);
 	
 	return OnMouseUp(x, y, modifiers);
 }
@@ -289,17 +289,17 @@ bool MGtkWidgetMixin::OnGrabBroken(GdkEvent* inEvent)
 	return false;
 }
 
-bool MGtkWidgetMixin::OnMouseDown(int32 inX, int32 inY, uint32 inButtonNr, uint32 inClickCount, uint32 inModifiers)
+bool MGtkWidgetMixin::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers)
 {
 	return false;
 }
 
-bool MGtkWidgetMixin::OnMouseMove(int32 inX, int32 inY, uint32 inModifiers)
+bool MGtkWidgetMixin::OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	return false;
 }
 
-bool MGtkWidgetMixin::OnMouseUp(int32 inX, int32 inY, uint32 inModifiers)
+bool MGtkWidgetMixin::OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	return false;
 }
@@ -367,7 +367,7 @@ bool MGtkWidgetMixin::OnDrawEvent(cairo_t* inCairo)
 
 // Drag and Drop support
 
-void MGtkWidgetMixin::SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32 inTargetCount)
+void MGtkWidgetMixin::SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount)
 {
 	gtk_drag_dest_set(mWidget, GTK_DEST_DEFAULT_ALL,
 		inTargets, inTargetCount,
@@ -455,7 +455,7 @@ void MGtkWidgetMixin::DragEnter()
 {
 }
 	
-bool MGtkWidgetMixin::DragWithin(int32 inX, int32 inY)
+bool MGtkWidgetMixin::DragWithin(int32_t inX, int32_t inY)
 {
 	return false;
 }
@@ -464,12 +464,12 @@ void MGtkWidgetMixin::DragLeave()
 {
 }
 
-bool MGtkWidgetMixin::DragAccept(bool inMove, int32 inX, int32 inY, const char* inData, uint32 inLength, uint32 inType)
+bool MGtkWidgetMixin::DragAccept(bool inMove, int32_t inX, int32_t inY, const char* inData, uint32_t inLength, uint32_t inType)
 {
 	return false;
 }
 
-void MGtkWidgetMixin::DragBegin(const GtkTargetEntry inTargets[], uint32 inTargetCount, GdkEventMotion* inEvent)
+void MGtkWidgetMixin::DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEventMotion* inEvent)
 {
 //	int button = 1;
 //	
@@ -489,15 +489,15 @@ void MGtkWidgetMixin::DragBegin(const GtkTargetEntry inTargets[], uint32 inTarge
 //	MDevice dev(this, bounds, true);
 //	
 //	GdkPixmap* pm = nullptr;
-//	int32 x, y;
+//	int32_t x, y;
 //	GdkModifierType state;
 //
 //	if (inEvent->is_hint)
 //		gdk_window_get_pointer(inEvent->window, &x, &y, &state);
 //	else
 //	{
-//		x = static_cast<int32>(inEvent->x);
-//		y = static_cast<int32>(inEvent->y);
+//		x = static_cast<int32_t>(inEvent->x);
+//		y = static_cast<int32_t>(inEvent->y);
 //		state = GdkModifierType(inEvent->state);
 //	}
 //	
@@ -510,7 +510,7 @@ void MGtkWidgetMixin::DragBegin(const GtkTargetEntry inTargets[], uint32 inTarge
 //	
 //	if (pm != nullptr)
 //	{
-//		int32 w, h;
+//		int32_t w, h;
 //		gdk_drawable_get_size(pm, &w, &h);
 //		
 //		gtk_drag_set_icon_pixmap(context, gdk_drawable_get_colormap(pm),
@@ -532,7 +532,7 @@ void MGtkWidgetMixin::DragDeleteData()
 {
 }
 
-void MGtkWidgetMixin::GetMouse(int32& outX, int32& outY) const
+void MGtkWidgetMixin::GetMouse(int32_t& outX, int32_t& outY) const
 {
 	GdkModifierType modifiers;
 	// gdk_window_get_pointer(gtk_widget_get_window(mWidget), nullptr, nullptr, &modifiers);
@@ -548,7 +548,7 @@ void MGtkWidgetMixin::GetMouse(int32& outX, int32& outY) const
 	// gtk_widget_get_pointer(mWidget, &outX, &outY);
 }
 
-uint32 MGtkWidgetMixin::GetModifiers() const
+uint32_t MGtkWidgetMixin::GetModifiers() const
 {
 	GdkModifierType modifiers;
 	// gdk_window_get_pointer(gtk_widget_get_window(mWidget), nullptr, nullptr, &modifiers);
@@ -698,7 +698,7 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 
 //void MView::SetupDragAndDrop(
 //	const GtkTargetEntry inTargets[],
-//	uint32 inTargetCount)
+//	uint32_t inTargetCount)
 //{
 //	gtk_drag_dest_set(mWidget, GTK_DEST_DEFAULT_ALL,
 //		inTargets, inTargetCount,
@@ -796,8 +796,8 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //}
 //	
 //bool MView::DragWithin(
-//	int32 inX,
-//	int32 inY)
+//	int32_t inX,
+//	int32_t inY)
 //{
 //	return false;
 //}
@@ -808,18 +808,18 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //
 //bool MView::DragAccept(
 //	bool inMove,
-//	int32 inX,
-//	int32 inY,
+//	int32_t inX,
+//	int32_t inY,
 //	const char* inData,
-//	uint32 inLength,
-//	uint32 inType)
+//	uint32_t inLength,
+//	uint32_t inType)
 //{
 //	return false;
 //}
 //
 //void MView::DragBegin(
 //	const GtkTargetEntry inTargets[],
-//	uint32 inTargetCount,
+//	uint32_t inTargetCount,
 //	GdkEventMotion* inEvent)
 //{
 //	int button = 1;
@@ -840,15 +840,15 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	MDevice dev(this, bounds, true);
 //	
 //	GdkPixmap* pm = nullptr;
-//	int32 x, y;
+//	int32_t x, y;
 //	GdkModifierType state;
 //
 //	if (inEvent->is_hint)
 //		gdk_window_get_pointer(inEvent->window, &x, &y, &state);
 //	else
 //	{
-//		x = static_cast<int32>(inEvent->x);
-//		y = static_cast<int32>(inEvent->y);
+//		x = static_cast<int32_t>(inEvent->x);
+//		y = static_cast<int32_t>(inEvent->y);
 //		state = GdkModifierType(inEvent->state);
 //	}
 //	
@@ -861,7 +861,7 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	
 //	if (pm != nullptr)
 //	{
-//		int32 w, h;
+//		int32_t w, h;
 //		gdk_drawable_get_size(pm, &w, &h);
 //		
 //		gtk_drag_set_icon_pixmap(context, gdk_drawable_get_colormap(pm),

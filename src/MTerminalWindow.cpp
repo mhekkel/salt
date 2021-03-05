@@ -33,16 +33,16 @@ namespace ba = boost::algorithm;
 class MSshTerminalWindow : public MTerminalWindow
 {
   public:
-	MSshTerminalWindow(const string& inUser, const string& inHost, uint16 inPort,
-							const string& inSSHCommand, pinch::basic_connection* inConnection);
+	MSshTerminalWindow(const string& inUser, const string& inHost, uint16_t inPort,
+							const string& inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
 	MTerminalWindow*	Clone()
 	{
 		return new MSshTerminalWindow(mUser, mServer, mPort, mSSHCommand, mConnection);
 	}
 
-	virtual bool		UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked);
-	virtual bool		ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers);
+	virtual bool		UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked);
+	virtual bool		ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
   protected:
 
@@ -56,16 +56,16 @@ class MSshTerminalWindow : public MTerminalWindow
 
 	void				DropPublicKey(pinch::ssh_private_key inKey);
 
-	pinch::basic_connection*
+	std::shared_ptr<pinch::basic_connection>
 						mConnection;
 	string				mUser, mServer;
-	uint16				mPort;
+	uint16_t				mPort;
 	string				mSSHCommand;
 	pinch::channel_ptr	mKeyDropper;
 };
 
-MSshTerminalWindow::MSshTerminalWindow(const string& inUser, const string& inHost, uint16 inPort,
-	const string& inSSHCommand, pinch::basic_connection* inConnection)
+MSshTerminalWindow::MSshTerminalWindow(const string& inUser, const string& inHost, uint16_t inPort,
+	const string& inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
 	: MTerminalWindow(
 		MTerminalChannel::Create(inConnection),
 		inSSHCommand)
@@ -88,9 +88,9 @@ MSshTerminalWindow::MSshTerminalWindow(const string& inUser, const string& inHos
 }
 
 bool MSshTerminalWindow::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -118,10 +118,10 @@ bool MSshTerminalWindow::UpdateCommandStatus(
 }
 
 bool MSshTerminalWindow::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool result = true;
 
@@ -133,7 +133,7 @@ bool MSshTerminalWindow::ProcessCommand(
 			
 			if (inItemIndex < agent.size())
 			{
-				uint32 n = inItemIndex;
+				uint32_t n = inItemIndex;
 				for (auto key = agent.begin(); key != agent.end(); ++key)
 				{
 					if (n-- > 0)
@@ -220,7 +220,7 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 	string blob;
 	CryptoPP::Base64Encoder enc(new CryptoPP::StringSink(blob));
 	
-	const vector<uint8>& data(p);
+	const vector<uint8_t>& data(p);
 	enc.Put(&data[0], data.size());
 	enc.MessageEnd(true);
 	
@@ -309,7 +309,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel* inTerminalChannel, const stri
 	AddChild(mStatusbar);
 	mStatusbar->GetBounds(bounds);
 
-	int32 statusbarHeight = bounds.height;
+	int32_t statusbarHeight = bounds.height;
 
 	// hbox: force correct autolayout in Gtk
 	MBoxControl* hbox = new MBoxControl("hbox", bounds, true, false, true, true, 0, 0);
@@ -333,7 +333,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel* inTerminalChannel, const stri
 //	bounds.height -= statusbarHeight + kSearchPanelHeight;
 //	bounds.width -= kScrollbarWidth;
 
-	uint32 w, h;
+	uint32_t w, h;
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
 	bounds = MRect(0, 0, w, h);
 
@@ -392,7 +392,7 @@ void MTerminalWindow::Mapped()
 
 MRect MTerminalWindow::GetPrefferedBounds()
 {
-	uint32 w, h;
+	uint32_t w, h;
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
 
 	return MRect(0, 0, w, h + kScrollbarWidth);
@@ -424,14 +424,14 @@ void MTerminalWindow::HideSearchPanel()
 
 void MTerminalWindow::Animate()
 {
-//	ResizeSearchPanelTo(static_cast<uint32>(mAnimationVariable->GetValue()));
+//	ResizeSearchPanelTo(static_cast<uint32_t>(mAnimationVariable->GetValue()));
 
 	MRect frame;
 	mSearchPanel->GetFrame(frame);
 	
-	uint32 newHeight = static_cast<uint32>(mAnimationVariable->GetValue());
+	uint32_t newHeight = static_cast<uint32_t>(mAnimationVariable->GetValue());
 
-	int32 delta = newHeight - frame.height;
+	int32_t delta = newHeight - frame.height;
 	
 	mSearchPanel->ResizeFrame(0, delta);
 	mTerminalView->ResizeFrame(0, -delta);
@@ -483,9 +483,9 @@ void MTerminalWindow::Close()
 }
 
 bool MTerminalWindow::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -516,10 +516,10 @@ bool MTerminalWindow::UpdateCommandStatus(
 }
 
 bool MTerminalWindow::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool result = true;
 
@@ -596,8 +596,8 @@ MTerminalWindow* MTerminalWindow::Create(boost::asio::io_service& inIOService)
 	return new MPtyTerminalWindow(inIOService);
 }
 
-MTerminalWindow* MTerminalWindow::Create(const string& inUser, const string& inHost, uint16 inPort,
-	const string& inSSHCommand, pinch::basic_connection* inConnection)
+MTerminalWindow* MTerminalWindow::Create(const string& inUser, const string& inHost, uint16_t inPort,
+	const string& inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
 {
 	return new MSshTerminalWindow(inUser, inHost, inPort, inSSHCommand, inConnection);
 }						

@@ -131,7 +131,7 @@ void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin* inChild)
 }
 
 void MGtkWindowImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32 inPadding)
+		bool inExpand, bool inFill, uint32_t inPadding)
 {
 	if (mMainVBox == nullptr)
 	{
@@ -427,7 +427,7 @@ bool MGtkWindowImpl::OnConfigureEvent(GdkEventConfigure* inEvent)
 	return MGtkWidgetMixin::OnConfigureEvent(inEvent);
 }
 
-void MGtkWindowImpl::ResizeWindow(int32 inWidthDelta, int32 inHeightDelta)
+void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	PRINT(("MGtkWindowImpl::ResizeWindow(%d,%d)", inWidthDelta, inHeightDelta));
 	int w, h;
@@ -474,7 +474,7 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 //{
 //	GdkScreen* screen = gtk_widget_get_screen(GetWidget());
 //	
-//	uint32 monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(GetWidget()));
+//	uint32_t monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(GetWidget()));
 //	
 //	GdkRectangle r;
 //	gdk_screen_get_monitor_geometry(screen, monitor, &r);
@@ -490,11 +490,11 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 //	GetWindowPosition(start);
 //	gdk_threads_leave();
 //	
-//	uint32
+//	uint32_t
 //		kSleep = 10000,
 //		kSteps = 6;
 //	
-//	for (uint32 step = 0; step < kSteps; ++step)
+//	for (uint32_t step = 0; step < kSteps; ++step)
 //	{
 //		MRect r;
 //		
@@ -519,7 +519,7 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 //}
 //
 //const char* MGtkWindowImpl::IDToName(
-//	uint32			inID,
+//	uint32_t			inID,
 //	char			inName[5])
 //{
 //	inName[4] = 0;
@@ -532,7 +532,7 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 //}
 //
 //GtkWidget* MGtkWindowImpl::GetWidget(
-//	uint32			inID) const
+//	uint32_t			inID) const
 //{
 //	char name[5];
 //	GtkWidget* wdgt = mGtkBuilder->GetWidget(IDToName(inID, name));
@@ -599,13 +599,13 @@ bool MGtkWindowImpl::ChildFocus(GdkEventFocus* inEvent)
 //}
 //
 //void MGtkWindowImpl::SetFocus(
-//	uint32				inID)
+//	uint32_t				inID)
 //{
 //	gtk_widget_grab_focus(GetWidget(inID));
 //}
 //
 //string MGtkWindowImpl::GetText(
-//	uint32				inID) const
+//	uint32_t				inID) const
 //{
 //	string result;
 //	
@@ -651,7 +651,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 }
 
 //void MGtkWindowImpl::SetText(
-//	uint32				inID,
+//	uint32_t				inID,
 //	const std::string&	inText)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -683,7 +683,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::SetPasswordField(
-//	uint32				inID,
+//	uint32_t				inID,
 //	bool				isVisible)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -693,10 +693,10 @@ MHandler* MGtkWindowImpl::GetFocus()
 //		THROW(("item is not an entry"));
 //}
 //
-//int32 MGtkWindowImpl::GetValue(
-//	uint32				inID) const
+//int32_t MGtkWindowImpl::GetValue(
+//	uint32_t				inID) const
 //{
-//	int32 result = 0;
+//	int32_t result = 0;
 //	GtkWidget* wdgt = GetWidget(inID);
 //	
 //	if (GTK_IS_COMBO_BOX(wdgt))
@@ -708,8 +708,8 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::SetValue(
-//	uint32				inID,
-//	int32				inValue)
+//	uint32_t				inID,
+//	int32_t				inValue)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
 //
@@ -721,14 +721,14 @@ MHandler* MGtkWindowImpl::GetFocus()
 //
 //// for comboboxes
 //void MGtkWindowImpl::GetValues(
-//	uint32				inID,
+//	uint32_t				inID,
 //	vector<string>& 	outValues) const
 //{
 //	assert(false);
 //}
 //
 //void MGtkWindowImpl::SetValues(
-//	uint32				inID,
+//	uint32_t				inID,
 //	const vector<string>&
 //						inValues)
 //{
@@ -739,7 +739,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //		THROW(("Item %s is not a combo box", IDToName(inID, name)));
 //
 //	GtkTreeModel* model = gtk_combo_box_get_model(GTK_COMBO_BOX(wdgt));
-//	int32 count = gtk_tree_model_iter_n_children(model, nullptr);
+//	int32_t count = gtk_tree_model_iter_n_children(model, nullptr);
 //
 //	while (count-- > 0)
 //		gtk_combo_box_remove_text(GTK_COMBO_BOX(wdgt), count);
@@ -751,7 +751,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::SetColor(
-//	uint32				inID,
+//	uint32_t				inID,
 //	MColor				inColor)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -763,7 +763,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //MColor MGtkWindowImpl::GetColor(
-//	uint32				inID) const
+//	uint32_t				inID) const
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
 //	if (not GTK_IS_COLOR_BUTTON(wdgt))
@@ -775,7 +775,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //bool MGtkWindowImpl::IsChecked(
-//	uint32				inID) const
+//	uint32_t				inID) const
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
 //	if (not GTK_IS_TOGGLE_BUTTON(wdgt))
@@ -784,7 +784,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::SetChecked(
-//	uint32				inID,
+//	uint32_t				inID,
 //	bool				inOn)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -794,14 +794,14 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}	
 //
 //bool MGtkWindowImpl::IsVisible(
-//	uint32				inID) const
+//	uint32_t				inID) const
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
 //	return GTK_WIDGET_VISIBLE(wdgt);
 //}
 //
 //void MGtkWindowImpl::SetVisible(
-//	uint32				inID,
+//	uint32_t				inID,
 //	bool				inVisible)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -812,14 +812,14 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //bool MGtkWindowImpl::IsEnabled(
-//	uint32				inID) const
+//	uint32_t				inID) const
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
 //	return GTK_WIDGET_IS_SENSITIVE(wdgt);
 //}
 //
 //void MGtkWindowImpl::SetEnabled(
-//	uint32				inID,
+//	uint32_t				inID,
 //	bool				inEnabled)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -827,7 +827,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //bool MGtkWindowImpl::IsExpanded(
-//	uint32				inID) const
+//	uint32_t				inID) const
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
 //	assert(GTK_IS_EXPANDER(wdgt));
@@ -835,7 +835,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::SetExpanded(
-//	uint32				inID,
+//	uint32_t				inID,
 //	bool				inExpanded)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -844,7 +844,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::SetProgressFraction(
-//	uint32				inID,
+//	uint32_t				inID,
 //	float				inFraction)
 //{
 //	GtkWidget* wdgt = GetWidget(inID);
@@ -853,7 +853,7 @@ MHandler* MGtkWindowImpl::GetFocus()
 //}
 //
 //void MGtkWindowImpl::ValueChanged(
-//	uint32				inID)
+//	uint32_t				inID)
 //{
 ////	char name[5];
 ////	cout << "Value Changed for " << IDToName(inID, name) << endl;
@@ -864,15 +864,15 @@ MHandler* MGtkWindowImpl::GetFocus()
 //	const char* name = gtk_buildable_get_name(GTK_BUILDABLE(mChanged.GetSourceGObject()));
 //	if (name != nullptr)
 //	{
-//		uint32 id = 0;
-//		for (uint32 i = 0; i < 4 and name[i]; ++i)
+//		uint32_t id = 0;
+//		for (uint32_t i = 0; i < 4 and name[i]; ++i)
 //			id = (id << 8) | name[i];
 //		
 ////		mWindow->ValueChanged(id);
 //	}
 //}
 
-bool MGtkWindowImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, const string& inText)
+bool MGtkWindowImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const string& inText)
 {
 	return false;
 }
@@ -891,16 +891,16 @@ void MGtkWindowImpl::UpdateNow()
 	// 	gdk_window_process_updates(gtk_widget_get_window(GetWidget()), true);
 }
 
-void MGtkWindowImpl::ScrollRect(MRect inRect, int32 inDeltaH, int32 inDeltaV)
+void MGtkWindowImpl::ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV)
 {
 }
 
-bool MGtkWindowImpl::GetMouse(int32& outX, int32& outY, uint32& outModifiers)
+bool MGtkWindowImpl::GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers)
 {
 	return false;
 }
 
-bool MGtkWindowImpl::WaitMouseMoved(int32 inX, int32 inY)
+bool MGtkWindowImpl::WaitMouseMoved(int32_t inX, int32_t inY)
 {
 	return false;
 }
@@ -913,15 +913,15 @@ void MGtkWindowImpl::ObscureCursor()
 {
 }
 
-void MGtkWindowImpl::ConvertToScreen(int32& ioX, int32& ioY) const
+void MGtkWindowImpl::ConvertToScreen(int32_t& ioX, int32_t& ioY) const
 {
 }
 
-void MGtkWindowImpl::ConvertFromScreen(int32& ioX, int32& ioY) const
+void MGtkWindowImpl::ConvertFromScreen(int32_t& ioX, int32_t& ioY) const
 {
 }
 
-uint32 MGtkWindowImpl::GetModifiers() const
+uint32_t MGtkWindowImpl::GetModifiers() const
 {
 	return 0;
 }

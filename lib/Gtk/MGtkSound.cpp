@@ -36,7 +36,7 @@ class MAudioSocket
 
 	static void		CAFinishCallback(
 						ca_context*		inContext,
-						uint32_t		inID,
+						uint32_t_t		inID,
 						int				inErrorCode,
 						void*			inUserData);
 	
@@ -66,7 +66,7 @@ MAudioSocket& MAudioSocket::Instance()
 
 void MAudioSocket::CAFinishCallback(
 	ca_context*		inContext,
-	uint32_t		inID,
+	uint32_t_t		inID,
 	int				inErrorCode,
 	void*			inUserData)
 {

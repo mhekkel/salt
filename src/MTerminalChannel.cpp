@@ -37,8 +37,8 @@ using namespace std;
 // --------------------------------------------------------------------
 // MTerminalChannel
 
-MTerminalChannel::MTerminalChannel(boost::asio::io_service& inIOService)
-	: mIOService(inIOService)
+MTerminalChannel::MTerminalChannel(boost::asio::io_context& inIOService)
+	: mIOContext(inIOService)
 	, mRefCount(1)
 {
 }
@@ -74,13 +74,13 @@ void MTerminalChannel::KeepAliveIfNeeded()
 class MSshTerminalChannel : public MTerminalChannel
 {
   public:
-	MSshTerminalChannel(pinch::basic_connection* inConnection);
+	MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection);
 	~MSshTerminalChannel();
 	
 	virtual void SetMessageCallback(MessageCallback&& inMessageCallback);
 	
-	virtual void SetTerminalSize(uint32 inColumns, uint32 inRows,
-		uint32 inPixelWidth, uint32 inPixelHeight);
+	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+		uint32_t inPixelWidth, uint32_t inPixelHeight);
 	
 	virtual void Open(const string& inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
@@ -104,8 +104,8 @@ class MSshTerminalChannel : public MTerminalChannel
 	boost::asio::streambuf mResponse;
 };
 
-MSshTerminalChannel::MSshTerminalChannel(pinch::basic_connection* inConnection)
-	: MTerminalChannel(inConnection->get_io_service())
+MSshTerminalChannel::MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection)
+	: MTerminalChannel(inConnection->get_executor().context())
 	, mChannel(new pinch::terminal_channel(inConnection))
 {
 }
@@ -120,8 +120,8 @@ void MSshTerminalChannel::SetMessageCallback(MessageCallback&& inMessageCallback
 	mChannel->set_message_callbacks(mMessageCB, mMessageCB, mMessageCB);
 }
 
-void MSshTerminalChannel::SetTerminalSize(uint32 inColumns, uint32 inRows,
-	uint32 inPixelWidth, uint32 inPixelHeight)
+void MSshTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+	uint32_t inPixelWidth, uint32_t inPixelHeight)
 {
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
@@ -143,11 +143,13 @@ void MSshTerminalChannel::Open(const string& inTerminalType,
 		inTerminalType, inForwardAgent, inForwardX11, inCommand,
 		[this, inOpenCallback](const boost::system::error_code& ec)
 		{
-			mConnectionInfo = vector<string>({
-				mChannel->get_connection_parameters(pinch::client2server),
-				mChannel->get_connection_parameters(pinch::server2client),
-				mChannel->get_key_exchange_algoritm()
-			});
+
+#warning "fix"
+			// mConnectionInfo = vector<string>({
+			// 	mChannel->get_connection_parameters(pinch::client2server),
+			// 	mChannel->get_connection_parameters(pinch::server2client),
+			// 	mChannel->get_key_exchange_algoritm()
+			// });
 
 			mConnectionInfo.erase(unique(mConnectionInfo.begin(), mConnectionInfo.end()), mConnectionInfo.end());
 
@@ -168,7 +170,8 @@ bool MSshTerminalChannel::IsOpen() const
 
 void MSshTerminalChannel::Disconnect(bool disconnectProxy)
 {
-	mChannel->disconnect(disconnectProxy);
+#warning "fix"
+	// mChannel->disconnect(disconnectProxy);
 }
 
 void MSshTerminalChannel::SendData(const string& inData, WriteCallback&& inCallback)
@@ -209,11 +212,11 @@ void MSshTerminalChannel::KeepAliveIfNeeded()
 class MPtyTerminalChannel : public MTerminalChannel
 {
   public:
-	MPtyTerminalChannel(boost::asio::io_service& inIOService);
+	MPtyTerminalChannel(boost::asio::io_context& inIOContext);
 	~MPtyTerminalChannel();
 	
-	virtual void SetTerminalSize(uint32 inColumns, uint32 inRows,
-		uint32 inPixelWidth, uint32 inPixelHeight);
+	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+		uint32_t inPixelWidth, uint32_t inPixelHeight);
 	
 	virtual void Open(const string& inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
@@ -234,8 +237,8 @@ class MPtyTerminalChannel : public MTerminalChannel
 	
 	struct ChangeWindowsSizeCommand
 	{
-		ChangeWindowsSizeCommand(uint32 inColumns, uint32 inRows,
-			uint32 inPixelWidth, uint32 inPixelHeight)
+		ChangeWindowsSizeCommand(uint32_t inColumns, uint32_t inRows,
+			uint32_t inPixelWidth, uint32_t inPixelHeight)
 		{
 			ws.ws_row = inRows;
 			ws.ws_col = inColumns;
@@ -256,10 +259,10 @@ class MPtyTerminalChannel : public MTerminalChannel
 	boost::asio::streambuf mResponse;
 };
 
-MPtyTerminalChannel::MPtyTerminalChannel(boost::asio::io_service& inIOService)
-	: MTerminalChannel(inIOService)
+MPtyTerminalChannel::MPtyTerminalChannel(boost::asio::io_context& inIOContext)
+	: MTerminalChannel(inIOContext)
 	, mPid(-1)
-	, mPty(mIOService)
+	, mPty(mIOContext)
 {
 }
 
@@ -268,8 +271,8 @@ MPtyTerminalChannel::~MPtyTerminalChannel()
 PRINT(("MPtyTerminalChannel::~MPtyTerminalChannel()"));
 }
 
-void MPtyTerminalChannel::SetTerminalSize(uint32 inColumns, uint32 inRows,
-	uint32 inPixelWidth, uint32 inPixelHeight)
+void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+	uint32_t inPixelWidth, uint32_t inPixelHeight)
 {
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
@@ -479,7 +482,7 @@ void MPtyTerminalChannel::ReadData(ReadCallback&& inCallback)
 // --------------------------------------------------------------------
 // MTerminalChannel factory
 
-MTerminalChannel* MTerminalChannel::Create(pinch::basic_connection* inConnection)
+MTerminalChannel* MTerminalChannel::Create(std::shared_ptr<pinch::basic_connection> inConnection)
 {
 	return new MSshTerminalChannel(inConnection);
 }

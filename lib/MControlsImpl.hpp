@@ -36,7 +36,7 @@ public:
 	virtual void	MarginsChanged()							{}
 	// virtual void	Draw(MRect inBounds)						{}
 	virtual void	Draw(cairo_t* inCairo)						{}
-	virtual void	Click(int32 inX, int32 inY)					{}
+	virtual void	Click(int32_t inX, int32_t inY)					{}
 	virtual void	ActivateSelf()								{}
 	virtual void	DeactivateSelf()							{}
 	virtual void	EnableSelf()								{}
@@ -64,20 +64,20 @@ public:
 					MScrollbarImpl(MScrollbar* inControl)
 						: MControlImpl<MScrollbar>(inControl)				{}
 
-	virtual int32	GetValue() const = 0;
-	virtual void	SetValue(int32 inValue) = 0;
+	virtual int32_t	GetValue() const = 0;
+	virtual void	SetValue(int32_t inValue) = 0;
 
-	virtual int32	GetTrackValue() const = 0;
+	virtual int32_t	GetTrackValue() const = 0;
 
-	virtual void	SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-						int32 inScrollUnit, int32 inPageSize, int32 inValue) = 0;
+	virtual void	SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+						int32_t inScrollUnit, int32_t inPageSize, int32_t inValue) = 0;
 
-	virtual int32	GetMinValue() const = 0;
-//	virtual void	SetMinValue(int32 inValue) = 0;
-	virtual int32	GetMaxValue() const = 0;
-//	virtual void	SetMaxValue(int32 inValue) = 0;
+	virtual int32_t	GetMinValue() const = 0;
+//	virtual void	SetMinValue(int32_t inValue) = 0;
+	virtual int32_t	GetMaxValue() const = 0;
+//	virtual void	SetMaxValue(int32_t inValue) = 0;
 //
-//	virtual void	SetViewSize(int32 inViewSize) = 0;
+//	virtual void	SetViewSize(int32_t inViewSize) = 0;
 
 	static MScrollbarImpl*
 					Create(MScrollbar* inControl);
@@ -94,7 +94,7 @@ public:
 
 	virtual void	SetText(const std::string& inText) = 0;
 
-	virtual void	GetIdealSize(int32& outWidth, int32& outHeight) = 0;
+	virtual void	GetIdealSize(int32_t& outWidth, int32_t& outHeight) = 0;
 
 	static MButtonImpl*
 					Create(MButton* inButton, const std::string& inLabel,
@@ -130,10 +130,10 @@ public:
 					MStatusbarImpl(MStatusbar* inStatusbar)
 						: MControlImpl<MStatusbar>(inStatusbar)				{}
 
-	virtual void	SetStatusText(uint32 inPartNr, const std::string& inText, bool inBorder) = 0;
+	virtual void	SetStatusText(uint32_t inPartNr, const std::string& inText, bool inBorder) = 0;
 
 	static MStatusbarImpl*
-					Create(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[]);
+					Create(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[]);
 };
 
 class MComboboxImpl : public MControlImpl<MCombobox>
@@ -158,8 +158,8 @@ public:
 					MPopupImpl(MPopup* inPopup)
 						: MControlImpl<MPopup>(inPopup) {}
 	
-	virtual void	SetValue(int32 inValue) = 0;
-	virtual int32	GetValue() const = 0;
+	virtual void	SetValue(int32_t inValue) = 0;
+	virtual int32_t	GetValue() const = 0;
 	
 	virtual void	SetText(const std::string& inText) = 0;
 	virtual std::string
@@ -181,12 +181,12 @@ public:
 	virtual std::string
 					GetText() const = 0;
 
-	virtual uint32	GetFlags() const = 0;
+	virtual uint32_t	GetFlags() const = 0;
 
-	virtual void	SetPasswordChar(uint32 inUnicode) = 0;
+	virtual void	SetPasswordChar(uint32_t inUnicode) = 0;
 
 	static MEdittextImpl*
-					Create(MEdittext* inEdittext, uint32 inFlags);
+					Create(MEdittext* inEdittext, uint32_t inFlags);
 };
 
 class MCaptionImpl : public MControlImpl<MCaption>
@@ -259,8 +259,8 @@ public:
 
 	virtual void	AddPage(const std::string& inLabel, MView* inPage) = 0;
 
-	virtual void	SelectPage(uint32 inPage) = 0;
-	virtual uint32	GetSelectedPage() const = 0;
+	virtual void	SelectPage(uint32_t inPage) = 0;
+	virtual uint32_t	GetSelectedPage() const = 0;
 
 	static MNotebookImpl*
 					Create(MNotebook* inNotebook);
@@ -287,8 +287,8 @@ public:
 
 	virtual void	AddItem(const std::string& inText) = 0;
 
-	virtual int32	GetValue() const = 0;
-	virtual void	SetValue(int32 inValue) = 0;
+	virtual int32_t	GetValue() const = 0;
+	virtual void	SetValue(int32_t inValue) = 0;
 
 	static MListBoxImpl*
 					Create(MListBox* inListBox);
@@ -317,7 +317,7 @@ class MBoxControlImpl : public MControlImpl<MBoxControl>
 		: MControlImpl(inControl)							{}
 
 	static MBoxControlImpl* Create(MBoxControl* inControl, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32 inSpacing, uint32 inPadding);
+		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding);
 };
 
 #endif

@@ -44,10 +44,10 @@ private:
 class MDDEImpl
 {
 public:
-						MDDEImpl(uint32 inInst);
+						MDDEImpl(uint32_t inInst);
 						~MDDEImpl();
 
-	static uint32		Init();
+	static uint32_t		Init();
 
 	bool				IsServer() const;
 	void				Send(HCONV inConversation, const wstring& inCommand);
@@ -78,7 +78,7 @@ protected:
 						}
 
 	static MDDEImpl*	sInstance;
-	uint32				mInst;
+	uint32_t				mInst;
 	HSZ					mServer, mTopic;
 	HCONV				mConv;				// 0 for server, defined for client
 	set<HCONV>			mConversations;		// only for servers
@@ -87,7 +87,7 @@ protected:
 
 MDDEImpl* MDDEImpl::sInstance;
 
-MDDEImpl::MDDEImpl(uint32 inInst)
+MDDEImpl::MDDEImpl(uint32_t inInst)
 	: eDocClosed(this, &MDDEImpl::DocClosed)
 	, mInst(inInst)
 	, mServer(::DdeCreateStringHandle(inInst, c2w(kAppName).c_str(), CP_WINUNICODE))
@@ -117,7 +117,7 @@ MDDEImpl::~MDDEImpl()
 //	::DdeUninitialize(mInst);
 }
 
-uint32 MDDEImpl::Init()
+uint32_t MDDEImpl::Init()
 {
 	DWORD inst = 0;
 	UINT err = ::DdeInitialize(&inst, &MDDEImpl::DdeCallback, 0, 0);
@@ -261,7 +261,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpszCmdLine, int n
 	int result = 0;
 
 	vector<string> args = po::split_winmain(lpszCmdLine);
-	uint32 inst = MDDEImpl::Init();
+	uint32_t inst = MDDEImpl::Init();
 
 	unique_ptr<MApplication> app(MApplication::Create(new MWinApplicationImpl(hInst)));
 

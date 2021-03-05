@@ -28,8 +28,8 @@ MXcbWindowImpl::~MXcbWindowImpl()
 
 void MXcbWindowImpl::Create(MRect inBounds, const string& inTitle)
 {
-	uint32 mask = 0;
-	vector<uint32> values;
+	uint32_t mask = 0;
+	vector<uint32_t> values;
 	
 	mask |= XCB_CW_BACK_PIXEL;
 	values.push_back(mScreen->white_pixel);
@@ -115,7 +115,7 @@ MHandler* MXcbWindowImpl::GetFocus()
 	return nullptr;
 }
 
-void MXcbWindowImpl::ResizeWindow(int32 inWidthDelta, int32 inHeightDelta)
+void MXcbWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 }
 
@@ -139,21 +139,21 @@ void MXcbWindowImpl::UpdateNow()
 {
 }
 
-void MXcbWindowImpl::ScrollRect(MRect inRect, int32 inDeltaH, int32 inDeltaV)
+void MXcbWindowImpl::ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV)
 {
 }
 
-bool MXcbWindowImpl::GetMouse(int32& outX, int32& outY, uint32& outModifiers)
+bool MXcbWindowImpl::GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers)
 {
 	return false;
 }
 
-uint32 MXcbWindowImpl::GetModifiers() const
+uint32_t MXcbWindowImpl::GetModifiers() const
 {
 	return 0;
 }
 
-bool MXcbWindowImpl::WaitMouseMoved(int32 inX, int32 inY)
+bool MXcbWindowImpl::WaitMouseMoved(int32_t inX, int32_t inY)
 {
 	return false;
 }
@@ -166,11 +166,11 @@ void MXcbWindowImpl::ObscureCursor()
 {
 }
 
-void MXcbWindowImpl::ConvertToScreen(int32& ioX, int32& ioY) const
+void MXcbWindowImpl::ConvertToScreen(int32_t& ioX, int32_t& ioY) const
 {
 }
 
-void MXcbWindowImpl::ConvertFromScreen(int32& ioX, int32& ioY) const
+void MXcbWindowImpl::ConvertFromScreen(int32_t& ioX, int32_t& ioY) const
 {
 }
 

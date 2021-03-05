@@ -24,9 +24,9 @@ class MImageButton : public MCanvas
 
 	// virtual void	Draw(MRect inUpdate);
 	virtual void	Draw(cairo_t* inCairo);
-	virtual void	MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 inModifiers);
-	virtual void	MouseUp(int32 inX, int32 inY, uint32 inModifiers);
-	virtual void	MouseMove(int32 inX, int32 inY, uint32 inModifiers);
+	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
+	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void	MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void	MouseExit();
 
 	virtual void	ActivateSelf()			{ Invalidate(); }
@@ -78,7 +78,7 @@ void MImageButton::Draw(cairo_t* inCairo)
 	}		
 }
 
-void MImageButton::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 inModifiers)
+void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
 {
 	if (mBounds.ContainsPoint(inX, inY))
 	{
@@ -87,13 +87,13 @@ void MImageButton::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 i
 	}	
 }
 
-void MImageButton::MouseUp(int32 inX, int32 inY, uint32 inModifiers)
+void MImageButton::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mBounds.ContainsPoint(inX, inY))
 		eClicked();
 }
 
-void MImageButton::MouseMove(int32 inX, int32 inY, uint32 inModifiers)
+void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	MMouseStateForCloseButton state(mMouseState);
 	
@@ -141,7 +141,7 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 
 	string captionString(_("Find:"));
 	dev.SetText(captionString);
-	uint32 captionWidth = static_cast<uint32>(dev.GetTextWidth());
+	uint32_t captionWidth = static_cast<uint32_t>(dev.GetTextWidth());
 	
 	MRect bounds(inBounds);
 
@@ -177,7 +177,7 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 
 	string label(_("Case sensitive"));
 	dev.SetText(label);
-	uint32 labelWidth = static_cast<uint32>(dev.GetTextWidth());
+	uint32_t labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
 	GetBounds(bounds);
 	bounds.x = 32 + captionWidth + 4 + 200 + 4;
@@ -195,7 +195,7 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 
 	label = _("Next");
 	dev.SetText(label);
-	labelWidth = static_cast<uint32>(dev.GetTextWidth());
+	labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
 	bounds.width = labelWidth + 20;
 	MButton* next = new MButton("find-next", bounds, label);
@@ -207,7 +207,7 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 
 	label = _("Previous");
 	dev.SetText(label);
-	labelWidth = static_cast<uint32>(dev.GetTextWidth());
+	labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
 	bounds.width = labelWidth + 20;
 	MButton* prev = new MButton("find-prev", bounds, label);
@@ -234,14 +234,14 @@ void MSearchPanel::FindBtn(const std::string& inID)
 		eSearch(searchUp);
 }
 
-uint32 MSearchPanel::GetHeight() const
+uint32_t MSearchPanel::GetHeight() const
 {
 	MRect bounds;
 	GetBounds(bounds);
 	return bounds.height;
 }
 
-bool MSearchPanel::HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = true;
 	switch (inKeyCode)

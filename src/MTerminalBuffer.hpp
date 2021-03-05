@@ -69,7 +69,7 @@ class MStyle
 		SetForeColor(kXTermColorNone);
 		SetBackColor(kXTermColorNone);
 	}
-//	explicit MStyle(uint32 inValue) : mData(inValue) {}
+//	explicit MStyle(uint32_t inValue) : mData(inValue) {}
 	
 	MStyle(MXTermColor inForeColor, MXTermColor inBackColor) : mData(0)
 	{
@@ -82,7 +82,7 @@ class MStyle
 		return (mData & inStyle) != 0;
 	}
 	
-	operator uint32() const
+	operator uint32_t() const
 	{
 		return mData;
 	}
@@ -102,7 +102,7 @@ class MStyle
 		mData &= ~inStyle;
 	}
 
-	void ChangeFlags(uint32 inMode)
+	void ChangeFlags(uint32_t inMode)
 	{
 		switch (inMode)
 		{
@@ -126,7 +126,7 @@ class MStyle
 	void SetForeColor(MXTermColor inColor)
 	{
 		mData &= ~kForeColorMask;
-		mData |= ((uint32)inColor << kFgShift) & kForeColorMask;
+		mData |= ((uint32_t)inColor << kFgShift) & kForeColorMask;
 	}
   	
 	MXTermColor GetBackColor() const
@@ -137,11 +137,11 @@ class MStyle
 	void SetBackColor(MXTermColor inColor)
 	{
 		mData &= ~kBackColorMask;
-		mData |= ((uint32)inColor << kBgShift) & kBackColorMask;
+		mData |= ((uint32_t)inColor << kBgShift) & kBackColorMask;
 	}
   	
   private:
-	uint32	mData;
+	uint32_t	mData;
 };
 
 // MChar is a container for both a unicode and the style associated with
@@ -174,27 +174,27 @@ class MChar
 	MChar&		operator=(char inChar)					{ mUnicode = inChar; return *this; }
 	MChar&		operator=(MStyle inStyle)				{ mStyle = inStyle; return *this; }
 
-	bool		operator==(char rhs) const				{ return mUnicode == static_cast<uint32>(rhs); }
+	bool		operator==(char rhs) const				{ return mUnicode == static_cast<uint32_t>(rhs); }
 	bool		operator==(unicode rhs) const			{ return mUnicode == rhs; }
 	bool		operator==(MStyle rhs) const			{ return mStyle == rhs; }
 
-	bool		operator!=(char rhs) const				{ return mUnicode != static_cast<uint32>(rhs); }
+	bool		operator!=(char rhs) const				{ return mUnicode != static_cast<uint32_t>(rhs); }
 	bool		operator!=(unicode rhs) const			{ return mUnicode != rhs; }
 	bool		operator!=(MStyle rhs) const			{ return mStyle != rhs; }
 
 	bool		operator&(MCharStyle inStyle) const		{ return (mStyle & inStyle) != 0; }
 	
-	void		operator|=(uint32 inStyle)				{ mStyle.SetFlag((MCharStyle)inStyle); }
-	void		operator&=(uint32 inStyle)				{ mStyle.ClearFlag((MCharStyle)inStyle); }
+	void		operator|=(uint32_t inStyle)				{ mStyle.SetFlag((MCharStyle)inStyle); }
+	void		operator&=(uint32_t inStyle)				{ mStyle.ClearFlag((MCharStyle)inStyle); }
 
 	void		ReverseFlag(MCharStyle inStyle)			{ mStyle.ReverseFlag(inStyle); }
-	void		ChangeFlags(uint32 inMode)				{ mStyle.ChangeFlags(inMode); }
+	void		ChangeFlags(uint32_t inMode)				{ mStyle.ChangeFlags(inMode); }
 	
 				operator unicode () const				{ return mUnicode; }
 				operator MStyle () const				{ return mStyle; }
 
   private:
-	uint32		mUnicode;
+	uint32_t		mUnicode;
 	MStyle		mStyle;
 };
 
@@ -204,17 +204,17 @@ class MChar
 class MLine
 {
   public:
-					MLine(uint32 inSize, MXTermColor inForeColor, MXTermColor inBackColor);
+					MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor);
 					MLine(const MLine& rhs);
 					~MLine();
 
 	MLine&			operator=(const MLine& rhs);
 	
-	void			Delete(uint32 inColumn, uint32 inWidth, MXTermColor inForeColor, MXTermColor inBackColor);
-	void			Insert(uint32 inColumn, uint32 inWidth);
+	void			Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor, MXTermColor inBackColor);
+	void			Insert(uint32_t inColumn, uint32_t inWidth);
 	
-	MChar&			operator[](uint32 inColumn)			{ assert(inColumn < mSize); return mCharacters[inColumn]; }
-	MChar			operator[](uint32 inColumn) const	{ assert(inColumn < mSize); return mCharacters[inColumn]; }
+	MChar&			operator[](uint32_t inColumn)			{ assert(inColumn < mSize); return mCharacters[inColumn]; }
+	MChar			operator[](uint32_t inColumn) const	{ assert(inColumn < mSize); return mCharacters[inColumn]; }
 
 	void			swap(MLine& rhs);
 
@@ -234,7 +234,7 @@ class MLine
 
   private:
 	MChar*			mCharacters;
-	uint32			mSize;
+	uint32_t			mSize;
 	bool			mSoftWrapped;
 	bool			mDoubleWidth, mDoubleHeight, mDoubleHeightTop;
 };
@@ -260,33 +260,33 @@ namespace std
 class MTerminalBuffer
 {
   public:
-					MTerminalBuffer(uint32 inWidth, uint32 inHeight, bool inBuffer);
+					MTerminalBuffer(uint32_t inWidth, uint32_t inHeight, bool inBuffer);
 	virtual			~MTerminalBuffer();
 
-	void			SetBufferSize(uint32 inBufferSize)				{ mBufferSize = inBufferSize; }
+	void			SetBufferSize(uint32_t inBufferSize)				{ mBufferSize = inBufferSize; }
 	
-	const MLine&	GetLine(int32 inLine) const;
+	const MLine&	GetLine(int32_t inLine) const;
 
 					// anchor line is recalculated in Resize to help to 
 					// adjust scrollbar.
-	void			Resize(uint32 inWidth, uint32 inHeight, int32& ioAnchorLine);
+	void			Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnchorLine);
 
-	void			SetCharacter(uint32 inLine, uint32 inColumn, unicode inChar, MStyle inStyle = MStyle());
+	void			SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar, MStyle inStyle = MStyle());
 
 	template<typename Handler>
-	void			ForeachInRectangle(int32 inFromLine, int32 inFromColumn,
-						int32 inToLine, int32 inToColumn, Handler&& inHandler)
+	void			ForeachInRectangle(int32_t inFromLine, int32_t inFromColumn,
+						int32_t inToLine, int32_t inToColumn, Handler&& inHandler)
 	{
-		for (int32 li = inFromLine; li <= inToLine; ++li)
+		for (int32_t li = inFromLine; li <= inToLine; ++li)
 		{
-			if (li >= static_cast<int32>(mLines.size()))
+			if (li >= static_cast<int32_t>(mLines.size()))
 				break;
 			
 			MLine& line(mLines[li]);
 			
-			for (int32 ci = inFromColumn; ci <= inToColumn; ++ci)
+			for (int32_t ci = inFromColumn; ci <= inToColumn; ++ci)
 			{
-				if (ci >= static_cast<int32>(mWidth))
+				if (ci >= static_cast<int32_t>(mWidth))
 					break;
 				
 				inHandler(line[ci], li, ci);
@@ -294,29 +294,29 @@ class MTerminalBuffer
 		}
 	}
 	
-	void			ReverseFlag(uint32 inFromLine, uint32 inFromColumn,
-						uint32 inToLine, uint32 inToColumn, MCharStyle inFlags);
-	void			ChangeFlags(uint32 inFromLine, uint32 inFromColumn,
-						uint32 inToLine, uint32 inToColumn, uint32 inMode);
+	void			ReverseFlag(uint32_t inFromLine, uint32_t inFromColumn,
+						uint32_t inToLine, uint32_t inToColumn, MCharStyle inFlags);
+	void			ChangeFlags(uint32_t inFromLine, uint32_t inFromColumn,
+						uint32_t inToLine, uint32_t inToColumn, uint32_t inMode);
 
-	void			ScrollForward(uint32 inFromLine, uint32 inToLine,
-						uint32 inLeftMargin, uint32 inRightMargin);
-	void			ScrollBackward(uint32 inFromLine, uint32 inToLine,
-						uint32 inLeftMargin, uint32 inRightMargin);
+	void			ScrollForward(uint32_t inFromLine, uint32_t inToLine,
+						uint32_t inLeftMargin, uint32_t inRightMargin);
+	void			ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
+						uint32_t inLeftMargin, uint32_t inRightMargin);
 
 	void			Clear();
 
-	void			EraseDisplay(uint32 inLine, uint32 inColumn, uint32 inMode, bool inSelective);
-	void			EraseLine(uint32 inLine, uint32 inColumn, uint32 inMode, bool inSelective);
-	void			EraseCharacter(uint32 inLine, uint32 inColumn, uint32 inCount);
-	void			InsertCharacter(uint32 inLine, uint32 inColumn, uint32 inWidth = 0);
-	void			DeleteCharacter(uint32 inLine, uint32 inColumn, uint32 inWidth = 0);
+	void			EraseDisplay(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective);
+	void			EraseLine(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective);
+	void			EraseCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inCount);
+	void			InsertCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth = 0);
+	void			DeleteCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth = 0);
 	
-	void			WrapLine(uint32 inLine);
+	void			WrapLine(uint32_t inLine);
 	
-	void			SetLineDoubleWidth(uint32 inLine);
-	void			SetLineDoubleHeight(uint32 inLine, bool inTop);
-	void			SetLineSingleWidth(uint32 inLine);
+	void			SetLineDoubleWidth(uint32_t inLine);
+	void			SetLineDoubleHeight(uint32_t inLine, bool inTop);
+	void			SetLineSingleWidth(uint32_t inLine);
 
 	void			FillWithE();		// for DECALN
 	
@@ -326,13 +326,13 @@ class MTerminalBuffer
 	bool			IsSelectionEmpty() const;
 	bool			IsSelectionBlock() const;
 
-	void			GetSelectionBegin(int32& outLine, int32& outColumn) const;
-	void			GetSelectionEnd(int32& outLine, int32& outColumn) const;
-	void			GetSelection(int32& outBeginLine, int32& outBeginColumn,
-						int32& outEndLine, int32& outEndColumn, bool& outIsBlock) const;
+	void			GetSelectionBegin(int32_t& outLine, int32_t& outColumn) const;
+	void			GetSelectionEnd(int32_t& outLine, int32_t& outColumn) const;
+	void			GetSelection(int32_t& outBeginLine, int32_t& outBeginColumn,
+						int32_t& outEndLine, int32_t& outEndColumn, bool& outIsBlock) const;
 
-	void			SetSelection(int32 inBeginLine, int32 inBeginColumn,
-						int32 inEndLine, int32 inEndColumn, bool inBlock = false);
+	void			SetSelection(int32_t inBeginLine, int32_t inBeginColumn,
+						int32_t inEndLine, int32_t inEndColumn, bool inBlock = false);
 	void			SelectAll();
 	void			ClearSelection();
 
@@ -342,28 +342,28 @@ class MTerminalBuffer
 		mBackColor = inBackColor;
 	}
 
-	void			FindWord(int32 inLine, int32 inColumn, int32& outBeginLine, int32& outBeginColumn,
-						int32& outEndLine, int32& outEndColumn);
+	void			FindWord(int32_t inLine, int32_t inColumn, int32_t& outBeginLine, int32_t& outBeginColumn,
+						int32_t& outEndLine, int32_t& outEndColumn);
 
 	std::string		GetSelectedText() const;
 	
-	int32			BufferedLines() const			{ return static_cast<int32>(mBuffer.size()); }
+	int32_t			BufferedLines() const			{ return static_cast<int32_t>(mBuffer.size()); }
 	
-	bool			FindNext(int32& ioLine, int32& ioColumn, const std::string& inWhat,
+	bool			FindNext(int32_t& ioLine, int32_t& ioColumn, const std::string& inWhat,
 						bool inIgnoreCase, bool inWrapAround);
-	bool			FindPrevious(int32& ioLine, int32& ioColumn, const std::string& inWhat,
+	bool			FindPrevious(int32_t& ioLine, int32_t& ioColumn, const std::string& inWhat,
 						bool inIgnoreCase, bool inWrapAround);
 
   private:
 
-	unicode			GetChar(uint32 inOffset, bool inToLower) const;
+	unicode			GetChar(uint32_t inOffset, bool inToLower) const;
 
 	std::deque<MLine>	mBuffer;
-	uint32				mBufferSize;
+	uint32_t				mBufferSize;
 	std::vector<MLine>	mLines;
-	uint32				mWidth;
+	uint32_t				mWidth;
 	bool				mDirty;
-	int32				mBeginLine, mBeginColumn, mEndLine, mEndColumn;
+	int32_t				mBeginLine, mBeginColumn, mEndLine, mEndColumn;
 	bool				mBlockSelection;
 	MXTermColor			mForeColor, mBackColor;
 };

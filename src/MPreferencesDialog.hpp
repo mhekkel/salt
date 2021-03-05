@@ -25,7 +25,7 @@ class MPreferencesDialog : public MDialog
 	virtual void	ButtonClicked(const std::string& inID);
 	virtual void	CheckboxChanged(const std::string& inID, bool inValue);
 	virtual void	TextChanged(const std::string& inID, const std::string& inText);
-	virtual void	ValueChanged(const std::string& inID, int32 inValue);
+	virtual void	ValueChanged(const std::string& inID, int32_t inValue);
 	virtual void	ColorChanged(const std::string& inID, MColor inValue);
 
 	MEventIn<void(const std::string&,MColor)>		ePreviewColor;

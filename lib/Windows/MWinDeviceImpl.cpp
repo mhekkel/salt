@@ -54,7 +54,7 @@ namespace {
 class MInlineReplacedChar : public IDWriteInlineObject
 {
   public:
-	MInlineReplacedChar(ID2D1RenderTarget* pRenderTarget, uint32 inUnicode, MColor inColor,
+	MInlineReplacedChar(ID2D1RenderTarget* pRenderTarget, uint32_t inUnicode, MColor inColor,
 		float inWidth, float inHeight, float inBaseline, IDWriteTextFormat* inFormat);
 	~MInlineReplacedChar();
 
@@ -92,14 +92,14 @@ class MInlineReplacedChar : public IDWriteInlineObject
   private:
 	ID2D1RenderTargetPtr	mRenderTarget;
 	IDWriteTextFormatPtr	mTextFormat;
-	uint32					mUnicode;
+	uint32_t					mUnicode;
 	MColor					mColor;
 	float					mWidth, mHeight;
 	float					mBaseline;
 	unsigned long			mRefCount;
 };
 
-MInlineReplacedChar::MInlineReplacedChar(ID2D1RenderTarget* inRenderTarget, uint32 inUnicode, MColor inColor,
+MInlineReplacedChar::MInlineReplacedChar(ID2D1RenderTarget* inRenderTarget, uint32_t inUnicode, MColor inColor,
 	float inWidth, float inHeight, float inBaseline, IDWriteTextFormat* inTextFormat)
 	: mRenderTarget(inRenderTarget)
 	, mTextFormat(inTextFormat)
@@ -126,7 +126,7 @@ HRESULT STDMETHODCALLTYPE MInlineReplacedChar::Draw(
     IUnknown* clientDrawingEffect)
 {
 	wchar_t s[2];
-	uint32 l = 1;
+	uint32_t l = 1;
 
 	if (mUnicode <= 0x0FFFF)
 		s[0] = static_cast<wchar_t>(mUnicode);
@@ -335,7 +335,7 @@ MWinDeviceImpl::MWinDeviceImpl(
 	inView->GetBounds(bounds);
 	inView->ConvertToWindow(bounds.x, bounds.y);
 
-	int32 x = 0, y = 0;
+	int32_t x = 0, y = 0;
 	inView->ConvertToWindow(x, y);
 
 	MCanvas* canvas = dynamic_cast<MCanvas*>(inView);
@@ -513,7 +513,7 @@ void MWinDeviceImpl::FillRect(
 
 void MWinDeviceImpl::StrokeRect(
 	MRect				inRect,
-	uint32				inLineWidth)
+	uint32_t				inLineWidth)
 {
 	assert(mForeBrush);
 	assert(mRenderTarget);
@@ -526,7 +526,7 @@ void MWinDeviceImpl::StrokeLine(
 	float				inFromY,
 	float				inToX,
 	float				inToY,
-	uint32				inLineWidth)
+	uint32_t				inLineWidth)
 {
 	assert(mForeBrush);
 	assert(mRenderTarget);
@@ -605,12 +605,12 @@ void MWinDeviceImpl::DrawBitmap(
 void MWinDeviceImpl::CreateAndUsePattern(
 	MColor				inColor1,
 	MColor				inColor2,
-	uint32				inWidth,
+	uint32_t				inWidth,
 	float				inRotation)
 {
-	uint32 data[8][8];
+	uint32_t data[8][8];
 
-	uint32 c1 = 0, c2 = 0;
+	uint32_t c1 = 0, c2 = 0;
 
 	c1 |= inColor1.red << 16;
 	c1 |= inColor1.green << 8;
@@ -620,9 +620,9 @@ void MWinDeviceImpl::CreateAndUsePattern(
 	c2 |= inColor2.green << 8;
 	c2 |= inColor2.blue << 0;
 
-	for (uint32 y = 0; y < 8; ++y)
+	for (uint32_t y = 0; y < 8; ++y)
 	{
-		for (uint32 x = 0; x < 8; ++x)
+		for (uint32_t x = 0; x < 8; ++x)
 			data[y][x] = ((x / inWidth) & 1) ? c2 : c1;
 	}
 
@@ -710,9 +710,9 @@ void MWinDeviceImpl::LookupFont(const wstring& inFamily)
 	{
 		ComPtr<IDWriteFontCollection> pFontCollection;
 		THROW_IF_HRESULT_ERROR(GetDWFactory()->GetSystemFontCollection(&pFontCollection));
-		uint32 familyCount = pFontCollection->GetFontFamilyCount();
+		uint32_t familyCount = pFontCollection->GetFontFamilyCount();
 	
-		for (uint32 i = 0; i < familyCount; ++i)
+		for (uint32_t i = 0; i < familyCount; ++i)
 		{
 			ComPtr<IDWriteFontFamily> pFontFamily;
 			THROW_IF_HRESULT_ERROR(pFontCollection->GetFontFamily(i, &pFontFamily));
@@ -720,7 +720,7 @@ void MWinDeviceImpl::LookupFont(const wstring& inFamily)
 			ComPtr<IDWriteLocalizedStrings> pFamilyNames;
 			THROW_IF_HRESULT_ERROR(pFontFamily->GetFamilyNames(&pFamilyNames));
 	
-			uint32 index = 0;
+			uint32_t index = 0;
 			BOOL exists = false;
 			
 			THROW_IF_HRESULT_ERROR(pFamilyNames->FindLocaleName(GetLocale().c_str(), &index, &exists));
@@ -729,7 +729,7 @@ void MWinDeviceImpl::LookupFont(const wstring& inFamily)
 			if (not exists)
 				index = 0;
 	
-			UINT32 length = 0;
+			UINT32_t length = 0;
 			THROW_IF_HRESULT_ERROR(pFamilyNames->GetStringLength(index, &length));
 			
 			vector<wchar_t> name(length + 1);
@@ -789,14 +789,14 @@ float MWinDeviceImpl::GetDescent()
 	return metrics.descent * mFontSize / metrics.designUnitsPerEm;
 }
 
-int32 MWinDeviceImpl::GetLineHeight()
+int32_t MWinDeviceImpl::GetLineHeight()
 {
 	if (not mFont)
 		SetFont(Preferences::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
-	return static_cast<int32>(
+	return static_cast<int32_t>(
 		ceil((metrics.ascent + metrics.descent + metrics.lineGap) * mFontSize / metrics.designUnitsPerEm));
 }
 
@@ -824,7 +824,7 @@ void MWinDeviceImpl::DrawString(
 	const string&		inText,
 	float				inX,
 	float				inY,
-	uint32				inTruncateWidth,
+	uint32_t				inTruncateWidth,
 	MAlignment			inAlign)
 {
 	IDWriteTextFormatPtr savedFormat(mTextFormat), nil;
@@ -885,19 +885,19 @@ void MWinDeviceImpl::SetText(
 
 	mSelectionLength = 0;
 	
-	typedef tr1::tuple<uint32,uint32,uint32> replaced_char;
+	typedef tr1::tuple<uint32_t,uint32_t,uint32_t> replaced_char;
 	vector<replaced_char> replaced;
 
 	for (string::const_iterator i = inText.begin(); i != inText.end(); ++i)
 	{
-		uint32 ch = static_cast<unsigned char>(*i);
+		uint32_t ch = static_cast<unsigned char>(*i);
 		mTextIndex.push_back(mText.length());
 
 		if (ch & 0x0080)
 		{
 			if ((ch & 0x0E0) == 0x0C0)
 			{
-				uint32 ch1 = static_cast<unsigned char>(*(i + 1));
+				uint32_t ch1 = static_cast<unsigned char>(*(i + 1));
 				if ((ch1 & 0x0c0) == 0x080)
 				{
 					ch = ((ch & 0x01f) << 6) | (ch1 & 0x03f);
@@ -907,8 +907,8 @@ void MWinDeviceImpl::SetText(
 			}
 			else if ((ch & 0x0F0) == 0x0E0)
 			{
-				uint32 ch1 = static_cast<unsigned char>(*(i + 1));
-				uint32 ch2 = static_cast<unsigned char>(*(i + 2));
+				uint32_t ch1 = static_cast<unsigned char>(*(i + 1));
+				uint32_t ch2 = static_cast<unsigned char>(*(i + 2));
 				if ((ch1 & 0x0c0) == 0x080 and (ch2 & 0x0c0) == 0x080)
 				{
 					ch = ((ch & 0x00F) << 12) | ((ch1 & 0x03F) << 6) | (ch2 & 0x03F);
@@ -919,9 +919,9 @@ void MWinDeviceImpl::SetText(
 			}
 			else if ((ch & 0x0F8) == 0x0F0)
 			{
-				uint32 ch1 = static_cast<unsigned char>(*(i + 1));
-				uint32 ch2 = static_cast<unsigned char>(*(i + 2));
-				uint32 ch3 = static_cast<unsigned char>(*(i + 3));
+				uint32_t ch1 = static_cast<unsigned char>(*(i + 1));
+				uint32_t ch2 = static_cast<unsigned char>(*(i + 2));
+				uint32_t ch3 = static_cast<unsigned char>(*(i + 3));
 				if ((ch1 & 0x0c0) == 0x080 and (ch2 & 0x0c0) == 0x080 and (ch3 & 0x0c0) == 0x080)
 				{
 					ch = ((ch & 0x007) << 18) | ((ch1 & 0x03F) << 12) | ((ch2 & 0x03F) << 6) | (ch3 & 0x03F);
@@ -994,15 +994,15 @@ void MWinDeviceImpl::SetTabStops(
 }
 
 void MWinDeviceImpl::SetTextColors(
-	uint32				inColorCount,
-	uint32				inColorIndices[],
-	uint32				inOffsets[],
+	uint32_t				inColorCount,
+	uint32_t				inColorIndices[],
+	uint32_t				inOffsets[],
 	MColor				inColors[])
 {
 	if (not mRenderTarget)	// short cut
 		return;
 
-	for (uint32 ix = 0; ix < inColorCount; ++ix)
+	for (uint32_t ix = 0; ix < inColorCount; ++ix)
 	{
 		MColor c = inColors[inColorIndices[ix]];
 		
@@ -1034,14 +1034,14 @@ void MWinDeviceImpl::SetTextColors(
 }
 
 void MWinDeviceImpl::SetTextStyles(
-	uint32				inStyleCount,
-	uint32				inStyles[],
-	uint32				inOffsets[])
+	uint32_t				inStyleCount,
+	uint32_t				inStyles[],
+	uint32_t				inOffsets[])
 {
 	if (not mRenderTarget)	// short cut
 		return;
 
-	for (uint32 ix = 0; ix < inStyleCount; ++ix)
+	for (uint32_t ix = 0; ix < inStyleCount; ++ix)
 	{
 		DWRITE_TEXT_RANGE range;
 		range.startPosition = mTextIndex[inOffsets[ix]];
@@ -1064,8 +1064,8 @@ void MWinDeviceImpl::SetTextStyles(
 }
 
 void MWinDeviceImpl::SetTextSelection(
-	uint32				inStart,
-	uint32				inLength,
+	uint32_t				inStart,
+	uint32_t				inLength,
 	MColor				inSelectionColor)
 {
 	mSelectionColor = inSelectionColor;
@@ -1074,9 +1074,9 @@ void MWinDeviceImpl::SetTextSelection(
 }
 
 void MWinDeviceImpl::IndexToPosition(
-	uint32				inIndex,
+	uint32_t				inIndex,
 	bool				inTrailing,
-	int32&				outPosition)
+	int32_t&				outPosition)
 {
 	// Translate text character offset to point x,y.
 	DWRITE_HIT_TEST_METRICS caretMetrics;
@@ -1084,20 +1084,20 @@ void MWinDeviceImpl::IndexToPosition(
 
 	if (mTextLayout and inIndex < mTextIndex.size())
 	{
-		int32 offset = mTextIndex[inIndex];
+		int32_t offset = mTextIndex[inIndex];
 
 		mTextLayout->HitTestTextPosition(
 			offset, inTrailing, &caretX, &caretY, &caretMetrics);
 
-		outPosition = static_cast<uint32>(caretX + 0.5f);
+		outPosition = static_cast<uint32_t>(caretX + 0.5f);
 	}
 	else
 		outPosition = 0;
 }
 
 bool MWinDeviceImpl::PositionToIndex(
-	int32				inPosition,
-	uint32&				outIndex)
+	int32_t				inPosition,
+	uint32_t&				outIndex)
 {
 	if (not mTextLayout)
 		outIndex = 0;
@@ -1150,7 +1150,7 @@ void MWinDeviceImpl::RenderText(
 				&selectionColorBrush));
 
 			DWRITE_TEXT_RANGE caretRange = { mSelectionStart, mSelectionLength };
-			UINT32 actualHitTestCount = 0;
+			UINT32_t actualHitTestCount = 0;
 
 			// Determine actual number of hit-test ranges
 			mTextLayout->HitTestTextRange(caretRange.startPosition, caretRange.length,
@@ -1160,7 +1160,7 @@ void MWinDeviceImpl::RenderText(
 			std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
 
 			mTextLayout->HitTestTextRange(caretRange.startPosition, caretRange.length,
-				inX, inY, &hitTestMetrics[0], static_cast<UINT32>(hitTestMetrics.size()),
+				inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
 				&actualHitTestCount);
 
 			// Draw the selection ranges behind the text.
@@ -1189,7 +1189,7 @@ void MWinDeviceImpl::RenderText(
 		if (mDrawWhiteSpace)
 		{
 			vector<DWRITE_CLUSTER_METRICS> clusters(mText.size() + 1);
-			uint32 count;
+			uint32_t count;
 			
 			HRESULT err = mTextLayout->GetClusterMetrics(&clusters[0], clusters.size(), &count);
 			if (err == E_NOT_SUFFICIENT_BUFFER)
@@ -1202,7 +1202,7 @@ void MWinDeviceImpl::RenderText(
 			if (SUCCEEDED(err))
 			{
 				float x = inX;
-				uint32 offset = 0;
+				uint32_t offset = 0;
 
 				ComPtr<ID2D1SolidColorBrush> brush;
 				err = mRenderTarget->CreateSolidColorBrush(
@@ -1246,7 +1246,7 @@ void MWinDeviceImpl::RenderText(
 void MWinDeviceImpl::DrawCaret(
 	float				inX,
 	float				inY,
-	uint32				inOffset)
+	uint32_t				inOffset)
 {
 	// Translate text character offset to point x,y.
 	DWRITE_HIT_TEST_METRICS caretMetrics = {};
@@ -1254,7 +1254,7 @@ void MWinDeviceImpl::DrawCaret(
 
 	if (mTextLayout)
 	{
-		int32 offset;
+		int32_t offset;
 
 		if (inOffset < mTextIndex.size())
 			offset = mTextIndex[inOffset];
@@ -1269,7 +1269,7 @@ void MWinDeviceImpl::DrawCaret(
 
 	// The default thickness of 1 pixel is almost _too_ thin on modern large monitors,
 	// but we'll use it.
-	DWORD caretIntThickness = static_cast<int32>(2 / mDpiScaleX);
+	DWORD caretIntThickness = static_cast<int32_t>(2 / mDpiScaleX);
 	::SystemParametersInfo(SPI_GETCARETWIDTH, 0, &caretIntThickness, FALSE);
 	const float caretThickness = float(caretIntThickness);
 
@@ -1285,8 +1285,8 @@ void MWinDeviceImpl::DrawCaret(
 void MWinDeviceImpl::RenderTextBackground(
 	float				inX,
 	float				inY,
-	uint32				inStart,
-	uint32				inLength,
+	uint32_t				inStart,
+	uint32_t				inLength,
 	MColor				inColor)
 {
 	if (mTextLayout)
@@ -1307,7 +1307,7 @@ void MWinDeviceImpl::RenderTextBackground(
 		range.startPosition = mTextIndex[inStart];
 		range.length = mTextIndex[inStart + inLength] - range.startPosition;
 
-		UINT32 actualHitTestCount = 0;
+		UINT32_t actualHitTestCount = 0;
 
 		// Determine actual number of hit-test ranges
 		mTextLayout->HitTestTextRange(range.startPosition, range.length,
@@ -1317,7 +1317,7 @@ void MWinDeviceImpl::RenderTextBackground(
 		std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
 
 		mTextLayout->HitTestTextRange(range.startPosition, range.length,
-			inX, inY, &hitTestMetrics[0], static_cast<UINT32>(hitTestMetrics.size()),
+			inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
 			&actualHitTestCount);
 
 		// Draw the selection ranges behind the text.
@@ -1358,12 +1358,12 @@ void MWinDeviceImpl::SetScale(
 }
 
 void MWinDeviceImpl::BreakLines(
-	uint32				inWidth,
-	vector<uint32>&		outBreaks)
+	uint32_t				inWidth,
+	vector<uint32_t>&		outBreaks)
 {
 	mTextLayout->SetMaxWidth(static_cast<float>(inWidth));
 	
-	uint32 lineCount = 0;
+	uint32_t lineCount = 0;
 	mTextLayout->GetLineMetrics(nullptr, 0, &lineCount);
 	if (lineCount > 0)
 	{
@@ -1371,7 +1371,7 @@ void MWinDeviceImpl::BreakLines(
 		THROW_IF_HRESULT_ERROR(
 			mTextLayout->GetLineMetrics(&lineMetrics[0], lineCount, &lineCount));
 		
-		uint32 offset = 0;
+		uint32_t offset = 0;
 		for (DWRITE_LINE_METRICS& m : lineMetrics)
 		{
 			offset += m.length;
@@ -1380,13 +1380,13 @@ void MWinDeviceImpl::BreakLines(
 	}
 }
 
-uint32 MWinDeviceImpl::MapBack(
-	uint32				inOffset)
+uint32_t MWinDeviceImpl::MapBack(
+	uint32_t				inOffset)
 {
-	vector<uint16>::iterator ix =
+	vector<uint16_t>::iterator ix =
 		find(mTextIndex.begin(), mTextIndex.end(), inOffset);
 
-	uint32 result;
+	uint32_t result;
 
 	if (ix == mTextIndex.end())
 		result = mText.length();
@@ -1426,7 +1426,7 @@ void MDevice::GetSysSelectionColor(
 	COLORREF clr = ::GetSysColor(COLOR_HIGHLIGHT);
 	if (clr != 0)
 	{
-		uint32 red = (clr & 0x000000FF);
+		uint32_t red = (clr & 0x000000FF);
 		red = (2 * red + 3 * 255) / 5;
 		if (red > 255)
 			red = 255;
@@ -1434,7 +1434,7 @@ void MDevice::GetSysSelectionColor(
 
 		clr >>= 8;
 
-		uint32 green = (clr & 0x000000FF);
+		uint32_t green = (clr & 0x000000FF);
 		green = (2 * green + 3 * 255) / 5;
 		if (green > 255)
 			green = 255;
@@ -1442,7 +1442,7 @@ void MDevice::GetSysSelectionColor(
 		
 		clr >>= 8;
 
-		uint32 blue = (clr & 0x000000FF);
+		uint32_t blue = (clr & 0x000000FF);
 		blue = (2 * blue + 3 * 255) / 5;
 		if (blue > 255)
 			blue = 255;
@@ -1473,7 +1473,7 @@ void MDevice::ListFonts(
 	// Get the system font collection.
 	HRESULT hr = pDWriteFactory->GetSystemFontCollection(&pFontCollection);
 
-	UINT32 familyCount = 0;
+	UINT32_t familyCount = 0;
 
 	// Get the number of font families in the collection.
 	if (SUCCEEDED(hr))
@@ -1481,7 +1481,7 @@ void MDevice::ListFonts(
 		familyCount = pFontCollection->GetFontFamilyCount();
 	}
 	
-	for (UINT32 i = 0; i < familyCount; ++i)
+	for (UINT32_t i = 0; i < familyCount; ++i)
 	{
 		ComPtr<IDWriteFontFamily> pFontFamily;
 
@@ -1499,7 +1499,7 @@ void MDevice::ListFonts(
 			hr = pFontFamily->GetFamilyNames(&pFamilyNames);
 		}
 
-		UINT32 index = 0;
+		UINT32_t index = 0;
 		BOOL exists = false;
 		
 		wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
@@ -1524,7 +1524,7 @@ void MDevice::ListFonts(
 		if (!exists)
 			index = 0;
 
-		UINT32 length = 0;
+		UINT32_t length = 0;
 
 		// Get the string length.
 		if (SUCCEEDED(hr))
@@ -1709,7 +1709,7 @@ MGeometryImpl* MGeometryImpl::Create(MDevice& inDevice, MGeometryFillMode inMode
 
 // PNG support
 
-MBitmap::MBitmap(const void* inPNG, uint32 inLength)
+MBitmap::MBitmap(const void* inPNG, uint32_t inLength)
 	: mData(nullptr), mWidth(0), mHeight(0), mStride(0), mUseAlpha(true)
 {
 	ComPtr<IWICImagingFactory> factory;
@@ -1728,10 +1728,10 @@ MBitmap::MBitmap(const void* inPNG, uint32 inLength)
 		{
 			bitmap->GetSize(&mWidth, &mHeight);
 
-			mStride = mWidth * sizeof(uint32);
+			mStride = mWidth * sizeof(uint32_t);
 			
-			mData = new uint32[mWidth * mHeight];
-			bitmap->CopyPixels(nullptr, mStride, mWidth * mHeight * sizeof(uint32), (BYTE*)mData);
+			mData = new uint32_t[mWidth * mHeight];
+			bitmap->CopyPixels(nullptr, mStride, mWidth * mHeight * sizeof(uint32_t), (BYTE*)mData);
 		}
 	}
 }

@@ -31,8 +31,8 @@ void MXcbCairoSurface::AddedToWindow()
 	
 	GetParentAndBounds(parent, bounds);
 
-	uint32 mask = 0;
-	vector<uint32> values;
+	uint32_t mask = 0;
+	vector<uint32_t> values;
 
 //	mask |= XCB_CW_OVERRIDE_REDIRECT;
 //	values.push_back(1);
@@ -233,7 +233,7 @@ void MXcbCairoSurface::SetColor(MColor inColor)
 	cairo_set_source_rgb(mCairo, inColor.red / 255.0, inColor.green / 255.0, inColor.blue / 255.0);
 }
 
-void MXcbCairoSurface::RoundedRectanglePath(MRect inBounds, uint32 inRadius)
+void MXcbCairoSurface::RoundedRectanglePath(MRect inBounds, uint32_t inRadius)
 {
 	if (inBounds.empty())
 		return;
@@ -266,13 +266,13 @@ void MXcbCairoSurface::RoundedRectanglePath(MRect inBounds, uint32 inRadius)
 	cairo_close_path(mCairo);
 }
 
-void MXcbCairoSurface::FillRoundedRectangle(MRect inBounds, uint32 inRadius)
+void MXcbCairoSurface::FillRoundedRectangle(MRect inBounds, uint32_t inRadius)
 {
 	RoundedRectanglePath(inBounds, inRadius);
 	cairo_fill(mCairo);
 }
 
-void MXcbCairoSurface::StrokeRoundedRectangle(MRect inBounds, uint32 inRadius)
+void MXcbCairoSurface::StrokeRoundedRectangle(MRect inBounds, uint32_t inRadius)
 {
 	RoundedRectanglePath(inBounds, inRadius);
 	cairo_stroke(mCairo);

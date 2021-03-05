@@ -70,7 +70,7 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 	virtual void	SetText(const std::string& inText);
 
 	virtual void	CreateWidget();
-	virtual void	GetIdealSize(int32& outWidth, int32& outHeight);
+	virtual void	GetIdealSize(int32_t& outWidth, int32_t& outHeight);
 
 	virtual void	AddedToWindow();
 
@@ -109,7 +109,7 @@ public:
 	virtual void	AddedToWindow();
 
 	virtual void	Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-						bool inExpand, bool inFill, uint32 inPadding);
+						bool inExpand, bool inFill, uint32_t inPadding);
 
   private:
 
@@ -130,20 +130,20 @@ public:
 //	virtual void	ShowSelf();
 //	virtual void	HideSelf();
 
-	virtual int32	GetValue() const;
-	virtual void	SetValue(int32 inValue);
+	virtual int32_t	GetValue() const;
+	virtual void	SetValue(int32_t inValue);
 	
-	virtual int32	GetTrackValue() const;
+	virtual int32_t	GetTrackValue() const;
 
-	virtual void	SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-						int32 inScrollUnit,  int32 inPageSize, int32 inValue);
+	virtual void	SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+						int32_t inScrollUnit,  int32_t inPageSize, int32_t inValue);
 
-	virtual int32	GetMinValue() const;
-//	virtual void	SetMinValue(int32 inValue);
-	virtual int32	GetMaxValue() const;
-//	virtual void	SetMaxValue(int32 inValue);
+	virtual int32_t	GetMinValue() const;
+//	virtual void	SetMinValue(int32_t inValue);
+	virtual int32_t	GetMaxValue() const;
+//	virtual void	SetMaxValue(int32_t inValue);
 //
-//	virtual void	SetViewSize(int32 inValue);
+//	virtual void	SetViewSize(int32_t inValue);
 
 	MSlot<void()>	eValueChanged;
 	void			ValueChanged();
@@ -152,10 +152,10 @@ public:
 class MGtkStatusbarImpl : public MGtkControlImpl<MStatusbar>
 {
   public:
-	MGtkStatusbarImpl(MStatusbar* inControl, uint32 inPartCount, MStatusBarElement inParts[]);
+	MGtkStatusbarImpl(MStatusbar* inControl, uint32_t inPartCount, MStatusBarElement inParts[]);
 
 	virtual void CreateWidget();
-	virtual void SetStatusText(uint32 inPartNr, const std::string& inText, bool inBorder);
+	virtual void SetStatusText(uint32_t inPartNr, const std::string& inText, bool inBorder);
 	virtual void AddedToWindow();
 
   private:
@@ -180,7 +180,7 @@ public:
 
 	virtual void	SetChoices(const std::vector<std::string>& inChoices);
 
-	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	virtual void	OnChanged();
 
   private:
@@ -194,8 +194,8 @@ public:
 	
 	virtual void	SetChoices(const std::vector<std::string>& inChoices);
 
-	virtual int32	GetValue() const;
-	virtual void	SetValue(int32 inValue);
+	virtual int32_t	GetValue() const;
+	virtual void	SetValue(int32_t inValue);
 	
 	virtual void	SetText(const std::string& inText);
 	virtual std::string
@@ -204,7 +204,7 @@ public:
 	virtual void	CreateWidget();
 	virtual void	AddedToWindow();
 
-	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 
   private:
 	std::vector<std::string>
@@ -214,7 +214,7 @@ public:
 class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
 {
 public:
-					MGtkEdittextImpl(MEdittext* inEdittext, uint32 inFlags);
+					MGtkEdittextImpl(MEdittext* inEdittext, uint32_t inFlags);
 	
 	virtual void	CreateWidget();
 
@@ -224,14 +224,14 @@ public:
 					GetText() const;
 	virtual void	SetText(const std::string& inText);
 
-	virtual uint32	GetFlags() const						{ return mFlags; }
+	virtual uint32_t	GetFlags() const						{ return mFlags; }
 
-	virtual void	SetPasswordChar(uint32 inUnicode);
+	virtual void	SetPasswordChar(uint32_t inUnicode);
 
-	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 
 protected:
-	uint32			mFlags;
+	uint32_t			mFlags;
 };
 
 class MGtkCaptionImpl : public MGtkControlImpl<MCaption>
@@ -303,8 +303,8 @@ class MGtkNotebookImpl : public MGtkControlImpl<MNotebook>
 
 	virtual void	AddPage(const std::string& inLabel, MView* inPage);
 	
-	virtual void	SelectPage(uint32 inPage);
-	virtual uint32	GetSelectedPage() const;
+	virtual void	SelectPage(uint32_t inPage);
+	virtual uint32_t	GetSelectedPage() const;
 
   private:
 	struct MPage
@@ -350,8 +350,8 @@ class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
 
 	virtual void	AddItem(const std::string& inLabel);
 
-	virtual int32	GetValue() const;
-	virtual void	SetValue(int32 inValue);
+	virtual int32_t	GetValue() const;
+	virtual void	SetValue(int32_t inValue);
 
   private:
 
@@ -361,7 +361,7 @@ class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
 
 	std::vector<std::string> mItems;
 	GtkListStore*	mStore;
-	int32			mNr;
+	int32_t			mNr;
 };
 
 class MGtkListViewImpl : public MGtkControlImpl<MListView>
@@ -385,13 +385,13 @@ class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
   public:
 	MGtkBoxControlImpl(MBoxControl* inControl,
 		bool inHorizontal, bool inHomogeneous, bool inExpand, bool inFill,
-		uint32 inSpacing, uint32 inPadding);
+		uint32_t inSpacing, uint32_t inPadding);
 
 	virtual void CreateWidget();
 
 	virtual void Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32 inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
 	bool mHorizontal, mHomogeneous, mExpand, mFill;
-	uint32 mSpacing, mPadding;
+	uint32_t mSpacing, mPadding;
 };

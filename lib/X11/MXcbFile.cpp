@@ -27,7 +27,7 @@ namespace fs = boost::filesystem;
 
 #include <sys/extattr.h>
 
-int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
+int32_t read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
 {
 	string path = inPath.string();
 	
@@ -35,7 +35,7 @@ int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, 
 		inName, outData, inDataSize);
 }
 
-int32 write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
+int32_t write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
 {
 	string path = inPath.string();
 	
@@ -56,7 +56,7 @@ int32 write_attribute(const fs::path& inPath, const char* inName, const void* in
 
 #include <attr/attributes.h>
 
-int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
+int32_t read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
 {
 	string path = inPath.string();
 
@@ -70,7 +70,7 @@ int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, 
 	return length;
 }
 
-int32 write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
+int32_t write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
 {
 	string path = inPath.string();
 	
@@ -89,14 +89,14 @@ int32 write_attribute(const fs::path& inPath, const char* inName, const void* in
 
 #include <sys/xattr.h>
 
-int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
+int32_t read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
 {
 	string path = inPath.string();
 
 	return ::getxattr(path.c_str(), inName, outData, inDataSize, 0, 0);
 }
 
-int32 write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
+int32_t write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
 {
 	string path = inPath.string();
 

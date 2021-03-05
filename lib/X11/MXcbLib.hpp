@@ -16,5 +16,5 @@
 
 // X11 utils
 
-uint32 MapModifier(uint32 inModifier);
-uint32 MapKeyCode(uint32 inKeyValue);
+uint32_t MapModifier(uint32_t inModifier);
+uint32_t MapKeyCode(uint32_t inKeyValue);

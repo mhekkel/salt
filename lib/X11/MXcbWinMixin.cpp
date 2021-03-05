@@ -40,7 +40,7 @@ MXcbWinMixin::~MXcbWinMixin()
 	sWinMixins.erase(remove(sWinMixins.begin(), sWinMixins.end(), this), sWinMixins.end());
 }
 
-MXcbWinMixin* MXcbWinMixin::FetchImpl(uint32 inWindowID)
+MXcbWinMixin* MXcbWinMixin::FetchImpl(uint32_t inWindowID)
 {
 	boost::unique_lock<boost::mutex> lock(sMutex);
 

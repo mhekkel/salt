@@ -25,11 +25,11 @@
 //// There are two versions of MListView here. A simple one using plain
 //// old objects. And a templated one. To use the templated one, do this:
 ////
-////	typedef MListViewT<string,int64>	CMyList;
+////	typedef MListViewT<string,int64_t>	CMyList;
 ////	typedef CMyList::MListRowT			CMyRow;
 ////
 ////	const char* labels[] = { "Column 1", "Column 2" };
-////	uint32 widths[] = { 200, 100 };
+////	uint32_t widths[] = { 200, 100 };
 ////
 ////	AddChild(list = new CMyList("list-1", MRect(...), labels, widths);
 ////	list->AddRow(new CMyRow("one", 1));
@@ -53,22 +53,22 @@
 //	bool			IsSelected() const				{ return mSelected; }
 //	void			SetSelected(bool inSelected)	{ mSelected = inSelected; }
 //	
-//	uint32			GetHeight() const				{ return mHeight; }
-//	void			SetHeight(uint32 inHeight)		{ mHeight = inHeight; }
+//	uint32_t			GetHeight() const				{ return mHeight; }
+//	void			SetHeight(uint32_t inHeight)		{ mHeight = inHeight; }
 //	
-//	virtual void	GetValue(uint32 inColumn, int64& outValue) const = 0;
-//	virtual void	SetValue(uint32 inColumn, int64 inValue) = 0;
+//	virtual void	GetValue(uint32_t inColumn, int64_t& outValue) const = 0;
+//	virtual void	SetValue(uint32_t inColumn, int64_t inValue) = 0;
 //
-//	virtual void	GetValue(uint32 inColumn, std::string& outValue) const = 0;
-//	virtual void	SetValue(uint32 inColumn, const std::string& inValue) = 0;
+//	virtual void	GetValue(uint32_t inColumn, std::string& outValue) const = 0;
+//	virtual void	SetValue(uint32_t inColumn, const std::string& inValue) = 0;
 //	
-//	virtual void	GetValue(uint32 inColumn, MColor& outValue) const = 0;
-//	virtual void	SetValue(uint32 inColumn, const MColor& inValue) = 0;
+//	virtual void	GetValue(uint32_t inColumn, MColor& outValue) const = 0;
+//	virtual void	SetValue(uint32_t inColumn, const MColor& inValue) = 0;
 //	
 //  protected:
 //
 //	  bool			mSelected;
-//	  uint32		mHeight;
+//	  uint32_t		mHeight;
 //
 //  private:
 //					MListRow(const MListRow&);
@@ -79,19 +79,19 @@
 //{
 //  public:
 //					MListColumn(const std::string& inLabel,
-//						uint32 inWidth);
+//						uint32_t inWidth);
 //	virtual			~MListColumn();
 //	
 //	virtual void	Render(MDevice& inDevice, const MListRow& inRow,
-//						uint32 inColumnNr, MRect inBounds) = 0;
+//						uint32_t inColumnNr, MRect inBounds) = 0;
 //
-//	virtual uint32	CalculateHeight(const MListRow& inRow,
-//						uint32 inColumnNr) = 0;
+//	virtual uint32_t	CalculateHeight(const MListRow& inRow,
+//						uint32_t inColumnNr) = 0;
 //
 //	std::string		GetLabel() const					{ return mLabel; }
 //
-//	uint32			GetWidth() const					{ return mWidth; }
-//	void			SetWidth(uint32 inWidth)			{ mWidth = inWidth; }
+//	uint32_t			GetWidth() const					{ return mWidth; }
+//	void			SetWidth(uint32_t inWidth)			{ mWidth = inWidth; }
 //
 //	std::string		GetFont() const						{ return mFont; }
 //	void			SetFont(const std::string& inFont)	{ mFont = inFont; }
@@ -102,7 +102,7 @@
 //  protected:
 //	std::string		mLabel;
 //	std::string		mFont;
-//	uint32			mWidth;
+//	uint32_t			mWidth;
 //	bool			mResizing;
 //
 //  private:
@@ -114,23 +114,23 @@
 //{
 //  public:
 //					MListTextColumn(const std::string& inLabel,
-//						uint32 inWidth);
+//						uint32_t inWidth);
 //	
 //	virtual void	Render(MDevice& inDevice, const MListRow& inRow,
-//						uint32 inColumnNr, MRect inBounds);	
+//						uint32_t inColumnNr, MRect inBounds);	
 //
-//	virtual uint32	CalculateHeight(const MListRow& inRow,
-//						uint32 inColumnNr);	
+//	virtual uint32_t	CalculateHeight(const MListRow& inRow,
+//						uint32_t inColumnNr);	
 //};
 //
 //class MListNumberColumn : public MListTextColumn
 //{
 //  public:
 //					MListNumberColumn(const std::string& inLabel,
-//						uint32 inWidth, const std::string& inFormat);
+//						uint32_t inWidth, const std::string& inFormat);
 //	
 //	virtual void	Render(MDevice& inDevice, const MListRow& inRow,
-//						uint32 inColumnNr, MRect inBounds);	
+//						uint32_t inColumnNr, MRect inBounds);	
 //
 //  protected:
 //	std::string		mFormat;
@@ -141,13 +141,13 @@
 //{
 //  public:
 //					MListDotColumn(const std::string& inLabel,
-//						uint32 inWidth);
+//						uint32_t inWidth);
 //	
 //	virtual void	Render(MDevice& inDevice, const MListRow& inRow,
-//						uint32 inColumnNr, MRect inBounds);	
+//						uint32_t inColumnNr, MRect inBounds);	
 //
-//	virtual uint32	CalculateHeight(const MListRow& inRow,
-//						uint32 inColumnNr);	
+//	virtual uint32_t	CalculateHeight(const MListRow& inRow,
+//						uint32_t inColumnNr);	
 //};
 //
 //class MListViewImpl;
@@ -160,22 +160,22 @@
 //						MRect inBounds, MListViewFlags inFlags = lvNone);
 //					~MListView();
 //
-//	virtual bool	HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+//	virtual bool	HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 //
-//	virtual void	ResizeFrame(int32 inWidthDelta, int32 inHeightDelta);
+//	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 //			
 //	virtual void	AddedToWindow();
 //
 //	virtual void	AddColumn(MListColumn* inColumn);
-//	void			SetResizingColumn(uint32 inColumnNr);
-//	MListColumn*	GetColumn(uint32 inColumnNr);
+//	void			SetResizingColumn(uint32_t inColumnNr);
+//	MListColumn*	GetColumn(uint32_t inColumnNr);
 //	
 //	virtual void	AddRow(MListRow* inRow, MListRow* inBefore = nullptr);
-//	virtual void	RemoveRow(uint32 inIndex);
+//	virtual void	RemoveRow(uint32_t inIndex);
 //	virtual void	RemoveRow(MListRow* inRow);
 //	virtual void	RemoveAll();
 //	
-//	virtual void	SelectRow(uint32 inIndex, bool inSelect = true);
+//	virtual void	SelectRow(uint32_t inIndex, bool inSelect = true);
 //	virtual void	SelectRow(MListRow* inRow, bool inSelect = true);
 //	virtual MListRow*
 //					GetFirstSelectedRow() const;
@@ -183,9 +183,9 @@
 //					GetNextSelectedRow(MListRow* inFrom) const;
 //
 //					// returns -1 if not found:	
-//	virtual int32	GetRowIndex(MListRow* inRow) const;
+//	virtual int32_t	GetRowIndex(MListRow* inRow) const;
 //	virtual MListRow*
-//					GetRow(uint32 inIndex);
+//					GetRow(uint32_t inIndex);
 //
 //  protected:
 //	friend class MListViewImpl;
@@ -206,7 +206,7 @@
 //// Column traits, mapping properties to recognized C++ types
 //template<class Arg> struct MListColumnTraitsT
 //{
-//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32 inWidth)
+//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32_t inWidth)
 //	{
 //		return nullptr;
 //	}
@@ -214,15 +214,15 @@
 //
 //template<> struct MListColumnTraitsT<std::string>
 //{
-//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32 inWidth)
+//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32_t inWidth)
 //	{
 //		return new MListTextColumn(inLabel, inWidth);
 //	}
 //};
 //
-//template<> struct MListColumnTraitsT<int64>
+//template<> struct MListColumnTraitsT<int64_t>
 //{
-//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32 inWidth)
+//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32_t inWidth)
 //	{
 //		return new MListNumberColumn(inLabel, inWidth, "%Ld");
 //	}
@@ -230,7 +230,7 @@
 //
 //template<> struct MListColumnTraitsT<MColor>
 //{
-//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32 inWidth)
+//	static MListColumn*	CreateColumn(const std::string& inLabel, uint32_t inWidth)
 //	{
 //		return new MListDotColumn(inLabel, inWidth);
 //	}
@@ -283,43 +283,43 @@
 //						MListRowBaseT(const MListColumnTypes& inValues)
 //							: mValues(inValues) {}
 //
-//	virtual void		GetValue(uint32 inColumn, int64& outValue) const;
-//	virtual void		SetValue(uint32 inColumn, int64 inValue);
-//	virtual void		GetValue(uint32 inColumn, std::string& outValue) const;
-//	virtual void		SetValue(uint32 inColumn, const std::string& inValue);
-//	virtual void		GetValue(uint32 inColumn, MColor& outValue) const;
-//	virtual void		SetValue(uint32 inColumn, const MColor& inValue);
+//	virtual void		GetValue(uint32_t inColumn, int64_t& outValue) const;
+//	virtual void		SetValue(uint32_t inColumn, int64_t inValue);
+//	virtual void		GetValue(uint32_t inColumn, std::string& outValue) const;
+//	virtual void		SetValue(uint32_t inColumn, const std::string& inValue);
+//	virtual void		GetValue(uint32_t inColumn, MColor& outValue) const;
+//	virtual void		SetValue(uint32_t inColumn, const MColor& inValue);
 //
 //  protected:
 //	MListColumnTypes	mValues;
 //};
 //
 //template<class Args>
-//void MListRowBaseT<Args>::GetValue(uint32 inColumn, int64& outValue) const
+//void MListRowBaseT<Args>::GetValue(uint32_t inColumn, int64_t& outValue) const
 //{
 //	switch (inColumn)
 //	{
-//		case 0:	MValueAccess<0,MListColumnTypes,int64>::get(mValues, outValue); break;
-//		case 1:	MValueAccess<1,MListColumnTypes,int64>::get(mValues, outValue); break;
-//		case 2:	MValueAccess<2,MListColumnTypes,int64>::get(mValues, outValue); break;
-//		case 3:	MValueAccess<3,MListColumnTypes,int64>::get(mValues, outValue); break;
+//		case 0:	MValueAccess<0,MListColumnTypes,int64_t>::get(mValues, outValue); break;
+//		case 1:	MValueAccess<1,MListColumnTypes,int64_t>::get(mValues, outValue); break;
+//		case 2:	MValueAccess<2,MListColumnTypes,int64_t>::get(mValues, outValue); break;
+//		case 3:	MValueAccess<3,MListColumnTypes,int64_t>::get(mValues, outValue); break;
 //	}
 //}
 //
 //template<class Args>
-//void MListRowBaseT<Args>::SetValue(uint32 inColumn, int64 inValue)
+//void MListRowBaseT<Args>::SetValue(uint32_t inColumn, int64_t inValue)
 //{
 //	switch (inColumn)
 //	{
-//		case 0:	MValueAccess<0,MListColumnTypes,int64>::set(mValues, inValue); break;
-//		case 1:	MValueAccess<1,MListColumnTypes,int64>::set(mValues, inValue); break;
-//		case 2:	MValueAccess<2,MListColumnTypes,int64>::set(mValues, inValue); break;
-//		case 3:	MValueAccess<3,MListColumnTypes,int64>::set(mValues, inValue); break;
+//		case 0:	MValueAccess<0,MListColumnTypes,int64_t>::set(mValues, inValue); break;
+//		case 1:	MValueAccess<1,MListColumnTypes,int64_t>::set(mValues, inValue); break;
+//		case 2:	MValueAccess<2,MListColumnTypes,int64_t>::set(mValues, inValue); break;
+//		case 3:	MValueAccess<3,MListColumnTypes,int64_t>::set(mValues, inValue); break;
 //	}
 //}
 //
 //template<class Args>
-//void MListRowBaseT<Args>::GetValue(uint32 inColumn, std::string& outValue) const
+//void MListRowBaseT<Args>::GetValue(uint32_t inColumn, std::string& outValue) const
 //{
 //	switch (inColumn)
 //	{
@@ -331,7 +331,7 @@
 //}
 //
 //template<class Args>
-//void MListRowBaseT<Args>::SetValue(uint32 inColumn, const std::string& inValue)
+//void MListRowBaseT<Args>::SetValue(uint32_t inColumn, const std::string& inValue)
 //{
 //	switch (inColumn)
 //	{
@@ -343,7 +343,7 @@
 //}
 //
 //template<class Args>
-//void MListRowBaseT<Args>::GetValue(uint32 inColumn, MColor& outValue) const
+//void MListRowBaseT<Args>::GetValue(uint32_t inColumn, MColor& outValue) const
 //{
 //	switch (inColumn)
 //	{
@@ -355,7 +355,7 @@
 //}
 //
 //template<class Args>
-//void MListRowBaseT<Args>::SetValue(uint32 inColumn, const MColor& inValue)
+//void MListRowBaseT<Args>::SetValue(uint32_t inColumn, const MColor& inValue)
 //{
 //	switch (inColumn)
 //	{
@@ -413,10 +413,10 @@
 //{
 //  public:
 //	typedef typename MListRowT<Arg0,Arg1,Arg2,Arg3>		MListRowT;
-//	static const uint32									kColumnCount = MListRowT::kColumnCount;
+//	static const uint32_t									kColumnCount = MListRowT::kColumnCount;
 //
 //					MListViewT(const std::string& inID, MRect inBounds,
-//						const char* inLabels[kColumnCount], uint32 inWidths[kColumnCount],
+//						const char* inLabels[kColumnCount], uint32_t inWidths[kColumnCount],
 //							MListViewFlags inFlags = lvNone)
 //						: MListView(inID, inBounds, inFlags)
 //					{
@@ -437,7 +437,7 @@
 //	virtual void	EmitRowDragged(MListRow* inRow)		{ eRowDragged(static_cast<MListRowT*>(inRow)); }
 //
 //	const char*		mLabels[kColumnCount];
-//	uint32			mWidths[kColumnCount];
+//	uint32_t			mWidths[kColumnCount];
 //};
 //
 //template<class Arg0, class Arg1, class Arg2, class Arg3>

@@ -69,33 +69,33 @@ class MWinDeviceImpl : public MDeviceImpl
 	//virtual void			ClipRegion(// MRegion inRegion);
 	virtual void			EraseRect(MRect inRect);
 	virtual void			FillRect(MRect inRect);
-	virtual void			StrokeRect(MRect inRect, uint32 inLineWidth = 1);
-	virtual void			StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32 inLineWidth);
+	virtual void			StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
+	virtual void			StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32_t inLineWidth);
 	virtual void			FillEllipse(MRect inRect);
 	virtual void			StrokeGeometry(MGeometryImpl& inGeometry, float inLineWidth);
 	virtual void			FillGeometry(MGeometryImpl& inGeometry);
 	virtual void			DrawBitmap(const MBitmap& inBitmap, float inX, float inY);
-	virtual void			CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32 inWidth, float inRotation);
+	virtual void			CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation);
 	
 	virtual float			GetAscent();
 	virtual float			GetDescent();
-	virtual int32			GetLineHeight();
+	virtual int32_t			GetLineHeight();
 	virtual float			GetXWidth();
-	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32 inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
+	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
 	virtual void			DrawString(const std::string& inText, MRect inBounds, MAlignment inAlign);
 	// Text Layout options
 	virtual void			SetText(const std::string& inText);
 	virtual void			SetTabStops(float inTabWidth);
-	virtual void			SetTextColors(uint32 inColorCount, uint32 inColorIndices[], uint32 inOffsets[], MColor inColors[]);
-	virtual void			SetTextStyles(uint32 inStyleCount, uint32 inStyles[], uint32 inOffsets[]);
-	virtual void			RenderTextBackground(float inX, float inY, uint32 inStart, uint32 inLength, MColor inColor);
-	virtual void			SetTextSelection(uint32 inStart, uint32 inLength, MColor inSelectionColor);
-	virtual void			IndexToPosition(uint32 inIndex, bool inTrailing, int32& outPosition);
-	virtual bool			PositionToIndex(int32 inPosition, uint32& outIndex);
+	virtual void			SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]);
+	virtual void			SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
+	virtual void			RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor);
+	virtual void			SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor);
+	virtual void			IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t& outPosition);
+	virtual bool			PositionToIndex(int32_t inPosition, uint32_t& outIndex);
 	virtual float			GetTextWidth();
 	virtual void			RenderText(float inX, float inY);
-	virtual void			DrawCaret(float inX, float inY, uint32 inOffset);
-	virtual void			BreakLines(uint32 inWidth, std::vector<uint32>& outBreaks);
+	virtual void			DrawCaret(float inX, float inY, uint32_t inOffset);
+	virtual void			BreakLines(uint32_t inWidth, std::vector<uint32_t>& outBreaks);
 	virtual void			MakeTransparent(float inOpacity) {}
 	virtual void			SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor);
 	virtual void			SetReplaceUnknownCharacters(bool inReplaceUnknownCharacters);
@@ -106,7 +106,7 @@ class MWinDeviceImpl : public MDeviceImpl
 
 	void					CreateTextFormat();
 	void					LookupFont(const std::wstring& inFamily);
-	uint32					MapBack(uint32 inOffset);
+	uint32_t					MapBack(uint32_t inOffset);
 
 	MView*					mView;
 //	HDC						mDC;
@@ -128,9 +128,9 @@ class MWinDeviceImpl : public MDeviceImpl
 
 	// converted text (from UTF8 to UTF16)
 	std::wstring			mText;
-	std::vector<uint16>		mTextIndex;		// from string to wstring
+	std::vector<uint16_t>		mTextIndex;		// from string to wstring
 	MColor					mSelectionColor;
-	uint32					mSelectionStart, mSelectionLength;
+	uint32_t					mSelectionStart, mSelectionLength;
 	MColor					mWhitespaceColor;
 
 	float					mDpiScaleX, mDpiScaleY;

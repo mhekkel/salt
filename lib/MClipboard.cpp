@@ -55,7 +55,7 @@ MClipboard::~MClipboard()
 {
 	mImpl->Commit();
 	
-	for (uint32 i = 0; i < mCount; ++i)
+	for (uint32_t i = 0; i < mCount; ++i)
 		delete mRing[i];
 	
 	delete mImpl;
@@ -73,7 +73,7 @@ bool MClipboard::HasData()
 	
 //	cout << "Clipboard now contains " << mCount << " data items:" << endl;
 //	
-//	for (uint32 i = 0; i < mCount; ++i)
+//	for (uint32_t i = 0; i < mCount; ++i)
 //		cout << *mRing[i];
 //	
 //	cout << endl;
@@ -93,7 +93,7 @@ void MClipboard::NextInRing()
 	if (mCount > 0)
 	{
 		Data* front = mRing[0];
-		for (uint32 i = 0; i < mCount - 1; ++i)
+		for (uint32_t i = 0; i < mCount - 1; ++i)
 			mRing[i] = mRing[i + 1];
 		mRing[mCount - 1] = front; 
 	}
@@ -127,7 +127,7 @@ void MClipboard::SetData(const string& inText, bool inBlock)
 	{
 		Data* newData = new Data(inText, inBlock);
 		
-		for (int32 i = mCount - 1; i >= 0; --i)
+		for (int32_t i = mCount - 1; i >= 0; --i)
 			mRing[i + 1] = mRing[i];
 
 		mRing[0] = newData;

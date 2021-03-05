@@ -21,7 +21,7 @@ class MTerminalWindow : public MWindow
 {
   public:
 	static MTerminalWindow* Create(boost::asio::io_service& inIOService);
-	static MTerminalWindow* Create(const std::string& inUser, const std::string& inHost, uint16 inPort,
+	static MTerminalWindow* Create(const std::string& inUser, const std::string& inHost, uint16_t inPort,
 								const std::string& inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
 	virtual MTerminalWindow* Clone() = 0;
@@ -34,8 +34,8 @@ class MTerminalWindow : public MWindow
 
 	virtual				~MTerminalWindow();
 
-	virtual bool		UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked);
-	virtual bool		ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers);
+	virtual bool		UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked);
+	virtual bool		ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
 	virtual bool		AllowClose(bool inLogOff);
 	virtual void		Close();

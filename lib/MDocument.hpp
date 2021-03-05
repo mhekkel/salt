@@ -52,7 +52,7 @@ class MDocument : public MHandler
 	// the MVC interface
 	void				AddController(MController* inController);
 	void				RemoveController(MController* inController);
-	uint32				CountControllers() const			{ return mControllers.size(); }
+	uint32_t				CountControllers() const			{ return mControllers.size(); }
 	virtual MController*
 						GetFirstController() const;
 	MControllerList		GetControllers() const				{ return mControllers; }
@@ -75,11 +75,11 @@ class MDocument : public MHandler
 	// implement the UpdateCommandStatus and ProcessCommand methods
 	// Reason for this is that documents can be shared by multiple controllers
 	
-	virtual bool		UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked);
+	virtual bool		UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked);
 
-	virtual bool		ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers);
+	virtual bool		ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
-	virtual bool		HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool		HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	virtual bool		HandleCharacter(const std::string& inText, bool inRepeat);
 
 	MEventOut<void(bool)>					eModifiedChanged;

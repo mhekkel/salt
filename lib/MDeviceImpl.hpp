@@ -37,9 +37,9 @@ class MDeviceImpl
 	virtual void			Save()											{}
 	virtual void			Restore()										{}
 
-	virtual bool			IsPrinting(int32& outPage) const			{ return false; }
+	virtual bool			IsPrinting(int32_t& outPage) const			{ return false; }
 	virtual MRect			GetBounds() const								{ return MRect(0, 0, 100, 100); }
-	virtual void			SetOrigin(int32 inX, int32 inY)					{}
+	virtual void			SetOrigin(int32_t inX, int32_t inY)					{}
 
 	virtual void			SetFont(const std::string& inFont)					{}
 
@@ -53,44 +53,44 @@ class MDeviceImpl
 
 	virtual void			EraseRect(MRect inRect)					{}
 	virtual void			FillRect(MRect inRect)					{}
-	virtual void			StrokeRect(MRect inRect, uint32 inLineWidth = 1)		{}
-	virtual void			StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32 inLineWidth) {}
+	virtual void			StrokeRect(MRect inRect, uint32_t inLineWidth = 1)		{}
+	virtual void			StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32_t inLineWidth) {}
 	virtual void			FillEllipse(MRect inRect)					{}
 	virtual void			StrokeGeometry(MGeometryImpl& inGeometry, float inLineWidth) {}
 	virtual void			FillGeometry(MGeometryImpl& inGeometry) {}
 	virtual void			DrawBitmap(const MBitmap& inBitmap, float inX, float inY) {}	
 
-	// virtual void			CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32 inWidth, float inRotation)				{}
+	// virtual void			CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation)				{}
 	//PangoFontMetrics*		GetMetrics();
 
 	virtual float			GetAscent()										{ return 10; }
 	virtual float			GetDescent()									{ return 2; }
 	virtual float			GetLeading()									{ return 0; }
-	virtual int32			GetLineHeight()
+	virtual int32_t			GetLineHeight()
 							{
-								return static_cast<int32>(std::ceil(GetAscent() + GetDescent() + GetLeading()));
+								return static_cast<int32_t>(std::ceil(GetAscent() + GetDescent() + GetLeading()));
 							}
 	virtual float			GetXWidth()										{ return 8; }
 
-	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32 inTruncateWidth = 0, MAlignment inAlign = eAlignNone)	{}
+	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone)	{}
 	virtual void			DrawString(const std::string& inText, MRect inBounds, MAlignment inAlign = eAlignNone)	{}
-	virtual uint32			GetStringWidth(const std::string& inText)					{ return 0; }
+	virtual uint32_t			GetStringWidth(const std::string& inText)					{ return 0; }
 
 	// Text Layout options
 	virtual void			SetText(const std::string& inText)					{}
 	virtual void			SetTabStops(float inTabWidth)				{}
-	virtual void			SetTextColors(uint32 inColorCount, uint32 inColorIndices[], uint32 inOffsets[], MColor inColors[])				{}
-	virtual void			SetTextStyles(uint32 inStyleCount, uint32 inStyles[], uint32 inOffsets[])			{}
-	virtual void			RenderTextBackground(float inX, float inY, uint32 inStart, uint32 inLength, MColor inColor)				{}
-	virtual void			SetTextSelection(uint32 inStart, uint32 inLength, MColor inSelectionColor)		{}
+	virtual void			SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[])				{}
+	virtual void			SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[])			{}
+	virtual void			RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor)				{}
+	virtual void			SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor)		{}
 	virtual void			SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor)		{}
 	virtual void			SetReplaceUnknownCharacters(bool inReplaceUnknownCharacters) {}
-	virtual void			IndexToPosition(uint32 inIndex, bool inTrailing, int32& outPosition)			{}
-	virtual bool			PositionToIndex(int32 inPosition, uint32& outIndex)				{ return false; }
+	virtual void			IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t& outPosition)			{}
+	virtual bool			PositionToIndex(int32_t inPosition, uint32_t& outIndex)				{ return false; }
 	virtual float			GetTextWidth()									{ return 0; }
 	virtual void			RenderText(float inX, float inY)					{}
-	virtual void			DrawCaret(float inX, float inY, uint32 inOffset)				{}
-	virtual void			BreakLines(uint32 inWidth, std::vector<uint32>& outBreaks)				{}
+	virtual void			DrawCaret(float inX, float inY, uint32_t inOffset)				{}
+	virtual void			BreakLines(uint32_t inWidth, std::vector<uint32_t>& outBreaks)				{}
 
 	virtual void			SetScale(float inScaleX, float inScaleY, float inCenterX, float inCenterY)				{}
 	virtual void			MakeTransparent(float inOpacity)				{}

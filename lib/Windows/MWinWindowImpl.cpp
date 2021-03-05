@@ -306,7 +306,7 @@ void MWinWindowImpl::SetTransparency(float inAlpha)
 	else
 	{
 		::SetWindowLong(GetHandle(), GWL_EXSTYLE, style | WS_EX_LAYERED);
-		::SetLayeredWindowAttributes(GetHandle(), 0, static_cast<uint8>(inAlpha * 255), LWA_ALPHA);
+		::SetLayeredWindowAttributes(GetHandle(), 0, static_cast<uint8_t>(inAlpha * 255), LWA_ALPHA);
 	}
 
 	//DWM_BLURBEHIND bb = {0};
@@ -413,7 +413,7 @@ MHandler* MWinWindowImpl::GetFocus()
 	return result;
 }
 	
-void MWinWindowImpl::ResizeWindow(int32 inWidthDelta, int32 inHeightDelta)
+void MWinWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	if (GetHandle() != nullptr)
 	{
@@ -466,14 +466,14 @@ void MWinWindowImpl::UpdateNow()
 	::UpdateWindow(GetHandle());
 }
 
-void MWinWindowImpl::ScrollRect(MRect inRect, int32 inDeltaH, int32 inDeltaV)
+void MWinWindowImpl::ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV)
 {
 	RECT r = { inRect.x, inRect.y, inRect.x + inRect.width, inRect.y + inRect.height };
 //	::ScrollWindowEx(GetHandle(), inDeltaH, inDeltaV, &r, &r, nullptr, nullptr, SW_INVALIDATE);
 	::InvalidateRect(GetHandle(), &r, false);
 }
 	
-bool MWinWindowImpl::GetMouse(int32& outX, int32& outY, uint32& outModifiers)
+bool MWinWindowImpl::GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers)
 {
 	POINT lPoint;
 	::GetCursorPos(&lPoint);
@@ -507,7 +507,7 @@ bool MWinWindowImpl::GetMouse(int32& outX, int32& outY, uint32& outModifiers)
 	return result;
 }
 
-bool MWinWindowImpl::WaitMouseMoved(int32 inX, int32 inY)
+bool MWinWindowImpl::WaitMouseMoved(int32_t inX, int32_t inY)
 {
 	bool result = false;
 
@@ -528,8 +528,8 @@ bool MWinWindowImpl::WaitMouseMoved(int32 inX, int32 inY)
 				break;
 			}
 			
-			int32 x, y;
-			uint32 mod;
+			int32_t x, y;
+			uint32_t mod;
 			
 			if (not GetMouse(x, y, mod))
 				break;
@@ -546,9 +546,9 @@ bool MWinWindowImpl::WaitMouseMoved(int32 inX, int32 inY)
 	return result;
 }
 
-uint32 MWinWindowImpl::GetModifiers() const
+uint32_t MWinWindowImpl::GetModifiers() const
 {
-	uint32 modifiers = 0;
+	uint32_t modifiers = 0;
 	if (::GetKeyState(VK_SHIFT) & 0x8000)
 		modifiers |= kShiftKey;
 	if (::GetKeyState(VK_CONTROL) & 0x8000)
@@ -597,7 +597,7 @@ void MWinWindowImpl::SetCursor(MCursor inCursor)
 					bi.biBitCount = 32;    
 					bi.biCompression = BI_RGB;
 
-					vector<uint32> rgba(bi.biWidth);
+					vector<uint32_t> rgba(bi.biWidth);
 
 					for (int row = 0; row < bi.biHeight; ++row)
 					{
@@ -636,7 +636,7 @@ void MWinWindowImpl::ObscureCursor()
 	::SetCursor(nullptr);
 }
 
-void MWinWindowImpl::ConvertToScreen(int32& ioX, int32& ioY) const
+void MWinWindowImpl::ConvertToScreen(int32_t& ioX, int32_t& ioY) const
 {
 	POINT p = { ioX, ioY };
 	::ClientToScreen(GetHandle(), &p);
@@ -644,7 +644,7 @@ void MWinWindowImpl::ConvertToScreen(int32& ioX, int32& ioY) const
 	ioY = p.y;
 }
 
-void MWinWindowImpl::ConvertFromScreen(int32& ioX, int32& ioY) const
+void MWinWindowImpl::ConvertFromScreen(int32_t& ioX, int32_t& ioY) const
 {
 	POINT p = { ioX, ioY };
 	::ScreenToClient(GetHandle(), &p);
@@ -652,7 +652,7 @@ void MWinWindowImpl::ConvertFromScreen(int32& ioX, int32& ioY) const
 	ioY = p.y;
 }
 
-bool MWinWindowImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MWinWindowImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	MHandler* focus = mWindow->GetFocus();
 	if (focus == nullptr)
@@ -668,7 +668,7 @@ bool MWinWindowImpl::DispatchCharacter(const string& inText, bool inRepeat)
 	return focus->HandleCharacter(inText, inRepeat);
 }
 
-bool MWinWindowImpl::DispatchCommand(uint32 inCommand, uint32 inModifiers)
+bool MWinWindowImpl::DispatchCommand(uint32_t inCommand, uint32_t inModifiers)
 {
 	MHandler* focus = mWindow->GetFocus();
 	if (focus == nullptr)
@@ -762,7 +762,7 @@ bool MWinWindowImpl::WMMouseActivate(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*
 	}
 	else if (LOWORD(inLParam) == HTCLIENT and not mWindow->IsActive())
 	{
-		uint32 modifiers;
+		uint32_t modifiers;
 		GetModifierState(modifiers, false);
 		
 		POINT lPoint;
@@ -777,8 +777,8 @@ bool MWinWindowImpl::WMMouseActivate(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*
 			view = mWindow->FindSubView(lPoint.x, lPoint.y);
 		assert(view != nullptr);
 		
-		int32 x = lPoint.x;
-		int32 y = lPoint.y;
+		int32_t x = lPoint.x;
+		int32_t y = lPoint.y;
 		
 		view->ConvertFromWindow(x, y);
 		
@@ -819,8 +819,8 @@ bool MWinWindowImpl::WMSize(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM inWParam, L
 		MRect bounds;
 		mWindow->GetBounds(bounds);
 		
-		int32 dw = newBounds.width - mNonClientMargin.left - mNonClientMargin.right - bounds.width;
-		int32 dh = newBounds.height - mNonClientMargin.top - mNonClientMargin.bottom - bounds.height;
+		int32_t dw = newBounds.width - mNonClientMargin.left - mNonClientMargin.right - bounds.width;
+		int32_t dh = newBounds.height - mNonClientMargin.top - mNonClientMargin.bottom - bounds.height;
 		
 		if (dw or dh)
 			mWindow->MView::ResizeFrame(dw, dh);
@@ -973,7 +973,7 @@ bool MWinWindowImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM
 
 	if (inLParam == 0)
 	{
-		uint32 modifiers;
+		uint32_t modifiers;
 		GetModifierState(modifiers, false);
 		result = mWindow->GetFocus()->ProcessCommand(inWParam, nullptr, 0, modifiers);
 	}
@@ -993,7 +993,7 @@ bool MWinWindowImpl::WMMenuCommand(HWND inHWnd, UINT /*inUMsg*/, WPARAM inWParam
 {
 	outResult = 1;
 	
-	uint32 index = inWParam;
+	uint32_t index = inWParam;
 	MMenu* menu = MWinMenuImpl::Lookup((HMENU)inLParam);
 
 	return mWindow->GetFocus()->ProcessCommand(menu->GetItemCommand(index), menu, index, 0);
@@ -1004,11 +1004,11 @@ bool MWinWindowImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	::SetFocus(inHWnd);
 	::SetCapture(inHWnd);
 
-	uint32 modifiers;
+	uint32_t modifiers;
 	::GetModifierState(modifiers, false);
 	
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
 	MView* mousedView = mWindow->FindSubView(x, y);
 	if (mousedView == mMousedView)
@@ -1037,13 +1037,13 @@ bool MWinWindowImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 
 bool MWinWindowImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 {
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
 	MView* mousedView = mWindow->FindSubView(x, y);
 	if (mousedView == mMousedView)
 	{
-		uint32 modifiers;
+		uint32_t modifiers;
 		::GetModifierState(modifiers, false);
 
 		mMousedView->ConvertFromWindow(x, y);
@@ -1065,13 +1065,13 @@ bool MWinWindowImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM
 {
 	::ReleaseCapture();
 
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
 	MView* mousedView = mWindow->FindSubView(x, y);
 	if (mousedView == mMousedView)
 	{
-		uint32 modifiers;
+		uint32_t modifiers;
 		::GetModifierState(modifiers, false);
 	
 		mMousedView->ConvertFromWindow(x, y);
@@ -1088,11 +1088,11 @@ bool MWinWindowImpl::WMMouseWheel(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM inWPa
 	short deltax = static_cast<short>(LOWORD(inWParam));
 	deltax /= WHEEL_DELTA;
 	
-	uint32 modifiers;
+	uint32_t modifiers;
 	::GetModifierState(modifiers, false);
 	
-	int32 x = LOWORD(inLParam);
-	int32 y = HIWORD(inLParam);
+	int32_t x = LOWORD(inLParam);
+	int32_t y = HIWORD(inLParam);
 	mWindow->ConvertFromScreen(x, y);
 	
 	MView* view = mWindow->FindSubView(x, y);
@@ -1111,8 +1111,8 @@ bool MWinWindowImpl::WMContextMenu(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*in
 {
 	try
 	{
-		int32 x = LOWORD(inLParam);
-		int32 y = HIWORD(inLParam);
+		int32_t x = LOWORD(inLParam);
+		int32_t y = HIWORD(inLParam);
 
 		ConvertFromScreen(x, y);
 		
@@ -1135,8 +1135,8 @@ bool MWinWindowImpl::WMSetCursor(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*inWP
 	bool handled = false;
 	try
 	{
-		int32 x, y;
-		uint32 modifiers;
+		int32_t x, y;
+		uint32_t modifiers;
 		
 		GetMouse(x, y, modifiers);
 		

@@ -35,7 +35,7 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	virtual MHandler*
 					GetFocus();
 
-	virtual void	ResizeWindow(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void	ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	virtual void	SetWindowPosition(MRect inBounds, bool inTransition);
 	virtual void	GetWindowPosition(MRect& outBounds) const;
@@ -44,18 +44,18 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	virtual void	Validate(MRect inRect);
 	virtual void	UpdateNow();
 
-	virtual void	ScrollRect(MRect inRect, int32 inDeltaH, int32 inDeltaV);
+	virtual void	ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV);
 	
-	virtual bool	GetMouse(int32& outX, int32& outY, uint32& outModifiers);
-	virtual bool	WaitMouseMoved(int32 inX, int32 inY);
+	virtual bool	GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers);
+	virtual bool	WaitMouseMoved(int32_t inX, int32_t inY);
 
-	virtual uint32	GetModifiers() const;
+	virtual uint32_t	GetModifiers() const;
 
 	virtual void	SetCursor(MCursor inCursor);
 	virtual void	ObscureCursor();
 
-	virtual void	ConvertToScreen(int32& ioX, int32& ioY) const;
-	virtual void	ConvertFromScreen(int32& ioX, int32& ioY) const;
+	virtual void	ConvertToScreen(int32_t& ioX, int32_t& ioY) const;
+	virtual void	ConvertFromScreen(int32_t& ioX, int32_t& ioY) const;
 
 	MWindow*		GetWindow() const						{ return mWindow; }
 
@@ -102,26 +102,26 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	virtual bool	WMNCCalcSize(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
 	virtual bool	WMNCHitTest(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
 
-	virtual bool	DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	virtual bool	DispatchCharacter(const std::string& inText, bool inRepeat);
-	virtual bool	DispatchCommand(uint32 inCommand, uint32 inModifiers);
+	virtual bool	DispatchCommand(uint32_t inCommand, uint32_t inModifiers);
 
 	bool			UpdateNonClientMargins();
 	void			PaintCustomCaption(HDC inHdc);
 
 	HWND			mSizeBox;
 	HWND			mStatus;
-	int32			mMinWidth, mMinHeight;
+	int32_t			mMinWidth, mMinHeight;
 	MMenu*			mMenubar;
-	int32			mLastGetMouseX, mLastGetMouseY;
+	int32_t			mLastGetMouseX, mLastGetMouseY;
 	MView*			mMousedView;
-	uint32			mClickCount;
+	uint32_t			mClickCount;
 	double			mLastClickTime;
 	IDropTarget*	mDropTarget;
 	
-	struct { int32 left, top, right, bottom; }
+	struct { int32_t left, top, right, bottom; }
 					mNonClientOffset, mNonClientMargin;
 	bool			mCustomNonClient, mCallDWP;
-	int32			mCaptionHeight;
-	int32			mHorizontalResizeMargin, mVerticalResizeMargin;
+	int32_t			mCaptionHeight;
+	int32_t			mHorizontalResizeMargin, mVerticalResizeMargin;
 };

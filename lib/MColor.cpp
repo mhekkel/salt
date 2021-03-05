@@ -59,9 +59,9 @@ MColor::MColor(
 }
 
 MColor::MColor(
-	uint8			inRed,
-	uint8			inGreen,
-	uint8			inBlue)
+	uint8_t			inRed,
+	uint8_t			inGreen,
+	uint8_t			inBlue)
 {
 	red = inRed;
 	green = inGreen;
@@ -73,9 +73,9 @@ MColor::MColor(
 	float			inGreen,
 	float			inBlue)
 {
-	red = static_cast<uint8>(inRed * 255);
-	green = static_cast<uint8>(inGreen * 255);
-	blue = static_cast<uint8>(inBlue * 255);
+	red = static_cast<uint8_t>(inRed * 255);
+	green = static_cast<uint8_t>(inGreen * 255);
+	blue = static_cast<uint8_t>(inBlue * 255);
 }
 
 MColor& MColor::operator=(
@@ -103,9 +103,9 @@ string MColor::hex() const
 	s.setf(ios_base::hex, ios_base::basefield);
 	
 	s << '#'
-		<< setw(2) << setfill('0') << static_cast<uint32>(red)
-		<< setw(2) << setfill('0') << static_cast<uint32>(green)
-		<< setw(2) << setfill('0') << static_cast<uint32>(blue);
+		<< setw(2) << setfill('0') << static_cast<uint32_t>(red)
+		<< setw(2) << setfill('0') << static_cast<uint32_t>(green)
+		<< setw(2) << setfill('0') << static_cast<uint32_t>(blue);
 	
 	return s.str();
 }
@@ -114,21 +114,21 @@ void MColor::hex(
 	const string&	inHex)
 {
 	const char* h = inHex.c_str();
-	uint32 l = inHex.length();
+	uint32_t l = inHex.length();
 	
 	if (*h == '#')
 		++h, --l;
 	
 	if (l == 6)
 	{
-		uint32 v = strtoul(h, nullptr, 16);
+		uint32_t v = strtoul(h, nullptr, 16);
 		red =		(v >> 16) & 0x0ff;
 		green = 	(v >>  8) & 0x0ff;
 		blue =		(v >>  0) & 0x0ff;
 	}	
 	else if (inHex.length() == 4 and inHex[0] == '#')
 	{
-		uint32 v = strtoul(inHex.c_str() + 1, nullptr, 16);
+		uint32_t v = strtoul(inHex.c_str() + 1, nullptr, 16);
 		red =	(v >> 8) & 0x0f;	red = (red << 4) | red;
 		green =	(v >> 4) & 0x0f;	green = (green << 4) | green;
 		blue =	(v >> 0) & 0x0f;	blue = (blue << 4) | blue;
@@ -138,9 +138,9 @@ void MColor::hex(
 MColor MColor::Disable(const MColor& inBackColor) const
 {
 	MColor r;
-	r.red	= static_cast<uint8>((red + inBackColor.red) / 2);
-	r.green = static_cast<uint8>((green + inBackColor.green) / 2);
-	r.blue	= static_cast<uint8>((blue + inBackColor.blue) / 2);
+	r.red	= static_cast<uint8_t>((red + inBackColor.red) / 2);
+	r.green = static_cast<uint8_t>((green + inBackColor.green) / 2);
+	r.blue	= static_cast<uint8_t>((blue + inBackColor.blue) / 2);
 	return r;
 }
 
@@ -157,21 +157,21 @@ MColor MColor::Disable(const MColor& inBackColor, float inScale) const
 
 MColor MColor::Distinct(const MColor& inBackColor) const
 {
-	const uint32 kDistinctColorTresholdSquare = 10000;
+	const uint32_t kDistinctColorTresholdSquare = 10000;
 
 	// Does a simple distance based color comparison, returns an
 	// inverse color if colors close enough
-	uint32 redDelta = (uint32)red - (uint32)inBackColor.red;
-	uint32 greenDelta = (uint32)green - (uint32)inBackColor.green;
-	uint32 blueDelta = (uint32)blue - (uint32)inBackColor.blue;
+	uint32_t redDelta = (uint32_t)red - (uint32_t)inBackColor.red;
+	uint32_t greenDelta = (uint32_t)green - (uint32_t)inBackColor.green;
+	uint32_t blueDelta = (uint32_t)blue - (uint32_t)inBackColor.blue;
 
 	if (redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta > kDistinctColorTresholdSquare)
 		return *this;
 
 	MColor result;
-	result.red =	static_cast<uint8> (255 - red); 
-	result.green =	static_cast<uint8> (255 - green); 
-	result.blue =	static_cast<uint8> (255 - blue);
+	result.red =	static_cast<uint8_t> (255 - red); 
+	result.green =	static_cast<uint8_t> (255 - green); 
+	result.blue =	static_cast<uint8_t> (255 - blue);
 	
 	return result;
 }
@@ -200,9 +200,9 @@ ostream& operator<<(ostream& os, const MColor& inColor)
 	ios_base::fmtflags flags = os.setf(ios_base::hex, ios_base::basefield);
 	
 	os << '#'
-		<< setw(2) << setfill('0') << static_cast<uint32>(inColor.red)
-		<< setw(2) << setfill('0') << static_cast<uint32>(inColor.green)
-		<< setw(2) << setfill('0') << static_cast<uint32>(inColor.blue);
+		<< setw(2) << setfill('0') << static_cast<uint32_t>(inColor.red)
+		<< setw(2) << setfill('0') << static_cast<uint32_t>(inColor.green)
+		<< setw(2) << setfill('0') << static_cast<uint32_t>(inColor.blue);
 	
 	os.setf(flags);
 	return os;

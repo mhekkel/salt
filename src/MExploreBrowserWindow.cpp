@@ -11,7 +11,7 @@
 
 using namespace std;
 
-MExploreBrowserWindow::MExploreBrowserWindow(pinch::basic_connection* inConnection)
+MExploreBrowserWindow::MExploreBrowserWindow(std::shared_ptr<pinch::basic_connection> inConnection)
 	: MWindow("Explore", MRect(0, 0, 640, 480),
 		 MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate),
 		"terminal-window-menu")
@@ -25,12 +25,12 @@ MExploreBrowserWindow::MExploreBrowserWindow(pinch::basic_connection* inConnecti
 	bounds.y += bounds.height - kScrollbarWidth;
 	bounds.height = kScrollbarWidth;
 
-	int32 partWidths[4] = { 250, 250, 45, -1 };
+	int32_t partWidths[4] = { 250, 250, 45, -1 };
 	mStatusbar = new MStatusbar("status", bounds, 4, partWidths);
 	AddChild(mStatusbar);
 	mStatusbar->GetBounds(bounds);
 
-	int32 statusbarHeight = bounds.height;
+	int32_t statusbarHeight = bounds.height;
 	
 	// create browse view
 	GetBounds(bounds);

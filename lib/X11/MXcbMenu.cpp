@@ -41,14 +41,14 @@ class MXcbMenubarImpl;
 
 struct MMenuItem
 {
-	MMenuItem(const string& inLabel, uint32 inCommand)
+	MMenuItem(const string& inLabel, uint32_t inCommand)
 		: mLabel(inLabel), mCommand(inCommand) {}
 
 	MMenuItem(MMenu* inSubmenu)
 		: mLabel(inSubmenu->GetLabel()), mCommand(0), mSubmenu(inSubmenu) {}
 
 	string				mLabel;
-	uint32				mCommand;
+	uint32_t				mCommand;
 	unique_ptr<MMenu>	mSubmenu = nullptr;
 	bool				mEnabled = false;
 	bool				mChecked = false;
@@ -60,7 +60,7 @@ struct MMenuItem
 struct MParentMenu
 {
 	virtual ~MParentMenu() {}
-	virtual bool ReturnToParent(int32 x, int32 y, MMenu* inChild) = 0;
+	virtual bool ReturnToParent(int32_t x, int32_t y, MMenu* inChild) = 0;
 	
 	MParentMenu* mParent = nullptr;
 };
@@ -75,24 +75,24 @@ class MXcbMenuImpl : public MMenuImpl, public MXcbWinMixin, public MParentMenu
 	~MXcbMenuImpl();
 
 	virtual void SetTarget(MHandler* inHandler);
-	virtual void SetItemState(uint32 inItem, bool inEnabled, bool inChecked);
-	virtual void AppendItem(const std::string& inLabel, uint32 inCommand);
+	virtual void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked);
+	virtual void AppendItem(const std::string& inLabel, uint32_t inCommand);
 	virtual void AppendSubmenu(MMenu* inSubmenu);
 	virtual void AppendSeparator();
-	virtual void AppendCheckbox(const std::string& inLabel, uint32 inCommand);
-	virtual void AppendRadiobutton(const std::string& inLabel, uint32 inCommand);
-	virtual uint32 CountItems() const;
-	virtual void RemoveItems(uint32 inFirstIndex, uint32 inCount);
-	virtual std::string GetItemLabel(uint32 inIndex) const;
-	virtual void SetItemCommand(uint32 inIndex, uint32 inCommand);
-	virtual uint32 GetItemCommand(uint32 inIndex) const;
-	virtual MMenu* GetSubmenu(uint32 inIndex) const;
+	virtual void AppendCheckbox(const std::string& inLabel, uint32_t inCommand);
+	virtual void AppendRadiobutton(const std::string& inLabel, uint32_t inCommand);
+	virtual uint32_t CountItems() const;
+	virtual void RemoveItems(uint32_t inFirstIndex, uint32_t inCount);
+	virtual std::string GetItemLabel(uint32_t inIndex) const;
+	virtual void SetItemCommand(uint32_t inIndex, uint32_t inCommand);
+	virtual uint32_t GetItemCommand(uint32_t inIndex) const;
+	virtual MMenu* GetSubmenu(uint32_t inIndex) const;
 	virtual void AddToWindow(MWindowImpl* inWindow);
 	virtual void MenuUpdated();
 
-	virtual int32 Popup(MWindow* inHandler, bool preferredIsDown,
-		int32 inXPreferred, int32 inYPreferred,
-		int32 inXAlternative, int32 inYAlternative);
+	virtual int32_t Popup(MWindow* inHandler, bool preferredIsDown,
+		int32_t inXPreferred, int32_t inYPreferred,
+		int32_t inXAlternative, int32_t inYAlternative);
 
 	void Hide();
 
@@ -103,23 +103,23 @@ class MXcbMenuImpl : public MMenuImpl, public MXcbWinMixin, public MParentMenu
 	virtual void ConfigureNotifyEvent(xcb_configure_notify_event_t* inEvent);
 	virtual void MapNotifyEvent(xcb_map_notify_event_t* inEvent);
 
-	void SelectItem(int32 x, int32 y);
-	int32 GetItemForMouse(int32 x, int32 y);
+	void SelectItem(int32_t x, int32_t y);
+	int32_t GetItemForMouse(int32_t x, int32_t y);
 
-	int32 TrackMouse();
-	void SelectCommand(uint32 inCommand);
+	int32_t TrackMouse();
+	void SelectCommand(uint32_t inCommand);
 
 	void UpdateMenu();
 	void DrawMenu(MGfxDevice& dev);
 
   protected:
 
-	MMenuItem* CreateNewItem(const std::string& inLabel, uint32 inCommand);
+	MMenuItem* CreateNewItem(const std::string& inLabel, uint32_t inCommand);
 	
 	void CreateWindow(MWindow* inHandler);
 	void CalculateExtends();
 
-	MRect GetItemRect(uint32 inIndex) const;
+	MRect GetItemRect(uint32_t inIndex) const;
 
 	float StringWidth(const string& inText)
 	{
@@ -129,19 +129,19 @@ class MXcbMenuImpl : public MMenuImpl, public MXcbWinMixin, public MParentMenu
 		return textExtends.x_advance;
 	}
 
-	virtual bool ReturnToParent(int32 x, int32 y, MMenu* inChild);
+	virtual bool ReturnToParent(int32_t x, int32_t y, MMenu* inChild);
 	
-	int32 MenuLoop();
+	int32_t MenuLoop();
 	
 	vector<MMenuItem>	mItems;
 	MHandler*			mTarget = nullptr;
 	MWindow*			mParentWindow = nullptr;
 	cairo_surface_t*	mSurface = nullptr;
 	cairo_t*			mCairo = nullptr;
-	int32				mWidth, mHeight;
-	uint32				mPaddingX, mPaddingY;
-	uint32				mSeparatorHeight, mItemHeight;
-	int32				mActiveItem = -1;
+	int32_t				mWidth, mHeight;
+	uint32_t				mPaddingX, mPaddingY;
+	uint32_t				mSeparatorHeight, mItemHeight;
+	int32_t				mActiveItem = -1;
 	
 	// for the menuloop
 	static bool			sDone;
@@ -176,14 +176,14 @@ void MXcbMenuImpl::SetTarget(MHandler* inHandler)
 	}
 }
 
-void MXcbMenuImpl::SetItemState(uint32 inIndex, bool inEnabled, bool inChecked)
+void MXcbMenuImpl::SetItemState(uint32_t inIndex, bool inEnabled, bool inChecked)
 {
 	MMenuItem& mi = mItems.at(inIndex);
 	mi.mEnabled = inEnabled;
 	mi.mChecked = inChecked;
 }
 
-void MXcbMenuImpl::AppendItem(const string& inLabel, uint32 inCommand)
+void MXcbMenuImpl::AppendItem(const string& inLabel, uint32_t inCommand)
 {
 	mItems.emplace_back(inLabel, inCommand);
 }
@@ -198,22 +198,22 @@ void MXcbMenuImpl::AppendSeparator()
 	mItems.emplace_back("-", 0);
 }
 
-void MXcbMenuImpl::AppendCheckbox(const string& inLabel, uint32 inCommand)
+void MXcbMenuImpl::AppendCheckbox(const string& inLabel, uint32_t inCommand)
 {
 	assert(false);
 }
 
-void MXcbMenuImpl::AppendRadiobutton(const string& inLabel, uint32 inCommand)
+void MXcbMenuImpl::AppendRadiobutton(const string& inLabel, uint32_t inCommand)
 {
 	assert(false);
 }
 
-uint32 MXcbMenuImpl::CountItems() const
+uint32_t MXcbMenuImpl::CountItems() const
 {
 	return mItems.size();
 }
 
-void MXcbMenuImpl::RemoveItems(uint32 inFirstIndex, uint32 inCount)
+void MXcbMenuImpl::RemoveItems(uint32_t inFirstIndex, uint32_t inCount)
 {
 	if (inFirstIndex < mItems.size())
 	{
@@ -230,27 +230,27 @@ void MXcbMenuImpl::RemoveItems(uint32 inFirstIndex, uint32 inCount)
 	}
 }
 
-string MXcbMenuImpl::GetItemLabel(uint32 inIndex) const
+string MXcbMenuImpl::GetItemLabel(uint32_t inIndex) const
 {
 	return mItems.at(inIndex).mLabel;
 }
 
-void MXcbMenuImpl::SetItemCommand(uint32 inIndex, uint32 inCommand)
+void MXcbMenuImpl::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
 {
 	mItems.at(inIndex).mCommand = inCommand;
 }
 
-uint32 MXcbMenuImpl::GetItemCommand(uint32 inIndex) const
+uint32_t MXcbMenuImpl::GetItemCommand(uint32_t inIndex) const
 {
 	return mItems.at(inIndex).mCommand;
 }
 
-MMenu* MXcbMenuImpl::GetSubmenu(uint32 inIndex) const
+MMenu* MXcbMenuImpl::GetSubmenu(uint32_t inIndex) const
 {
 	return mItems.at(inIndex).mSubmenu.get();
 }
 
-bool MXcbMenuImpl::ReturnToParent(int32 x, int32 y, MMenu* inChild)
+bool MXcbMenuImpl::ReturnToParent(int32_t x, int32_t y, MMenu* inChild)
 {
 	ConvertFromScreen(x, y);
 	
@@ -280,14 +280,14 @@ bool MXcbMenuImpl::ReturnToParent(int32 x, int32 y, MMenu* inChild)
 	return result;
 }
 
-int32 MXcbMenuImpl::GetItemForMouse(int32 x, int32 y)
+int32_t MXcbMenuImpl::GetItemForMouse(int32_t x, int32_t y)
 {
-	int32 result = -1;
+	int32_t result = -1;
 	
 	if (x >= 0 and x < mWidth)
 	{
 		float iy = 0;
-		for (uint32 i = 0; i < mItems.size(); ++i)
+		for (uint32_t i = 0; i < mItems.size(); ++i)
 		{
 			auto& item = mItems[i];
 			
@@ -313,9 +313,9 @@ int32 MXcbMenuImpl::GetItemForMouse(int32 x, int32 y)
 
 void MXcbMenuImpl::ButtonPressEvent(xcb_button_press_event_t* inEvent)
 {
-	int32 i = GetItemForMouse(inEvent->event_x, inEvent->event_y);
+	int32_t i = GetItemForMouse(inEvent->event_x, inEvent->event_y);
 	
-	if (i >= 0 and i < static_cast<int32>(mItems.size()))
+	if (i >= 0 and i < static_cast<int32_t>(mItems.size()))
 	{
 		SelectCommand(mItems[i].mCommand);
 		sDone = true;
@@ -324,9 +324,9 @@ void MXcbMenuImpl::ButtonPressEvent(xcb_button_press_event_t* inEvent)
 
 void MXcbMenuImpl::ButtonReleaseEvent(xcb_button_press_event_t* inEvent)
 {
-	int32 i = GetItemForMouse(inEvent->event_x, inEvent->event_y);
+	int32_t i = GetItemForMouse(inEvent->event_x, inEvent->event_y);
 	
-	if (i >= 0 and i < static_cast<int32>(mItems.size()))
+	if (i >= 0 and i < static_cast<int32_t>(mItems.size()))
 	{
 		SelectCommand(mItems[i].mCommand);
 		sDone = true;
@@ -335,18 +335,18 @@ void MXcbMenuImpl::ButtonReleaseEvent(xcb_button_press_event_t* inEvent)
 
 void MXcbMenuImpl::MotionNotifyEvent(xcb_motion_notify_event_t* inEvent)
 {
-	int32 x = inEvent->event_x, y = inEvent->event_y;
+	int32_t x = inEvent->event_x, y = inEvent->event_y;
 
 	// 	
 
-	int32 activeItem = GetItemForMouse(x, y);
+	int32_t activeItem = GetItemForMouse(x, y);
 	
 	if (activeItem != mActiveItem)
 	{
 		mActiveItem = activeItem;
 		UpdateMenu();
 		
-//		if (mActiveItem >= 0 and mActiveItem < static_cast<int32>(mItems.size()) and mItems[mActiveItem].mSubmenu)
+//		if (mActiveItem >= 0 and mActiveItem < static_cast<int32_t>(mItems.size()) and mItems[mActiveItem].mSubmenu)
 //			mActiveSubmenu = static_cast<MXcbMenuImpl*>(mItems[mActiveItem].mSubmenu->impl());
 //		else
 //			mActiveSubmenu = nullptr;
@@ -355,13 +355,13 @@ void MXcbMenuImpl::MotionNotifyEvent(xcb_motion_notify_event_t* inEvent)
 //		{
 //			MRect r = GetItemRect(mActiveItem);
 //			
-//			int32 preferredX = r.x + r.width;
-//			int32 preferredY = r.y;
+//			int32_t preferredX = r.x + r.width;
+//			int32_t preferredY = r.y;
 //			
 //			ConvertToScreen(preferredX, preferredY);
 //
-//			int32 alterateX = r.x + r.width;
-//			int32 alterateY = r.y + r.height;
+//			int32_t alterateX = r.x + r.width;
+//			int32_t alterateY = r.y + r.height;
 //			
 //			ConvertToScreen(alterateX, alterateY);
 //			
@@ -381,8 +381,8 @@ void MXcbMenuImpl::MotionNotifyEvent(xcb_motion_notify_event_t* inEvent)
 	}
 }
 
-int32 MXcbMenuImpl::Popup(MWindow* inHandler, bool preferredIsDown,
-	int32 inXPreferred, int32 inYPreferred, int32 inXAlternative, int32 inYAlternative)
+int32_t MXcbMenuImpl::Popup(MWindow* inHandler, bool preferredIsDown,
+	int32_t inXPreferred, int32_t inYPreferred, int32_t inXAlternative, int32_t inYAlternative)
 {
 	if (mCairo == nullptr)
 	{
@@ -396,7 +396,7 @@ int32 MXcbMenuImpl::Popup(MWindow* inHandler, bool preferredIsDown,
 	MRect sr;
 	MWindow::GetMainScreenBounds(sr);
 	
-	int32 x, y;
+	int32_t x, y;
 	
 	if (preferredIsDown)	// prefer a 'hanging' menu
 	{
@@ -421,7 +421,7 @@ int32 MXcbMenuImpl::Popup(MWindow* inHandler, bool preferredIsDown,
 	/* Map the window on the screen */
 	MXcbWinMixin::Show();
 	
-	uint8 revert_to;
+	uint8_t revert_to;
 	xcb_window_t focus;
 	tie(revert_to, focus) = GetInputFocus();
 
@@ -432,17 +432,17 @@ int32 MXcbMenuImpl::Popup(MWindow* inHandler, bool preferredIsDown,
 	return result;
 }
 
-int32 MXcbMenuImpl::MenuLoop()
+int32_t MXcbMenuImpl::MenuLoop()
 {
-	int32 result = -1;
+	int32_t result = -1;
 
 	sDone = false;
 	mClosed = false;
 	
 	bool ignoreUp = true;
 	
-	int32 startX, startY, x, y;
-	uint32 modifiers = 0;
+	int32_t startX, startY, x, y;
+	uint32_t modifiers = 0;
 	GetMouse(startX, startY, modifiers);
 	
 //	GrabPointer();
@@ -468,13 +468,13 @@ int32 MXcbMenuImpl::MenuLoop()
 //				
 //				MRect r = GetItemRect(item);
 //				
-//				int32 preferredX = r.x + r.width;
-//				int32 preferredY = r.y;
+//				int32_t preferredX = r.x + r.width;
+//				int32_t preferredY = r.y;
 //				
 //				ConvertToScreen(preferredX, preferredY);
 //	
-//				int32 alterateX = r.x + r.width;
-//				int32 alterateY = r.y + r.height;
+//				int32_t alterateX = r.x + r.width;
+//				int32_t alterateY = r.y + r.height;
 //				
 //				ConvertToScreen(alterateX, alterateY);
 //				
@@ -578,11 +578,11 @@ void MXcbMenuImpl::CalculateExtends()
 	}
 }
 
-MRect MXcbMenuImpl::GetItemRect(uint32 inIndex) const
+MRect MXcbMenuImpl::GetItemRect(uint32_t inIndex) const
 {
 	MRect result = { 0, 0, mWidth, 0 };
 	
-	for (uint32 i = 0; i <= inIndex; ++i)
+	for (uint32_t i = 0; i <= inIndex; ++i)
 	{
 		result.y += result.height;
 		result.height = mItems[i].mLabel == "-" ? mSeparatorHeight : mItemHeight;
@@ -599,8 +599,8 @@ void MXcbMenuImpl::CreateWindow(MWindow* inHandler)
 	
 	MRect bounds(0, 0, 200, 200);
 	
-	uint32 mask = 0;
-	vector<uint32> values;
+	uint32_t mask = 0;
+	vector<uint32_t> values;
 
 	mask |= XCB_CW_OVERRIDE_REDIRECT;
 	values.push_back(1);
@@ -708,10 +708,10 @@ void MXcbMenuImpl::MapNotifyEvent(xcb_map_notify_event_t* inEvent)
 	GrabPointer();
 }
 
-int32 MXcbMenuImpl::TrackMouse()
+int32_t MXcbMenuImpl::TrackMouse()
 {
-	int32 x, y;
-	uint32 modifiers = 0;
+	int32_t x, y;
+	uint32_t modifiers = 0;
 	
 	MXcbWinMixin::GetMouse(x, y, modifiers);
 	
@@ -733,17 +733,17 @@ int32 MXcbMenuImpl::TrackMouse()
 
 	// 	
 
-	int32 activeItem = -1;
+	int32_t activeItem = -1;
 	
 	if (x > 0 and x < mWidth)
 	{
-		int32 iy = 0, i = 0;
+		int32_t iy = 0, i = 0;
 		
 		for (auto& item: mItems)
 		{
 			if (item.mLabel == "-")	// separator
 				iy += mSeparatorHeight;
-			else if (y >= iy and y < iy + static_cast<int32>(mItemHeight))
+			else if (y >= iy and y < iy + static_cast<int32_t>(mItemHeight))
 			{
 				if (item.mEnabled)
 				{
@@ -764,7 +764,7 @@ int32 MXcbMenuImpl::TrackMouse()
 		mActiveItem = activeItem;
 		UpdateMenu();
 		
-//		if (mActiveItem >= 0 and mActiveItem < static_cast<int32>(mItems.size()) and mItems[mActiveItem].mSubmenu)
+//		if (mActiveItem >= 0 and mActiveItem < static_cast<int32_t>(mItems.size()) and mItems[mActiveItem].mSubmenu)
 //			mActiveSubmenu = static_cast<MXcbMenuImpl*>(mItems[mActiveItem].mSubmenu->impl());
 //		else
 //			mActiveSubmenu = nullptr;
@@ -773,13 +773,13 @@ int32 MXcbMenuImpl::TrackMouse()
 //		{
 //			MRect r = GetItemRect(mActiveItem);
 //			
-//			int32 preferredX = r.x + r.width;
-//			int32 preferredY = r.y;
+//			int32_t preferredX = r.x + r.width;
+//			int32_t preferredY = r.y;
 //			
 //			ConvertToScreen(preferredX, preferredY);
 //
-//			int32 alterateX = r.x + r.width;
-//			int32 alterateY = r.y + r.height;
+//			int32_t alterateX = r.x + r.width;
+//			int32_t alterateY = r.y + r.height;
 //			
 //			ConvertToScreen(alterateX, alterateY);
 //			
@@ -791,7 +791,7 @@ int32 MXcbMenuImpl::TrackMouse()
 	return mActiveItem;	
 }
 
-void MXcbMenuImpl::SelectCommand(uint32 inCommand)
+void MXcbMenuImpl::SelectCommand(uint32_t inCommand)
 {
 	if (mTarget != nullptr)
 	{
@@ -844,7 +844,7 @@ void MXcbMenuImpl::DrawMenu(MGfxDevice& dev)
 	
 	float y = mPaddingY;
 	
-	int32 ix = 0;
+	int32_t ix = 0;
 	for (auto& item: mItems)
 	{
 		if (item.mLabel == "-")	// separator
@@ -944,15 +944,15 @@ class MXcbMenubarImpl : public MXcbControlImpl<MMenubarControl>, public MParentM
 	virtual void ButtonReleaseEvent(xcb_button_press_event_t* inEvent);
 	virtual void MotionNotifyEvent(xcb_motion_notify_event_t* inEvent);
 
-	virtual bool ReturnToParent(int32 x, int32 y, MMenu* inChild);
+	virtual bool ReturnToParent(int32_t x, int32_t y, MMenu* inChild);
 	
-	int32 MenuForMouse(float x, float y);
-	int32 LeftEdgeOfMenu(uint32 inMenu);
-	void ShowMenu(int32 inMenu);
+	int32_t MenuForMouse(float x, float y);
+	int32_t LeftEdgeOfMenu(uint32_t inMenu);
+	void ShowMenu(int32_t inMenu);
 	
 	bool mMouseDown = false;
-	int32 mActiveMenu = 1;
-	uint32 mCommand = 0;
+	int32_t mActiveMenu = 1;
+	uint32_t mCommand = 0;
 	
 	float mPadding;
 	
@@ -965,19 +965,19 @@ class MXcbMenubarImpl : public MXcbControlImpl<MMenubarControl>, public MParentM
 
 MGfxDevice MXcbMenubarImpl::sOffscreenDev(1000, 32);
 
-int32 MXcbMenubarImpl::MenuForMouse(float x, float y)
+int32_t MXcbMenubarImpl::MenuForMouse(float x, float y)
 {
-	int32 result = -1;
+	int32_t result = -1;
 	
 	MRect bounds;
 	mControl->GetBounds(bounds);
 
 	if (bounds.ContainsPoint(x, y))
 	{
-		int32 menuCount = mMenuImpl->CountItems();
+		int32_t menuCount = mMenuImpl->CountItems();
 		float left = 0;
 	
-		for (int32 i = 0; i < menuCount; ++i)
+		for (int32_t i = 0; i < menuCount; ++i)
 		{
 			auto menu = mMenuImpl->GetSubmenu(i);
 			if (menu == nullptr) // ????
@@ -1004,11 +1004,11 @@ int32 MXcbMenubarImpl::MenuForMouse(float x, float y)
 	return result;
 }
 
-int32 MXcbMenubarImpl::LeftEdgeOfMenu(uint32 inMenu)
+int32_t MXcbMenubarImpl::LeftEdgeOfMenu(uint32_t inMenu)
 {
-	int32 result = 0;
+	int32_t result = 0;
 	
-	for (uint32 i = 0; i < inMenu; ++i)
+	for (uint32_t i = 0; i < inMenu; ++i)
 	{
 		auto menu = mMenuImpl->GetSubmenu(i);
 		if (menu == nullptr) // ????
@@ -1021,7 +1021,7 @@ int32 MXcbMenubarImpl::LeftEdgeOfMenu(uint32 inMenu)
 	return result;
 }
 
-void MXcbMenubarImpl::ShowMenu(int32 inMenu)
+void MXcbMenubarImpl::ShowMenu(int32_t inMenu)
 {
 	if (mVisibleMenu != nullptr)
 	{
@@ -1029,7 +1029,7 @@ void MXcbMenubarImpl::ShowMenu(int32 inMenu)
 		mVisibleMenu = nullptr;
 	}
 	
-	if (inMenu >= 0 and inMenu < static_cast<int32>(mMenuImpl->CountItems()))
+	if (inMenu >= 0 and inMenu < static_cast<int32_t>(mMenuImpl->CountItems()))
 	{
 		auto menu = mMenuImpl->GetSubmenu(mActiveMenu);
 		mVisibleMenu = static_cast<MXcbMenuImpl*>(menu->impl());
@@ -1037,8 +1037,8 @@ void MXcbMenubarImpl::ShowMenu(int32 inMenu)
 		MRect bounds;
 		mControl->GetBounds(bounds);
 		
-		int32 x = bounds.x + LeftEdgeOfMenu(mActiveMenu);
-		int32 y = bounds.y + bounds.height;
+		int32_t x = bounds.x + LeftEdgeOfMenu(mActiveMenu);
+		int32_t y = bounds.y + bounds.height;
 		
 		mControl->ConvertToScreen(x, y);
 		
@@ -1064,8 +1064,8 @@ void MXcbMenubarImpl::DrawWidget(MGfxDevice& dev)
 	float y = bounds.y + (bounds.height - fontExtends.height) / 2 +
 				fontExtends.ascent;
 
-	int32 menuCount = mMenuImpl->CountItems();
-	for (int32 i = 0; i < menuCount; ++i)
+	int32_t menuCount = mMenuImpl->CountItems();
+	for (int32_t i = 0; i < menuCount; ++i)
 	{
 		auto menu = mMenuImpl->GetSubmenu(i);
 		if (menu == nullptr) // ????
@@ -1141,7 +1141,7 @@ void MXcbMenubarImpl::MotionNotifyEvent(xcb_motion_notify_event_t* inEvent)
 	}
 }
 
-bool MXcbMenubarImpl::ReturnToParent(int32 x, int32 y, MMenu* inChild)
+bool MXcbMenubarImpl::ReturnToParent(int32_t x, int32_t y, MMenu* inChild)
 {
 	ConvertFromScreen(x, y);
 	

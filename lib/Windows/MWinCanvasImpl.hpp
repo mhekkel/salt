@@ -27,9 +27,9 @@ class MWinCanvasImpl : public MCanvasImpl, public MWinProcMixin
 	ID2D1RenderTargetPtr
 					GetRenderTarget();
 
-	virtual void	MoveFrame(int32 inXDelta, int32 inYDelta);
+	virtual void	MoveFrame(int32_t inXDelta, int32_t inYDelta);
 
-	virtual void	ResizeFrame(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	virtual void	AddedToWindow();
 
@@ -66,7 +66,7 @@ class MWinCanvasImpl : public MCanvasImpl, public MWinProcMixin
 
 	virtual bool	WMSetCursor(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
 
-	void			MapXY(int32& ioX, int32& ioY);
+	void			MapXY(int32_t& ioX, int32_t& ioY);
 
   private:
 
@@ -74,7 +74,7 @@ class MWinCanvasImpl : public MCanvasImpl, public MWinProcMixin
 					mRenderTarget;
 
 	double			mLastClickTime;
-	uint32			mClickCount;
+	uint32_t			mClickCount;
 	HMONITOR		mMonitor;
 	
 	MIDropTargetPtr	mDropTarget;

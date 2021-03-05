@@ -20,13 +20,13 @@ class MWinListViewImpl : public MListViewImpl
 
 //	virtual void	AddedToWindow();
 
-	MEventIn<void(uint32,uint32)>
+	MEventIn<void(uint32_t,uint32_t)>
 					eColumnResized;
 
-	void			ColumnResized(uint32 inItemNr, uint32 inWidth);
+	void			ColumnResized(uint32_t inItemNr, uint32_t inWidth);
 
   protected:
 	MListHeader*	mListHeader;
-	std::vector<uint32>
+	std::vector<uint32_t>
 					mColumnWidths;
 };

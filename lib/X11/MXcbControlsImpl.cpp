@@ -34,9 +34,9 @@ enum MThemeAlignment
 struct MTheme
 {
 	MColor foreColor, backColor;
-	uint32 rounded;
+	uint32_t rounded;
 	string fontFamily;
-	uint32 fontStyle;
+	uint32_t fontStyle;
 	MColor fontColor;
 	MThemeAlignment textAlignment;
 };
@@ -244,7 +244,7 @@ void MXcbButtonImpl::SetText(const std::string& inText)
 	mLabel = inText;
 }
 
-void MXcbButtonImpl::GetIdealSize(int32& outWidth, int32& outHeight)
+void MXcbButtonImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 {
 //	outWidth = 75;
 //	outHeight = 23;
@@ -365,7 +365,7 @@ MButtonImpl* MButtonImpl::Create(MButton* inButton, const string& inLabel,
 //}
 //
 //void MXcbExpanderImpl::Append(MXcbWinMixin* inChild, MControlPacking inPacking,
-//		bool inExpand, bool inFill, uint32 inPadding)
+//		bool inExpand, bool inFill, uint32_t inPadding)
 //{
 //	assert(GTK_IS_CONTAINER(GetWidget()));
 //	gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
@@ -493,8 +493,8 @@ MButtonImpl* MButtonImpl::Create(MButton* inButton, const string& inLabel,
 ////		mControl->UpdateNow();
 ////	}
 ////
-////	int32 x = static_cast<int16>(LOWORD(inLParam));
-////	int32 y = static_cast<int16>(HIWORD(inLParam));
+////	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+////	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 ////	
 ////	MRect bounds;
 ////	mControl->GetBounds(bounds);
@@ -525,8 +525,8 @@ MButtonImpl* MButtonImpl::Create(MButton* inButton, const string& inLabel,
 ////{
 ////	::ReleaseCapture();
 ////	
-////	int32 x = static_cast<int16>(LOWORD(inLParam));
-////	int32 y = static_cast<int16>(HIWORD(inLParam));
+////	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+////	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 ////	
 ////	MRect bounds;
 ////	mControl->GetBounds(bounds);
@@ -603,9 +603,9 @@ MExpanderImpl* MExpanderImpl::Create(MExpander* inExpander, const string& inLabe
 //	eValueChanged.Connect(GetWidget(), "value-changed");
 //}
 //
-//int32 MXcbScrollbarImpl::GetValue() const
+//int32_t MXcbScrollbarImpl::GetValue() const
 //{
-//	int32 result = 0;
+//	int32_t result = 0;
 //
 //	if (GetWidget() != nullptr)
 //		result = gtk_range_get_value(GTK_RANGE(GetWidget()));
@@ -613,18 +613,18 @@ MExpanderImpl* MExpanderImpl::Create(MExpander* inExpander, const string& inLabe
 //	return result;
 //}
 //
-//void MXcbScrollbarImpl::SetValue(int32 inValue)
+//void MXcbScrollbarImpl::SetValue(int32_t inValue)
 //{
 //	gtk_range_set_value(GTK_RANGE(GetWidget()), inValue);
 //}
 //
-//int32 MXcbScrollbarImpl::GetTrackValue() const
+//int32_t MXcbScrollbarImpl::GetTrackValue() const
 //{
 //	return GetValue();
 //}
 //
-//void MXcbScrollbarImpl::SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-//	int32 inScrollUnit, int32 inPageSize, int32 inValue)
+//void MXcbScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+//	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 //{
 //	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 //	
@@ -640,17 +640,17 @@ MExpanderImpl* MExpanderImpl::Create(MExpander* inExpander, const string& inLabe
 //	}
 //}
 //
-//int32 MXcbScrollbarImpl::GetMinValue() const
+//int32_t MXcbScrollbarImpl::GetMinValue() const
 //{
 //	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 //	return adj == nullptr ? 0 : adj->lower;
 //}
 //
-//int32 MXcbScrollbarImpl::GetMaxValue() const
+//int32_t MXcbScrollbarImpl::GetMaxValue() const
 //{
 //	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 //
-//	int32 result = 0;
+//	int32_t result = 0;
 //	if (adj != nullptr)
 //	{
 //		result = adj->upper;
@@ -674,7 +674,7 @@ MScrollbarImpl* MScrollbarImpl::Create(MScrollbar* inScrollbar)
 
 // --------------------------------------------------------------------
 
-//MXcbStatusbarImpl::MXcbStatusbarImpl(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[])
+//MXcbStatusbarImpl::MXcbStatusbarImpl(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 //	: MXcbControlImpl(inStatusbar, "")
 //	, mParts(inParts, inParts + inPartCount)
 //	, mClicked(this, &MXcbStatusbarImpl::Clicked)
@@ -730,7 +730,7 @@ MScrollbarImpl* MScrollbarImpl::Create(MScrollbar* inScrollbar)
 //	impl->AddStatusbarWidget(this);
 //}
 //
-//void MXcbStatusbarImpl::SetStatusText(uint32 inPartNr, const string& inText, bool inBorder)
+//void MXcbStatusbarImpl::SetStatusText(uint32_t inPartNr, const string& inText, bool inBorder)
 //{
 //	if (inPartNr < mPanels.size())
 //		gtk_label_set_text(GTK_LABEL(mPanels[inPartNr]), inText.c_str());
@@ -747,7 +747,7 @@ MScrollbarImpl* MScrollbarImpl::Create(MScrollbar* inScrollbar)
 //	return true;
 //}
 
-MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[])
+MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 {
 //	return new MXcbStatusbarImpl(inStatusbar, inPartCount, inParts);
 	return nullptr;
@@ -826,7 +826,7 @@ MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32 inPartCou
 //		SetChoices(mChoices);
 //}
 //
-//bool MXcbComboboxImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+//bool MXcbComboboxImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 //{
 //	bool result = false;
 //
@@ -889,12 +889,12 @@ MComboboxImpl* MComboboxImpl::Create(MCombobox* inCombobox)
 //		SetChoices(mChoices);
 //}
 //
-//int32 MXcbPopupImpl::GetValue() const
+//int32_t MXcbPopupImpl::GetValue() const
 //{
 //	return gtk_combo_box_get_active(GTK_COMBO_BOX(GetWidget()));
 //}
 //
-//void MXcbPopupImpl::SetValue(int32 inValue)
+//void MXcbPopupImpl::SetValue(int32_t inValue)
 //{
 //	gtk_combo_box_set_active(GTK_COMBO_BOX(GetWidget()), inValue);
 //}
@@ -912,7 +912,7 @@ MComboboxImpl* MComboboxImpl::Create(MCombobox* inCombobox)
 //	return s ? s : "";
 //}
 //
-//bool MXcbPopupImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+//bool MXcbPopupImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 //{
 //	bool result = false;
 //
@@ -936,7 +936,7 @@ MPopupImpl* MPopupImpl::Create(MPopup* inPopup)
 
 // --------------------------------------------------------------------
 
-//MXcbEdittextImpl::MXcbEdittextImpl(MEdittext* inEdittext, uint32 inFlags)
+//MXcbEdittextImpl::MXcbEdittextImpl(MEdittext* inEdittext, uint32_t inFlags)
 //	: MXcbControlImpl(inEdittext, "")
 //	, mFlags(inFlags)
 //{
@@ -968,7 +968,7 @@ MPopupImpl* MPopupImpl::Create(MPopup* inPopup)
 //		gtk_entry_set_text(GTK_ENTRY(GetWidget()), inText.c_str());
 //}
 //
-//void MXcbEdittextImpl::SetPasswordChar(uint32 inUnicode)
+//void MXcbEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 //{
 //	GtkWidget* wdgt = GetWidget();
 //	if (GTK_IS_ENTRY(wdgt))
@@ -980,7 +980,7 @@ MPopupImpl* MPopupImpl::Create(MPopup* inPopup)
 //		THROW(("item is not an entry"));
 //}
 //
-//bool MXcbEdittextImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+//bool MXcbEdittextImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 //{
 //	bool result = false;
 //
@@ -996,7 +996,7 @@ MPopupImpl* MPopupImpl::Create(MPopup* inPopup)
 //	return result;
 //}
 
-MEdittextImpl* MEdittextImpl::Create(MEdittext* inEdittext, uint32 inFlags)
+MEdittextImpl* MEdittextImpl::Create(MEdittext* inEdittext, uint32_t inFlags)
 {
 //	return new MXcbEdittextImpl(inEdittext, inFlags);
 	return nullptr;
@@ -1231,7 +1231,7 @@ MListHeaderImpl* MListHeaderImpl::Create(MListHeader* inListHeader)
 ////		MRect frame;
 ////		page.mPage->GetFrame(frame);
 ////
-////		int32 dx, dy, dw, dh;
+////		int32_t dx, dy, dw, dh;
 ////		dx = rc.left - frame.x;
 ////		dy = rc.top - frame.y;
 ////		dw = rc.right - rc.left - frame.width;
@@ -1280,7 +1280,7 @@ MListHeaderImpl* MListHeaderImpl::Create(MListHeader* inListHeader)
 ////	}
 //}
 //
-//void MXcbNotebookImpl::SelectPage(uint32 inPage)
+//void MXcbNotebookImpl::SelectPage(uint32_t inPage)
 //{
 ////	if (inPage != ::SendMessage(GetWidget(), TCM_GETCURSEL, 0, 0))
 ////	{
@@ -1301,7 +1301,7 @@ MListHeaderImpl* MListHeaderImpl::Create(MListHeader* inListHeader)
 ////	}
 //}
 //
-//uint32 MXcbNotebookImpl::GetSelectedPage() const
+//uint32_t MXcbNotebookImpl::GetSelectedPage() const
 //{
 ////	return ::SendMessage(GetWidget(), TCM_GETCURSEL, 0, 0);
 //	return 0;
@@ -1374,7 +1374,7 @@ MNotebookImpl* MNotebookImpl::Create(MNotebook* inNotebook)
 //		gtk_color_button_set_color(GTK_COLOR_BUTTON(GetWidget()), &color);
 //}
 //
-////void MXcbColorSwatchImpl::GetIdealSize(int32& outWidth, int32& outHeight)
+////void MXcbColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 ////{
 ////	outWidth = 30;
 ////	outHeight = 23;
@@ -1462,9 +1462,9 @@ MColorSwatchImpl* MColorSwatchImpl::Create(MColorSwatch* inColorSwatch, MColor i
 //	}
 //}
 //
-//int32 MXcbListBoxImpl::GetValue() const
+//int32_t MXcbListBoxImpl::GetValue() const
 //{
-//	int32 result = -1;
+//	int32_t result = -1;
 //	
 //	GtkTreeIter iter;
 //    GtkTreeModel *model;
@@ -1476,7 +1476,7 @@ MColorSwatchImpl* MColorSwatchImpl::Create(MColorSwatch* inColorSwatch, MColor i
 //	return result;
 //}
 //
-//void MXcbListBoxImpl::SetValue(int32 inValue)
+//void MXcbListBoxImpl::SetValue(int32_t inValue)
 //{
 ////	::SendMessage(GetWidget(), LB_SETCURSEL, inValue, 0);
 //}
@@ -1490,7 +1490,7 @@ MColorSwatchImpl* MColorSwatchImpl::Create(MColorSwatch* inColorSwatch, MColor i
 //
 //    if (gtk_tree_selection_get_selected(selection, &model, &iter))
 //    {
-//    	int32 selected;
+//    	int32_t selected;
 //		gtk_tree_model_get(GTK_TREE_MODEL(mStore), &iter, 1, &selected, -1);
 //		mControl->eValueChanged(mControl->GetID(), selected);
 //    }
@@ -1634,7 +1634,7 @@ MListViewImpl* MListViewImpl::Create(MListView* inListView)
 // --------------------------------------------------------------------
 
 //MXcbBoxControlImpl::MXcbBoxControlImpl(MBoxControl* inControl, bool inHorizontal,
-//		bool inHomogeneous, bool inExpand, bool inFill, uint32 inSpacing, uint32 inPadding)
+//		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 //	: MXcbControlImpl(inControl, ""), mHorizontal(inHorizontal)
 //	, mHomogeneous(inHomogeneous), mExpand(inExpand), mFill(inFill)
 //	, mSpacing(inSpacing), mPadding(inPadding)
@@ -1647,7 +1647,7 @@ MListViewImpl* MListViewImpl::Create(MListView* inListView)
 //}
 //
 //void MXcbBoxControlImpl::Append(MXcbWinMixin* inChild, MControlPacking inPacking,
-//		bool inExpand, bool inFill, uint32 inPadding)
+//		bool inExpand, bool inFill, uint32_t inPadding)
 //{
 //	assert(GTK_IS_BOX(GetWidget()));
 //	
@@ -1658,7 +1658,7 @@ MListViewImpl* MListViewImpl::Create(MListView* inListView)
 //}
 
 MBoxControlImpl* MBoxControlImpl::Create(MBoxControl* inControl, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32 inSpacing, uint32 inPadding)
+		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 {
 //	return new MXcbBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
 	return nullptr;

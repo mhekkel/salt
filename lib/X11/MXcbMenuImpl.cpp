@@ -23,7 +23,7 @@ struct MCommandToString
 	char mCommandString[10];
 	
 	MCommandToString(
-		uint32			inCommand)
+		uint32_t			inCommand)
 	{
 		strcpy(mCommandString, "MCmd_xxxx");
 		
@@ -60,7 +60,7 @@ void MXcbMenuImpl::SetTarget(MHandler* inHandler)
 	mTarget = inHandler;
 }
 
-void MXcbMenuImpl::SetItemState(uint32 inItem, bool inEnabled, bool inChecked)
+void MXcbMenuImpl::SetItemState(uint32_t inItem, bool inEnabled, bool inChecked)
 {
 //	PRINT(("MENU: %s", __func__));
 	if (inItem < mItems.size())
@@ -70,7 +70,7 @@ void MXcbMenuImpl::SetItemState(uint32 inItem, bool inEnabled, bool inChecked)
 	}
 }
 
-void MXcbMenuImpl::AppendItem(const string& inLabel, uint32 inCommand)
+void MXcbMenuImpl::AppendItem(const string& inLabel, uint32_t inCommand)
 {
 	PRINT(("MENU: %s(%s, %x)", __func__, inLabel.c_str(), inCommand));
 	MMenuItem item = { inLabel, inCommand };
@@ -91,27 +91,27 @@ void MXcbMenuImpl::AppendSeparator()
 	mItems.push_back(item);
 }
 
-void MXcbMenuImpl::AppendCheckbox(const string& inLabel, uint32 inCommand)
+void MXcbMenuImpl::AppendCheckbox(const string& inLabel, uint32_t inCommand)
 {
 //	PRINT(("MENU: %s", __func__));
 	MMenuItem item = { inLabel + "-checkbox", inCommand };
 	mItems.push_back(item);
 }
 
-void MXcbMenuImpl::AppendRadiobutton(const string& inLabel, uint32 inCommand)
+void MXcbMenuImpl::AppendRadiobutton(const string& inLabel, uint32_t inCommand)
 {
 //	PRINT(("MENU: %s", __func__));
 	MMenuItem item = { inLabel + "-radiobutton", inCommand };
 	mItems.push_back(item);
 }
 
-uint32 MXcbMenuImpl::CountItems() const
+uint32_t MXcbMenuImpl::CountItems() const
 {
 //	PRINT(("MENU: %s", __func__));
 	return mItems.size();
 }
 
-void MXcbMenuImpl::RemoveItems(uint32 inFirstIndex, uint32 inCount)
+void MXcbMenuImpl::RemoveItems(uint32_t inFirstIndex, uint32_t inCount)
 {
 //	PRINT(("MENU: %s", __func__));
 	if (inFirstIndex < mItems.size())
@@ -123,7 +123,7 @@ void MXcbMenuImpl::RemoveItems(uint32 inFirstIndex, uint32 inCount)
 	}
 }
 
-string	MXcbMenuImpl::GetItemLabel(uint32 inIndex) const
+string	MXcbMenuImpl::GetItemLabel(uint32_t inIndex) const
 {
 //	PRINT(("MENU: %s", __func__));
 	string label;
@@ -132,23 +132,23 @@ string	MXcbMenuImpl::GetItemLabel(uint32 inIndex) const
 	return label;
 }
 
-void MXcbMenuImpl::SetItemCommand(uint32 inIndex, uint32 inCommand)
+void MXcbMenuImpl::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
 {
 //	PRINT(("MENU: %s", __func__));
 	if (inIndex < mItems.size())
 		mItems[inIndex].mCommand = inCommand;
 }
 
-uint32 MXcbMenuImpl::GetItemCommand(uint32 inIndex) const
+uint32_t MXcbMenuImpl::GetItemCommand(uint32_t inIndex) const
 {
 //	PRINT(("MENU: %s", __func__));
-	uint32 command = 0;
+	uint32_t command = 0;
 	if (inIndex < mItems.size())
 		command = mItems[inIndex].mCommand;
 	return command;
 }
 
-MMenu* MXcbMenuImpl::GetSubmenu(uint32 inIndex) const
+MMenu* MXcbMenuImpl::GetSubmenu(uint32_t inIndex) const
 {
 //	PRINT(("MENU: %s", __func__));
 	MMenu* result = nullptr;
@@ -157,7 +157,7 @@ MMenu* MXcbMenuImpl::GetSubmenu(uint32 inIndex) const
 	return result;
 }
 
-void MXcbMenuImpl::Popup(MWindow* inHandler, int32 inX, int32 inY, bool inBottomMenu)
+void MXcbMenuImpl::Popup(MWindow* inHandler, int32_t inX, int32_t inY, bool inBottomMenu)
 {
 	PRINT(("MENU: %s", __func__));
 }

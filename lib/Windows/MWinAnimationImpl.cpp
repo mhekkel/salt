@@ -173,7 +173,7 @@ class MWinAnimationTimerEventHandler : public IUIAnimationTimerEventHandler
     // IUIAnimationTimerEventHandler
     HRESULT __stdcall	OnPreUpdate()				{ return S_OK; }
     HRESULT __stdcall	OnPostUpdate();
-    HRESULT __stdcall	OnRenderingTooSlow(uint32)	{ return S_OK; }
+    HRESULT __stdcall	OnRenderingTooSlow(uint32_t)	{ return S_OK; }
 
   private:
 	MAnimationManager*	mManager;

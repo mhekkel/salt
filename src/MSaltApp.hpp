@@ -17,7 +17,7 @@
 
 extern const char kAppName[], kVersionString[];
 
-const uint32
+const uint32_t
 	cmd_Connect				= 'Conn',
 	cmd_Disconnect			= 'Disc',
 	cmd_Reset				= 'rset',
@@ -52,8 +52,8 @@ class MSaltApp : public MApplication
 	virtual void		DoNew();
 	virtual void		Open(const std::string& inURL);
 
-	virtual bool		UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked);
-	virtual bool		ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers);
+	virtual bool		UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked);
+	virtual bool		ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
 	void				AddRecent(const std::string& inRecent);
 	void				OpenRecent(const std::string& inRecent);
@@ -64,7 +64,7 @@ class MSaltApp : public MApplication
 						GetConnectionPool()					{ return mConnectionPool; }
 	
 	bool				ValidateHost(const std::string& inHost,
-							const std::string& inAlg, const std::vector<uint8>& inHostKey);
+							const std::string& inAlg, const std::vector<uint8_t>& inHostKey);
 	
   private:
 

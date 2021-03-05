@@ -12,32 +12,32 @@
 class MXcbCanvasImpl// : public MXcbControlImpl<MCanvas>
 {
   public:
-					MXcbCanvasImpl(MCanvas* inCanvas, uint32 inWidth, uint32 inHeight);
+					MXcbCanvasImpl(MCanvas* inCanvas, uint32_t inWidth, uint32_t inHeight);
 	virtual 		~MXcbCanvasImpl();
 	
 	virtual void	CreateWidget();
 
-	virtual bool	OnMouseDown(int32 inX, int32 inY, uint32 inButtonNr, uint32 inClickCount, uint32 inModifiers);
-	virtual bool	OnMouseMove(int32 inX, int32 inY, uint32 inModifiers);
-	virtual bool	OnMouseUp(int32 inX, int32 inY, uint32 inModifiers);
+	virtual bool	OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
+	virtual bool	OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual bool	OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual bool	OnMouseExit();
 	
-//	virtual void	MoveFrame(int32 inXDelta, int32 inYDelta);
-//	virtual void	ResizeFrame(int32 inWidthDelta, int32 inHeightDelta);
+//	virtual void	MoveFrame(int32_t inXDelta, int32_t inYDelta);
+//	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 //	virtual void	AddedToWindow();
 //
 //	void			GetBounds(// MRect& outBounds) const;
 //	void			SetBounds(// const MRect& inBounds);
-//	void			ResizeTo(// int32 inWidth, // int32 inHeight);
-//	void			ConvertToGlobal(// int32& ioX, // int32& ioY);
+//	void			ResizeTo(// int32_t inWidth, // int32_t inHeight);
+//	void			ConvertToGlobal(// int32_t& ioX, // int32_t& ioY);
 //
 //	void			UpdateNow();
 //
 	void			Invalidate();
 //	void			Invalidate(const MRect& inRect);
 //
-//	void			Scroll(const MRect& inRect, int32 inX, int32 inY);
-//	void			Scroll(int32 inX, int32 inY);
+//	void			Scroll(const MRect& inRect, int32_t inX, int32_t inY);
+//	void			Scroll(int32_t inX, int32_t inY);
 //
 //	virtual void	Add(MView* inSubView);
 //
@@ -54,7 +54,7 @@ class MXcbCanvasImpl// : public MXcbControlImpl<MCanvas>
 //	virtual void	TrackMouse(bool inTrackMove, bool inTrackExit);
 //
 //	// called for printing
-//	virtual uint32	CountPages(MDevice& inDevice);
+//	virtual uint32_t	CountPages(MDevice& inDevice);
 
   protected:
 //	virtual bool	OnExposeEvent(GdkEventExpose* inEvent);

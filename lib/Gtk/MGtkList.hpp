@@ -115,13 +115,13 @@ class MListRowBase : public boost::noncopyable
 
 	virtual void		UpdateDataInTreeStore() = 0;
 
-	bool				GetParentAndPosition(MListRowBase*& outParent, uint32& outPosition, uint32 inObjectColumn);
+	bool				GetParentAndPosition(MListRowBase*& outParent, uint32_t& outPosition, uint32_t inObjectColumn);
 
 	void				UpdateRowReference(GtkTreeModel* inNewModel, GtkTreePath* inNewPath);
 
-	virtual void		ColumnEdited(uint32 inColumnNr, const std::string& inNewText)		{}
+	virtual void		ColumnEdited(uint32_t inColumnNr, const std::string& inNewText)		{}
 
-	virtual void		ColumnToggled(uint32 inColumnNr)		{}
+	virtual void		ColumnToggled(uint32_t inColumnNr)		{}
 
   private:
 
@@ -246,7 +246,7 @@ class MListRow : public MListRowBase
 
 	using MListRowBase::GetParentAndPosition;
 
-	bool				GetParentAndPosition(impl_type*& outParent, uint32& outPosition)
+	bool				GetParentAndPosition(impl_type*& outParent, uint32_t& outPosition)
 						{
 							bool result = false;
 							MListRowBase* parent;
@@ -275,20 +275,20 @@ class MListBase : public MView
 
 	void			AllowMultipleSelectedItems();
 
-	void			SetColumnTitle(uint32 inColumnNr, const std::string& inTitle);
+	void			SetColumnTitle(uint32_t inColumnNr, const std::string& inTitle);
 
-	void			SetColumnAlignment(uint32 inColumnNr, float inAlignment);		
+	void			SetColumnAlignment(uint32_t inColumnNr, float inAlignment);		
 
-	void			SetExpandColumn(uint32 inColumnNr);		
+	void			SetExpandColumn(uint32_t inColumnNr);		
 
-	void			SetColumnEditable(uint32 inColumnNr, bool inEditable);
+	void			SetColumnEditable(uint32_t inColumnNr, bool inEditable);
 
-	void			SetColumnToggleable(uint32 inColumnNr, bool inToggleable);
+	void			SetColumnToggleable(uint32_t inColumnNr, bool inToggleable);
 
 					// turn column into a popup/combo item
-	void			SetListOfOptionsForColumn(uint32 inColumnNr, const std::vector<std::string>& inOptions);
+	void			SetListOfOptionsForColumn(uint32_t inColumnNr, const std::vector<std::string>& inOptions);
 
-	void			SelectRowAndStartEditingColumn(MListRowBase* inRow, uint32 inColumnNr);
+	void			SelectRowAndStartEditingColumn(MListRowBase* inRow, uint32_t inColumnNr);
 
 	virtual MListRowBase*
 					GetCursorRow() const;
@@ -386,7 +386,7 @@ class MListBase : public MView
  	
 	MTimeOut		mRowSelectedTimer;
 	MTimeOut		mRowEditingTimedOut;
-	std::set<uint32>
+	std::set<uint32_t>
 					mEnabledEditColumns;
 };
 

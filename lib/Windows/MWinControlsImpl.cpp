@@ -363,7 +363,7 @@ void MWinButtonImpl::AddedToWindow()
 		::SendMessage(GetHandle(), BM_SETSTYLE, (WPARAM)BS_PUSHBUTTON, 0);
 }
 
-void MWinButtonImpl::GetIdealSize(int32& outWidth, int32& outHeight)
+void MWinButtonImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 {
 	outWidth = 75;
 	outHeight = 23;
@@ -543,8 +543,8 @@ bool MWinExpanderImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LP
 		mControl->UpdateNow();
 	}
 
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 	
 	MRect bounds;
 	mControl->GetBounds(bounds);
@@ -575,8 +575,8 @@ bool MWinExpanderImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 {
 	::ReleaseCapture();
 	
-	int32 x = static_cast<int16>(LOWORD(inLParam));
-	int32 y = static_cast<int16>(HIWORD(inLParam));
+	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 	
 	MRect bounds;
 	mControl->GetBounds(bounds);
@@ -663,9 +663,9 @@ void MWinScrollbarImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
 		outStyle |= SBS_VERT;
 }
 
-int32 MWinScrollbarImpl::GetValue() const
+int32_t MWinScrollbarImpl::GetValue() const
 {
-	int32 result = 0;
+	int32_t result = 0;
 
 	SCROLLINFO info = { sizeof(SCROLLINFO), SIF_POS };
 	
@@ -675,7 +675,7 @@ int32 MWinScrollbarImpl::GetValue() const
 	return result;
 }
 
-void MWinScrollbarImpl::SetValue(int32 inValue)
+void MWinScrollbarImpl::SetValue(int32_t inValue)
 {
 	if (GetHandle() != nullptr)
 	{
@@ -686,7 +686,7 @@ void MWinScrollbarImpl::SetValue(int32 inValue)
 	}
 }
 
-int32 MWinScrollbarImpl::GetTrackValue() const
+int32_t MWinScrollbarImpl::GetTrackValue() const
 {
 	SCROLLINFO info = { sizeof(SCROLLINFO), SIF_TRACKPOS };
 	
@@ -696,8 +696,8 @@ int32 MWinScrollbarImpl::GetTrackValue() const
 	return info.nTrackPos;
 }
 
-void MWinScrollbarImpl::SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-	int32 inScrollUnit, int32 inPageSize, int32 inValue)
+void MWinScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 {
 	if (GetHandle() != nullptr)
 	{
@@ -710,7 +710,7 @@ void MWinScrollbarImpl::SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
 	}
 }
 
-int32 MWinScrollbarImpl::GetMinValue() const
+int32_t MWinScrollbarImpl::GetMinValue() const
 {
 	SCROLLINFO info = { sizeof(SCROLLINFO), SIF_RANGE };
 	
@@ -720,13 +720,13 @@ int32 MWinScrollbarImpl::GetMinValue() const
 	return info.nMin;
 }
 
-int32 MWinScrollbarImpl::GetMaxValue() const
+int32_t MWinScrollbarImpl::GetMaxValue() const
 {
 	SCROLLINFO info = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
 	if (GetHandle() != nullptr)
 		::GetScrollInfo(GetHandle(), SB_CTL, &info);
 
-	int32 result = info.nMax;
+	int32_t result = info.nMax;
 	if (info.nPage > 1)
 		result -= info.nPage - 1;
 
@@ -780,11 +780,11 @@ MScrollbarImpl* MScrollbarImpl::Create(MScrollbar* inScrollbar)
 
 // --------------------------------------------------------------------
 
-MWinStatusbarImpl::MWinStatusbarImpl(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[])
+MWinStatusbarImpl::MWinStatusbarImpl(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MWinControlImpl(inStatusbar, "")
 {
-	int32 offset = 0;
-	for (uint32 p = 0; p < inPartCount; ++p)
+	int32_t offset = 0;
+	for (uint32_t p = 0; p < inPartCount; ++p)
 	{
 		if (inParts[p].expand)
 			mOffsets.push_back(-1);
@@ -825,7 +825,7 @@ void MWinStatusbarImpl::AddedToWindow()
 	::SendMessageW(GetHandle(), SB_SETPARTS, mOffsets.size(), (LPARAM)&mOffsets[0]);
 }
 
-void MWinStatusbarImpl::SetStatusText(uint32 inPartNr, const string& inText, bool inBorder)
+void MWinStatusbarImpl::SetStatusText(uint32_t inPartNr, const string& inText, bool inBorder)
 {
 	if (inPartNr >= 0 and inPartNr < mOffsets.size())
 	{
@@ -842,7 +842,7 @@ bool MWinStatusbarImpl::NMClick(WPARAM inWParam, LPARAM inLParam, LRESULT& outRe
 {
 	NMMOUSE* nmMouse = reinterpret_cast<NMMOUSE*>(inLParam);
 	
-	uint32 partNr = nmMouse->dwItemSpec;
+	uint32_t partNr = nmMouse->dwItemSpec;
 	
 	RECT r;
 	::SendMessageW(GetHandle(), SB_GETRECT, partNr, (LPARAM)&r);
@@ -853,7 +853,7 @@ bool MWinStatusbarImpl::NMClick(WPARAM inWParam, LPARAM inLParam, LRESULT& outRe
 	return true;
 }
 
-MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[])
+MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 {
 	return new MWinStatusbarImpl(inStatusbar, inPartCount, inParts);
 }
@@ -910,7 +910,7 @@ void MWinComboboxImpl::AddedToWindow()
 		SetChoices(mChoices);
 }
 
-bool MWinComboboxImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MWinComboboxImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 
@@ -942,7 +942,7 @@ bool MWinComboboxImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 		
 		case CBN_SELCHANGE:
 		{
-			uint32 selected = ::SendMessage(GetHandle(), CB_GETCURSEL, 0, 0);
+			uint32_t selected = ::SendMessage(GetHandle(), CB_GETCURSEL, 0, 0);
 			if (selected < mChoices.size())
 				mControl->eValueChanged(mControl->GetID(), mChoices[selected]);
 			break;
@@ -1033,12 +1033,12 @@ void MWinPopupImpl::AddedToWindow()
 		SetChoices(mChoices);
 }
 
-int32 MWinPopupImpl::GetValue() const
+int32_t MWinPopupImpl::GetValue() const
 {
 	return ::SendMessage(GetHandle(), CB_GETCURSEL, 0, 0) + 1;
 }
 
-void MWinPopupImpl::SetValue(int32 inValue)
+void MWinPopupImpl::SetValue(int32_t inValue)
 {
 	::SendMessage(GetHandle(), CB_SETCURSEL, (WPARAM)(inValue - 1), 0);
 	::UpdateWindow(GetHandle());
@@ -1054,7 +1054,7 @@ void MWinPopupImpl::SetText(const string& inText)
 	::UpdateWindow(GetHandle());
 }
 
-bool MWinPopupImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MWinPopupImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 
@@ -1123,7 +1123,7 @@ MPopupImpl* MPopupImpl::Create(MPopup* inPopup)
 
 // --------------------------------------------------------------------
 
-MWinEdittextImpl::MWinEdittextImpl(MEdittext* inEdittext, uint32 inFlags)
+MWinEdittextImpl::MWinEdittextImpl(MEdittext* inEdittext, uint32_t inFlags)
 	: MWinControlImpl(inEdittext, "")
 	, mFlags(inFlags)
 {
@@ -1183,12 +1183,12 @@ void MWinEdittextImpl::SetText(const std::string& inText)
 	}
 }
 
-void MWinEdittextImpl::SetPasswordChar(uint32 inUnicode)
+void MWinEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 {
 	::SendMessage(GetHandle(), EM_SETPASSWORDCHAR, (WPARAM)inUnicode, 0);
 }
 
-bool MWinEdittextImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MWinEdittextImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 
@@ -1222,7 +1222,7 @@ bool MWinEdittextImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	return result;
 }
 
-MEdittextImpl* MEdittextImpl::Create(MEdittext* inEdittext, uint32 inFlags)
+MEdittextImpl* MEdittextImpl::Create(MEdittext* inEdittext, uint32_t inFlags)
 {
 	return new MWinEdittextImpl(inEdittext, inFlags);
 }
@@ -1596,7 +1596,7 @@ void MWinNotebookImpl::FrameResized()
 		MRect frame;
 		page.mPage->GetFrame(frame);
 
-		int32 dx, dy, dw, dh;
+		int32_t dx, dy, dw, dh;
 		dx = rc.left - frame.x;
 		dy = rc.top - frame.y;
 		dw = rc.right - rc.left - frame.width;
@@ -1645,7 +1645,7 @@ void MWinNotebookImpl::AddPage(const string& inLabel, MView* inPage)
 	}
 }
 
-void MWinNotebookImpl::SelectPage(uint32 inPage)
+void MWinNotebookImpl::SelectPage(uint32_t inPage)
 {
 	if (inPage != ::SendMessage(GetHandle(), TCM_GETCURSEL, 0, 0))
 	{
@@ -1666,7 +1666,7 @@ void MWinNotebookImpl::SelectPage(uint32 inPage)
 	}
 }
 
-uint32 MWinNotebookImpl::GetSelectedPage() const
+uint32_t MWinNotebookImpl::GetSelectedPage() const
 {
 	return ::SendMessage(GetHandle(), TCM_GETCURSEL, 0, 0);
 }
@@ -1767,7 +1767,7 @@ void MWinColorSwatchImpl::SetColor(MColor inColor)
 	}
 }
 
-//void MWinColorSwatchImpl::GetIdealSize(int32& outWidth, int32& outHeight)
+//void MWinColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 //{
 //	outWidth = 30;
 //	outHeight = 23;
@@ -1829,12 +1829,12 @@ void MWinListBoxImpl::AddItem(const string& inText)
 	}
 }
 
-int32 MWinListBoxImpl::GetValue() const
+int32_t MWinListBoxImpl::GetValue() const
 {
 	return ::SendMessage(GetHandle(), LB_GETCURSEL, 0, 0);
 }
 
-void MWinListBoxImpl::SetValue(int32 inValue)
+void MWinListBoxImpl::SetValue(int32_t inValue)
 {
 	::SendMessage(GetHandle(), LB_SETCURSEL, inValue, 0);
 }

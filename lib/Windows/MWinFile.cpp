@@ -95,9 +95,9 @@ bool MAuthzContext::IsWritable(const fs::path& inFile)
 
 }
 
-int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
+int32_t read_attribute(const fs::path& inPath, const char* inName, void* outData, size_t inDataSize)
 {
-	int32 result = -1;
+	int32_t result = -1;
 
 	wstring path = c2w(inPath.string());
 	path += L":japi";
@@ -121,9 +121,9 @@ int32 read_attribute(const fs::path& inPath, const char* inName, void* outData, 
 	return result;
 }
 
-int32 write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
+int32_t write_attribute(const fs::path& inPath, const char* inName, const void* inData, size_t inDataSize)
 {
-	int32 result = -1;
+	int32_t result = -1;
 
 	wstring path = c2w(inPath.string());
 	path += L":japi";
@@ -169,7 +169,7 @@ time_t GetFileCreationTime(const fs::path& inFile)
 	if (::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard,
 		 &data))
 	{
-		int64 t = data.ftCreationTime.dwHighDateTime;
+		int64_t t = data.ftCreationTime.dwHighDateTime;
 		t = (t << 32) + data.ftCreationTime.dwLowDateTime;
 		t -= 116444736000000000LL;
 		t /= 10000000;
@@ -360,7 +360,7 @@ bool Choose(
 		DWORD count;
 		THROW_IF_HRESULT_ERROR(psiResult->GetCount(&count));
 
-		for (uint32 i = 0; i < count; ++i)
+		for (uint32_t i = 0; i < count; ++i)
 		{
 			MComPtr<IShellItem> item;
 			THROW_IF_HRESULT_ERROR(psiResult->GetItemAt(i, &item));

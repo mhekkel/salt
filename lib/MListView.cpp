@@ -37,30 +37,30 @@ class MListViewImpl : public MCanvas
 					~MListViewImpl();
 
 	virtual void	ResizeFrame(
-						int32 inWidthDelta, int32 inHeightDelta);
+						int32_t inWidthDelta, int32_t inHeightDelta);
 
 	// virtual void	Draw(MRect inUpdate);
 	virtual void	Draw(cairo_t* inCairo);
 
-	virtual bool	HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	
-	virtual void	MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 inModifiers);
+	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
 
 	void			AddRow(MListRow* inRow, MListRow* inBefore = nullptr);
 	void			RemoveRow(MListRow* inRow);
 	void			RemoveAllRows();
 	
 	void			AddColumn(MListColumn* inColumn);
-	void			SetResizingColumn(uint32 inColumnNr);
-	MListColumn*	GetColumn(uint32 inColumnNr);
+	void			SetResizingColumn(uint32_t inColumnNr);
+	MListColumn*	GetColumn(uint32_t inColumnNr);
 	
-	MListRow*		GetRowForPoint(int32 inX, int32 inY);
+	MListRow*		GetRowForPoint(int32_t inX, int32_t inY);
 
 	void			SelectRow(MListRow* inRow, bool inSelect);
 	MListRow*		GetNextSelectedRow(MListRow* inRow);
 
-	int32			GetRowIndex(MListRow* inRow) const;
-	MListRow*		GetRow(uint32 inIndex);
+	int32_t			GetRowIndex(MListRow* inRow) const;
+	MListRow*		GetRow(uint32_t inIndex);
 	
   private:
 	vector<MListRow*>
@@ -87,7 +87,7 @@ MListViewImpl::~MListViewImpl()
 		delete col;
 }
 
-void MListViewImpl::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
+void MListViewImpl::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	MCanvas::ResizeFrame(inWidthDelta, inHeightDelta);
 	
@@ -102,7 +102,7 @@ void MListViewImpl::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
 
 		default:
 		{
-			int32 w = mBounds.width;
+			int32_t w = mBounds.width;
 			MListColumn* resizingColumn = nullptr;
 			for (MListColumn* col: mColumns)
 			{
@@ -123,7 +123,7 @@ void MListViewImpl::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
 	}
 }
 
-bool MListViewImpl::HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MListViewImpl::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool handled = true;
 	switch (inKeyCode)
@@ -146,10 +146,10 @@ void MListViewImpl::AddRow(MListRow* inRow, MListRow* inBefore)
 	vector<MListRow*>::iterator i = find(mRows.begin(), mRows.end(), inBefore);
 	mRows.insert(i, inRow);
 	
-	uint32 height = 0;
-	for (uint32 i = 0; i < mColumns.size(); ++i)
+	uint32_t height = 0;
+	for (uint32_t i = 0; i < mColumns.size(); ++i)
 	{
-		uint32 columnHeight = mColumns[i]->CalculateHeight(*inRow, i);
+		uint32_t columnHeight = mColumns[i]->CalculateHeight(*inRow, i);
 		if (height < columnHeight)
 			height = columnHeight;
 	}
@@ -167,7 +167,7 @@ void MListViewImpl::RemoveRow(MListRow* inRow)
 	if (i != mRows.end())
 	{
 		mRows.erase(i);
-		ResizeFrame(0, -static_cast<int32>(inRow->GetHeight()));
+		ResizeFrame(0, -static_cast<int32_t>(inRow->GetHeight()));
 		delete inRow;
 		
 		Invalidate();
@@ -189,12 +189,12 @@ void MListViewImpl::AddColumn(MListColumn* inColumn)
 	mColumns.push_back(inColumn);	
 
 	// recalculate heights for all rows
-	for (uint32 i = 0; i < mRows.size(); ++i)
+	for (uint32_t i = 0; i < mRows.size(); ++i)
 	{
-		uint32 height = 0;
-		for (uint32 j = 0; j < mColumns.size(); ++j)
+		uint32_t height = 0;
+		for (uint32_t j = 0; j < mColumns.size(); ++j)
 		{
-			uint32 columnHeight = mColumns[j]->CalculateHeight(*mRows[i], j);
+			uint32_t columnHeight = mColumns[j]->CalculateHeight(*mRows[i], j);
 			if (height < columnHeight)
 				height = columnHeight;
 		}
@@ -205,7 +205,7 @@ void MListViewImpl::AddColumn(MListColumn* inColumn)
 	Invalidate();
 }
 
-void MListViewImpl::SetResizingColumn(uint32 inColumnNr)
+void MListViewImpl::SetResizingColumn(uint32_t inColumnNr)
 {
 	for (MListColumn* col: mColumns)
 		col->SetResizing(false);
@@ -214,7 +214,7 @@ void MListViewImpl::SetResizingColumn(uint32 inColumnNr)
 		mColumns[inColumnNr]->SetResizing(true);
 }
 
-MListColumn* MListViewImpl::GetColumn(uint32 inColumnNr)
+MListColumn* MListViewImpl::GetColumn(uint32_t inColumnNr)
 {
 	MListColumn* result = nullptr;
 	if (inColumnNr < mColumns.size())
@@ -230,7 +230,7 @@ void MListViewImpl::Draw(cairo_t* inCairo)
 	
 	MRect r(0, 0, mBounds.width, dev.GetLineHeight() + 3);
 
-	for (uint32 i = 0; i < mRows.size() and r.y < inUpdate.y + inUpdate.height; ++i)
+	for (uint32_t i = 0; i < mRows.size() and r.y < inUpdate.y + inUpdate.height; ++i)
 	{
 		MListRow* row = mRows[i];
 		
@@ -244,7 +244,7 @@ void MListViewImpl::Draw(cairo_t* inCairo)
 			
 			MRect b = r;
 	
-			for (uint32 j = 0; j < mColumns.size(); ++j)
+			for (uint32_t j = 0; j < mColumns.size(); ++j)
 			{
 				b.width = mColumns[j]->GetWidth();
 				mColumns[j]->Render(dev, *row, j, b);
@@ -256,7 +256,7 @@ void MListViewImpl::Draw(cairo_t* inCairo)
 	}
 }
 
-void MListViewImpl::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 inModifiers)
+void MListViewImpl::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
 {
 	MListRow* row = GetRowForPoint(inX, inY);
 	if (row != nullptr)
@@ -282,12 +282,12 @@ void MListViewImpl::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 
 	}
 }
 
-MListRow* MListViewImpl::GetRowForPoint(int32 inX, int32 inY)
+MListRow* MListViewImpl::GetRowForPoint(int32_t inX, int32_t inY)
 {
 	MListRow* result = nullptr;
 	if (inX >= 0 and inX < mBounds.width and inY >= 0)
 	{
-		for (uint32 i = 0; i < mRows.size(); ++i)
+		for (uint32_t i = 0; i < mRows.size(); ++i)
 		{
 			inY -= mRows[i]->GetHeight();
 			if (inY <= 0)
@@ -330,16 +330,16 @@ MListRow* MListViewImpl::GetNextSelectedRow(MListRow* inRow)
 	return result;
 }
 
-int32 MListViewImpl::GetRowIndex(MListRow* inRow) const
+int32_t MListViewImpl::GetRowIndex(MListRow* inRow) const
 {
-	int32 result = -1;
+	int32_t result = -1;
 	vector<MListRow*>::const_iterator i = find(mRows.begin(), mRows.end(), inRow);
 	if (i != mRows.end())
 		result = i - mRows.begin();
 	return result;
 }
 
-MListRow* MListViewImpl::GetRow(uint32 inIndex)
+MListRow* MListViewImpl::GetRow(uint32_t inIndex)
 {
 	MListRow* result = nullptr;
 	if (inIndex < mRows.size())
@@ -349,7 +349,7 @@ MListRow* MListViewImpl::GetRow(uint32 inIndex)
 
 //---------------------------------------------------------------------
 
-MListColumn::MListColumn(const string& inLabel, uint32 inWidth)
+MListColumn::MListColumn(const string& inLabel, uint32_t inWidth)
 	: mLabel(inLabel)
 	, mFont("Segoe UI 9")
 	, mWidth(inWidth)
@@ -363,13 +363,13 @@ MListColumn::~MListColumn()
 
 //---------------------------------------------------------------------
 
-MListTextColumn::MListTextColumn(const string& inLabel, uint32 inWidth)
+MListTextColumn::MListTextColumn(const string& inLabel, uint32_t inWidth)
 	: MListColumn(inLabel, inWidth)
 {
 }
 
 void MListTextColumn::Render(MDevice& inDevice, const MListRow& inRow,
-	uint32 inColumnNr, MRect inBounds)
+	uint32_t inColumnNr, MRect inBounds)
 {
 	string text;
 	inRow.GetValue(inColumnNr, text);
@@ -380,7 +380,7 @@ void MListTextColumn::Render(MDevice& inDevice, const MListRow& inRow,
 	inDevice.DrawString(text, inBounds);
 }
 
-uint32 MListTextColumn::CalculateHeight(const MListRow& inRow, uint32 inColumnNr)
+uint32_t MListTextColumn::CalculateHeight(const MListRow& inRow, uint32_t inColumnNr)
 {
 	MDevice dev;
 	dev.SetFont(mFont);
@@ -390,16 +390,16 @@ uint32 MListTextColumn::CalculateHeight(const MListRow& inRow, uint32 inColumnNr
 //---------------------------------------------------------------------
 
 MListNumberColumn::MListNumberColumn(const string& inLabel,
-	uint32 inWidth, const string& inFormat)
+	uint32_t inWidth, const string& inFormat)
 	: MListTextColumn(inLabel, inWidth)
 	, mFormat(inFormat)
 {
 }
 
 void MListNumberColumn::Render(MDevice& inDevice, const MListRow& inRow,
-	uint32 inColumnNr, MRect inBounds)
+	uint32_t inColumnNr, MRect inBounds)
 {
-	int64 v;
+	int64_t v;
 	inRow.GetValue(inColumnNr, v);
 	
 	inDevice.SetFont(mFont);
@@ -410,13 +410,13 @@ void MListNumberColumn::Render(MDevice& inDevice, const MListRow& inRow,
 
 //---------------------------------------------------------------------
 
-MListDotColumn::MListDotColumn(const string& inLabel, uint32 inWidth)
+MListDotColumn::MListDotColumn(const string& inLabel, uint32_t inWidth)
 	: MListColumn(inLabel, inWidth + 6)
 {
 }
 
 void MListDotColumn::Render(MDevice& inDevice, const MListRow& inRow,
-	uint32 inColumnNr, MRect inBounds)
+	uint32_t inColumnNr, MRect inBounds)
 {
 	MColor v;
 	inRow.GetValue(inColumnNr, v);
@@ -430,7 +430,7 @@ void MListDotColumn::Render(MDevice& inDevice, const MListRow& inRow,
 	inDevice.SetForeColor(kBlack);
 }
 
-uint32 MListDotColumn::CalculateHeight(const MListRow& inRow, uint32 inColumnNr)
+uint32_t MListDotColumn::CalculateHeight(const MListRow& inRow, uint32_t inColumnNr)
 {
 	return GetWidth() - 4;
 }
@@ -453,12 +453,12 @@ MListView::~MListView()
 	//delete mImpl;
 }
 
-bool MListView::HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MListView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	return mImpl->HandleKeyDown(inKeyCode, inModifiers, inRepeat);
 }
 
-void MListView::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
+void MListView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	MView::ResizeFrame(inWidthDelta, inHeightDelta);
 //	mImpl->FrameResized();
@@ -497,12 +497,12 @@ void MListView::AddColumn(MListColumn* inColumn)
 	mImpl->AddColumn(inColumn);
 }
 
-void MListView::SetResizingColumn(uint32 inColumnNr)
+void MListView::SetResizingColumn(uint32_t inColumnNr)
 {
 	mImpl->SetResizingColumn(inColumnNr);
 }
 
-MListColumn* MListView::GetColumn(uint32 inColumnNr)
+MListColumn* MListView::GetColumn(uint32_t inColumnNr)
 {
 	return mImpl->GetColumn(inColumnNr);
 }
@@ -517,7 +517,7 @@ void MListView::RemoveAll()
 	mImpl->RemoveAllRows();
 }
 
-void MListView::RemoveRow(uint32 inIndex)
+void MListView::RemoveRow(uint32_t inIndex)
 {
 	MListRow* row = GetRow(inIndex);
 	if (row != nullptr)
@@ -534,7 +534,7 @@ void MListView::SelectRow(MListRow* inRow, bool inSelect)
 	mImpl->SelectRow(inRow, inSelect);
 }
 
-void MListView::SelectRow(uint32 inIndex, bool inSelect)
+void MListView::SelectRow(uint32_t inIndex, bool inSelect)
 {
 	SelectRow(GetRow(inIndex), inSelect);
 }
@@ -549,12 +549,12 @@ MListRow* MListView::GetNextSelectedRow(MListRow* inFrom) const
 	return mImpl->GetNextSelectedRow(inFrom);
 }
 
-int32 MListView::GetRowIndex(MListRow* inRow) const
+int32_t MListView::GetRowIndex(MListRow* inRow) const
 {
 	return mImpl->GetRowIndex(inRow);
 }
 
-MListRow* MListView::GetRow(uint32 inIndex)
+MListRow* MListView::GetRow(uint32_t inIndex)
 {
 	return mImpl->GetRow(inIndex);
 }
@@ -633,8 +633,8 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //
 //bool MListRowBase::GetParentAndPosition(
 //	MListRowBase*&		outParent,
-//	uint32&				outPosition,
-//	uint32				inObjectColumn)
+//	uint32_t&				outPosition,
+//	uint32_t				inObjectColumn)
 //{
 //	bool result = false;
 //
@@ -681,7 +681,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //{
 //  public:
 //					MListColumnEditedListener(
-//						uint32				inColumnNr,
+//						uint32_t				inColumnNr,
 //						MListBase*			inList,
 //						GtkCellRenderer*	inRenderer,
 //						bool				inListenToToggle,
@@ -735,7 +735,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //					
 //	MSlot<void(gchar*,gchar*)>				eEdited;
 //
-//	uint32			mColumnNr;
+//	uint32_t			mColumnNr;
 //	MListBase*		mList;
 //};
 //
@@ -894,7 +894,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //}
 //
 //void MListBase::SetColumnTitle(
-//	uint32			inColumnNr,
+//	uint32_t			inColumnNr,
 //	const string&	inTitle)
 //{
 //	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
@@ -904,7 +904,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //}
 //
 //void MListBase::SetExpandColumn(
-//	uint32			inColumnNr)
+//	uint32_t			inColumnNr)
 //{
 //	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
 //	if (column == NULL)
@@ -913,7 +913,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //}
 //
 //void MListBase::SetColumnAlignment(
-//	uint32				inColumnNr,
+//	uint32_t				inColumnNr,
 //	float				inAlignment)
 //{
 //	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
@@ -925,7 +925,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //}
 //
 //void MListBase::SetColumnEditable(
-//	uint32			inColumnNr,
+//	uint32_t			inColumnNr,
 //	bool			inEditable)
 //{
 //	if (inColumnNr < mRenderers.size())
@@ -941,7 +941,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //}
 //
 //void MListBase::SetColumnToggleable(
-//	uint32			inColumnNr,
+//	uint32_t			inColumnNr,
 //	bool			inToggleable)
 //{
 //	if (inColumnNr < mRenderers.size())
@@ -949,7 +949,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //}
 //
 //void MListBase::SetListOfOptionsForColumn(
-//	uint32					inColumnNr,
+//	uint32_t					inColumnNr,
 //	const vector<string>&	inOptions)
 //{
 //	if (inColumnNr >= mRenderers.size())
@@ -1108,7 +1108,7 @@ MListRow* MListView::GetRow(uint32 inIndex)
 //
 //void MListBase::SelectRowAndStartEditingColumn(
 //	MListRowBase*		inRow,
-//	uint32				inColumnNr)
+//	uint32_t				inColumnNr)
 //{
 //	GtkTreePath* path = inRow->GetTreePath();
 //	if (path != nullptr)

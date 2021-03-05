@@ -223,15 +223,15 @@ class MGtkWidgetMixin
 //	MGtkWidgetMixin(GtkWidget* inWidget);
 	virtual ~MGtkWidgetMixin();
 
-	void			RequestSize(int32 inWidth, int32 inHeight);
+	void			RequestSize(int32_t inWidth, int32_t inHeight);
 
 	bool			IsActive() const;
 	virtual void	SetFocus();
 	virtual void	ReleaseFocus();
 	virtual bool	IsFocus() const;
 
-	void			GetMouse(int32& outX, int32& outY) const;
-	uint32			GetModifiers() const;
+	void			GetMouse(int32_t& outX, int32_t& outY) const;
+	uint32_t			GetModifiers() const;
 
 	void			CreateIMContext();
 
@@ -241,7 +241,7 @@ class MGtkWidgetMixin
 	void SetWidget(GtkWidget* inWidget);
 	
 	virtual void Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32 inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
   protected:
 
@@ -264,19 +264,19 @@ class MGtkWidgetMixin
 
 	// Mouse support
 	
-	virtual bool	OnMouseDown(int32 inX, int32 inY, uint32 inButtonNr, uint32 inClickCount, uint32 inModifiers);
-	virtual bool	OnMouseMove(int32 inX, int32 inY, uint32 inModifiers);
-	virtual bool	OnMouseUp(int32 inX, int32 inY, uint32 inModifiers);
+	virtual bool	OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
+	virtual bool	OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual bool	OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual bool	OnMouseExit();
 
 	// Drag and Drop support
 
-	void			SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32 inTargetCount);
-	void			DragBegin(const GtkTargetEntry inTargets[], uint32 inTargetCount, GdkEventMotion* inEvent);
+	void			SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount);
+	void			DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEventMotion* inEvent);
 	virtual void	DragEnter();
-	virtual bool	DragWithin(int32 inX, int32 inY);
+	virtual bool	DragWithin(int32_t inX, int32_t inY);
 	virtual void	DragLeave();
-	virtual bool	DragAccept(bool inMove, int32 inX, int32 inY, const char* inData, uint32 inLength, uint32 inType);
+	virtual bool	DragAccept(bool inMove, int32_t inX, int32_t inY, const char* inData, uint32_t inLength, uint32_t inType);
 	virtual void	DragSendData(std::string& outData);
 	virtual void	DragDeleteData();
 	virtual void	OnDragDataReceived(GdkDragContext* inDragContext, gint inX, gint inY, GtkSelectionData* inData, guint inInfo, guint inTime);
@@ -285,7 +285,7 @@ class MGtkWidgetMixin
 	virtual void	OnDragDataDelete(GdkDragContext* inDragContext);
 	virtual void	OnDragDataGet(GdkDragContext* inDragContext, GtkSelectionData* inData, guint inInfo, guint inTime);
 	bool			IsWithinDrag() const	{ return mDragWithin; }
-//	virtual void	DrawDragImage(GdkPixmap*& outPixmap, int32& outX, int32& outY)	{  }
+//	virtual void	DrawDragImage(GdkPixmap*& outPixmap, int32_t& outX, int32_t& outY)	{  }
 
 
 	GtkWidget* mWidget;
@@ -349,7 +349,7 @@ class MGtkWidgetMixin
 	MSlot<bool(GdkEvent*)>				mOnGrabBroken;
 
   protected:
-	int32			mRequestedWidth, mRequestedHeight;
+	int32_t			mRequestedWidth, mRequestedHeight;
 	bool			mAutoRepeat;
 
   private:

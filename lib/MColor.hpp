@@ -11,16 +11,16 @@
 struct MColor
 {
   public:
-	uint8		red;
-	uint8		green;
-	uint8		blue;
+	uint8_t		red;
+	uint8_t		green;
+	uint8_t		blue;
 
 				MColor();
 				MColor(const MColor& inOther);
 				//MColor(// const GdkColor& inColor);
 				MColor(const char* inHex);
 				MColor(const std::string& inHex);
-				MColor(uint8 inRed, uint8 inGreen, uint8 inBlue);
+				MColor(uint8_t inRed, uint8_t inGreen, uint8_t inBlue);
 				MColor(float inRed, float inGreen, float inBlue);
 	MColor&		operator=(const MColor& inOther);
 

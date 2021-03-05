@@ -27,8 +27,8 @@ class MPrinter
 	//void			OnBeginPrint(// GtkPrintContext* inContext);
 	//MSlot<void(GtkPrintContext*)>			mBeginPrint;
 
-	//void			OnDrawPage(// GtkPrintContext* inContext, // int32 inPage);
-	//MSlot<void(GtkPrintContext*,int32)>		mDrawPage;
+	//void			OnDrawPage(// GtkPrintContext* inContext, // int32_t inPage);
+	//MSlot<void(GtkPrintContext*,int32_t)>		mDrawPage;
 
 	//GtkPrintOperation*			mPrint;
 	MView*						mPrintedView;

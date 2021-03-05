@@ -1,15 +1,15 @@
 struct MUnicodeInfoAtom {
-	uint32			upper;
-	uint32			lower;
+	uint32_t			upper;
+	uint32_t			lower;
 	CharBreakClass	cbc;
 	LineBreakClass	lbc;
-	uint8			prop;
+	uint8_t			prop;
 };
 
 typedef MUnicodeInfoAtom	MUnicodeInfoPage[256];
 
 struct MUnicodeInfo {
-	int16				page_index[4352];
+	int16_t				page_index[4352];
 	MUnicodeInfoPage	data[119];
 } kUnicodeInfo = {
 	{

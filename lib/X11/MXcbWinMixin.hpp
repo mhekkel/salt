@@ -18,9 +18,9 @@ class MXcbWinMixin
 
 	virtual ~MXcbWinMixin();
 
-	static MXcbWinMixin* FetchImpl(uint32 inWindowID);
+	static MXcbWinMixin* FetchImpl(uint32_t inWindowID);
 	
-	uint32 GetWindowID() const			{ return mWindowID; }
+	uint32_t GetWindowID() const			{ return mWindowID; }
 
 	void Show();
 	void Hide();
@@ -62,7 +62,7 @@ class MXcbWinMixin
   protected:
 	xcb_connection_t* mConnection;
 	xcb_screen_t* mScreen;
-	uint32 mWindowID;
+	uint32_t mWindowID;
 
   private:
 	static boost::mutex				sMutex;

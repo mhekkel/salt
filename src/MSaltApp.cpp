@@ -24,7 +24,7 @@
 #include "MConnectDialog.hpp"
 #include "MPreferences.hpp"
 #include "MPreferencesDialog.hpp"
-#include "MSaltVersion.hpp"
+// #include "MSaltVersion.hpp"
 #include "MPreferences.hpp"
 #include "MUtils.hpp"
 #include "MAlerts.hpp"
@@ -118,13 +118,13 @@ void MSaltApp::Initialise()
 	}
 	
 	// set preferred algorithms
-	mConnectionPool.set_algorithm(pinch::encryption, pinch::both_directions,
+	mConnectionPool.set_algorithm(pinch::algorithm::encryption, pinch::direction::both,
 		Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
-	mConnectionPool.set_algorithm(pinch::verification, pinch::both_directions,
+	mConnectionPool.set_algorithm(pinch::algorithm::verification, pinch::direction::both,
 		Preferences::GetString("mac", pinch::kMacAlgorithms));
-	mConnectionPool.set_algorithm(pinch::compression, pinch::both_directions,
+	mConnectionPool.set_algorithm(pinch::algorithm::compression, pinch::direction::both,
 		Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
-	mConnectionPool.set_algorithm(pinch::keyexchange, pinch::both_directions,
+	mConnectionPool.set_algorithm(pinch::algorithm::keyexchange, pinch::direction::both,
 		Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
 }
 
@@ -150,10 +150,10 @@ MApplication* MApplication::Create(
 // --------------------------------------------------------------------
 
 bool MSaltApp::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool result = true;
 
@@ -215,9 +215,9 @@ bool MSaltApp::ProcessCommand(
 }
 
 bool MSaltApp::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -342,7 +342,7 @@ void MSaltApp::OpenRecent(const string& inRecent)
 	{
 		string user = m[1];
 		string host = m[2];
-		uint16 port = m[3].matched ? std::to_string(m[3]) : 22;
+		uint16_t port = m[3].matched ? std::stoi(m[3]) : 22;
 		string command = m[6];
 		
 		MWindow* w;
@@ -351,22 +351,25 @@ void MSaltApp::OpenRecent(const string& inRecent)
 		{
 			string proxy_user = m[4];
 			string proxy_host = m[5];
-			uint16 proxy_port = m[6].matched ? std::to_string(m[6]) : 22;
+			uint16_t proxy_port = m[6].matched ? std::stoi(m[6]) : 22;
 			string proxy_cmd  = m[7];
 			
-			pinch::basic_connection* connection = mConnectionPool.get(
+			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(
 				user, host, port, proxy_user, proxy_host, proxy_port, proxy_cmd);
 			w = MTerminalWindow::Create(host, user, port, command, connection);
 		}
 		else
 		{
-			pinch::basic_connection* connection = mConnectionPool.get(user, host, port);
+			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
 			w = MTerminalWindow::Create(host, user, port, command, connection);
 		}
 
 		w->Select();
 	}
 }
+
+#warning "version"
+const char* kRevision = "0.1";
 
 void MSaltApp::DoAbout()
 {
@@ -430,10 +433,10 @@ void MSaltApp::Open(const string& inFile)
 	{
 		string user = m[1];
 		string host = m[3];
-		uint16 port = m[4].matched ? std::to_string(m[4]) : 22;
+		uint16_t port = m[4].matched ? std::stoi(m[4]) : 22;
 		string command;
 		
-		pinch::basic_connection* connection = mConnectionPool.get(user, host, port);
+		std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
 		MWindow* w = MTerminalWindow::Create(host, user, port, command, connection);
 		w->Select();
 	}
@@ -470,7 +473,7 @@ void MSaltApp::Pulse()
 	}
 }
 
-bool MSaltApp::ValidateHost(const string& inHost, const string& inAlgorithm, const vector<uint8>& inHostKey)
+bool MSaltApp::ValidateHost(const string& inHost, const string& inAlgorithm, const vector<uint8_t>& inHostKey)
 {
 	bool result = true;
 	
@@ -486,13 +489,13 @@ bool MSaltApp::ValidateHost(const string& inHost, const string& inAlgorithm, con
 #else
 	CryptoPP::MD5 hash;
 #endif
-	uint32 dLen = hash.DigestSize();
+	uint32_t dLen = hash.DigestSize();
 	vector<char>	H(dLen);
 	
 	hash.Update(&inHostKey[0], inHostKey.size());
 	hash.Final(reinterpret_cast<unsigned char*>(&H[0]));
 	
-	for (uint32 i = 0; i < dLen; ++i)
+	for (uint32_t i = 0; i < dLen; ++i)
 	{
 		if (not fingerprint.empty())
 			fingerprint += ':';
@@ -539,7 +542,7 @@ bool MSaltApp::ValidateHost(const string& inHost, const string& inAlgorithm, con
 
 #if not defined(_MSC_VER)
 
-#include <gtk/gtk.h>
+// #include <gtk/gtk.h>
 
 void MApplication::Install(const string& inPrefix)
 {
@@ -594,7 +597,8 @@ void MApplication::Install(const string& inPrefix)
 	
 	fs::path desktopFile, applicationsDir;
 	
-	const char* const* config_dirs = g_get_system_data_dirs();
+#warning "fix"
+	const char* const* config_dirs = nullptr;//g_get_system_data_dirs();
 	for (const char* const* dir = config_dirs; *dir != nullptr; ++dir)
 	{
 		applicationsDir = fs::path(*dir) / "applications";

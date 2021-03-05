@@ -79,8 +79,8 @@ unicode GetUnicode(MEncoding inEncoding, char inByte)
 {
 	switch (inEncoding)
 	{
-		case kEncodingMacOSRoman:	return kMacOSRomanChars[static_cast<uint8>(inByte)];
-		case kEncodingISO88591:		return static_cast<uint8>(inByte);	// iso-8859-1 maps exactly on unicode
+		case kEncodingMacOSRoman:	return kMacOSRomanChars[static_cast<uint8_t>(inByte)];
+		case kEncodingISO88591:		return static_cast<uint8_t>(inByte);	// iso-8859-1 maps exactly on unicode
 		default:					THROW(("Invalid encoding for GetUnicode"));
 	}
 }
@@ -110,12 +110,12 @@ char GetChar(MEncoding inEncoding, unicode inChar)
 
 UnicodeProperty GetProperty(unicode inUnicode)
 {
-	uint8 result = 0;
+	uint8_t result = 0;
 	
 	if (inUnicode < 0x110000)
 	{
-		uint32 ix = inUnicode >> 8;
-		uint32 p_ix = inUnicode & 0x00FF;
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
 		
 		ix = kUnicodeInfo.page_index[ix];
 		result = kUnicodeInfo.data[ix][p_ix].prop;
@@ -144,7 +144,7 @@ WordBreakClass GetWordBreakClass(unicode inUnicode)
 		
 		default:
 		{
-			uint8 prop = GetProperty(inUnicode);
+			uint8_t prop = GetProperty(inUnicode);
 			if (prop == kLETTER or prop == kNUMBER)
 			{
 				if (inUnicode >= 0x003040 and inUnicode <= 0x00309f)
@@ -177,8 +177,8 @@ CharBreakClass GetCharBreakClass(
 	
 	if (inUnicode < 0x110000)
 	{
-		uint32 ix = inUnicode >> 8;
-		uint32 p_ix = inUnicode & 0x00FF;
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
 		
 		ix = kUnicodeInfo.page_index[ix];
 		result = kUnicodeInfo.data[ix][p_ix].cbc;
@@ -194,8 +194,8 @@ LineBreakClass GetLineBreakClass(
 	
 	if (inUnicode < 0x110000)
 	{
-		uint32 ix = inUnicode >> 8;
-		uint32 p_ix = inUnicode & 0x00FF;
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
 		
 		ix = kUnicodeInfo.page_index[ix];
 		result = kUnicodeInfo.data[ix][p_ix].lbc;
@@ -211,8 +211,8 @@ unicode ToLower(
 	
 	if (inUnicode < 0x110000)
 	{
-		uint32 ix = inUnicode >> 8;
-		uint32 p_ix = inUnicode & 0x00FF;
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
 		
 		ix = kUnicodeInfo.page_index[ix];
 		if (kUnicodeInfo.data[ix][p_ix].lower != 0)
@@ -229,8 +229,8 @@ unicode ToUpper(
 	
 	if (inUnicode < 0x110000)
 	{
-		uint32 ix = inUnicode >> 8;
-		uint32 p_ix = inUnicode & 0x00FF;
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
 		
 		ix = kUnicodeInfo.page_index[ix];
 		if (kUnicodeInfo.data[ix][p_ix].upper != 0)
@@ -272,7 +272,7 @@ bool IsNum(
 
 bool IsAlnum(unicode inUnicode)
 {
-	uint8 prop = GetProperty(inUnicode);
+	uint8_t prop = GetProperty(inUnicode);
 	
 	return prop == kLETTER or prop == kNUMBER;
 }
@@ -356,7 +356,7 @@ class MDecoderImpl : public MDecoder
 	typedef MEncodingTraits<ENCODING>	traits;
   public:
 
-					MDecoderImpl(const void* inBuffer, uint32 inLength)
+					MDecoderImpl(const void* inBuffer, uint32_t inLength)
 						: MDecoder(inBuffer, inLength)
 					{
 					}
@@ -366,7 +366,7 @@ class MDecoderImpl : public MDecoder
 						bool result = false;
 						if (mLength > 0)
 						{
-							uint32 l;
+							uint32_t l;
 							traits::ReadUnicode(mBuffer, l, outUnicode);
 							
 							if (l > 0 and l <= mLength)
@@ -381,7 +381,7 @@ class MDecoderImpl : public MDecoder
 					}
 };
 
-MDecoder* MDecoder::GetDecoder(MEncoding inEncoding, const void* inBuffer, uint32 inLength)
+MDecoder* MDecoder::GetDecoder(MEncoding inEncoding, const void* inBuffer, uint32_t inLength)
 {
 	MDecoder* decoder;
 	switch (inEncoding)
@@ -448,7 +448,7 @@ string::iterator next_cursor_position(
 {
 	string::iterator result = inEnd;
 
-	uint32 length;
+	uint32_t length;
 	unicode ch;
 	
 	MEncodingTraits<kEncodingUTF8>::ReadUnicode(inStart, length, ch);
@@ -637,7 +637,7 @@ string::iterator next_line_break(
 		};
 
 	unicode uc;
-	uint32 cl;
+	uint32_t cl;
 	
 	typedef MEncodingTraits<kEncodingUTF8> enc;
 

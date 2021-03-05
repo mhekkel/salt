@@ -148,7 +148,7 @@ bool MWinProcMixin::WMDestroy(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM 
 
 bool MWinProcMixin::WMKeydown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 {
-	uint32 keyCode = 0, modifiers = 0, scanCode = static_cast<uint8>(inLParam >> 16);
+	uint32_t keyCode = 0, modifiers = 0, scanCode = static_cast<uint8_t>(inLParam >> 16);
 	string text;
 
 	GetModifierState(modifiers, false);
@@ -266,7 +266,7 @@ bool MWinProcMixin::WMKeydown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM 
 	return mHandledKeyDown;
 }
 
-bool MWinProcMixin::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MWinProcMixin::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 	
@@ -338,7 +338,7 @@ bool MWinProcMixin::DispatchCharacter(const string& inText, bool inRepeat)
 	return result;
 }
 
-bool MWinProcMixin::DispatchCommand(uint32 inCommand, uint32 inModifiers)
+bool MWinProcMixin::DispatchCommand(uint32_t inCommand, uint32_t inModifiers)
 {
 	return false;
 }

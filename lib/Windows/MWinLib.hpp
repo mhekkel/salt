@@ -7,18 +7,18 @@
 
 #include <stdint.h>
 
-#undef INT8_MIN
-#undef INT16_MIN
-#undef INT32_MIN
-#undef INT64_MIN
-#undef INT8_MAX
-#undef UINT8_MAX
-#undef INT16_MAX
-#undef UINT16_MAX
-#undef INT32_MAX
-#undef UINT32_MAX
-#undef INT64_MAX
-#undef UINT64_MAX
+#undef INT8_t_MIN
+#undef INT16_t_MIN
+#undef INT32_t_MIN
+#undef INT64_t_MIN
+#undef INT8_t_MAX
+#undef UINT8_t_MAX
+#undef INT16_t_MAX
+#undef UINT16_t_MAX
+#undef INT32_t_MAX
+#undef UINT32_t_MAX
+#undef INT64_t_MAX
+#undef UINT64_t_MAX
 
 #include <intsafe.h>
 

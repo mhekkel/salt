@@ -12,7 +12,7 @@
 std::wstring c2w(const std::string& s);
 std::string w2c(const std::wstring& s);
 
-void LogWinMsg(const char* inWhere, uint32 inMsg);
+void LogWinMsg(const char* inWhere, uint32_t inMsg);
 
 template<typename T>
 class MComPtr

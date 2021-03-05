@@ -242,7 +242,7 @@ namespace ba = boost::algorithm;
 //	static const GDBusInterfaceVTable sInterfaceVTable;
 //	
 //	GDBusNodeInfo* mIntrospectionData;
-//	uint32 mOwnerId, mRegistrationID, mWatcherID;
+//	uint32_t mOwnerId, mRegistrationID, mWatcherID;
 //	string mOpenParameter;
 //};
 //

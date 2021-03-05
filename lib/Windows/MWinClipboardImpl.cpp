@@ -57,7 +57,7 @@ bool MWinClipboardImpl::WMRenderClipboard(HWND inHWnd, UINT inUMsg, WPARAM inWPa
 	if (not mClipboard->HasData())
 		return false;
 	
-	uint32 format = inWParam;
+	uint32_t format = inWParam;
 	if (format == 0)
 		format = CF_UNICODETEXT;
 	

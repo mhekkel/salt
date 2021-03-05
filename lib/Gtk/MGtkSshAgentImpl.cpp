@@ -117,7 +117,7 @@ bool MSshAgent::GetFirstIdentity(
 	mCount = 0;
 
 	MSshPacket out;
-	uint8 msg = SSH2_AGENTC_REQUEST_IDENTITIES;
+	uint8_t msg = SSH2_AGENTC_REQUEST_IDENTITIES;
 	out << msg;
 	
 	if (RequestReply(out, mIdentities))
@@ -171,11 +171,11 @@ bool MSshAgent::RequestReply(
 	
 //	net_swapper swap;
 //	
-//	uint32 l = out.size();
+//	uint32_t l = out.size();
 //	l = swap(l);
 //	
 //	if (write(mSock, &l, sizeof(l)) == sizeof(l) and
-//		write(mSock, out.peek(), out.size()) == int32(out.size()) and
+//		write(mSock, out.peek(), out.size()) == int32_t(out.size()) and
 //		read(mSock, &l, sizeof(l)) == sizeof(l))
 //	{
 //		l = swap(l);
@@ -184,7 +184,7 @@ bool MSshAgent::RequestReply(
 //		{
 //			char b[1024];
 //
-//			uint32 k = l;
+//			uint32_t k = l;
 //			if (k > sizeof(b))
 //				k = sizeof(b);
 //			
@@ -211,9 +211,9 @@ void MSshAgent::SignData(
 	string&			outSignature)
 {
 	MSshPacket out;
-	uint8 msg = SSH2_AGENTC_SIGN_REQUEST;
+	uint8_t msg = SSH2_AGENTC_SIGN_REQUEST;
 
-	uint32 flags = 0;
+	uint32_t flags = 0;
 	
 	out << msg << inBlob << inData << flags;
 	

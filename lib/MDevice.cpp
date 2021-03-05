@@ -78,34 +78,34 @@ MBitmap& MBitmap::operator=(MBitmap&& inBitmap)
 	return *this;
 }
 
-MBitmap::MBitmap(uint32 inWidth, uint32 inHeight, bool inUseAlpha)
+MBitmap::MBitmap(uint32_t inWidth, uint32_t inHeight, bool inUseAlpha)
 	: mData(nullptr)
 	, mWidth(inWidth)
 	, mHeight(inHeight)
-	, mStride(inWidth * sizeof(uint32))
+	, mStride(inWidth * sizeof(uint32_t))
 	, mUseAlpha(inUseAlpha)
 {
-	mData = new uint32[inWidth * inHeight];
+	mData = new uint32_t[inWidth * inHeight];
 }
 
 MBitmap::MBitmap(const MBitmap& inSource, MRect inCopyRect)
 	: mData(nullptr)
 	, mWidth(inCopyRect.width)
 	, mHeight(inCopyRect.height)
-	, mStride(mWidth * sizeof(uint32))
+	, mStride(mWidth * sizeof(uint32_t))
 	, mUseAlpha(inSource.mUseAlpha)
 {
-	mData = new uint32[mWidth * mHeight];
+	mData = new uint32_t[mWidth * mHeight];
 
-	if (inCopyRect.x + inCopyRect.width <= static_cast<int32>(inSource.mWidth) and
-		inCopyRect.y + inCopyRect.height <= static_cast<int32>(inSource.mHeight))
+	if (inCopyRect.x + inCopyRect.width <= static_cast<int32_t>(inSource.mWidth) and
+		inCopyRect.y + inCopyRect.height <= static_cast<int32_t>(inSource.mHeight))
 	{
-		for (uint32 y = 0; y < mHeight; ++y)
+		for (uint32_t y = 0; y < mHeight; ++y)
 		{
-			uint32 sy = y + inCopyRect.y;
-			for (uint32 x = 0; x < mWidth; ++x)
+			uint32_t sy = y + inCopyRect.y;
+			for (uint32_t x = 0; x < mWidth; ++x)
 			{
-				uint32 sx = x + inCopyRect.x;
+				uint32_t sx = x + inCopyRect.x;
 				mData[y * mWidth + x] = inSource.mData[sy * inSource.mWidth + sx];
 			}
 		}
@@ -154,13 +154,13 @@ void MDevice::Restore()
 
 bool MDevice::IsPrinting() const
 {
-	int32 page;
+	int32_t page;
 	return mImpl->IsPrinting(page);
 }
 
-int32 MDevice::GetPageNr() const
+int32_t MDevice::GetPageNr() const
 {
-	int32 page;
+	int32_t page;
 	if (not mImpl->IsPrinting(page))
 		page = -1;
 	return page;
@@ -225,7 +225,7 @@ void MDevice::FillRect(
 
 void MDevice::StrokeRect(
 	MRect		inRect,
-	uint32		inLineWidth)
+	uint32_t		inLineWidth)
 {
 	mImpl->StrokeRect(inRect, inLineWidth);
 }
@@ -235,7 +235,7 @@ void MDevice::StrokeLine(
 	float				inFromY,
 	float				inToX,
 	float				inToY,
-	uint32				inLineWidth)
+	uint32_t				inLineWidth)
 {
 	mImpl->StrokeLine(inFromX, inFromY, inToX, inToY, inLineWidth);	
 }
@@ -270,7 +270,7 @@ void MDevice::DrawBitmap(
 // void MDevice::CreateAndUsePattern(
 // 	MColor		inColor1,
 // 	MColor		inColor2,
-// 	uint32		inWidth,
+// 	uint32_t		inWidth,
 // 	float		inRotation)
 // {
 // 	mImpl->CreateAndUsePattern(inColor1, inColor2, inWidth, inRotation);
@@ -291,7 +291,7 @@ float MDevice::GetLeading() const
 	return mImpl->GetLeading();
 }
 
-int32 MDevice::GetLineHeight() const
+int32_t MDevice::GetLineHeight() const
 {
 	return mImpl->GetLineHeight();
 }
@@ -305,7 +305,7 @@ void MDevice::DrawString(
 	const string&	inText,
 	float 			inX,
 	float 			inY,
-	uint32			inTruncateWidth,
+	uint32_t			inTruncateWidth,
 	MAlignment		inAlign)
 {
 	mImpl->DrawString(inText, inX, inY, inTruncateWidth, inAlign);
@@ -332,18 +332,18 @@ void MDevice::SetTabStops(
 }
 
 void MDevice::SetTextColors(
-	uint32				inColorCount,
-	uint32				inColorIndices[],
-	uint32				inOffsets[],
+	uint32_t				inColorCount,
+	uint32_t				inColorIndices[],
+	uint32_t				inOffsets[],
 	MColor				inColors[])
 {
 	mImpl->SetTextColors(inColorCount, inColorIndices, inOffsets, inColors);
 }
 
 void MDevice::SetTextStyles(
-	uint32				inStyleCount,
-	uint32				inStyles[],
-	uint32				inOffsets[])
+	uint32_t				inStyleCount,
+	uint32_t				inStyles[],
+	uint32_t				inOffsets[])
 {
 	mImpl->SetTextStyles(inStyleCount, inStyles, inOffsets);
 }
@@ -351,32 +351,32 @@ void MDevice::SetTextStyles(
 void MDevice::RenderTextBackground(
 	float				inX,
 	float				inY,
-	uint32				inStart,
-	uint32				inLength,
+	uint32_t				inStart,
+	uint32_t				inLength,
 	MColor				inColor)
 {
 	mImpl->RenderTextBackground(inX, inY, inStart, inLength, inColor);
 }
 
 void MDevice::SetTextSelection(
-	uint32			inStart,
-	uint32			inLength,
+	uint32_t			inStart,
+	uint32_t			inLength,
 	MColor			inSelectionColor)
 {
 	mImpl->SetTextSelection(inStart, inLength, inSelectionColor);
 }
 
 void MDevice::IndexToPosition(
-	uint32			inIndex,
+	uint32_t			inIndex,
 	bool			inTrailing,
-	int32&			outPosition)
+	int32_t&			outPosition)
 {
 	mImpl->IndexToPosition(inIndex, inTrailing, outPosition);
 }
 
 bool MDevice::PositionToIndex(
-	int32			inPosition,
-	uint32&			outIndex)
+	int32_t			inPosition,
+	uint32_t&			outIndex)
 {
 	return mImpl->PositionToIndex(inPosition, outIndex);
 }
@@ -394,8 +394,8 @@ float MDevice::GetTextWidth() const
 }
 
 void MDevice::BreakLines(
-	uint32				inWidth,
-	vector<uint32>&		outBreaks)
+	uint32_t				inWidth,
+	vector<uint32_t>&		outBreaks)
 {
 	mImpl->BreakLines(inWidth, outBreaks);
 }
@@ -403,7 +403,7 @@ void MDevice::BreakLines(
 void MDevice::DrawCaret(
 	float				inX,
 	float				inY,
-	uint32				inOffset)
+	uint32_t				inOffset)
 {
 	mImpl->DrawCaret(inX, inY, inOffset);
 }

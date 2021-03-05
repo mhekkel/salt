@@ -27,18 +27,18 @@ class MMenu
 
 	static MMenu*	CreateFromResource(const char* inResourceName, bool inPopup);
 
-	void			AppendItem(const std::string& inLabel, uint32 inCommand);
-	void			AppendRadioItem(const std::string& inLabel, uint32 inCommand);
-	void			AppendCheckItem(const std::string& inLabel, uint32 inCommand);
+	void			AppendItem(const std::string& inLabel, uint32_t inCommand);
+	void			AppendRadioItem(const std::string& inLabel, uint32_t inCommand);
+	void			AppendCheckItem(const std::string& inLabel, uint32_t inCommand);
 	void			AppendSeparator();
 	virtual void	AppendMenu(MMenu* inMenu);
-	uint32			CountItems();
-	void			RemoveItems(uint32 inFromIndex, uint32 inCount);
+	uint32_t			CountItems();
+	void			RemoveItems(uint32_t inFromIndex, uint32_t inCount);
 
-	std::string		GetItemLabel(uint32 inIndex) const;
+	std::string		GetItemLabel(uint32_t inIndex) const;
 
-	void			SetItemCommand(uint32 inIndex, uint32 inCommand);
-	uint32			GetItemCommand(uint32 inIndex) const;
+	void			SetItemCommand(uint32_t inIndex, uint32_t inCommand);
+	uint32_t			GetItemCommand(uint32_t inIndex) const;
 
 	void			SetTarget(MHandler* inHandler);
 
@@ -47,7 +47,7 @@ class MMenu
 	std::string		GetLabel()				{ return mLabel; }
 	MHandler*		GetTarget()				{ return mTarget; }
 	
-	void			Popup(MWindow* inTarget, int32 inX, int32 inY, bool inBottomMenu);
+	void			Popup(MWindow* inTarget, int32_t inX, int32_t inY, bool inBottomMenu);
 	
 	static MMenu*	Create(zeep::xml::element* inXMLNode, bool inPopup);
 

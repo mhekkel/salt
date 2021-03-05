@@ -51,7 +51,7 @@ class MExploreBrowserData : public IDataObject
 	HRESULT __stdcall	EnumDAdvise(IEnumSTATDATA **ppenumAdvise);
 
   private:
-	uint32					mRefCount;
+	uint32_t					mRefCount;
 	IDataAdviseHolderPtr	mAdvise;
 };
 
@@ -82,7 +82,7 @@ class MExploreBrowserImpl : public IServiceProvider,
 	HRESULT __stdcall	IncludeObject(IShellView * /* psv */, PCUITEMID_CHILD /* pidl */);
 
   private:
-	uint32				mRefCount;
+	uint32_t				mRefCount;
 	IExplorerBrowserPtr	mBrowser;
 	IResultsFolderPtr	mFolder;
 };
@@ -235,7 +235,7 @@ class MSFTPItem : public IShellItem
 {
   public:
 						MSFTPItem(const string& inName, const string& inOwner,
-							int64 inFileSize, time_t inModificationTime);
+							int64_t inFileSize, time_t inModificationTime);
 						~MSFTPItem();
 
 	// IUnknown
@@ -261,21 +261,21 @@ class MSFTPItem : public IShellItem
 //	HRESULT __stdcall	GetProperty(REFPROPERTYKEY key, PROPVARIANT *ppropvar);
 //	HRESULT __stdcall	GetCLSID(REFPROPERTYKEY key, CLSID *pclsid);
 //	HRESULT __stdcall	GetFileTime( REFPROPERTYKEY key, FILETIME *pft);
-//	HRESULT __stdcall	GetInt32(REFPROPERTYKEY key, int *pi);
+//	HRESULT __stdcall	GetInt32_t(REFPROPERTYKEY key, int *pi);
 //	HRESULT __stdcall	GetString(REFPROPERTYKEY key, LPWSTR *ppsz);
-//	HRESULT __stdcall	GetUInt32(REFPROPERTYKEY key, ULONG *pui);
-//	HRESULT __stdcall	GetUInt64(REFPROPERTYKEY key, ULONGLONG *pull);
+//	HRESULT __stdcall	GetUInt32_t(REFPROPERTYKEY key, ULONG *pui);
+//	HRESULT __stdcall	GetUInt64_t(REFPROPERTYKEY key, ULONGLONG *pull);
 //	HRESULT __stdcall	GetBool(REFPROPERTYKEY key, BOOL *pf);
 
   private:
-	uint32				mRefCount;
+	uint32_t				mRefCount;
 	string				mName, mOwner;
-	int64				mSize;
+	int64_t				mSize;
 	time_t				mModificationTime;
 };
 
 MSFTPItem::MSFTPItem(const string& inName, const string& inOwner,
-	int64 inFileSize, time_t inModificationTime)
+	int64_t inFileSize, time_t inModificationTime)
 	: mRefCount(0), mName(inName), mOwner(inOwner), mSize(inFileSize), mModificationTime(inModificationTime)
 {
 }
@@ -454,7 +454,7 @@ HRESULT __stdcall MSFTPItem::Compare(
 //		// Note that LONGLONG is a 64-bit value
 //	    LONGLONG ll;
 //
-//	    ll = Int32x32To64(mModificationTime, 10000000) + 116444736000000000;
+//	    ll = Int32_tx32To64(mModificationTime, 10000000) + 116444736000000000;
 //	    pft->dwLowDateTime = (DWORD)ll;
 //	    pft->dwHighDateTime = ll >> 32;
 //		
@@ -464,7 +464,7 @@ HRESULT __stdcall MSFTPItem::Compare(
 //	return result;
 //}
 //    
-//HRESULT __stdcall MSFTPItem::GetInt32( 
+//HRESULT __stdcall MSFTPItem::GetInt32_t( 
 //        /* [in] */ __RPC__in REFPROPERTYKEY key,
 //        /* [out] */ __RPC__out int *pi)
 //{
@@ -490,14 +490,14 @@ HRESULT __stdcall MSFTPItem::Compare(
 //	return result;
 //}
 //    
-//HRESULT __stdcall MSFTPItem::GetUInt32( 
+//HRESULT __stdcall MSFTPItem::GetUInt32_t( 
 //        /* [in] */ __RPC__in REFPROPERTYKEY key,
 //        /* [out] */ __RPC__out ULONG *pui)
 //{
 //	return S_FALSE;
 //}
 //    
-//HRESULT __stdcall MSFTPItem::GetUInt64( 
+//HRESULT __stdcall MSFTPItem::GetUInt64_t( 
 //        /* [in] */ __RPC__in REFPROPERTYKEY key,
 //        /* [out] */ __RPC__out ULONGLONG *pull)
 //{
@@ -589,7 +589,7 @@ void MWinExploreBrowserView::AddedToWindow()
  //   }
 }
 
-void MWinExploreBrowserView::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
+void MWinExploreBrowserView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	MView::ResizeFrame(inWidthDelta, inHeightDelta);
 
@@ -601,7 +601,7 @@ void MWinExploreBrowserView::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta
 }
 
 void MWinExploreBrowserView::AddItem(const string& inName, const string& inOwner,
-	int64 inFileSize, time_t inModificationTime)
+	int64_t inFileSize, time_t inModificationTime)
 {
 //	mImpl->AddItem(inName, inOwner, inFileSize, inModificationTime);
 	IShellItemPtr item(new MSFTPItem(inName, inOwner, inFileSize, inModificationTime));

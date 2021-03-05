@@ -42,9 +42,9 @@ class MXcbCairoSurface : public MXcbWinMixin
 
 	void SetColor(MColor inColor);
 
-	void RoundedRectanglePath(MRect inBounds, uint32 inRadius);
-	void FillRoundedRectangle(MRect inBounds, uint32 inRadius);
-	void StrokeRoundedRectangle(MRect inBounds, uint32 inRadius);
+	void RoundedRectanglePath(MRect inBounds, uint32_t inRadius);
+	void FillRoundedRectangle(MRect inBounds, uint32_t inRadius);
+	void StrokeRoundedRectangle(MRect inBounds, uint32_t inRadius);
 	
 	void SetFont(const std::string& inFont);
 	enum MFontWeight { fwNormal, fwBold };

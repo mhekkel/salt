@@ -39,20 +39,20 @@ class MTerminalView : public MCanvas
 	MEventIn<void(MScrollMessage)>		eScroll;
 	
 	// What lines are visible:
-	int32			GetTopLine() const;
+	int32_t			GetTopLine() const;
 	
 	// virtual void	Draw(MRect inUpdate);
 	virtual void	Draw(cairo_t* inCairo);
-	virtual void	MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 inModifiers);
-	virtual void	MouseMove(int32 inX, int32 inY, uint32 inModifiers);
+	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
+	virtual void	MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void	MouseExit();
-	virtual void	MouseUp(int32 inX, int32 inY, uint32 inModifiers);
-	virtual void	MouseWheel(int32 inX, int32 inY, int32 inDeltaX, int32 inDeltaY, uint32 inModifiers);
-	virtual void	ShowContextMenu(int32 inX, int32 inY);
-	static void		GetTerminalMetrics(uint32 inColumns, uint32 inRows, bool inStatusLine,
-						uint32& outWidth, uint32& outHeight);
-	static MRect	GetIdealTerminalBounds(uint32 inColumns, uint32 inRows);
-	virtual void	ResizeFrame(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void	MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
+	virtual void	ShowContextMenu(int32_t inX, int32_t inY);
+	static void		GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
+						uint32_t& outWidth, uint32_t& outHeight);
+	static MRect	GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows);
+	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	bool			IsOpen() const					{ return mTerminalChannel->IsOpen(); }
 	void			Open();
@@ -65,25 +65,25 @@ class MTerminalView : public MCanvas
 	virtual void	SendCommand(std::string inData);
 	virtual void	SendCommand(const boost::format& inData)
 						{ SendCommand(inData.str()); }
-	virtual void	SendMouseCommand(int32 inButton, int32 inX, int32 inY, uint32 inModifiers);
+	virtual void	SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY, uint32_t inModifiers);
 
 	void			HandleOpened(const boost::system::error_code& ec);
 	void			HandleWritten(const boost::system::error_code& ec, std::size_t inBytesReceived);
 	void			HandleReceived(const boost::system::error_code& ec, std::streambuf& inData);
 
-	virtual bool	UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked);
-	virtual bool	ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers);
-	virtual bool	HandleKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat);
+	virtual bool	UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked);
+	virtual bool	ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
+	virtual bool	HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	virtual bool	HandleCharacter(const std::string& inText, bool inRepeat);
 
 	void			HandleMessage(const std::string& inMessage, const std::string& inLanguage);
 	
-	void			EnterTOTP(uint32 inItemIndex);
+	void			EnterTOTP(uint32_t inItemIndex);
 
 	MEventIn<void(MSearchDirection)> eSearch;
 	void			FindNext(MSearchDirection inSearchDirection);
 
-	void			ResizeTerminal(uint32 inColumns, uint32 inRows, bool inResetCursor = false, bool inResizeWindow = true);
+	void			ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inResetCursor = false, bool inResizeWindow = true);
 
 	MEventIn<void()>		ePreferencesChanged;
 	MEventIn<void(MColor)>	ePreviewColor;
@@ -95,18 +95,18 @@ class MTerminalView : public MCanvas
 	virtual void	ActivateSelf();
 	virtual void	DeactivateSelf();
 
-	void			AdjustScrollbar(int32 inTopLine);
+	void			AdjustScrollbar(int32_t inTopLine);
 	void			Scroll(MScrollMessage inMessage);
 
-	virtual void	AdjustCursor(int32 inX, int32 inY, uint32 inModifiers);
+	virtual void	AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers);
 
 	void			ReadPreferences();
 	void			PreferencesChanged();
 	void			PreviewColor(MColor inColor);
 	
-	MEventIn<void(uint32,MRect)>	eStatusPartClicked;
-	void			StatusPartClicked(uint32 inNr, MRect);
-	uint32			mStatusInfo;
+	MEventIn<void(uint32_t,MRect)>	eStatusPartClicked;
+	void			StatusPartClicked(uint32_t inNr, MRect);
+	uint32_t			mStatusInfo;
 
 	MStatusbar*		mStatusbar;
 	MScrollbar*		mScrollbar;
@@ -115,7 +115,7 @@ class MTerminalView : public MCanvas
 	MTerminalChannel*
 					mTerminalChannel;
 	std::string		mSSHCommand;
-	int32			mTerminalWidth, mTerminalHeight;
+	int32_t			mTerminalWidth, mTerminalHeight;
 
 	MTerminalBuffer	mScreenBuffer, mAlternateBuffer, mStatusLineBuffer;
 	MTerminalBuffer* mBuffer;
@@ -126,24 +126,24 @@ class MTerminalView : public MCanvas
 	void			Emulate();
 	
 	void			WriteChar(unicode inChar);
-	void			EraseInDisplay(uint32 inMode, bool inSelective = false);
-	void			EraseInLine(uint32 inMode, bool inSelective = false);
+	void			EraseInDisplay(uint32_t inMode, bool inSelective = false);
+	void			EraseInLine(uint32_t inMode, bool inSelective = false);
 
 	void			ScrollForward();
 	void			ScrollBackward();
 	
 //	typedef boost::function<void(char)>	EscapeHandler;
-	void			EscapeStart(uint8 inChar);
-	void			EscapeVT52(uint8 inChar);
-	void			SelectCharSet(uint8 inChar);
-	void			SelectControlTransmission(uint8 inChar);
-	void			SelectDouble(uint8 inChar);
-	void			EscapeCSI(uint8 inChar);
-	void			ProcessCSILevel1(uint32 inCmd);
-	void			ProcessCSILevel4(uint32 inCmd);
-	void			EscapeDCS(uint8 inChar);
+	void			EscapeStart(uint8_t inChar);
+	void			EscapeVT52(uint8_t inChar);
+	void			SelectCharSet(uint8_t inChar);
+	void			SelectControlTransmission(uint8_t inChar);
+	void			SelectDouble(uint8_t inChar);
+	void			EscapeCSI(uint8_t inChar);
+	void			ProcessCSILevel1(uint32_t inCmd);
+	void			ProcessCSILevel4(uint32_t inCmd);
+	void			EscapeDCS(uint8_t inChar);
 	void			CommitPFK();
-	void			EscapeOSC(uint8 inChar);
+	void			EscapeOSC(uint8_t inChar);
 
 	void			SaveCursor();
 	void			RestoreCursor();
@@ -173,7 +173,7 @@ class MTerminalView : public MCanvas
 	};
 
 	void			MoveCursor(MCursorMovement inDirection);
-	void			MoveCursorTo(int32 inX, int32 inY);
+	void			MoveCursorTo(int32_t inX, int32_t inY);
 	
 	bool			CursorIsInMargins() const
 	{
@@ -182,15 +182,15 @@ class MTerminalView : public MCanvas
 	}
 	
 	void			SetTabstop();
-	uint32			GetParam(uint32 inParamNr, uint32 inDefaultValue);
-	void			GetRectParam(uint32 inParamOffset,
-						int32& outTop, int32& outLeft, int32& outBottom, int32& outRight);
+	uint32_t			GetParam(uint32_t inParamNr, uint32_t inDefaultValue);
+	void			GetRectParam(uint32_t inParamOffset,
+						int32_t& outTop, int32_t& outLeft, int32_t& outBottom, int32_t& outRight);
 
-	void			SetResetMode(uint32 inMode, bool inANSI, bool inSet);
-	bool			GetMode(uint32 inMode, bool inANSI);
+	void			SetResetMode(uint32_t inMode, bool inANSI, bool inSet);
+	bool			GetMode(uint32_t inMode, bool inANSI);
 
-	MRect			GetCharacterBounds(uint32 inLine, uint32 inColumn);
-	bool			GetCharacterForPosition(int32 inX, int32 inY, int32& outLine, int32& outColumn);
+	MRect			GetCharacterBounds(uint32_t inLine, uint32_t inColumn);
+	bool			GetCharacterForPosition(int32_t inX, int32_t inY, int32_t& outLine, int32_t& outColumn);
 
 	void			Idle(double inTime);
 	
@@ -209,8 +209,8 @@ class MTerminalView : public MCanvas
 
 	std::string		mFont;
 	float			mCharWidth;
-	int32			mLineHeight;
-	int32			mMarginLeft, mMarginTop, mMarginRight, mMarginBottom;
+	int32_t			mLineHeight;
+	int32_t			mMarginLeft, mMarginTop, mMarginRight, mMarginBottom;
 	MEncoding		mEncoding;
 	std::vector<bool>
 					mTabStops;
@@ -279,12 +279,12 @@ class MTerminalView : public MCanvas
 	}				mEscState;
 
 	int				mState;
-	std::vector<uint32>
+	std::vector<uint32_t>
 					mArgs;
 	std::string		mArgString;
 	std::string		mCtrlSeq;
-	uint32			mCSICmd;
-	uint32			mPFKKeyNr;
+	uint32_t			mCSICmd;
+	uint32_t			mPFKKeyNr;
 	
 	// requests coming from host
 	std::string		mDECRQSS;
@@ -293,14 +293,14 @@ class MTerminalView : public MCanvas
 	double			mLastBeep;
 	bool			mBlockCursor, mBlinkCursor, mBlinkOn;
 	double			mLastBlink, mNextSmoothScroll;
-	int32			mScrollForwardCount;
+	int32_t			mScrollForwardCount;
 	
 	enum { eNoClick, eWaitClick, eSingleClick, eDoubleClick, eTripleClick, eTrackClick }
 					mMouseClick;
 	bool			mMouseBlockSelect;
 	double			mLastMouseDown;
-	int32			mLastMouseX, mLastMouseY;
-	int32			mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol;
+	int32_t			mLastMouseX, mLastMouseY;
+	int32_t			mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol;
 
 	// graphical beep support
 	MEventIn<void()>	eAnimate;
@@ -322,10 +322,10 @@ class MTerminalView : public MCanvas
 	bool				mOldFnKeys;
 	bool				mXTermKeys;
 
-	std::string			ProcessKeyCommon(uint32 inKeyCode, uint32 inModifiers);
-	std::string			ProcessKeyVT52(uint32 inKeyCode, uint32 inModifiers);
-	std::string			ProcessKeyANSI(uint32 inKeyCode, uint32 inModifiers);
-	std::string			ProcessKeyXTerm(uint32 inKeyCode, uint32 inModifiers);
+	std::string			ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers);
+	std::string			ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers);
+	std::string			ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers);
+	std::string			ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers);
 
 	MAnimationManager*	mAnimationManager;
 	MAnimationVariable*	mGraphicalBeep;
@@ -341,7 +341,7 @@ class MTerminalView : public MCanvas
 		eTrackMouseCellMotionTracking	= 1002,
 		eTrackMouseAllMotionTracking	= 1003
 	}					mMouseMode;
-	int32				mMouseTrackX, mMouseTrackY;
+	int32_t				mMouseTrackX, mMouseTrackY;
 
 #if DEBUG
 	bool				mDebugUpdate;

@@ -74,8 +74,8 @@ void MDocApplication::SaveGlobals()
 	MApplication::SaveGlobals();
 }
 
-bool MDocApplication::ProcessCommand(uint32 inCommand, const MMenu*	inMenu,
-	uint32 inItemIndex, uint32 inModifiers)
+bool MDocApplication::ProcessCommand(uint32_t inCommand, const MMenu*	inMenu,
+	uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool result = true;
 
@@ -131,7 +131,7 @@ bool MDocApplication::ProcessCommand(uint32 inCommand, const MMenu*	inMenu,
 	return result;
 }
 
-bool MDocApplication::UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex,
+bool MDocApplication::UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex,
 	bool& outEnabled, bool& outChecked)
 {
 	bool result = true;
@@ -233,19 +233,19 @@ void MDocApplication::AddToRecentMenu(string inURL)
 
 		mRecentFiles.push_front(inURL);
 
-		if (mRecentFiles.size() > static_cast<uint32>(Preferences::GetInteger("recent-size", 20)))
+		if (mRecentFiles.size() > static_cast<uint32_t>(Preferences::GetInteger("recent-size", 20)))
 			mRecentFiles.pop_back();
 	}
 }
 
-const string& MDocApplication::GetRecent(uint32 inIndex)
+const string& MDocApplication::GetRecent(uint32_t inIndex)
 {
 	if (inIndex >= mRecentFiles.size())
 		THROW(("Recent index out of range"));
 	return mRecentFiles[inIndex];
 }
 
-void MDocApplication::DoSelectWindowFromWindowMenu(uint32 inIndex)
+void MDocApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)
 {
 	MDocument* doc = MDocument::GetFirstDocument();
 

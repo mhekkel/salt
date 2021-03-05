@@ -16,10 +16,10 @@ class MWinExploreBrowserView : public MExploreBrowserView
 					~MWinExploreBrowserView();
 
 	virtual void	AddedToWindow();
-	virtual void	ResizeFrame(int32 inWidthDelta, int32 inHeightDelta);
+	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	virtual void	AddItem(const std::string& inName, const std::string& inOwner,
-						int64 inFileSize, std::time_t inModificationTime);
+						int64_t inFileSize, std::time_t inModificationTime);
 
   protected:
 	

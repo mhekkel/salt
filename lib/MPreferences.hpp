@@ -21,8 +21,8 @@ namespace Preferences
 bool	GetBoolean(const char* inName, bool inDefaultValue);
 void	SetBoolean(const char* inName, bool inValue);
 
-int32	GetInteger(const char* inName, int32 inDefaultValue);
-void	SetInteger(const char* inName, int32 inValue);
+int32_t	GetInteger(const char* inName, int32_t inDefaultValue);
+void	SetInteger(const char* inName, int32_t inValue);
 
 std::string	GetString(const char* inName, std::string inDefaultValue);
 void	SetString(const char* inName, std::string inValue);

@@ -46,19 +46,19 @@ struct MEncodingTraits
 {
 	template<class ByteIterator>
 	static
-	uint32		GetNextCharLength(const ByteIterator inText);
+	uint32_t		GetNextCharLength(const ByteIterator inText);
 
 	template<class ByteIterator>
 	static
-	uint32		GetPrevCharLength(const ByteIterator inText);
+	uint32_t		GetPrevCharLength(const ByteIterator inText);
 
 	template<class ByteIterator>
 	static
-	void		ReadUnicode(const ByteIterator inText, uint32& outLength, unicode& outUnicode);
+	void		ReadUnicode(const ByteIterator inText, uint32_t& outLength, unicode& outUnicode);
 
 	template<class ByteIterator>
 	static
-	uint32		WriteUnicode(ByteIterator& inText, unicode inUnicode);
+	uint32_t		WriteUnicode(ByteIterator& inText, unicode inUnicode);
 };
 
 enum WordBreakClass
@@ -186,7 +186,7 @@ class MEncoder
 	void				SetText(const std::string& inText);
 	void				SetText(const std::wstring& inText);
 	
-	uint32				GetBufferSize() const				{ return mBuffer.size(); }
+	uint32_t				GetBufferSize() const				{ return mBuffer.size(); }
 	const void*			Peek() const						{ return &mBuffer[0]; }
 	
 	template<class Iterator>
@@ -208,17 +208,17 @@ class MDecoder
 	void				GetText(std::string& outText);
 	void				GetText(std::wstring& outText);
 	
-	static MDecoder*	GetDecoder(MEncoding inEncoding, const void* inBuffer, uint32 inLength);
+	static MDecoder*	GetDecoder(MEncoding inEncoding, const void* inBuffer, uint32_t inLength);
 
   protected:
-						MDecoder(const void* inBuffer, uint32 inLength)
+						MDecoder(const void* inBuffer, uint32_t inLength)
 							: mBuffer(static_cast<const char*>(inBuffer))
 							, mLength(inLength)
 						{
 						}
 
 	const char*			mBuffer;
-	uint32				mLength;
+	uint32_t				mLength;
 };
 
 #include "MUnicode.inl"

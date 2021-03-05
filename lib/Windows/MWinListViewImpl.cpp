@@ -43,8 +43,8 @@ void MWinListViewImpl::AppendColumn(
 }
 
 void MWinListViewImpl::ColumnResized(
-	uint32			inColumnNr,
-	uint32			inColumnWidth)
+	uint32_t			inColumnNr,
+	uint32_t			inColumnWidth)
 {
 	if (inColumnNr < mColumnWidths.size())
 		mColumnWidths[inColumnNr] = inColumnWidth;

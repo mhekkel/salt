@@ -27,7 +27,7 @@ class MGtkDeviceImpl : public MDeviceImpl
 	virtual void			Save();
 	virtual void			Restore();
 
-	virtual void			SetOrigin(int32 inX, int32 inY);
+	virtual void			SetOrigin(int32_t inX, int32_t inY);
 
 	virtual void			SetFont(const std::string& inFont);
 
@@ -47,7 +47,7 @@ class MGtkDeviceImpl : public MDeviceImpl
 
 	virtual void			FillRect(MRect inRect);
 
-	virtual void			StrokeRect(MRect inRect, uint32 inLineWidth = 1);
+	virtual void			StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
 
 	virtual void			FillEllipse(MRect inRect);
 
@@ -65,9 +65,9 @@ class MGtkDeviceImpl : public MDeviceImpl
 
 	virtual float			GetXWidth();
 	
-	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32 inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
+	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
 
-	virtual uint32			GetStringWidth(const std::string& inText);
+	virtual uint32_t			GetStringWidth(const std::string& inText);
 
 	// Text Layout options
 	
@@ -75,23 +75,23 @@ class MGtkDeviceImpl : public MDeviceImpl
 	
 	virtual void			SetTabStops(float inTabWidth);
 	
-	virtual void			SetTextColors(uint32 inColorCount, uint32 inColorIndices[], uint32 inOffsets[], MColor inColors[]);
-	virtual void			SetTextStyles(uint32 inStyleCount, uint32 inStyles[], uint32 inOffsets[]);
-	virtual void			RenderTextBackground(float inX, float inY, uint32 inStart, uint32 inLength, MColor inColor);
+	virtual void			SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]);
+	virtual void			SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
+	virtual void			RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor);
 
-	virtual void			SetTextSelection(uint32 inStart, uint32 inLength, MColor inSelectionColor);
+	virtual void			SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor);
 	
-	virtual void			IndexToPosition(uint32 inIndex, bool inTrailing, int32& outPosition);
+	virtual void			IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t& outPosition);
 
-	virtual bool			PositionToIndex(int32 inPosition, uint32& outIndex);
+	virtual bool			PositionToIndex(int32_t inPosition, uint32_t& outIndex);
 	
 	virtual float			GetTextWidth();
 	
 	virtual void			RenderText(float inX, float inY);
 
-	virtual void			DrawCaret(float inX, float inY, uint32 inOffset);
+	virtual void			DrawCaret(float inX, float inY, uint32_t inOffset);
 	
-	virtual void			BreakLines(uint32 inWidth, std::vector<uint32>& outBreaks);
+	virtual void			BreakLines(uint32_t inWidth, std::vector<uint32_t>& outBreaks);
 
 	virtual void			MakeTransparent(float inOpacity) {}
 
@@ -103,12 +103,12 @@ class MGtkDeviceImpl : public MDeviceImpl
 
 	PangoItem*				Itemize(const char* inText, PangoAttrList* inAttrs);
 
-	void					GetWhiteSpaceGlyphs(uint32& outSpace, uint32& outTab, uint32& outNL);
+	void					GetWhiteSpaceGlyphs(uint32_t& outSpace, uint32_t& outTab, uint32_t& outNL);
 
 	PangoLayout*			mPangoLayout;
 	PangoFontDescription*	mFont;
 	PangoFontMetrics*		mMetrics;
 	bool					mTextEndsWithNewLine;
-	uint32					mSpaceGlyph, mTabGlyph, mNewLineGlyph;
-	uint32					mPangoScale;
+	uint32_t					mSpaceGlyph, mTabGlyph, mNewLineGlyph;
+	uint32_t					mPangoScale;
 };

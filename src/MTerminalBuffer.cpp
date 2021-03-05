@@ -14,7 +14,7 @@ BOOST_STATIC_ASSERT(sizeof(MChar) == 8);
 
 // --------------------------------------------------------------------
 
-MLine::MLine(uint32 inSize, MXTermColor inForeColor, MXTermColor inBackColor)
+MLine::MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor)
 	: mCharacters(new MChar[inSize])
 	, mSize(inSize)
 	, mSoftWrapped(false)
@@ -64,23 +64,23 @@ MLine& MLine::operator=(const MLine& rhs)
 	return *this;
 }
 
-void MLine::Delete(uint32 inColumn, uint32 inWidth, MXTermColor inForeColor, MXTermColor inBackColor)
+void MLine::Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor, MXTermColor inBackColor)
 {
 	if (inWidth == 0 or inWidth > mSize)
 		inWidth = mSize;
 	
 	assert(inColumn < mSize);
-	for (uint32 i = inColumn; i < inWidth - 1; ++i)
+	for (uint32_t i = inColumn; i < inWidth - 1; ++i)
 		mCharacters[i] = mCharacters[i + 1];
 	mCharacters[inWidth - 1] = MChar(inForeColor, inBackColor);
 }
 
-void MLine::Insert(uint32 inColumn, uint32 inWidth)
+void MLine::Insert(uint32_t inColumn, uint32_t inWidth)
 {
 	if (inWidth == 0 or inWidth > mSize)
 		inWidth = mSize;
 	
-	for (uint32 i = inWidth - 1; i > inColumn; --i)
+	for (uint32_t i = inWidth - 1; i > inColumn; --i)
 		mCharacters[i] = mCharacters[i - 1];
 	mCharacters[inColumn] = ' ';
 }
@@ -105,7 +105,7 @@ void MLine::swap(MLine& p)
 
 // --------------------------------------------------------------------
 
-MTerminalBuffer::MTerminalBuffer(uint32 inWidth, uint32 inHeight, bool inBuffer)
+MTerminalBuffer::MTerminalBuffer(uint32_t inWidth, uint32_t inHeight, bool inBuffer)
 	: mLines(inHeight, MLine(inWidth, kXTermColorNone, kXTermColorNone))
 	, mWidth(inWidth)
 	, mDirty(false)
@@ -124,24 +124,24 @@ MTerminalBuffer::~MTerminalBuffer()
 {
 }
 
-const MLine& MTerminalBuffer::GetLine(int32 inLine) const
+const MLine& MTerminalBuffer::GetLine(int32_t inLine) const
 {
 	if (inLine >= 0)
 	{
-		if (static_cast<uint32>(inLine) >= mLines.size())
+		if (static_cast<uint32_t>(inLine) >= mLines.size())
 			THROW(("Out of range"));
 		return mLines[inLine];
 	}
 	else
 	{
 		inLine = -inLine - 1;
-		if (static_cast<uint32>(inLine) >= mBuffer.size())
+		if (static_cast<uint32_t>(inLine) >= mBuffer.size())
 			THROW(("Out of range"));
 		return mBuffer[inLine];
 	}
 }
 
-void MTerminalBuffer::Resize(uint32 inWidth, uint32 inHeight, int32& ioAnchorLine)
+void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnchorLine)
 {
 	if (inWidth == mWidth)
 	{
@@ -167,8 +167,8 @@ void MTerminalBuffer::Resize(uint32 inWidth, uint32 inHeight, int32& ioAnchorLin
 	else
 	{
 		// for ioAnchorLine, find out what unwrapped line it is on
-		int32 anchor = 0, newAnchorLine = ioAnchorLine;
-		for (int32 i = 0; i < ioAnchorLine + static_cast<int32>(mBuffer.size()) and i < static_cast<int32>(mBuffer.size()); ++i)
+		int32_t anchor = 0, newAnchorLine = ioAnchorLine;
+		for (int32_t i = 0; i < ioAnchorLine + static_cast<int32_t>(mBuffer.size()) and i < static_cast<int32_t>(mBuffer.size()); ++i)
 		{
 			if (not mBuffer[mBuffer.size() - i - 1].IsSoftWrapped())
 				++anchor;
@@ -214,16 +214,16 @@ void MTerminalBuffer::Resize(uint32 inWidth, uint32 inHeight, int32& ioAnchorLin
 				newAnchorLine = rewrapped.size();
 			
 			// copy over to new
-			uint32 offset = 0;
+			uint32_t offset = 0;
 			while (offset < chars.size())
 			{
 				MLine& line(rewrapped.front());
 				
-				uint32 n = inWidth;
+				uint32_t n = inWidth;
 				if (n + offset >= chars.size())
 					n = chars.size() - offset;
 				
-				for (uint32 i = 0; i < n; ++i)
+				for (uint32_t i = 0; i < n; ++i)
 					line[i] = chars[i + offset];
 				
 				offset += n;
@@ -254,14 +254,14 @@ void MTerminalBuffer::Resize(uint32 inWidth, uint32 inHeight, int32& ioAnchorLin
 
 		// finally, calculate new anchorline
 		if (ioAnchorLine < 0)
-			ioAnchorLine = newAnchorLine - static_cast<int32>(mBuffer.size());
+			ioAnchorLine = newAnchorLine - static_cast<int32_t>(mBuffer.size());
 	}
 	
 	mDirty = true;
 }
 
-void MTerminalBuffer::ScrollForward(uint32 inFromLine, uint32 inToLine,
-	uint32 inLeftMargin, uint32 inRightMargin)
+void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
+	uint32_t inLeftMargin, uint32_t inRightMargin)
 {
 	if (inFromLine >= inToLine or inToLine >= mLines.size())
 		return;
@@ -275,31 +275,31 @@ void MTerminalBuffer::ScrollForward(uint32 inFromLine, uint32 inToLine,
 		while (mBuffer.size() > mBufferSize)
 			mBuffer.pop_back();
 		
-		for (uint32 line = inFromLine; line < inToLine; ++line)
+		for (uint32_t line = inFromLine; line < inToLine; ++line)
 			mLines[line].swap(mLines[line + 1]);
 	}
 	else
 	{
-		for (uint32 line = inFromLine; line < inToLine; ++line)
+		for (uint32_t line = inFromLine; line < inToLine; ++line)
 		{
 			MLine& a = mLines[line];
 			MLine& b = mLines[line + 1];
 			
-			for (uint32 col = inLeftMargin; col <= inRightMargin; ++col)
+			for (uint32_t col = inLeftMargin; col <= inRightMargin; ++col)
 				swap(a[col], b[col]);
 		}
 	}
 
 	MLine& line = mLines[inToLine];
-	for (uint32 c = inLeftMargin; c <= inRightMargin; ++c)
+	for (uint32_t c = inLeftMargin; c <= inRightMargin; ++c)
 		line[c] = MChar(mForeColor, mBackColor);
 	line.SetSoftWrapped(false);
 
 	mDirty = true;
 }
 
-void MTerminalBuffer::ScrollBackward(uint32 inFromLine, uint32 inToLine,
-	uint32 inLeftMargin, uint32 inRightMargin)
+void MTerminalBuffer::ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
+	uint32_t inLeftMargin, uint32_t inRightMargin)
 {
 	if (inFromLine >= inToLine or inToLine >= mLines.size())
 		return;
@@ -309,23 +309,23 @@ void MTerminalBuffer::ScrollBackward(uint32 inFromLine, uint32 inToLine,
 
 	if (inLeftMargin == 0 and inRightMargin == mWidth - 1)
 	{
-		for (uint32 line = inToLine; line > inFromLine; --line)
+		for (uint32_t line = inToLine; line > inFromLine; --line)
 			swap(mLines[line], mLines[line - 1]);
 	}
 	else
 	{
-		for (uint32 line = inToLine; line > inFromLine; --line)
+		for (uint32_t line = inToLine; line > inFromLine; --line)
 		{
 			MLine& a = mLines[line];
 			MLine& b = mLines[line - 1];
 			
-			for (uint32 col = inLeftMargin; col <= inRightMargin; ++col)
+			for (uint32_t col = inLeftMargin; col <= inRightMargin; ++col)
 				swap(a[col], b[col]);
 		}
 	}
 	
 	MLine& line = mLines[inFromLine];
-	for (uint32 c = inLeftMargin; c <= inRightMargin; ++c)
+	for (uint32_t c = inLeftMargin; c <= inRightMargin; ++c)
 		line[c] = MChar(mForeColor, mBackColor);
 	line.SetSoftWrapped(false);
 
@@ -338,7 +338,7 @@ void MTerminalBuffer::Clear()
 	EraseDisplay(0, 0, 2, false);
 }
 
-void MTerminalBuffer::SetCharacter(uint32 inLine, uint32 inColumn, unicode inChar, MStyle inStyle)
+void MTerminalBuffer::SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar, MStyle inStyle)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -349,17 +349,17 @@ void MTerminalBuffer::SetCharacter(uint32 inLine, uint32 inColumn, unicode inCha
 	mDirty = true;
 }
 
-void MTerminalBuffer::ReverseFlag(uint32 inFromLine, uint32 inFromColumn,
-	uint32 inToLine, uint32 inToColumn, MCharStyle inFlags)
+void MTerminalBuffer::ReverseFlag(uint32_t inFromLine, uint32_t inFromColumn,
+	uint32_t inToLine, uint32_t inToColumn, MCharStyle inFlags)
 {
-	for (uint32 li = inFromLine; li <= inToLine; ++li)
+	for (uint32_t li = inFromLine; li <= inToLine; ++li)
 	{
 		if (li >= mLines.size())
 			break;
 		
 		MLine& line(mLines[li]);
 		
-		for (uint32 ci = inFromColumn; ci <= inToColumn; ++ci)
+		for (uint32_t ci = inFromColumn; ci <= inToColumn; ++ci)
 		{
 			if (ci >= mWidth)
 				break;
@@ -371,17 +371,17 @@ void MTerminalBuffer::ReverseFlag(uint32 inFromLine, uint32 inFromColumn,
 	mDirty = true;
 }
 
-void MTerminalBuffer::ChangeFlags(uint32 inFromLine, uint32 inFromColumn,
-	uint32 inToLine, uint32 inToColumn, uint32 inMode)
+void MTerminalBuffer::ChangeFlags(uint32_t inFromLine, uint32_t inFromColumn,
+	uint32_t inToLine, uint32_t inToColumn, uint32_t inMode)
 {
-	for (uint32 li = inFromLine; li <= inToLine; ++li)
+	for (uint32_t li = inFromLine; li <= inToLine; ++li)
 	{
 		if (li >= mLines.size())
 			break;
 		
 		MLine& line(mLines[li]);
 		
-		for (uint32 ci = inFromColumn; ci <= inToColumn; ++ci)
+		for (uint32_t ci = inFromColumn; ci <= inToColumn; ++ci)
 		{
 			if (ci >= mWidth)
 				break;
@@ -393,7 +393,7 @@ void MTerminalBuffer::ChangeFlags(uint32 inFromLine, uint32 inFromColumn,
 	mDirty = true;
 }
 
-void MTerminalBuffer::SetLineDoubleWidth(uint32 inLine)
+void MTerminalBuffer::SetLineDoubleWidth(uint32_t inLine)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -402,7 +402,7 @@ void MTerminalBuffer::SetLineDoubleWidth(uint32 inLine)
 	mDirty = true;
 }
 
-void MTerminalBuffer::SetLineDoubleHeight(uint32 inLine, bool inTop)
+void MTerminalBuffer::SetLineDoubleHeight(uint32_t inLine, bool inTop)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -411,7 +411,7 @@ void MTerminalBuffer::SetLineDoubleHeight(uint32 inLine, bool inTop)
 	mDirty = true;
 }
 
-void MTerminalBuffer::SetLineSingleWidth(uint32 inLine)
+void MTerminalBuffer::SetLineSingleWidth(uint32_t inLine)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -420,15 +420,15 @@ void MTerminalBuffer::SetLineSingleWidth(uint32 inLine)
 	mDirty = true;
 }
 
-void MTerminalBuffer::EraseDisplay(uint32 inLine, uint32 inColumn, uint32 inMode, bool inSelective)
+void MTerminalBuffer::EraseDisplay(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective)
 {
-	for (uint32 l = 0; l < mLines.size(); ++l)
+	for (uint32_t l = 0; l < mLines.size(); ++l)
 	{
 		MLine& line(mLines[l]);
 		line.SetSoftWrapped(false);
 		line.SetSingleWidth();
 		
-		for (uint32 c = 0; c < mWidth; ++c)
+		for (uint32_t c = 0; c < mWidth; ++c)
 		{
 			if (line[c] & kProtected or (inSelective and line[c] & kUnerasable))
 				continue;
@@ -445,7 +445,7 @@ void MTerminalBuffer::EraseDisplay(uint32 inLine, uint32 inColumn, uint32 inMode
 	mDirty = true;
 }
 
-void MTerminalBuffer::EraseLine(uint32 inLine, uint32 inColumn, uint32 inMode, bool inSelective)
+void MTerminalBuffer::EraseLine(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -454,14 +454,14 @@ void MTerminalBuffer::EraseLine(uint32 inLine, uint32 inColumn, uint32 inMode, b
 	line.SetSoftWrapped(false);
 //	line.SetSingleWidth();
 
-	uint32 cf = 0, ct = mWidth;
+	uint32_t cf = 0, ct = mWidth;
 	switch (inMode)
 	{
 		case 0:	cf = inColumn; break;
 		case 1:	ct = inColumn + 1; break;
 	}
 	
-	for (uint32 c = cf; c < ct; ++c)
+	for (uint32_t c = cf; c < ct; ++c)
 	{
 		if (line[c] & kProtected or (inSelective and line[c] & kUnerasable))
 			continue;
@@ -471,7 +471,7 @@ void MTerminalBuffer::EraseLine(uint32 inLine, uint32 inColumn, uint32 inMode, b
 	mDirty = true;
 }
 
-void MTerminalBuffer::EraseCharacter(uint32 inLine, uint32 inColumn, uint32 inCount)
+void MTerminalBuffer::EraseCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inCount)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -481,7 +481,7 @@ void MTerminalBuffer::EraseCharacter(uint32 inLine, uint32 inColumn, uint32 inCo
 
 	MLine& line(mLines[inLine]);
 	
-	for (uint32 c = inColumn; c < inColumn + inCount and c < mWidth; ++c)
+	for (uint32_t c = inColumn; c < inColumn + inCount and c < mWidth; ++c)
 	{
 		if (line[c] & kProtected)
 			continue;
@@ -492,7 +492,7 @@ void MTerminalBuffer::EraseCharacter(uint32 inLine, uint32 inColumn, uint32 inCo
 }
 
 
-void MTerminalBuffer::DeleteCharacter(uint32 inLine, uint32 inColumn, uint32 inWidth)
+void MTerminalBuffer::DeleteCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -502,7 +502,7 @@ void MTerminalBuffer::DeleteCharacter(uint32 inLine, uint32 inColumn, uint32 inW
 	mDirty = true;
 }
 
-void MTerminalBuffer::InsertCharacter(uint32 inLine, uint32 inColumn, uint32 inWidth)
+void MTerminalBuffer::InsertCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth)
 {
 	if (inLine >= mLines.size())
 		return;
@@ -513,7 +513,7 @@ void MTerminalBuffer::InsertCharacter(uint32 inLine, uint32 inColumn, uint32 inW
 }
 
 
-void MTerminalBuffer::WrapLine(uint32 inLine)
+void MTerminalBuffer::WrapLine(uint32_t inLine)
 {
 	if (inLine < mLines.size())
 		mLines[inLine].SetSoftWrapped(true);
@@ -521,10 +521,10 @@ void MTerminalBuffer::WrapLine(uint32 inLine)
 
 void MTerminalBuffer::FillWithE()
 {
-	for (uint32 l = 0; l < mLines.size(); ++l)
+	for (uint32_t l = 0; l < mLines.size(); ++l)
 	{
 		MLine& line(mLines[l]);
-		for (uint32 column = 0; column < mWidth; ++column)
+		for (uint32_t column = 0; column < mWidth; ++column)
 			line[column] = MChar('E', MStyle(mForeColor, mBackColor));
 	}
 
@@ -541,20 +541,20 @@ bool MTerminalBuffer::IsSelectionBlock() const
 	return mBlockSelection;
 }
 
-void MTerminalBuffer::GetSelectionBegin(int32& outLine, int32& outColumn) const
+void MTerminalBuffer::GetSelectionBegin(int32_t& outLine, int32_t& outColumn) const
 {
 	outLine = mBeginLine;
 	outColumn = mBeginColumn;
 }
 
-void MTerminalBuffer::GetSelectionEnd(int32& outLine, int32& outColumn) const
+void MTerminalBuffer::GetSelectionEnd(int32_t& outLine, int32_t& outColumn) const
 {
 	outLine = mEndLine;
 	outColumn = mEndColumn;
 }
 
-void MTerminalBuffer::GetSelection(int32& outBeginLine, int32& outBeginColumn,
-	int32& outEndLine, int32& outEndColumn, bool& outIsBlock) const
+void MTerminalBuffer::GetSelection(int32_t& outBeginLine, int32_t& outBeginColumn,
+	int32_t& outEndLine, int32_t& outEndColumn, bool& outIsBlock) const
 {
 	outBeginLine = mBeginLine;
 	outBeginColumn = mBeginColumn;
@@ -563,8 +563,8 @@ void MTerminalBuffer::GetSelection(int32& outBeginLine, int32& outBeginColumn,
 	outIsBlock = mBlockSelection;
 }
 
-void MTerminalBuffer::SetSelection(int32 inBeginLine, int32 inBeginColumn,
-	int32 inEndLine, int32 inEndColumn, bool inBlock)
+void MTerminalBuffer::SetSelection(int32_t inBeginLine, int32_t inBeginColumn,
+	int32_t inEndLine, int32_t inEndColumn, bool inBlock)
 {
 	assert(inBeginLine < inEndLine or (inBeginLine == inEndLine and inBeginColumn <= inEndColumn));
 	
@@ -661,8 +661,8 @@ TerminalWordBreakClass GetTerminalWordBreakClass(unicode inUnicode)
 
 }
 
-void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
-	int32& outLine1, int32& outColumn1, int32& outLine2, int32& outColumn2)
+void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
+	int32_t& outLine1, int32_t& outColumn1, int32_t& outLine2, int32_t& outColumn2)
 {
 	// sensible defaults:
 	outLine1 = outLine2 = inLine;
@@ -680,7 +680,7 @@ void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
 			continue;
 		}
 
-		if (-inLine + 1 < static_cast<int32>(mBuffer.size()))
+		if (-inLine + 1 < static_cast<int32_t>(mBuffer.size()))
 		{
 			if (not mBuffer[-inLine + 1].IsSoftWrapped())
 				break;
@@ -693,14 +693,14 @@ void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
 	
 	// collect the unicode string for this line
 	vector<MChar> s;
-	int32 lineNr = inLine;
+	int32_t lineNr = inLine;
 	for (;;)
 	{
 		const MLine& line = GetLine(lineNr);
 		++lineNr;
 
 		line.CopyOut(back_inserter(s));
-		if (not line.IsSoftWrapped() or lineNr >= static_cast<int32>(mLines.size()))
+		if (not line.IsSoftWrapped() or lineNr >= static_cast<int32_t>(mLines.size()))
 			break;
 	}
 
@@ -708,10 +708,10 @@ void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
 	while (not s.empty() and (wchar_t)s.back() == ' ')
 		s.pop_back();
 
-	if (inColumn > static_cast<int32>(s.size()))
-		inColumn = static_cast<int32>(s.size());
+	if (inColumn > static_cast<int32_t>(s.size()))
+		inColumn = static_cast<int32_t>(s.size());
 
-	const int8
+	const int8_t
 		kNextWordBreakStateTable[5][7] = {
 			//	Sep	Let	Com	Hir	Kat	Han	Other		State
 			{	 0,	 1,	 1,	 2,	 3,	 4,	 0	},	//	0
@@ -731,16 +731,16 @@ void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
 		};
 
 	// now find the word position, start by going right
-	int32 nextColumn, prevColumn, column = inColumn - 1;
-	int8 state = 0;
+	int32_t nextColumn, prevColumn, column = inColumn - 1;
+	int8_t state = 0;
 	while (state >= 0)
 	{
 		++column;
 		nextColumn = column;
-		if (nextColumn >= static_cast<int32>(s.size()))
+		if (nextColumn >= static_cast<int32_t>(s.size()))
 			break;
 		TerminalWordBreakClass cl = GetTerminalWordBreakClass(s[column]);
-		state = kNextWordBreakStateTable[uint8(state)][cl];
+		state = kNextWordBreakStateTable[uint8_t(state)][cl];
 	}
 	
 	// then go back
@@ -753,7 +753,7 @@ void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
 			break;
 		--column;
 		TerminalWordBreakClass cl = GetTerminalWordBreakClass(s[column]);
-		state = kPrevWordBreakStateTable[uint8(state)][cl];
+		state = kPrevWordBreakStateTable[uint8_t(state)][cl];
 	}
 	
 	// check if we did find anything
@@ -763,13 +763,13 @@ void MTerminalBuffer::FindWord(int32 inLine, int32 inColumn,
 		outColumn2 = nextColumn;
 		outLine1 = outLine2 = inLine;	// we now have to correct for the wrapping
 		
-		while (outColumn1 > static_cast<int32>(mWidth))
+		while (outColumn1 > static_cast<int32_t>(mWidth))
 		{
 			outColumn1 -= mWidth;
 			++outLine1;
 		}
 
-		while (outColumn2 > static_cast<int32>(mWidth))
+		while (outColumn2 > static_cast<int32_t>(mWidth))
 		{
 			outColumn2 -= mWidth;
 			++outLine2;
@@ -781,11 +781,11 @@ string MTerminalBuffer::GetSelectedText() const
 {
 	string result;
 	
-	for (int32 l = mBeginLine; l <= mEndLine; ++l)
+	for (int32_t l = mBeginLine; l <= mEndLine; ++l)
 	{
 		const MLine& line(GetLine(l));
 		
-		int32 c1 = 1, c2 = 0;
+		int32_t c1 = 1, c2 = 0;
 		if (mBlockSelection)
 		{
 			c1 = mBeginColumn;
@@ -808,7 +808,7 @@ string MTerminalBuffer::GetSelectedText() const
 		
 		auto iter = back_inserter(result);
 		
-		for (int32 c = c1; c < c2; ++c)
+		for (int32_t c = c1; c < c2; ++c)
 			MEncodingTraits<kEncodingUTF8>::WriteUnicode(iter, (unicode)line[c]);
 
 		if (mBlockSelection or (l != mEndLine and not line.IsSoftWrapped()))
@@ -818,15 +818,15 @@ string MTerminalBuffer::GetSelectedText() const
 	return result;
 }
 
-unicode MTerminalBuffer::GetChar(uint32 inOffset, bool inToLower) const
+unicode MTerminalBuffer::GetChar(uint32_t inOffset, bool inToLower) const
 {
-	int32 line = inOffset / mWidth;
-	int32 column = inOffset % mWidth;
+	int32_t line = inOffset / mWidth;
+	int32_t column = inOffset % mWidth;
 	
-	assert(line >= 0 and line < static_cast<int32>(mBuffer.size() + mLines.size()));
+	assert(line >= 0 and line < static_cast<int32_t>(mBuffer.size() + mLines.size()));
 	
 	unicode result;
-	if (line >= static_cast<int32>(mBuffer.size()))
+	if (line >= static_cast<int32_t>(mBuffer.size()))
 		result = mLines[line - mBuffer.size()][column];
 	else
 		result = mBuffer[mBuffer.size() - line - 1][column];
@@ -842,17 +842,17 @@ unicode MTerminalBuffer::GetChar(uint32 inOffset, bool inToLower) const
 // Implement forward and backward searching in separate routines to
 // keep code readable.
 
-bool MTerminalBuffer::FindNext(int32& ioLine, int32& ioColumn, const string& inWhat,
+bool MTerminalBuffer::FindNext(int32_t& ioLine, int32_t& ioColumn, const string& inWhat,
 	bool inIgnoreCase, bool inWrapAround)
 {
 	// q is a rather large prime, d is the alphabet size (of Unicode)
-	const int64 q = 33554393, d = 1114112;
+	const int64_t q = 33554393, d = 1114112;
 	
 	// convert the search string to unicode's
 	vector<unicode> what;
 	for (string::const_iterator w = inWhat.begin(); w != inWhat.end();)
 	{
-		unicode ch; uint32 l;
+		unicode ch; uint32_t l;
 		MEncodingTraits<kEncodingUTF8>::ReadUnicode(w, l, ch);
 		w += l;
 		
@@ -863,20 +863,20 @@ bool MTerminalBuffer::FindNext(int32& ioLine, int32& ioColumn, const string& inW
 	}
 
 	// M is the length of the search string
-	int32 M = what.size();
+	int32_t M = what.size();
 	
 	// We're looking forward. N is the length of the remaining characters in the buffer
-	int32 lineCount = static_cast<int32>(mBuffer.size() + mLines.size());
-	int32 line = static_cast<int32>(mBuffer.size()) + ioLine;
-	int32 N = (lineCount - line) * mWidth - ioColumn;
-	int32 O = lineCount * mWidth - N;	// offset from start for ioLine/ioColumn
+	int32_t lineCount = static_cast<int32_t>(mBuffer.size() + mLines.size());
+	int32_t line = static_cast<int32_t>(mBuffer.size()) + ioLine;
+	int32_t N = (lineCount - line) * mWidth - ioColumn;
+	int32_t O = lineCount * mWidth - N;	// offset from start for ioLine/ioColumn
 
 	// sanity check	
 	if (M >= N)
 		return false;
 
-	int64 dM = 1, h1 = 0, h2 = 0;
-	int32 i;
+	int64_t dM = 1, h1 = 0, h2 = 0;
+	int32_t i;
 	
     for (i = 1; i < M; ++i)
     	dM = (d * dM) % q;
@@ -905,15 +905,15 @@ bool MTerminalBuffer::FindNext(int32& ioLine, int32& ioColumn, const string& inW
 	bool result = false;
 	if (i < N - M)
 	{
-		ioLine = (O + i) / mWidth - static_cast<int32>(mBuffer.size());
+		ioLine = (O + i) / mWidth - static_cast<int32_t>(mBuffer.size());
 		ioColumn = (O + i) % mWidth;
 		result = true;
 	}
-	else if (inWrapAround and (ioLine > -static_cast<int32>(mBuffer.size()) or ioColumn > 0))
+	else if (inWrapAround and (ioLine > -static_cast<int32_t>(mBuffer.size()) or ioColumn > 0))
 	{
-		int32 line = -static_cast<int32>(mBuffer.size()), column = 0;
+		int32_t line = -static_cast<int32_t>(mBuffer.size()), column = 0;
 		result = FindNext(line, column, inWhat, inIgnoreCase, false);
-		if (result and (line > ioLine or (line == ioLine and column + static_cast<int32>(what.size()) >= ioColumn)))
+		if (result and (line > ioLine or (line == ioLine and column + static_cast<int32_t>(what.size()) >= ioColumn)))
 			result = false;
 		else
 		{
@@ -925,17 +925,17 @@ bool MTerminalBuffer::FindNext(int32& ioLine, int32& ioColumn, const string& inW
 	return result;
 }
 
-bool MTerminalBuffer::FindPrevious(int32& ioLine, int32& ioColumn, const string& inWhat,
+bool MTerminalBuffer::FindPrevious(int32_t& ioLine, int32_t& ioColumn, const string& inWhat,
 	bool inIgnoreCase, bool inWrapAround)
 {
 	// q is a rather large prime, d is the alphabet size (of Unicode)
-	const int64 q = 33554393, d = 1114112;
+	const int64_t q = 33554393, d = 1114112;
 	
 	// convert the search string to unicode's
 	vector<unicode> what;
 	for (string::const_iterator w = inWhat.begin(); w != inWhat.end();)
 	{
-		unicode ch; uint32 l;
+		unicode ch; uint32_t l;
 		MEncodingTraits<kEncodingUTF8>::ReadUnicode(w, l, ch);
 		w += l;
 		
@@ -947,20 +947,20 @@ bool MTerminalBuffer::FindPrevious(int32& ioLine, int32& ioColumn, const string&
 	reverse(what.begin(), what.end());
 
 	// M is the length of the search string
-	int32 M = what.size();
+	int32_t M = what.size();
 	
 	// We're looking backward now. N is the length of the characters in the buffer
 	// up until the point where we start.
-	int32 lineCount = static_cast<int32>(mBuffer.size() + mLines.size());
-	int32 line = static_cast<int32>(mBuffer.size()) + ioLine;
-	int32 N = line * mWidth + ioColumn;
+	int32_t lineCount = static_cast<int32_t>(mBuffer.size() + mLines.size());
+	int32_t line = static_cast<int32_t>(mBuffer.size()) + ioLine;
+	int32_t N = line * mWidth + ioColumn;
 
 	// sanity check	
 	if (M >= N)
 		return false;
 
-	int64 dM = 1, h1 = 0, h2 = 0;
-	int32 i;
+	int64_t dM = 1, h1 = 0, h2 = 0;
+	int32_t i;
 	
     for (i = 1; i < M; ++i)
     	dM = (d * dM) % q;
@@ -989,17 +989,17 @@ bool MTerminalBuffer::FindPrevious(int32& ioLine, int32& ioColumn, const string&
 	bool result = false;
 	if (i < N - M)
 	{
-		ioLine = (N - i - M + 1) / mWidth - static_cast<int32>(mBuffer.size());
+		ioLine = (N - i - M + 1) / mWidth - static_cast<int32_t>(mBuffer.size());
 		ioColumn = (N - i - M + 1) % mWidth;
 		result = true;
 	}
-	else if (inWrapAround and (ioLine < lineCount or ioColumn < static_cast<int32>(mWidth)))
+	else if (inWrapAround and (ioLine < lineCount or ioColumn < static_cast<int32_t>(mWidth)))
 	{
 #warning("deep recursion found here...")
 
-		int32 line = lineCount - mBuffer.size() - 1, column = mWidth - 1;
+		int32_t line = lineCount - mBuffer.size() - 1, column = mWidth - 1;
 		result = FindPrevious(line, column, inWhat, inIgnoreCase, false);
-		if (result and (line < ioLine or (line == ioLine and column + static_cast<int32>(what.size()) <= ioColumn)))
+		if (result and (line < ioLine or (line == ioLine and column + static_cast<int32_t>(what.size()) <= ioColumn)))
 			result = false;
 		else
 		{

@@ -169,7 +169,7 @@ void MDialog::TextChanged(
 
 void MDialog::ValueChanged(
 	const string&		inID,
-	int32				inValue)
+	int32_t				inValue)
 {
 }
 
@@ -258,16 +258,16 @@ void MDialog::SetText(const string& inID, const std::string& inText)
 		static_cast<MButton*>(view)->SetText(inText);
 }
 
-void MDialog::SetPasswordChar(const string& inID, const uint32 inUnicode)
+void MDialog::SetPasswordChar(const string& inID, const uint32_t inUnicode)
 {
 	MView* view = FindSubViewByID(inID);
 	THROW_IF_NIL(dynamic_cast<MEdittext*>(view));
 	static_cast<MEdittext*>(view)->SetPasswordChar(inUnicode);
 }
 
-int32 MDialog::GetValue(const std::string& inID) const
+int32_t MDialog::GetValue(const std::string& inID) const
 {
-	int32 result = -1;
+	int32_t result = -1;
 
 	MView* view = FindSubViewByID(inID);
 	THROW_IF_NIL(view);
@@ -277,7 +277,7 @@ int32 MDialog::GetValue(const std::string& inID) const
 	return result;
 }
 
-void MDialog::SetValue(const std::string& inID, int32 inValue)
+void MDialog::SetValue(const std::string& inID, int32_t inValue)
 {
 	MView* view = FindSubViewByID(inID);
 	THROW_IF_NIL(view);

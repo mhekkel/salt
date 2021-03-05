@@ -152,7 +152,7 @@ void MGtkControlImpl<CONTROL>::MarginsChanged()
 	
 	if (widget != nullptr)
 	{
-		int32 l, t, r, b;
+		int32_t l, t, r, b;
 
 		MView* view = this->mControl;
 		view->GetMargins(l, t, r, b);
@@ -241,11 +241,11 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey* inEvent)
 	{
 PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
 
-		const uint32 kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 		
-	    uint32 modifiers = MapModifier(inEvent->state & kValidModifiersMask);
-		uint32 keyValue = MapKeyCode(inEvent->keyval);
-		uint32 cmd;
+	    uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+		uint32_t keyValue = MapKeyCode(inEvent->keyval);
+		uint32_t cmd;
 		
 		if (MAcceleratorTable::Instance().IsAcceleratorKey(keyValue, modifiers, cmd))
 		{
@@ -263,7 +263,7 @@ void MGtkControlImpl<CONTROL>::OnPopupMenu()
 {
 PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
 
-	int32 x, y;
+	int32_t x, y;
 
 #if GTK_CHECK_VERSION (3,20,0)
 	auto seat = gdk_display_get_default_seat(gdk_display_get_default());

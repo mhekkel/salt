@@ -280,9 +280,9 @@ void MDocument::CloseDocument()
 //	UpdateCommandStatus
 
 bool MDocument::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -293,10 +293,10 @@ bool MDocument::UpdateCommandStatus(
 //	ProcessCommand
 
 bool MDocument::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	return false;
 }
@@ -305,8 +305,8 @@ bool MDocument::ProcessCommand(
 //	HandleKeyDown
 
 bool MDocument::HandleKeyDown(
-	uint32			inKeyCode,
-	uint32			inModifiers,
+	uint32_t			inKeyCode,
+	uint32_t			inModifiers,
 	bool			inRepeat)
 {
 	return false;

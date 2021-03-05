@@ -99,8 +99,8 @@ void MGtkDeviceImpl::Restore()
 }
 
 void MGtkDeviceImpl::SetOrigin(
-	int32		inX,
-	int32		inY)
+	int32_t		inX,
+	int32_t		inY)
 {
 }
 
@@ -174,7 +174,7 @@ void MGtkDeviceImpl::FillRect(
 
 void MGtkDeviceImpl::StrokeRect(
 	MRect				inRect,
-	uint32				inLineWidth)
+	uint32_t				inLineWidth)
 {
 }
 
@@ -210,7 +210,7 @@ PangoFontMetrics* MGtkDeviceImpl::GetMetrics()
 			
 			// there's a bug in pango I guess
 			
-			int32 x;
+			int32_t x;
 			if (IsPrinting(x))
 				fontDesc = pango_font_description_copy(fontDesc);
 		}
@@ -257,12 +257,12 @@ void MGtkDeviceImpl::DrawString(
 	const string&		inText,
 	float				inX,
 	float				inY,
-	uint32				inTruncateWidth,
+	uint32_t				inTruncateWidth,
 	MAlignment			inAlign)
 {
 }
 
-uint32 MGtkDeviceImpl::GetStringWidth(
+uint32_t MGtkDeviceImpl::GetStringWidth(
 	const string&		inText)
 {
 	// reset attributes first
@@ -295,9 +295,9 @@ void MGtkDeviceImpl::SetTabStops(
 {
 	PangoTabArray* tabs = pango_tab_array_new(2, false);
 	
-	uint32 next = inTabWidth;
+	uint32_t next = inTabWidth;
 	
-	for (uint32 x = 0; x < 2; ++x)
+	for (uint32_t x = 0; x < 2; ++x)
 	{
 		pango_tab_array_set_tab(tabs, x, PANGO_TAB_LEFT, next * mPangoScale);
 		next += inTabWidth;
@@ -309,20 +309,20 @@ void MGtkDeviceImpl::SetTabStops(
 }
 
 void MGtkDeviceImpl::SetTextColors(
-	uint32				inColorCount,
-	uint32				inColorIndices[],
-	uint32				inOffsets[],
+	uint32_t				inColorCount,
+	uint32_t				inColorIndices[],
+	uint32_t				inOffsets[],
 	MColor				inColors[])
 {
 	PangoAttrList* attrs = pango_layout_get_attributes(mPangoLayout);
 
-	for (uint32 ix = 0; ix < inColorCount; ++ix)
+	for (uint32_t ix = 0; ix < inColorCount; ++ix)
 	{
 		MColor c = inColors[inColorIndices[ix]];
 		
-		uint16 red = c.red << 8 | c.red;
-		uint16 green = c.green << 8 | c.green;
-		uint16 blue = c.blue << 8 | c.blue;
+		uint16_t red = c.red << 8 | c.red;
+		uint16_t green = c.green << 8 | c.green;
+		uint16_t blue = c.blue << 8 | c.blue;
 
 		PangoAttribute* attr = pango_attr_foreground_new(red, green, blue);
 		attr->start_index = inOffsets[ix];
@@ -338,13 +338,13 @@ void MGtkDeviceImpl::SetTextColors(
 	}
 }
 
-void MGtkDeviceImpl::RenderTextBackground(float inX, float inY, uint32 inStart, uint32 inLength, MColor inColor)
+void MGtkDeviceImpl::RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor)
 {
 	PangoAttrList* attrs = pango_layout_get_attributes(mPangoLayout);
 
-	uint16 red = inColor.red << 8 | inColor.red;
-	uint16 green = inColor.green << 8 | inColor.green;
-	uint16 blue = inColor.blue << 8 | inColor.blue;
+	uint16_t red = inColor.red << 8 | inColor.red;
+	uint16_t green = inColor.green << 8 | inColor.green;
+	uint16_t blue = inColor.blue << 8 | inColor.blue;
 
 	PangoAttribute* attr = pango_attr_background_new(red, green, blue);
 	attr->start_index = inStart;
@@ -354,16 +354,16 @@ void MGtkDeviceImpl::RenderTextBackground(float inX, float inY, uint32 inStart, 
 }
 
 void MGtkDeviceImpl::SetTextStyles(
-	uint32				inStyleCount,
-	uint32				inStyles[],
-	uint32				inOffsets[])
+	uint32_t				inStyleCount,
+	uint32_t				inStyles[],
+	uint32_t				inOffsets[])
 {
 	PangoAttrList* attrs = pango_layout_get_attributes(mPangoLayout);
 
-	for (uint32 ix = 0; ix < inStyleCount; ++ix)
+	for (uint32_t ix = 0; ix < inStyleCount; ++ix)
 	{
-		uint32 start_index = inOffsets[ix];
-		uint32 end_index = (ix + 1 == inStyleCount ? G_MAXUINT : inOffsets[ix + 1]);
+		uint32_t start_index = inOffsets[ix];
+		uint32_t end_index = (ix + 1 == inStyleCount ? G_MAXUINT : inOffsets[ix + 1]);
 		assert(end_index > start_index);
 		
 		PangoAttribute* attr;
@@ -386,13 +386,13 @@ void MGtkDeviceImpl::SetTextStyles(
 }
 
 void MGtkDeviceImpl::SetTextSelection(
-	uint32				inStart,
-	uint32				inLength,
+	uint32_t				inStart,
+	uint32_t				inLength,
 	MColor				inSelectionColor)
 {
-	uint16 red = inSelectionColor.red << 8 | inSelectionColor.red;
-	uint16 green = inSelectionColor.green << 8 | inSelectionColor.green;
-	uint16 blue = inSelectionColor.blue << 8 | inSelectionColor.blue;
+	uint16_t red = inSelectionColor.red << 8 | inSelectionColor.red;
+	uint16_t green = inSelectionColor.green << 8 | inSelectionColor.green;
+	uint16_t blue = inSelectionColor.blue << 8 | inSelectionColor.blue;
 	
 	PangoAttribute* attr = pango_attr_background_new(red, green, blue);
 	attr->start_index = inStart;
@@ -403,9 +403,9 @@ void MGtkDeviceImpl::SetTextSelection(
 }
 
 void MGtkDeviceImpl::IndexToPosition(
-	uint32				inIndex,
+	uint32_t				inIndex,
 	bool				inTrailing,
-	int32&				outPosition)
+	int32_t&				outPosition)
 {
 	PangoRectangle r;
 	pango_layout_index_to_pos(mPangoLayout, inIndex, &r);
@@ -413,8 +413,8 @@ void MGtkDeviceImpl::IndexToPosition(
 }
 
 bool MGtkDeviceImpl::PositionToIndex(
-	int32				inPosition,
-	uint32&				outIndex)
+	int32_t				inPosition,
+	uint32_t&				outIndex)
 {
 	int index, trailing;
 	
@@ -426,7 +426,7 @@ bool MGtkDeviceImpl::PositionToIndex(
 
 	while (trailing-- > 0)
 	{
-		uint32 n = enc.GetNextCharLength(text); 
+		uint32_t n = enc.GetNextCharLength(text); 
 		text += n;
 		index += n;
 	}
@@ -454,20 +454,20 @@ void MGtkDeviceImpl::RenderText(
 void MGtkDeviceImpl::DrawCaret(
 	float				inX,
 	float				inY,
-	uint32				inOffset)
+	uint32_t				inOffset)
 {
 }
 
 void MGtkDeviceImpl::BreakLines(
-	uint32				inWidth,
-	vector<uint32>&		outBreaks)
+	uint32_t				inWidth,
+	vector<uint32_t>&		outBreaks)
 {
 	pango_layout_set_width(mPangoLayout, inWidth * mPangoScale);
 	pango_layout_set_wrap(mPangoLayout, PANGO_WRAP_WORD_CHAR);
 
 	if (pango_layout_is_wrapped(mPangoLayout))
 	{
-		uint32 line = 0;
+		uint32_t line = 0;
 		for (;;)
 		{
 			PangoLayoutLine* pangoLine = pango_layout_get_line_readonly(mPangoLayout, line);
@@ -493,9 +493,9 @@ PangoItem* MGtkDeviceImpl::Itemize(
 }
 
 void MGtkDeviceImpl::GetWhiteSpaceGlyphs(
-	uint32&				outSpace,
-	uint32&				outTab,
-	uint32&				outNL)
+	uint32_t&				outSpace,
+	uint32_t&				outTab,
+	uint32_t&				outNL)
 {
 	//	long kMiddleDot = 0x00B7, kRightChevron = 0x00BB, kNotSign = 0x00AC; 
 	
@@ -541,19 +541,19 @@ class MCairoDeviceImp : public MGtkDeviceImpl
 {
   public:
 	MCairoDeviceImp(MView *inView, cairo_t *inCairo);
-	// MCairoDeviceImp(GtkPrintContext *inContext, MRect inRect, int32 inPage);
+	// MCairoDeviceImp(GtkPrintContext *inContext, MRect inRect, int32_t inPage);
 	~MCairoDeviceImp();
 
 	virtual void Save();
 	virtual void Restore();
-	virtual bool IsPrinting(int32 &outPage) const
+	virtual bool IsPrinting(int32_t &outPage) const
 	{
 		outPage = mPage;
 		return outPage >= 0;
 	}
 
 	virtual MRect GetBounds() const { return mRect; }
-	virtual void SetOrigin(int32 inX, int32 inY);
+	virtual void SetOrigin(int32_t inX, int32_t inY);
 	virtual void SetForeColor(MColor inColor);
 	virtual MColor GetForeColor() const;
 	virtual void SetBackColor(MColor inColor);
@@ -561,14 +561,14 @@ class MCairoDeviceImp : public MGtkDeviceImpl
 	virtual void ClipRect(MRect inRect);
 	virtual void EraseRect(MRect inRect);
 	virtual void FillRect(MRect inRect);
-	virtual void StrokeRect(MRect inRect, uint32 inLineWidth = 1);
+	virtual void StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
 	virtual void FillEllipse(MRect inRect);
 	virtual void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
 	virtual void DrawBitmap(const MBitmap &inBitmap, float inX, float inY);
 	virtual void CreateAndUsePattern(MColor inColor1, MColor inColor2);
-	virtual void DrawString(const string &inText, float inX, float inY, uint32 inTruncateWidth, MAlignment inAlign);
+	virtual void DrawString(const string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign);
 	virtual void RenderText(float inX, float inY);
-	virtual void DrawCaret(float inX, float inY, uint32 inOffset);
+	virtual void DrawCaret(float inX, float inY, uint32_t inOffset);
 	virtual void MakeTransparent(float inOpacity);
 	virtual void SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor);
 
@@ -581,8 +581,8 @@ class MCairoDeviceImp : public MGtkDeviceImpl
 	  MColor mEvenRowColor;
 	  MColor mWhiteSpaceColor;
 	  cairo_t *mContext;
-	  uint32 mPatternData[8][8];
-	  int32 mPage;
+	  uint32_t mPatternData[8][8];
+	  int32_t mPage;
 	  bool mDrawWhiteSpace;
 };
 
@@ -616,8 +616,8 @@ void MCairoDeviceImp::Restore()
 }
 
 void MCairoDeviceImp::SetOrigin(
-	int32				inX,
-	int32				inY)
+	int32_t				inX,
+	int32_t				inY)
 {
 	cairo_translate(mContext, inX, inY);
 }
@@ -693,7 +693,7 @@ void MCairoDeviceImp::FillRect(
 
 void MCairoDeviceImp::StrokeRect(
 	MRect				inRect,
-	uint32				inLineWidth)
+	uint32_t				inLineWidth)
 {
 	cairo_rectangle(mContext, inRect.x, inRect.y, inRect.width, inRect.height);
 	cairo_stroke(mContext);
@@ -747,7 +747,7 @@ void MCairoDeviceImp::DrawImage(
 void MCairoDeviceImp::DrawBitmap(const MBitmap& inBitmap, float inX, float inY)
 {
 	cairo_surface_t* surface = cairo_image_surface_create_for_data(
-		(uint8*)inBitmap.Data(), CAIRO_FORMAT_ARGB32, inBitmap.Width(), inBitmap.Height(), inBitmap.Stride());
+		(uint8_t*)inBitmap.Data(), CAIRO_FORMAT_ARGB32, inBitmap.Width(), inBitmap.Height(), inBitmap.Stride());
 
 	if (surface != nullptr)
 	{
@@ -760,7 +760,7 @@ void MCairoDeviceImp::CreateAndUsePattern(
 	MColor				inColor1,
 	MColor				inColor2)
 {
-	uint32 c1 = 0, c2 = 0;
+	uint32_t c1 = 0, c2 = 0;
 	
 	assert(cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, 8) == 32);
 	
@@ -772,16 +772,16 @@ void MCairoDeviceImp::CreateAndUsePattern(
 	c2 |= inColor2.green << 8;
 	c2 |= inColor2.blue << 0;
 	
-	for (uint32 y = 0; y < 8; ++y)
+	for (uint32_t y = 0; y < 8; ++y)
 	{
-		for (uint32 x = 0; x < 4; ++x)
+		for (uint32_t x = 0; x < 4; ++x)
 			mPatternData[y][x] = c1;
-		for (uint32 x = 4; x < 8; ++x)
+		for (uint32_t x = 4; x < 8; ++x)
 			mPatternData[y][x] = c2;
 	}
 	
 	cairo_surface_t* s = cairo_image_surface_create_for_data(
-		reinterpret_cast<uint8*>(mPatternData), CAIRO_FORMAT_RGB24, 8, 8, 32);
+		reinterpret_cast<uint8_t*>(mPatternData), CAIRO_FORMAT_RGB24, 8, 8, 32);
 
 	if (s != nullptr)
 	{
@@ -807,7 +807,7 @@ void MCairoDeviceImp::DrawString(
 	const string&		inText,
 	float				inX,
 	float				inY,
-	uint32				inTruncateWidth,
+	uint32_t				inTruncateWidth,
 	MAlignment			inAlign)
 {
 	// reset attributes first
@@ -827,7 +827,7 @@ void MCairoDeviceImp::DrawString(
 			PangoRectangle r;
 			pango_layout_get_pixel_extents(mPangoLayout, nullptr, &r);
 		
-			if (static_cast<uint32>(r.width) < inTruncateWidth)
+			if (static_cast<uint32_t>(r.width) < inTruncateWidth)
 			{
 				if (inAlign == eAlignCenter)
 					inX += (inTruncateWidth - r.width) / 2;
@@ -951,7 +951,7 @@ void MCairoDeviceImp::RenderText(
 void MCairoDeviceImp::DrawCaret(
 	float				inX,
 	float				inY,
-	uint32				inOffset)
+	uint32_t				inOffset)
 {
 	PangoRectangle sp, wp;
 
@@ -1007,8 +1007,8 @@ MDeviceImpl* MDeviceImpl::Create(MView* inView, cairo_t* inCairo)
 
 struct MPNGSurface
 {
-	MPNGSurface(const void* inPNG, uint32 inLength)
-		: mSurface(nullptr), mData(reinterpret_cast<const uint8*>(inPNG)), mLength(inLength)
+	MPNGSurface(const void* inPNG, uint32_t inLength)
+		: mSurface(nullptr), mData(reinterpret_cast<const uint8_t*>(inPNG)), mLength(inLength)
 	{
 		mSurface = cairo_image_surface_create_from_png_stream(&MPNGSurface::read_func, this);
 		if (mSurface == nullptr)
@@ -1042,11 +1042,11 @@ struct MPNGSurface
 	operator cairo_surface_t*() { return mSurface; }
 
 	cairo_surface_t* mSurface;
-	const uint8* mData;
-	uint32 mLength;
+	const uint8_t* mData;
+	uint32_t mLength;
 };
 
-MBitmap::MBitmap(const void* inPNG, uint32 inLength)
+MBitmap::MBitmap(const void* inPNG, uint32_t inLength)
 	: mData(nullptr), mWidth(0), mHeight(0), mStride(0), mUseAlpha(true)
 {
 	MPNGSurface surface(inPNG, inLength);
@@ -1055,7 +1055,7 @@ MBitmap::MBitmap(const void* inPNG, uint32 inLength)
 	mHeight = cairo_image_surface_get_height(surface);
 	mStride = cairo_image_surface_get_stride(surface);
 
-	uint32 length = mHeight * mStride;
+	uint32_t length = mHeight * mStride;
 	switch (cairo_image_surface_get_format(surface))
 	{
 		case CAIRO_FORMAT_RGB24:	mUseAlpha = false;	// fall through
@@ -1064,7 +1064,7 @@ MBitmap::MBitmap(const void* inPNG, uint32 inLength)
 		default:					throw runtime_error("unsupported format"); break;
 	}
 	
-	mData = new uint32[length / 4];
+	mData = new uint32_t[length / 4];
 	memcpy(mData, cairo_image_surface_get_data(surface), length);
 }
 

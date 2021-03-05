@@ -9,6 +9,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <pinch/types.hpp>
+
 #include "MPreferencesDialog.hpp"
 #include "MTerminalWindow.hpp"
 #include "MPreferences.hpp"
@@ -131,7 +133,7 @@ void MPreferencesDialog::Apply()
 	Preferences::SetString("font", GetText("font") + ' ' + GetText("size"));
 	Preferences::SetString("back-color", boost::lexical_cast<string>(GetColor("back-color")));
 	Preferences::SetInteger("buffer-size", 
-		boost::lexical_cast<uint32>(GetText("buffer")));
+		boost::lexical_cast<uint32_t>(GetText("buffer")));
 	Preferences::SetBoolean("block-cursor", IsChecked("block-cursor"));
 	Preferences::SetBoolean("blink-cursor", IsChecked("blink-cursor"));
 	Preferences::SetString("terminal-type", GetText("terminal-type"));
@@ -180,10 +182,10 @@ void MPreferencesDialog::Apply()
 	
 	// protocols
 	struct { pinch::algorithm type; const char* conf; const char* desc; string def; } kAlgs[] = {
-		{ pinch::encryption, "enc", "encryption", pinch::kEncryptionAlgorithms },
-		{ pinch::verification, "mac", "verification", pinch::kMacAlgorithms },
-		{ pinch::keyexchange, "kex", "key exchange", pinch::kKeyExchangeAlgorithms },
-		{ pinch::compression, "cmp", "compression", pinch::kCompressionAlgorithms }
+		{ pinch::algorithm::encryption, "enc", "encryption", pinch::kEncryptionAlgorithms },
+		{ pinch::algorithm::verification, "mac", "verification", pinch::kMacAlgorithms },
+		{ pinch::algorithm::keyexchange, "kex", "key exchange", pinch::kKeyExchangeAlgorithms },
+		{ pinch::algorithm::compression, "cmp", "compression", pinch::kCompressionAlgorithms }
 	};
 	
 	auto& connectionPool = static_cast<MSaltApp*>(gApp)->GetConnectionPool();
@@ -213,7 +215,7 @@ void MPreferencesDialog::Apply()
 		{
 			string algo = ba::join(v, ",");
 			Preferences::SetString(alg.conf, algo);
-			connectionPool.set_algorithm(alg.type, pinch::both_directions, algo);
+			connectionPool.set_algorithm(alg.type, pinch::direction::both, algo);
 		}
 	}
 	
@@ -243,7 +245,7 @@ void MPreferencesDialog::TextChanged(const string& inID, const string& inText)
 //	SetEnabled("apply", true);
 }
 
-void MPreferencesDialog::ValueChanged(const string& inID, int32 inValue)
+void MPreferencesDialog::ValueChanged(const string& inID, int32_t inValue)
 {
 	if (inID == "page-selector")
 		static_cast<MPager*>(FindSubViewByID("pages"))->SelectPage(inValue);

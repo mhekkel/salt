@@ -34,8 +34,8 @@ MDeviceImpl* MDeviceImpl::Create(MView* inView, MRect inRect, bool inCreateOffsc
 
 //struct MPNGSurface
 //{
-//	MPNGSurface(const void* inPNG, uint32 inLength)
-//		: mSurface(nullptr), mData(reinterpret_cast<const uint8*>(inPNG)), mLength(inLength)
+//	MPNGSurface(const void* inPNG, uint32_t inLength)
+//		: mSurface(nullptr), mData(reinterpret_cast<const uint8_t*>(inPNG)), mLength(inLength)
 //	{
 //		mSurface = cairo_image_surface_create_from_png_stream(&MPNGSurface::read_func, this);
 //		if (mSurface == nullptr)
@@ -69,11 +69,11 @@ MDeviceImpl* MDeviceImpl::Create(MView* inView, MRect inRect, bool inCreateOffsc
 //	operator cairo_surface_t*() { return mSurface; }
 //
 //	cairo_surface_t* mSurface;
-//	const uint8* mData;
-//	uint32 mLength;
+//	const uint8_t* mData;
+//	uint32_t mLength;
 //};
 //
-//MBitmap::MBitmap(const void* inPNG, uint32 inLength)
+//MBitmap::MBitmap(const void* inPNG, uint32_t inLength)
 //	: mData(nullptr), mWidth(0), mHeight(0), mStride(0), mUseAlpha(true)
 //{
 //	MPNGSurface surface(inPNG, inLength);
@@ -82,7 +82,7 @@ MDeviceImpl* MDeviceImpl::Create(MView* inView, MRect inRect, bool inCreateOffsc
 //	mHeight = cairo_image_surface_get_height(surface);
 //	mStride = cairo_image_surface_get_stride(surface);
 //
-//	uint32 length = mHeight * mStride;
+//	uint32_t length = mHeight * mStride;
 //	switch (cairo_image_surface_get_format(surface))
 //	{
 //		case CAIRO_FORMAT_RGB24:	mUseAlpha = false;	// fall through
@@ -91,7 +91,7 @@ MDeviceImpl* MDeviceImpl::Create(MView* inView, MRect inRect, bool inCreateOffsc
 //		default:					throw runtime_error("unsupported format"); break;
 //	}
 //	
-//	mData = new uint32[length / 4];
+//	mData = new uint32_t[length / 4];
 //	memcpy(mData, cairo_image_surface_get_data(surface), length);
 //}
 

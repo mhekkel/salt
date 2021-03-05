@@ -14,7 +14,7 @@ class MExploreBrowserView : public MView
 	static MExploreBrowserView* Create(const std::string& inID, MRect inBounds);
 
 	virtual void	AddItem(const std::string& inName, const std::string& inOwner,
-						int64 inFileSize, std::time_t inModificationTime) = 0;
+						int64_t inFileSize, std::time_t inModificationTime) = 0;
 
   protected:
 

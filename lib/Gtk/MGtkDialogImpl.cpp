@@ -47,36 +47,36 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	virtual bool OnKeyPressEvent(GdkEventKey* inEvent);
 
 	virtual void Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-						bool inExpand, bool inFill, uint32 inPadding);
+						bool inExpand, bool inFill, uint32_t inPadding);
 
 	void GetMargins(xml::element* inTemplate,
-		int32& outLeftMargin, int32& outTopMargin, int32& outRightMargin, int32& outBottomMargin);
+		int32_t& outLeftMargin, int32_t& outTopMargin, int32_t& outRightMargin, int32_t& outBottomMargin);
 
-	MView* CreateControls(xml::element* inTemplate, int32 inX, int32 inY);
+	MView* CreateControls(xml::element* inTemplate, int32_t inX, int32_t inY);
 
-	MView* CreateButton(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateColorSwatch(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateCaption(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateCheckbox(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateRadiobutton(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateExpander(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateCombobox(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateEdittext(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreatePopup(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateScrollbar(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateSeparator(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateBox(xml::element* inTemplate, int32 inX, int32 inY, bool inHorizontal);
-	MView* CreateTable(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateNotebook(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreatePager(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateListBox(xml::element* inTemplate, int32 inX, int32 inY);
-	MView* CreateListView(xml::element* inTemplate, int32 inX, int32 inY);
+	MView* CreateButton(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateColorSwatch(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateCaption(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateCheckbox(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateRadiobutton(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateExpander(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateCombobox(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateEdittext(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreatePopup(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateScrollbar(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateBox(xml::element* inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
+	MView* CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateNotebook(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreatePager(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateListBox(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView* CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY);
 
-	uint32 GetTextWidth(const string& inText, const wchar_t* inClass, int inPartID, int inStateID);
+	uint32_t GetTextWidth(const string& inText, const wchar_t* inClass, int inPartID, int inStateID);
 
 	string l(const string& s)					{ return GetLocalisedStringForContext(mRsrc, s); }
 
-	void OnResponse(int32 inResponseID)
+	void OnResponse(int32_t inResponseID)
 	{
 		PRINT(("Response: %d", inResponseID));
 
@@ -97,20 +97,20 @@ class MGtkDialogImpl : public MGtkWindowImpl
 				break;
 			
 			default:
-				if (inResponseID > 0 and static_cast<uint32>(inResponseID) <= mResponseIDs.size())
+				if (inResponseID > 0 and static_cast<uint32_t>(inResponseID) <= mResponseIDs.size())
 					dlog->ButtonClicked(mResponseIDs[inResponseID - 1]);
 				break;
 		}
 	}
 	
-	MSlot<void(int32)> mResponse;
+	MSlot<void(int32_t)> mResponse;
 
 	float mDLUX, mDLUY;
 
 	string mRsrc;
 	list<MRadiobutton*> mRadioGroup;
 	vector<string> mResponseIDs;
-	int32 mDefaultResponse;
+	int32_t mDefaultResponse;
 	bool mResultIsOK;
 };
 
@@ -122,8 +122,8 @@ bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey* inEvent)
 	{
 		PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
 
-		uint32 keyCode = MapKeyCode(inEvent->keyval);
-		uint32 modifiers = MapModifier(inEvent->state);
+		uint32_t keyCode = MapKeyCode(inEvent->keyval);
+		uint32_t modifiers = MapModifier(inEvent->state);
 		
 		if ((keyCode == kEnterKeyCode or keyCode == kReturnKeyCode) and modifiers == 0)
 		{
@@ -181,12 +181,12 @@ void MGtkDialogImpl::Finish()
 	if (ba::contains(flags, "nosizebox"))
 		mFlags = MWindowFlags(mFlags | kMNoSizeBox);
 
-	uint32 minWidth = 40;
+	uint32_t minWidth = 40;
 	if (not dialog->attr("width").empty())
-		minWidth = boost::lexical_cast<uint32>(dialog->attr("width"));
-	uint32 minHeight = 40;
+		minWidth = boost::lexical_cast<uint32_t>(dialog->attr("width"));
+	uint32_t minHeight = 40;
 	if (not dialog->attr("height").empty())
-		minHeight = boost::lexical_cast<uint32>(dialog->attr("height"));
+		minHeight = boost::lexical_cast<uint32_t>(dialog->attr("height"));
 
 	MRect bounds(0, 0, minWidth, minHeight);
 
@@ -231,7 +231,7 @@ void MGtkDialogImpl::Finish()
 		{
 			mResponseIDs.push_back(button.attr("id"));
 			
-			int32 response = mResponseIDs.size();
+			int32_t response = mResponseIDs.size();
 			if (button.attr("id") == "ok")
 				response = GTK_RESPONSE_OK;
 			else if (button.attr("id") == "cancel")
@@ -251,7 +251,7 @@ void MGtkDialogImpl::Finish()
 }
 
 void MGtkDialogImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32 inPadding)
+	bool inExpand, bool inFill, uint32_t inPadding)
 {
 	GtkWidget* box = 
 		gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
@@ -263,7 +263,7 @@ void MGtkDialogImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
 }
 
 void MGtkDialogImpl::GetMargins(xml::element* inTemplate,
-	int32& outLeftMargin, int32& outTopMargin, int32& outRightMargin, int32& outBottomMargin)
+	int32_t& outLeftMargin, int32_t& outTopMargin, int32_t& outRightMargin, int32_t& outBottomMargin)
 {
 	outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 0;
 	
@@ -273,39 +273,39 @@ void MGtkDialogImpl::GetMargins(xml::element* inTemplate,
 	string m = inTemplate->attr("margin");
 	if (not m.empty())
 		outLeftMargin = outRightMargin =
-		outTopMargin = outBottomMargin = boost::lexical_cast<int32>(m);
+		outTopMargin = outBottomMargin = boost::lexical_cast<int32_t>(m);
 
 	m = inTemplate->attr("margin-left-right");
 	if (not m.empty())
-		outLeftMargin = outRightMargin = boost::lexical_cast<int32>(m);
+		outLeftMargin = outRightMargin = boost::lexical_cast<int32_t>(m);
 
 	m = inTemplate->attr("margin-top-bottom");
 	if (not m.empty())
-		outTopMargin = outBottomMargin = boost::lexical_cast<int32>(m);
+		outTopMargin = outBottomMargin = boost::lexical_cast<int32_t>(m);
 
 	m = inTemplate->attr("margin-left");
 	if (not m.empty())
-		outLeftMargin = boost::lexical_cast<int32>(m);
+		outLeftMargin = boost::lexical_cast<int32_t>(m);
 
 	m = inTemplate->attr("margin-top");
 	if (not m.empty())
-		outTopMargin = boost::lexical_cast<int32>(m);
+		outTopMargin = boost::lexical_cast<int32_t>(m);
 
 	m = inTemplate->attr("margin-right");
 	if (not m.empty())
-		outRightMargin = boost::lexical_cast<int32>(m);
+		outRightMargin = boost::lexical_cast<int32_t>(m);
 
 	m = inTemplate->attr("margin-bottom");
 	if (not m.empty())
-		outBottomMargin = boost::lexical_cast<int32>(m);
+		outBottomMargin = boost::lexical_cast<int32_t>(m);
 
-//	outLeftMargin = static_cast<int32>(outLeftMargin * mDLUX);
-//	outRightMargin = static_cast<int32>(outRightMargin * mDLUX);
-//	outTopMargin = static_cast<int32>(outTopMargin * mDLUY);
-//	outBottomMargin = static_cast<int32>(outBottomMargin * mDLUY);
+//	outLeftMargin = static_cast<int32_t>(outLeftMargin * mDLUX);
+//	outRightMargin = static_cast<int32_t>(outRightMargin * mDLUX);
+//	outTopMargin = static_cast<int32_t>(outTopMargin * mDLUY);
+//	outBottomMargin = static_cast<int32_t>(outBottomMargin * mDLUY);
 }
 
-MView* MGtkDialogImpl::CreateButton(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateButton(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	string title = l(inTemplate->attr("title"));
@@ -313,7 +313,7 @@ MView* MGtkDialogImpl::CreateButton(xml::element* inTemplate, int32 inX, int32 i
 //	float idealWidth = GetTextWidth(title, VSCLASS_BUTTON, BP_PUSHBUTTON, PBS_NORMAL) + 10 * mDLUX;
 //	if (idealWidth < 50 * mDLUX)
 //		idealWidth = 50 * mDLUX;
-	MRect bounds;//(inX, inY, static_cast<int32>(idealWidth), static_cast<int32>(14 * mDLUY));
+	MRect bounds;//(inX, inY, static_cast<int32_t>(idealWidth), static_cast<int32_t>(14 * mDLUY));
 
 	MButtonFlags flags = eBF_None;
 	
@@ -336,11 +336,11 @@ MView* MGtkDialogImpl::CreateButton(xml::element* inTemplate, int32 inX, int32 i
 	return button;
 }
 
-MView* MGtkDialogImpl::CreateColorSwatch(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateColorSwatch(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	
-	MRect bounds;//(inX, inY, static_cast<int32>(25 * mDLUX), static_cast<int32>(14 * mDLUY));
+	MRect bounds;//(inX, inY, static_cast<int32_t>(25 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 
 	MColor color(inTemplate->attr("color").c_str());
 	MColorSwatch* swatch = new MColorSwatch(id, bounds, color);
@@ -350,15 +350,15 @@ MView* MGtkDialogImpl::CreateColorSwatch(xml::element* inTemplate, int32 inX, in
 	return swatch;
 }
 
-MView* MGtkDialogImpl::CreateExpander(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateExpander(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	string title = l(inTemplate->attr("title"));
 	
 	MRect bounds;//(inX, inY,
-//		static_cast<int32>((13 + 3) * mDLUX) +
+//		static_cast<int32_t>((13 + 3) * mDLUX) +
 //			GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_LABEL, 0),
-//		static_cast<int32>(12 * mDLUY));
+//		static_cast<int32_t>(12 * mDLUY));
 
 	MExpander* expander = new MExpander(id, bounds, title);
 	AddRoute(expander->eClicked, static_cast<MDialog*>(mWindow)->eButtonClicked);
@@ -369,25 +369,25 @@ MView* MGtkDialogImpl::CreateExpander(xml::element* inTemplate, int32 inX, int32
 	return expander;
 }
 
-MView* MGtkDialogImpl::CreateCaption(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateCaption(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	if (id.empty())
 		id = "caption";
 	string text = l(inTemplate->attr("text"));
 
-	MRect bounds;//(inX, static_cast<int32>(inY), 0, static_cast<int32>(10 * mDLUY));
+	MRect bounds;//(inX, static_cast<int32_t>(inY), 0, static_cast<int32_t>(10 * mDLUY));
 //	bounds.width = GetTextWidth(text, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 	return new MCaption(id, bounds, text);
 }
 
-MView* MGtkDialogImpl::CreateCheckbox(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateCheckbox(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	string title = l(inTemplate->attr("title"));
 
-	MRect bounds;//(inX, inY, 0, static_cast<int32>(10 * mDLUY));
-//	bounds.width = static_cast<int32>(14 * mDLUX) +
+	MRect bounds;//(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
+//	bounds.width = static_cast<int32_t>(14 * mDLUX) +
 //		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 //		//GetTextWidth(title, VSCLASS_BUTTON, BP_CHECKBOX, PBS_NORMAL);
 
@@ -397,13 +397,13 @@ MView* MGtkDialogImpl::CreateCheckbox(xml::element* inTemplate, int32 inX, int32
 	return checkbox;
 }
 
-MView* MGtkDialogImpl::CreateRadiobutton(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateRadiobutton(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	string title = l(inTemplate->attr("title"));
 
-	MRect bounds;//(inX, inY, 0, static_cast<int32>(10 * mDLUY));
-//	bounds.width = static_cast<int32>(14 * mDLUX) +
+	MRect bounds;//(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
+//	bounds.width = static_cast<int32_t>(14 * mDLUX) +
 //		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 //		GetTextWidth(title, VSCLASS_BUTTON, BP_RADIOBUTTON, PBS_NORMAL);
 	MRadiobutton* radiobutton = new MRadiobutton(id, bounds, title);
@@ -415,22 +415,22 @@ MView* MGtkDialogImpl::CreateRadiobutton(xml::element* inTemplate, int32 inX, in
 	return radiobutton;
 }
 
-MView* MGtkDialogImpl::CreateCombobox(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateCombobox(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
-	MRect bounds;//(inX, inY, static_cast<int32>(50 * mDLUX), static_cast<int32>(14 * mDLUY));
+	MRect bounds;//(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MCombobox* combobox = new MCombobox(id, bounds);
 	AddRoute(combobox->eValueChanged,
 		static_cast<MDialog*>(mWindow)->eTextChanged);
 	return combobox;
 }
 
-MView* MGtkDialogImpl::CreateEdittext(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateEdittext(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	
-	uint32 flags = eMEditTextNoFlags;
+	uint32_t flags = eMEditTextNoFlags;
 	if (ba::contains(inTemplate->attr("style"), "right"))
 		flags |= eMEditTextAlignRight;
 	if (ba::contains(inTemplate->attr("style"), "number"))
@@ -440,7 +440,7 @@ MView* MGtkDialogImpl::CreateEdittext(xml::element* inTemplate, int32 inX, int32
 	if (ba::contains(inTemplate->attr("style"), "readonly"))
 		flags |= eMEditTextReadOnly;
 
-	MRect bounds;//(inX, inY, static_cast<int32>(5 * mDLUX), static_cast<int32>(14 * mDLUY));
+	MRect bounds;//(inX, inY, static_cast<int32_t>(5 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MEdittext* edittext = new MEdittext(id, bounds, flags);
 
 	if (inTemplate->attr("password") == "true")
@@ -451,23 +451,23 @@ MView* MGtkDialogImpl::CreateEdittext(xml::element* inTemplate, int32 inX, int32
 	return edittext;
 }
 
-MView* MGtkDialogImpl::CreatePopup(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreatePopup(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
-	MRect bounds;//(inX, inY, 0, static_cast<int32>(14 * mDLUY));
+	MRect bounds;//(inX, inY, 0, static_cast<int32_t>(14 * mDLUY));
 	
 	vector<string> choices;
 	for (xml::element* option: inTemplate->find("./option"))
 	{
 		string label = option->content();
-//		int32 width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
+//		int32_t width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
 //		if (bounds.width < width)
 //			bounds.width = width;
 		choices.push_back(label);
 	}
 
-//	bounds.width += static_cast<int32>(14 * mDLUX);
+//	bounds.width += static_cast<int32_t>(14 * mDLUX);
 
 	MPopup* popup = new MPopup(id, bounds);
 
@@ -478,7 +478,7 @@ MView* MGtkDialogImpl::CreatePopup(xml::element* inTemplate, int32 inX, int32 in
 	return popup;
 }
 
-MView* MGtkDialogImpl::CreateNotebook(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateNotebook(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
@@ -532,7 +532,7 @@ MView* MGtkDialogImpl::CreateNotebook(xml::element* inTemplate, int32 inX, int32
 	return result;
 }
 
-MView* MGtkDialogImpl::CreatePager(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreatePager(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
@@ -563,7 +563,7 @@ MView* MGtkDialogImpl::CreatePager(xml::element* inTemplate, int32 inX, int32 in
 	return result;
 }
 
-MView* MGtkDialogImpl::CreateListBox(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
@@ -573,13 +573,13 @@ MView* MGtkDialogImpl::CreateListBox(xml::element* inTemplate, int32 inX, int32 
 	for (auto listitem: inTemplate->find("./listitem"))
 	{
 		string text = l(listitem->content());
-//		int32 textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
+//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
 //		if (r.width < textWidth)
 //			r.width = textWidth;
 		result->AddItem(text);
 	}
 	
-//	r.width += static_cast<int32>(mDLUX * 6);
+//	r.width += static_cast<int32_t>(mDLUX * 6);
 //	result->SetFrame(r);
 
 	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
@@ -587,7 +587,7 @@ MView* MGtkDialogImpl::CreateListBox(xml::element* inTemplate, int32 inX, int32 
 	return result;
 }
 
-MView* MGtkDialogImpl::CreateListView(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
@@ -597,13 +597,13 @@ MView* MGtkDialogImpl::CreateListView(xml::element* inTemplate, int32 inX, int32
 	for (xml::element* listitem: inTemplate->find("./listitem"))
 	{
 		string text = l(listitem->content());
-//		int32 textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
+//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
 //		if (r.width < textWidth)
 //			r.width = textWidth;
 		result->AddItem(text);
 	}
 	
-//	r.width += static_cast<int32>(mDLUX * 6);
+//	r.width += static_cast<int32_t>(mDLUX * 6);
 //	result->SetFrame(r);
 
 	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
@@ -611,13 +611,13 @@ MView* MGtkDialogImpl::CreateListView(xml::element* inTemplate, int32 inX, int32
 	return result;
 }
 
-MView* MGtkDialogImpl::CreateSeparator(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	MRect bounds(inX, inY, 2, 2);
 	return new MSeparator("separator", bounds);
 }
 
-MView* MGtkDialogImpl::CreateScrollbar(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateScrollbar(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 	string orientation = inTemplate->attr("orientation");
@@ -632,17 +632,17 @@ MView* MGtkDialogImpl::CreateScrollbar(xml::element* inTemplate, int32 inX, int3
 	return new MScrollbar(id, bounds);
 }
 
-MView* MGtkDialogImpl::CreateBox(xml::element* inTemplate, int32 inX, int32 inY, bool inHorizontal)
+MView* MGtkDialogImpl::CreateBox(xml::element* inTemplate, int32_t inX, int32_t inY, bool inHorizontal)
 {
 	string id = inTemplate->attr("id");
 
-	uint32 spacing = 4;
+	uint32_t spacing = 4;
 	if (not inTemplate->attr("spacing").empty())
-		spacing = boost::lexical_cast<uint32>(inTemplate->attr("spacing"));
+		spacing = boost::lexical_cast<uint32_t>(inTemplate->attr("spacing"));
 
-	uint32 padding = 4;
+	uint32_t padding = 4;
 	if (not inTemplate->attr("padding").empty())
-		spacing = boost::lexical_cast<uint32>(inTemplate->attr("padding"));
+		spacing = boost::lexical_cast<uint32_t>(inTemplate->attr("padding"));
 
 	bool expand = inTemplate->attr("expand") == "true";
 	bool fill = inTemplate->attr("fill") == "true";
@@ -657,16 +657,16 @@ MView* MGtkDialogImpl::CreateBox(xml::element* inTemplate, int32 inX, int32 inY,
 	return result;
 }
 
-MView* MGtkDialogImpl::CreateTable(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->attr("id");
 
 	vector<MView*> views;
-	uint32 colCount = 0, rowCount = 0;
+	uint32_t colCount = 0, rowCount = 0;
 	
 	for (xml::element* row: inTemplate->find("./row"))
 	{
-		uint32 cn = 0;
+		uint32_t cn = 0;
 		
 		for (auto col: *row)
 		{
@@ -685,13 +685,13 @@ MView* MGtkDialogImpl::CreateTable(xml::element* inTemplate, int32 inX, int32 in
 	
 	MRect r(inX, inY, 0, 0);
 	MTable* result = new MTable(id, r,
-//		&views[0], colCount, rowCount, static_cast<int32>(4 * mDLUX), static_cast<int32>(4 * mDLUY));
+//		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
 		&views[0], colCount, rowCount, 4, 4);
 	
 	return result;
 }
 
-MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32 inX, int32 inY)
+MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
 	MView* result = nullptr;
 
@@ -738,19 +738,19 @@ MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32 inX, int32
 
 	MControlBase* control = dynamic_cast<MControlBase*>(result);
 
-	int32 marginLeft, marginTop, marginRight, marginBottom;
+	int32_t marginLeft, marginTop, marginRight, marginBottom;
 	GetMargins(inTemplate, marginLeft, marginTop, marginRight, marginBottom);
 //	result->SetMargins(marginLeft, marginTop, marginRight, marginBottom);
 
 	if (not inTemplate->attr("width").empty())
 	{
-		int32 width = marginLeft + marginRight;
+		int32_t width = marginLeft + marginRight;
 		
 		if (inTemplate->attr("width") == "scrollbarwidth")
 			width += kScrollbarWidth;
 		else
-//			width += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->attr("width")) * mDLUX);
-			width += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->attr("width")));
+//			width += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->attr("width")) * mDLUX);
+			width += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->attr("width")));
 
 		MGtkWidgetMixin* impl = dynamic_cast<MGtkWidgetMixin*>(control->GetControlImplBase());
 		if (impl != nullptr)
@@ -759,13 +759,13 @@ MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32 inX, int32
 	
 //	if (not inTemplate->attr("height").empty())
 //	{
-//		int32 height = marginTop + marginBottom;
+//		int32_t height = marginTop + marginBottom;
 //		
 //		if (inTemplate->attr("height") == "scrollbarheight")
 //			height += kScrollbarWidth;
 //		else
-////			height += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->attr("height")) * mDLUY);
-//			height += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->attr("height")));
+////			height += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->attr("height")) * mDLUY);
+//			height += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->attr("height")));
 //		
 //		MRect frame;
 //		result->GetFrame(frame);
@@ -779,16 +779,16 @@ MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32 inX, int32
 			inTemplate->attr("packing") == "end" ? ePackEnd : ePackStart,
 			inTemplate->attr("expand") == "true" ? true : false,
 			inTemplate->attr("fill") == "true" ? true : false,
-			inTemplate->attr("padding").empty() ? 0 : boost::lexical_cast<int32>(inTemplate->attr("padding")));
+			inTemplate->attr("padding").empty() ? 0 : boost::lexical_cast<int32_t>(inTemplate->attr("padding")));
 	}
 
 	return result;
 }
 
-uint32 MGtkDialogImpl::GetTextWidth(const string& inText,
+uint32_t MGtkDialogImpl::GetTextWidth(const string& inText,
 	const wchar_t* inClass, int inPartID, int inStateID)
 {
-	uint32 result = 0;
+	uint32_t result = 0;
 //	wstring text(c2w(inText));
 //	
 //	HTHEME hTheme = ::OpenThemeData(GetHandle(), inClass);
@@ -804,7 +804,7 @@ uint32 MGtkDialogImpl::GetTextWidth(const string& inText,
 //	else
 //	{
 //		SIZE size;
-//		::GetTextExtentPoint32(mDC, text.c_str(), text.length(), &size);
+//		::GetTextExtentPoint32_t(mDC, text.c_str(), text.length(), &size);
 //		result = size.cx;
 //	}
 	

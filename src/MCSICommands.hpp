@@ -35,7 +35,7 @@
 
 //	eDECAUPSS =		'****', 	// Assign user-preferred supplemental set
 
-enum MCSICmd : uint32
+enum MCSICmd : uint32_t
 {
 	eCBT =			'Z',		// Cursor Backward Tabulation
 	eCHA =			'G',		// Cursor Horizontal Absolute
@@ -198,7 +198,7 @@ enum MCSICmd : uint32
 
 struct MCmdName
 {
-	uint32 		cmd;
+	uint32_t 		cmd;
 	const char*	name;
 } kCmdNames[] =
 {
@@ -293,7 +293,7 @@ struct MCmdName
 	{ 0 }
 };
 
-const char* Cmd2Name(uint32 cmd)
+const char* Cmd2Name(uint32_t cmd)
 {
 	const char* result = "(unknown)";
 

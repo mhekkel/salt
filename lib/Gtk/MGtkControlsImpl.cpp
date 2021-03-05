@@ -94,7 +94,7 @@ void MGtkButtonImpl::AddedToWindow()
 //		::SendMessage(GetWidget(), BM_SETSTYLE, (WPARAM)BS_PUSHBUTTON, 0);
 }
 
-void MGtkButtonImpl::GetIdealSize(int32& outWidth, int32& outHeight)
+void MGtkButtonImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 {
 //	outWidth = 75;
 //	outHeight = 23;
@@ -136,7 +136,7 @@ void MGtkExpanderImpl::CreateWidget()
 }
 
 void MGtkExpanderImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32 inPadding)
+		bool inExpand, bool inFill, uint32_t inPadding)
 {
 	assert(GTK_IS_CONTAINER(GetWidget()));
 	gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
@@ -264,8 +264,8 @@ bool MGtkExpanderImpl::IsOpen() const
 //		mControl->UpdateNow();
 //	}
 //
-//	int32 x = static_cast<int16>(LOWORD(inLParam));
-//	int32 y = static_cast<int16>(HIWORD(inLParam));
+//	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+//	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 //	
 //	MRect bounds;
 //	mControl->GetBounds(bounds);
@@ -296,8 +296,8 @@ bool MGtkExpanderImpl::IsOpen() const
 //{
 //	::ReleaseCapture();
 //	
-//	int32 x = static_cast<int16>(LOWORD(inLParam));
-//	int32 y = static_cast<int16>(HIWORD(inLParam));
+//	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
+//	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 //	
 //	MRect bounds;
 //	mControl->GetBounds(bounds);
@@ -373,9 +373,9 @@ void MGtkScrollbarImpl::CreateWidget()
 	eValueChanged.Connect(GetWidget(), "value-changed");
 }
 
-int32 MGtkScrollbarImpl::GetValue() const
+int32_t MGtkScrollbarImpl::GetValue() const
 {
-	int32 result = 0;
+	int32_t result = 0;
 
 	if (GetWidget() != nullptr)
 		result = gtk_range_get_value(GTK_RANGE(GetWidget()));
@@ -383,18 +383,18 @@ int32 MGtkScrollbarImpl::GetValue() const
 	return result;
 }
 
-void MGtkScrollbarImpl::SetValue(int32 inValue)
+void MGtkScrollbarImpl::SetValue(int32_t inValue)
 {
 	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 	
 	if (adj != nullptr)
 	{
-		int32 minValue = GetMinValue();
+		int32_t minValue = GetMinValue();
 		
 		if (inValue < minValue)
 			inValue = minValue;
 
-		int32 maxValue = GetMaxValue();
+		int32_t maxValue = GetMaxValue();
 		if (inValue > maxValue)
 			inValue = maxValue;
 	}
@@ -402,13 +402,13 @@ void MGtkScrollbarImpl::SetValue(int32 inValue)
 	gtk_range_set_value(GTK_RANGE(GetWidget()), inValue);
 }
 
-int32 MGtkScrollbarImpl::GetTrackValue() const
+int32_t MGtkScrollbarImpl::GetTrackValue() const
 {
 	return GetValue();
 }
 
-void MGtkScrollbarImpl::SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
-	int32 inScrollUnit, int32 inPageSize, int32 inValue)
+void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 {
 	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 	
@@ -417,7 +417,7 @@ void MGtkScrollbarImpl::SetAdjustmentValues(int32 inMinValue, int32 inMaxValue,
 		if (inValue < inMinValue)
 			inValue = inMinValue;
 
-		int32 maxValue = inMaxValue + 1 - inPageSize;
+		int32_t maxValue = inMaxValue + 1 - inPageSize;
 		if (inValue > maxValue)
 			inValue = maxValue;
 
@@ -432,17 +432,17 @@ PRINT(("min: %d, max: %d, scrollunit: %d, page: %d, value: %d\n", inMinValue, in
 	}
 }
 
-int32 MGtkScrollbarImpl::GetMinValue() const
+int32_t MGtkScrollbarImpl::GetMinValue() const
 {
 	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 	return adj == nullptr ? 0 : gtk_adjustment_get_lower(adj);
 }
 
-int32 MGtkScrollbarImpl::GetMaxValue() const
+int32_t MGtkScrollbarImpl::GetMaxValue() const
 {
 	GtkAdjustment* adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 
-	int32 result = 0;
+	int32_t result = 0;
 	if (adj != nullptr)
 	{
 		result = gtk_adjustment_get_upper(adj);
@@ -465,7 +465,7 @@ MScrollbarImpl* MScrollbarImpl::Create(MScrollbar* inScrollbar)
 
 // --------------------------------------------------------------------
 
-MGtkStatusbarImpl::MGtkStatusbarImpl(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[])
+MGtkStatusbarImpl::MGtkStatusbarImpl(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MGtkControlImpl(inStatusbar, "")
 	, mParts(inParts, inParts + inPartCount)
 	, mClicked(this, &MGtkStatusbarImpl::Clicked)
@@ -522,7 +522,7 @@ void MGtkStatusbarImpl::AddedToWindow()
 	impl->AddStatusbarWidget(this);
 }
 
-void MGtkStatusbarImpl::SetStatusText(uint32 inPartNr, const string& inText, bool inBorder)
+void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const string& inText, bool inBorder)
 {
 	if (inPartNr < mPanels.size())
 		gtk_label_set_text(GTK_LABEL(mPanels[inPartNr]), inText.c_str());
@@ -539,7 +539,7 @@ bool MGtkStatusbarImpl::Clicked(GdkEventButton* inEvent)
 	return true;
 }
 
-MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32 inPartCount, MStatusBarElement inParts[])
+MStatusbarImpl* MStatusbarImpl::Create(MStatusbar* inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 {
 	return new MGtkStatusbarImpl(inStatusbar, inPartCount, inParts);
 }
@@ -614,7 +614,7 @@ void MGtkComboboxImpl::AddedToWindow()
 		SetChoices(mChoices);
 }
 
-bool MGtkComboboxImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MGtkComboboxImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 
@@ -676,12 +676,12 @@ void MGtkPopupImpl::AddedToWindow()
 		SetChoices(mChoices);
 }
 
-int32 MGtkPopupImpl::GetValue() const
+int32_t MGtkPopupImpl::GetValue() const
 {
 	return gtk_combo_box_get_active(GTK_COMBO_BOX(GetWidget()));
 }
 
-void MGtkPopupImpl::SetValue(int32 inValue)
+void MGtkPopupImpl::SetValue(int32_t inValue)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(GetWidget()), inValue);
 }
@@ -699,7 +699,7 @@ string MGtkPopupImpl::GetText() const
 	return s ? s : "";
 }
 
-bool MGtkPopupImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MGtkPopupImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 
@@ -722,7 +722,7 @@ MPopupImpl* MPopupImpl::Create(MPopup* inPopup)
 
 // --------------------------------------------------------------------
 
-MGtkEdittextImpl::MGtkEdittextImpl(MEdittext* inEdittext, uint32 inFlags)
+MGtkEdittextImpl::MGtkEdittextImpl(MEdittext* inEdittext, uint32_t inFlags)
 	: MGtkControlImpl(inEdittext, "")
 	, mFlags(inFlags)
 {
@@ -754,7 +754,7 @@ void MGtkEdittextImpl::SetText(const std::string& inText)
 		gtk_entry_set_text(GTK_ENTRY(GetWidget()), inText.c_str());
 }
 
-void MGtkEdittextImpl::SetPasswordChar(uint32 inUnicode)
+void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 {
 	GtkWidget* wdgt = GetWidget();
 	if (GTK_IS_ENTRY(wdgt))
@@ -766,7 +766,7 @@ void MGtkEdittextImpl::SetPasswordChar(uint32 inUnicode)
 		THROW(("item is not an entry"));
 }
 
-bool MGtkEdittextImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, bool inRepeat)
+bool MGtkEdittextImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
 {
 	bool result = false;
 
@@ -782,7 +782,7 @@ bool MGtkEdittextImpl::DispatchKeyDown(uint32 inKeyCode, uint32 inModifiers, boo
 	return result;
 }
 
-MEdittextImpl* MEdittextImpl::Create(MEdittext* inEdittext, uint32 inFlags)
+MEdittextImpl* MEdittextImpl::Create(MEdittext* inEdittext, uint32_t inFlags)
 {
 	return new MGtkEdittextImpl(inEdittext, inFlags);
 }
@@ -1008,7 +1008,7 @@ void MGtkNotebookImpl::FrameResized()
 //		MRect frame;
 //		page.mPage->GetFrame(frame);
 //
-//		int32 dx, dy, dw, dh;
+//		int32_t dx, dy, dw, dh;
 //		dx = rc.left - frame.x;
 //		dy = rc.top - frame.y;
 //		dw = rc.right - rc.left - frame.width;
@@ -1057,7 +1057,7 @@ void MGtkNotebookImpl::AddPage(const string& inLabel, MView* inPage)
 //	}
 }
 
-void MGtkNotebookImpl::SelectPage(uint32 inPage)
+void MGtkNotebookImpl::SelectPage(uint32_t inPage)
 {
 //	if (inPage != ::SendMessage(GetWidget(), TCM_GETCURSEL, 0, 0))
 //	{
@@ -1078,7 +1078,7 @@ void MGtkNotebookImpl::SelectPage(uint32 inPage)
 //	}
 }
 
-uint32 MGtkNotebookImpl::GetSelectedPage() const
+uint32_t MGtkNotebookImpl::GetSelectedPage() const
 {
 //	return ::SendMessage(GetWidget(), TCM_GETCURSEL, 0, 0);
 	return 0;
@@ -1118,9 +1118,9 @@ void MGtkColorSwatchImpl::OnColorSet()
 	GdkRGBA color = {};
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
 
-	mColor.red = static_cast<uint8>(255 * color.red);
-	mColor.green = static_cast<uint8>(255 * color.green);
-	mColor.blue = static_cast<uint8>(255 * color.blue);
+	mColor.red = static_cast<uint8_t>(255 * color.red);
+	mColor.green = static_cast<uint8_t>(255 * color.green);
+	mColor.blue = static_cast<uint8_t>(255 * color.blue);
 }
 
 void MGtkColorSwatchImpl::SelectedColor(MColor inColor)
@@ -1152,7 +1152,7 @@ void MGtkColorSwatchImpl::SetColor(MColor inColor)
 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
 }
 
-//void MGtkColorSwatchImpl::GetIdealSize(int32& outWidth, int32& outHeight)
+//void MGtkColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 //{
 //	outWidth = 30;
 //	outHeight = 23;
@@ -1239,9 +1239,9 @@ void MGtkListBoxImpl::AddItem(const string& inText)
 	}
 }
 
-int32 MGtkListBoxImpl::GetValue() const
+int32_t MGtkListBoxImpl::GetValue() const
 {
-	int32 result = -1;
+	int32_t result = -1;
 	
 	GtkTreeIter iter;
     GtkTreeModel *model;
@@ -1253,7 +1253,7 @@ int32 MGtkListBoxImpl::GetValue() const
 	return result;
 }
 
-void MGtkListBoxImpl::SetValue(int32 inValue)
+void MGtkListBoxImpl::SetValue(int32_t inValue)
 {
 //	::SendMessage(GetWidget(), LB_SETCURSEL, inValue, 0);
 }
@@ -1267,7 +1267,7 @@ void MGtkListBoxImpl::OnSelectionChanged()
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter))
     {
-    	int32 selected;
+    	int32_t selected;
 		gtk_tree_model_get(GTK_TREE_MODEL(mStore), &iter, 1, &selected, -1);
 		mControl->eValueChanged(mControl->GetID(), selected);
     }
@@ -1409,7 +1409,7 @@ MListViewImpl* MListViewImpl::Create(MListView* inListView)
 // --------------------------------------------------------------------
 
 MGtkBoxControlImpl::MGtkBoxControlImpl(MBoxControl* inControl, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32 inSpacing, uint32 inPadding)
+		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 	: MGtkControlImpl(inControl, ""), mHorizontal(inHorizontal)
 	, mHomogeneous(inHomogeneous), mExpand(inExpand), mFill(inFill)
 	, mSpacing(inSpacing), mPadding(inPadding)
@@ -1422,13 +1422,13 @@ void MGtkBoxControlImpl::CreateWidget()
 }
 
 MBoxControlImpl* MBoxControlImpl::Create(MBoxControl* inControl, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32 inSpacing, uint32 inPadding)
+		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 {
 	return new MGtkBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
 }
 
 void MGtkBoxControlImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32 inPadding)
+		bool inExpand, bool inFill, uint32_t inPadding)
 {
 	assert(GTK_IS_BOX(GetWidget()));
 	

@@ -14,7 +14,7 @@
 
 using namespace std;
 
-const uint32
+const uint32_t
 	kValidModifiersMask = kControlKey | kShiftKey | kOptionKey;
 
 namespace {
@@ -23,7 +23,7 @@ struct MCommandToString
 {
 	char mCommandString[10];
 	
-	MCommandToString(uint32 inCommand)
+	MCommandToString(uint32_t inCommand)
 	{
 		strcpy(mCommandString, "MCmd_xxxx");
 		
@@ -40,10 +40,10 @@ struct MCommandToString
 
 struct MAccelCombo
 {
-	int64		key;
-	uint32		keyval;
-	uint32		modifiers;
-	uint32		command;
+	int64_t		key;
+	uint32_t		keyval;
+	uint32_t		modifiers;
+	uint32_t		command;
 	
 	bool		operator<(const MAccelCombo& rhs) const
 					{ return key < rhs.key; }
@@ -134,11 +134,11 @@ MAcceleratorTable::~MAcceleratorTable()
 }
 
 void MAcceleratorTable::RegisterAcceleratorKey(
-	uint32			inCommand,
-	uint32			inKeyValue,
-	uint32			inModifiers)
+	uint32_t			inCommand,
+	uint32_t			inKeyValue,
+	uint32_t			inModifiers)
 {
-	int64 key = (int64(inKeyValue) << 32) | inModifiers;
+	int64_t key = (int64_t(inKeyValue) << 32) | inModifiers;
 	MAccelCombo kc = {
 		key, inKeyValue, inModifiers, inCommand
 	};
@@ -151,7 +151,7 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 	//if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(),
 	//	inKeyValue, &keys, &nkeys))
 	//{
-	//	for (int32 k = 0; k < nkeys; ++k)
+	//	for (int32_t k = 0; k < nkeys; ++k)
 	//	{
 	//		guint keyval;
 	//		GdkModifierType consumed;
@@ -159,11 +159,11 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 	//		if (gdk_keymap_translate_keyboard_state(nullptr,
 	//			keys[k].keycode, GdkModifierType(inModifiers), 0, &keyval, nullptr, nullptr, &consumed))
 	//		{
-	//			uint32 modifiers = inModifiers & ~consumed;
+	//			uint32_t modifiers = inModifiers & ~consumed;
 	//			if (inModifiers & kShiftKey)
 	//				modifiers |= kShiftKey;				
 	//			
-	//			int64 key = (int64(keyval) << 32) | modifiers;
+	//			int64_t key = (int64_t(keyval) << 32) | modifiers;
 	//			
 	//			MAccelCombo kc = {
 	//				key, inKeyValue, inModifiers, inCommand
@@ -175,11 +175,11 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 	//		if (gdk_keymap_translate_keyboard_state(nullptr,
 	//			keys[k].keycode, GdkModifierType(inModifiers | GDK_LOCK_MASK), 0, &keyval, nullptr, nullptr, &consumed))
 	//		{
-	//			uint32 modifiers = inModifiers & ~consumed;
+	//			uint32_t modifiers = inModifiers & ~consumed;
 	//			if (inModifiers & kShiftKey)
 	//				modifiers |= kShiftKey;				
 	//			
-	//			int64 key = (int64(keyval) << 32) | modifiers;
+	//			int64_t key = (int64_t(keyval) << 32) | modifiers;
 	//			
 	//			MAccelCombo kc = {
 	//				key, inKeyValue, inModifiers, inCommand
@@ -194,9 +194,9 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 }
 
 bool MAcceleratorTable::GetAcceleratorKeyForCommand(
-	uint32			inCommand,
-	uint32&			outKeyValue,
-	uint32&			outModifiers)
+	uint32_t			inCommand,
+	uint32_t&			outKeyValue,
+	uint32_t&			outModifiers)
 {
 	bool result = false;
 	
@@ -215,9 +215,9 @@ bool MAcceleratorTable::GetAcceleratorKeyForCommand(
 }
 
 bool MAcceleratorTable::IsAcceleratorKey(
-	uint32			inKeyCode,
-	uint32			inModifiers,
-	uint32&			outCommand)
+	uint32_t			inKeyCode,
+	uint32_t			inModifiers,
+	uint32_t&			outCommand)
 {
 	bool result = false;
 
@@ -230,7 +230,7 @@ bool MAcceleratorTable::IsAcceleratorKey(
 //		inEvent->state, modifiers));
 
 	inModifiers &= kValidModifiersMask;
-	int64 key = (int64(inKeyCode) << 32) | inModifiers;
+	int64_t key = (int64_t(inKeyCode) << 32) | inModifiers;
 
 	MAccelCombo kc;
 	kc.key = key;
@@ -249,8 +249,8 @@ bool MAcceleratorTable::IsAcceleratorKey(
 }
 
 bool MAcceleratorTable::IsNavigationKey(
-	uint32			inKeyValue,
-	uint32			inModifiers,
+	uint32_t			inKeyValue,
+	uint32_t			inModifiers,
 	MKeyCommand&	outCommand)
 {
 	bool result = false;
@@ -266,7 +266,7 @@ bool MAcceleratorTable::IsNavigationKey(
 	inModifiers &= kValidModifiersMask;
 
 	MAccelCombo kc;
-	kc.key = (int64(inKeyValue) << 32) | inModifiers;
+	kc.key = (int64_t(inKeyValue) << 32) | inModifiers;
 
 	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);	
 	if (a != mImpl->mTable.end())

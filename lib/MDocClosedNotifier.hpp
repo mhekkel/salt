@@ -18,7 +18,7 @@ public:
 protected:
 	virtual				~MDocClosedNotifierImpl();
 
-	int32				mRefCount;
+	int32_t				mRefCount;
 };
 
 class MDocClosedNotifier

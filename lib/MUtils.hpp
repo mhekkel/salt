@@ -39,41 +39,41 @@ bool swapper::operator()(bool inValue) const
 
 template<>
 inline
-int8 swapper::operator()(int8 inValue) const
+int8_t swapper::operator()(int8_t inValue) const
 {
 	return inValue;
 }
 
 template<>
 inline
-uint8 swapper::operator()(uint8 inValue) const
+uint8_t swapper::operator()(uint8_t inValue) const
 {
 	return inValue;
 }
 
 template<>
 inline
-int16 swapper::operator()(int16 inValue) const
+int16_t swapper::operator()(int16_t inValue) const
 {
-	return static_cast<int16>(((inValue & 0xFF00UL) >>  8) |
+	return static_cast<int16_t>(((inValue & 0xFF00UL) >>  8) |
 		((inValue & 0x00FFUL) <<  8)
 	);
 }
 
 template<>
 inline
-uint16 swapper::operator()(uint16 inValue) const
+uint16_t swapper::operator()(uint16_t inValue) const
 {
-	return static_cast<uint16>(((inValue & 0xFF00UL) >>  8) |
+	return static_cast<uint16_t>(((inValue & 0xFF00UL) >>  8) |
 		((inValue & 0x00FFUL) <<  8)
 	);
 }
 
 template<>
 inline
-int32 swapper::operator()(int32 inValue) const
+int32_t swapper::operator()(int32_t inValue) const
 {
-	return static_cast<int32>(((inValue & 0xFF000000UL) >> 24) |
+	return static_cast<int32_t>(((inValue & 0xFF000000UL) >> 24) |
 		((inValue & 0x00FF0000UL) >>  8) |
 		((inValue & 0x0000FF00UL) <<  8) |
 		((inValue & 0x000000FFUL) << 24)
@@ -82,9 +82,9 @@ int32 swapper::operator()(int32 inValue) const
 
 template<>
 inline
-uint32 swapper::operator()(uint32 inValue) const
+uint32_t swapper::operator()(uint32_t inValue) const
 {
-	return static_cast<uint32>(((inValue & 0xFF000000UL) >> 24) |
+	return static_cast<uint32_t>(((inValue & 0xFF000000UL) >> 24) |
 		((inValue & 0x00FF0000UL) >>  8) |
 		((inValue & 0x0000FF00UL) <<  8) |
 		((inValue & 0x000000FFUL) << 24)
@@ -104,30 +104,30 @@ uint32 swapper::operator()(uint32 inValue) const
 
 template<>
 inline
-int64 swapper::operator()(int64 inValue) const
+int64_t swapper::operator()(int64_t inValue) const
 {
-	return static_cast<int64>((((static_cast<uint64>(inValue))<<56) & 0xFF00000000000000ULL)  |
-		(((static_cast<uint64>(inValue))<<40) & 0x00FF000000000000ULL)  |
-		(((static_cast<uint64>(inValue))<<24) & 0x0000FF0000000000ULL)  |
-		(((static_cast<uint64>(inValue))<< 8) & 0x000000FF00000000ULL)  |
-		(((static_cast<uint64>(inValue))>> 8) & 0x00000000FF000000ULL)  |
-		(((static_cast<uint64>(inValue))>>24) & 0x0000000000FF0000ULL)  |
-		(((static_cast<uint64>(inValue))>>40) & 0x000000000000FF00ULL)  |
-		(((static_cast<uint64>(inValue))>>56) & 0x00000000000000FFULL));
+	return static_cast<int64_t>((((static_cast<uint64_t>(inValue))<<56) & 0xFF00000000000000ULL)  |
+		(((static_cast<uint64_t>(inValue))<<40) & 0x00FF000000000000ULL)  |
+		(((static_cast<uint64_t>(inValue))<<24) & 0x0000FF0000000000ULL)  |
+		(((static_cast<uint64_t>(inValue))<< 8) & 0x000000FF00000000ULL)  |
+		(((static_cast<uint64_t>(inValue))>> 8) & 0x00000000FF000000ULL)  |
+		(((static_cast<uint64_t>(inValue))>>24) & 0x0000000000FF0000ULL)  |
+		(((static_cast<uint64_t>(inValue))>>40) & 0x000000000000FF00ULL)  |
+		(((static_cast<uint64_t>(inValue))>>56) & 0x00000000000000FFULL));
 }
 
 template<>
 inline
-uint64 swapper::operator()(uint64 inValue) const
+uint64_t swapper::operator()(uint64_t inValue) const
 {
-	return static_cast<uint64>(((((uint64)inValue)<<56) & 0xFF00000000000000ULL)  |
-		((((uint64)inValue)<<40) & 0x00FF000000000000ULL)  |
-		((((uint64)inValue)<<24) & 0x0000FF0000000000ULL)  |
-		((((uint64)inValue)<< 8) & 0x000000FF00000000ULL)  |
-		((((uint64)inValue)>> 8) & 0x00000000FF000000ULL)  |
-		((((uint64)inValue)>>24) & 0x0000000000FF0000ULL)  |
-		((((uint64)inValue)>>40) & 0x000000000000FF00ULL)  |
-		((((uint64)inValue)>>56) & 0x00000000000000FFULL));
+	return static_cast<uint64_t>(((((uint64_t)inValue)<<56) & 0xFF00000000000000ULL)  |
+		((((uint64_t)inValue)<<40) & 0x00FF000000000000ULL)  |
+		((((uint64_t)inValue)<<24) & 0x0000FF0000000000ULL)  |
+		((((uint64_t)inValue)<< 8) & 0x000000FF00000000ULL)  |
+		((((uint64_t)inValue)>> 8) & 0x00000000FF000000ULL)  |
+		((((uint64_t)inValue)>>24) & 0x0000000000FF0000ULL)  |
+		((((uint64_t)inValue)>>40) & 0x000000000000FF00ULL)  |
+		((((uint64_t)inValue)>>56) & 0x00000000000000FFULL));
 }
 
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -178,11 +178,11 @@ class MValueChanger
 //	}
 //};
 
-uint16 CalculateCRC(const void* inData, uint32 inLength, uint16 inCRC);
+uint16_t CalculateCRC(const void* inData, uint32_t inLength, uint16_t inCRC);
 std::string Escape(std::string inString);
 std::string Unescape(std::string inString);
-std::string NumToString(uint32 inNumber);
-uint32 StringToNum(std::string inString);
+std::string NumToString(uint32_t inNumber);
+uint32_t StringToNum(std::string inString);
 std::string	GetUserName(bool inShortName = false);
 std::string GetHomeDirectory();
 std::string GetPrefsDirectory();
@@ -190,12 +190,12 @@ std::string	GetDateTime();
 double GetLocalTime();
 void delay(double inSeconds);
 double GetDblClickTime();
-void GetModifierState(uint32& outModifiers, bool inAsync);
+void GetModifierState(uint32_t& outModifiers, bool inAsync);
 bool IsModifierDown(int inModifierMask);
-void HexDump(const void* inBuffer, uint32 inLength, std::ostream& outStream);
-//GdkPixbuf* CreateDot(// MColor inColor, // uint32 inSize);
-void decode_base64(const std::string& inString, std::vector<uint8>& outBinary);
-void decode_base32(const std::string& inString, std::vector<uint8>& outBinary);
+void HexDump(const void* inBuffer, uint32_t inLength, std::ostream& outStream);
+//GdkPixbuf* CreateDot(// MColor inColor, // uint32_t inSize);
+void decode_base64(const std::string& inString, std::vector<uint8_t>& outBinary);
+void decode_base32(const std::string& inString, std::vector<uint8_t>& outBinary);
 void OpenURI(const std::string& inURI);
 std::string GetUserLocaleName();
 std::string GetApplicationVersion();

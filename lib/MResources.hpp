@@ -26,7 +26,7 @@
 //			
 //			~MResourceFile();
 //	
-//	void	Add(// const std::string& inPath, // const void* inData, // uint32 inSize);
+//	void	Add(// const std::string& inPath, // const void* inData, // uint32_t inSize);
 //
 //	void	Add(// const std::string& inPath, // const fs::path& inFile);
 //	

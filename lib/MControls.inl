@@ -43,21 +43,21 @@ void MControl<IMPL>::Draw(cairo_t* inCairo)
 }
 
 template<class IMPL>
-void MControl<IMPL>::MoveFrame(int32 inXDelta, int32 inYDelta)
+void MControl<IMPL>::MoveFrame(int32_t inXDelta, int32_t inYDelta)
 {
 	MView::MoveFrame(inXDelta, inYDelta);
 	mImpl->FrameMoved();
 }
 
 template<class IMPL>
-void MControl<IMPL>::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
+void MControl<IMPL>::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	MView::ResizeFrame(inWidthDelta, inHeightDelta);
 	mImpl->FrameResized();
 }
 
 template<class IMPL>
-void MControl<IMPL>::SetMargins(int32 inLeftMargin, int32 inTopMargin, int32 inRightMargin, int32 inBottomMargin)
+void MControl<IMPL>::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin)
 
 {
 	MView::SetMargins(inLeftMargin, inTopMargin, inRightMargin, inBottomMargin);

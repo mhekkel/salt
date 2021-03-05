@@ -21,9 +21,9 @@ MHandler::~MHandler()
 }
 
 bool MHandler::UpdateCommandStatus(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	MMenu*			inMenu,
-	uint32			inItemIndex,
+	uint32_t			inItemIndex,
 	bool&			outEnabled,
 	bool&			outChecked)
 {
@@ -44,10 +44,10 @@ bool MHandler::UpdateCommandStatus(
 }
 
 bool MHandler::ProcessCommand(
-	uint32			inCommand,
+	uint32_t			inCommand,
 	const MMenu*	inMenu,
-	uint32			inItemIndex,
-	uint32			inModifiers)
+	uint32_t			inItemIndex,
+	uint32_t			inModifiers)
 {
 	bool result = false;
 	
@@ -58,8 +58,8 @@ bool MHandler::ProcessCommand(
 }
 
 bool MHandler::HandleKeyDown(
-	uint32			inKeyCode,
-	uint32			inModifiers,
+	uint32_t			inKeyCode,
+	uint32_t			inModifiers,
 	bool			inRepeat)
 {
 	bool result = false;

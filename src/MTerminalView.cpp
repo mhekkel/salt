@@ -52,7 +52,7 @@ namespace io = boost::iostreams;
 namespace {
 
 // our commands
-const uint32
+const uint32_t
 	cmd_DebugUpdate	 	= 'dbug',
 	cmd_ResetAndClear	= 'rstc',
 	cmd_EncodingUTF8	= 'enU8',
@@ -91,7 +91,7 @@ const string
 	kSS3("\033O"),
 	kDCS("\033P");
 
-uint32
+uint32_t
 	kBorderWidth = 4;
 
 double
@@ -111,7 +111,7 @@ MColor
 string
 	kControlBreakMessage("Hello, world!");
 
-enum MCtrlChr : uint8
+enum MCtrlChr : uint8_t
 {
 	NUL = 0x00,	DLE = 0x10, SP = 0x20,					DCS = 0x90,
 	SOH = 0x01,	DC1 = 0x11, 							PU1 = 0x91,
@@ -149,7 +149,7 @@ struct MPFK
 {
 	bool				clear;
 	bool				locked;
-	map<uint32,string>	key;
+	map<uint32_t,string>	key;
 };
 
 // --------------------------------------------------------------------
@@ -339,8 +339,8 @@ void MTerminalView::PreferencesChanged()
 	MRect bounds;
 	GetBounds(bounds);
 	
-	uint32 w = static_cast<uint32>(ceil(mTerminalWidth * mCharWidth) + 2 * kBorderWidth);
-	uint32 h = mTerminalHeight * mLineHeight + 2 * kBorderWidth;
+	uint32_t w = static_cast<uint32_t>(ceil(mTerminalWidth * mCharWidth) + 2 * kBorderWidth);
+	uint32_t h = mTerminalHeight * mLineHeight + 2 * kBorderWidth;
 	
 	if (mDECSSDT > 0)
 		h += mLineHeight;
@@ -392,7 +392,7 @@ void MTerminalView::PreviewColor(MColor inColor)
 	Invalidate();
 }
 
-void MTerminalView::StatusPartClicked(uint32 inPart, MRect)
+void MTerminalView::StatusPartClicked(uint32_t inPart, MRect)
 {
 	auto info = mTerminalChannel->GetConnectionInfo();
 	
@@ -426,7 +426,7 @@ void MTerminalView::Reset()
 	mS8C1T = false;
 
 	mTabStops = vector<bool>(mTerminalWidth, false);
-	for (int32 i = 8; i < mTerminalWidth; i += 8)
+	for (int32_t i = 8; i < mTerminalWidth; i += 8)
 		mTabStops[i] = true;
 	
 	mEscState = eESC_NONE;
@@ -507,9 +507,9 @@ void MTerminalView::SoftReset()
 	mSaved = mCursor;
 }
 
-void MTerminalView::ResizeTerminal(uint32 inColumns, uint32 inRows, bool inResetCursor, bool inResizeWindow)
+void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inResetCursor, bool inResizeWindow)
 {
-	int32 dh = inRows - mTerminalHeight;
+	int32_t dh = inRows - mTerminalHeight;
 	
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
@@ -528,11 +528,11 @@ void MTerminalView::ResizeTerminal(uint32 inColumns, uint32 inRows, bool inReset
 	mMarginTop = 0;
 	mMarginBottom = mTerminalHeight - 1;
 	
-	int32 anchor = GetTopLine();
+	int32_t anchor = GetTopLine();
 	mBuffer->Resize(inColumns, inRows, anchor);
 	
 	mTabStops = vector<bool>(mTerminalWidth, false);
-	for (int32 i = 8; i < mTerminalWidth; i += 8)
+	for (int32_t i = 8; i < mTerminalWidth; i += 8)
 		mTabStops[i] = true;
 	
 	if (mStatusbar != nullptr)
@@ -568,29 +568,29 @@ void MTerminalView::ResizeTerminal(uint32 inColumns, uint32 inRows, bool inReset
 
 	if (inResizeWindow and GetWindow() != nullptr)
 	{
-		uint32 w, h;
+		uint32_t w, h;
 		GetTerminalMetrics(mTerminalWidth, mTerminalHeight, mDECSSDT > 0, w, h);
 		GetWindow()->ResizeWindow(w - bounds.width, h - bounds.height);
 	}
 }
 
-MRect MTerminalView::GetCharacterBounds(uint32 inLine, uint32 inColumn)
+MRect MTerminalView::GetCharacterBounds(uint32_t inLine, uint32_t inColumn)
 {
 	return MRect(
-			kBorderWidth + static_cast<int32>(ceil(inColumn * mCharWidth)),
+			kBorderWidth + static_cast<int32_t>(ceil(inColumn * mCharWidth)),
 			kBorderWidth + inLine * mLineHeight,
-			static_cast<int32>(ceil(mCharWidth)),
+			static_cast<int32_t>(ceil(mCharWidth)),
 			mLineHeight);
 }
 
-bool MTerminalView::GetCharacterForPosition(int32 inX, int32 inY, int32& outLine, int32& outColumn)
+bool MTerminalView::GetCharacterForPosition(int32_t inX, int32_t inY, int32_t& outLine, int32_t& outColumn)
 {
 	inX -= kBorderWidth;
 	inY -= kBorderWidth;
 	outLine = (inY / mLineHeight) - (mScrollbar->GetMaxValue() - mScrollbar->GetValue());
-	if (outLine < 0 and outLine < -static_cast<int32>(mBuffer->BufferedLines()))
+	if (outLine < 0 and outLine < -static_cast<int32_t>(mBuffer->BufferedLines()))
 	{
-		outLine = -static_cast<int32>(mBuffer->BufferedLines());
+		outLine = -static_cast<int32_t>(mBuffer->BufferedLines());
 		outColumn = 0;
 	}
 	else if (outLine > mTerminalHeight - 1)
@@ -600,7 +600,7 @@ bool MTerminalView::GetCharacterForPosition(int32 inX, int32 inY, int32& outLine
 	}
 	else
 	{
-		outColumn = static_cast<uint32>(floor(inX / mCharWidth));
+		outColumn = static_cast<uint32_t>(floor(inX / mCharWidth));
 	
 		if (outColumn < 0)
 			outColumn = 0;
@@ -611,7 +611,7 @@ bool MTerminalView::GetCharacterForPosition(int32 inX, int32 inY, int32& outLine
 	return true;
 }
 
-void MTerminalView::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 inModifiers)
+void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
 {
 	bool done = false;
 	
@@ -624,7 +624,7 @@ void MTerminalView::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 
 		{
 			mMouseClick = eSingleClick;
 			
-			int32 line, column;
+			int32_t line, column;
 			GetCharacterForPosition(inX, inY, line, column);
 	
 			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
@@ -676,7 +676,7 @@ void MTerminalView::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 
 				mMouseClick = eDoubleClick;
 				mMouseBlockSelect = false;
 	
-				int32 line, column;
+				int32_t line, column;
 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
 				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
 	
@@ -690,7 +690,7 @@ void MTerminalView::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 
 				mMouseClick = eTripleClick;
 				mMouseBlockSelect = false;
 				
-				int32 line, column;
+				int32_t line, column;
 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
 				mMinSelLine = mMaxSelLine = line;
 				mMinSelCol = 0;
@@ -704,7 +704,7 @@ void MTerminalView::MouseDown(int32 inX, int32 inY, uint32 inClickCount, uint32 
 	}
 }
 
-void MTerminalView::MouseMove(int32 inX, int32 inY, uint32 inModifiers)
+void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseClick == eTrackClick)
 	{
@@ -725,7 +725,7 @@ void MTerminalView::MouseMove(int32 inX, int32 inY, uint32 inModifiers)
 		{
 			mMouseClick = eSingleClick;
 			
-			int32 line, column;
+			int32_t line, column;
 			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
 			mMinSelLine = mMaxSelLine = line;
 			mMinSelCol = column;
@@ -735,7 +735,7 @@ void MTerminalView::MouseMove(int32 inX, int32 inY, uint32 inModifiers)
 		}
 	}
 
-	int32 line, column;
+	int32_t line, column;
 	GetCharacterForPosition(inX, inY, line, column);
 	
 	switch (mMouseClick)
@@ -751,7 +751,7 @@ void MTerminalView::MouseMove(int32 inX, int32 inY, uint32 inModifiers)
 
 		case eDoubleClick:
 		{
-			int32 wl1, wc1, wl2, wc2;
+			int32_t wl1, wc1, wl2, wc2;
 			mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
 			
 			if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
@@ -785,7 +785,7 @@ void MTerminalView::MouseExit()
 	mMouseClick = eNoClick;
 }
 
-void MTerminalView::MouseUp(int32 inX, int32 inY, uint32 inModifiers)
+void MTerminalView::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseMode >= eTrackMouseSendXYOnButton)
 		SendMouseCommand(3, inX, inY, inModifiers);
@@ -802,7 +802,7 @@ void MTerminalView::MouseUp(int32 inX, int32 inY, uint32 inModifiers)
 	mMouseClick = eNoClick;
 }
 
-void MTerminalView::MouseWheel(int32 inX, int32 inY, int32 inDeltaX, int32 inDeltaY, uint32 inModifiers)
+void MTerminalView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
 {
 	if (inDeltaY != 0)
 	{
@@ -814,7 +814,7 @@ void MTerminalView::MouseWheel(int32 inX, int32 inY, int32 inDeltaX, int32 inDel
 	}
 }
 
-void MTerminalView::ShowContextMenu(int32 inX, int32 inY)
+void MTerminalView::ShowContextMenu(int32_t inX, int32_t inY)
 {
 	if (not sSelectBuffer.empty() and mTerminalChannel->IsOpen())
 	{
@@ -825,7 +825,7 @@ void MTerminalView::ShowContextMenu(int32 inX, int32 inY)
 
 void MTerminalView::Draw(cairo_t* inCairo)
 {
-	int32 selLine1, selLine2, selCol1, selCol2;
+	int32_t selLine1, selLine2, selCol1, selCol2;
 	bool blockSelection;
 	mBuffer->GetSelection(selLine1, selCol1, selLine2, selCol2, blockSelection);
 	if (selLine1 > selLine2)
@@ -891,7 +891,7 @@ void MTerminalView::Draw(cairo_t* inCairo)
 	float x, y;
 	x = y = static_cast<float>(kBorderWidth);
 	
-	int32 H = mTerminalHeight;
+	int32_t H = mTerminalHeight;
 	if (mDECSSDT > 0)
 	{
 		H += 1;
@@ -923,16 +923,16 @@ void MTerminalView::Draw(cairo_t* inCairo)
 		}
 	}
 	
-	for (int32 l = 0; l < H; ++l)
+	for (int32_t l = 0; l < H; ++l)
 	{
 		MDeviceContextSaver save(dev);
 		text.clear();
 
-		int32 lineNr = GetTopLine() + l;
+		int32_t lineNr = GetTopLine() + l;
 
 		// being paranoid 
 		if (l != mTerminalHeight and
-			lineNr < 0 and -lineNr > static_cast<int32>(mBuffer->BufferedLines()))
+			lineNr < 0 and -lineNr > static_cast<int32_t>(mBuffer->BufferedLines()))
 		{
 			y += mLineHeight;
 			continue;
@@ -954,13 +954,13 @@ void MTerminalView::Draw(cairo_t* inCairo)
 			dev.SetScale(2.0, 1.0, x, y);
 		
 		vector<MColor> colors;
-		vector<uint32> colorIndex, colorOffset;
-		vector<uint32> backColorIndex, backColorOffset;
-		vector<uint32> styleValue, styleOffset;
+		vector<uint32_t> colorIndex, colorOffset;
+		vector<uint32_t> backColorIndex, backColorOffset;
+		vector<uint32_t> styleValue, styleOffset;
 		
-		auto pushColor = [&](MColor c, bool back, uint32 offset)
+		auto pushColor = [&](MColor c, bool back, uint32_t offset)
 		{
-			uint32 ix = find(colors.begin(), colors.end(), c) - colors.begin();
+			uint32_t ix = find(colors.begin(), colors.end(), c) - colors.begin();
 			if (ix >= colors.size())
 				colors.push_back(c);
 			
@@ -984,7 +984,7 @@ void MTerminalView::Draw(cairo_t* inCairo)
 		
 		pushColor(mTerminalColors[eBack], true, 0);
 		
-		int32 n = mTerminalWidth;
+		int32_t n = mTerminalWidth;
 		if (line.IsDoubleWidth() or line.IsDoubleHeight())
 			n /= 2;
 			
@@ -992,10 +992,10 @@ void MTerminalView::Draw(cairo_t* inCairo)
 		MColor caretColor;
 
 		auto iter = back_inserter(text);
-		for (int32 c = 0; c < n; ++c)
+		for (int32_t c = 0; c < n; ++c)
 		{
 			// calculate selected region
-			int32 sc1 = 1, sc2 = 0;
+			int32_t sc1 = 1, sc2 = 0;
 			if (lineNr >= selLine1 and lineNr <= selLine2)
 			{
 				if (blockSelection)
@@ -1090,7 +1090,7 @@ void MTerminalView::Draw(cairo_t* inCairo)
 				else
 				{
 					caretRect.height = 2;
-					caretRect.y += static_cast<int32>(ceil(dev.GetAscent()));
+					caretRect.y += static_cast<int32_t>(ceil(dev.GetAscent()));
 					caretColor = mTerminalColors[eBold].Distinct(backC);
 				}
 			}
@@ -1098,7 +1098,7 @@ void MTerminalView::Draw(cairo_t* inCairo)
 			pushColor(backC, true, text.length());
 			pushColor(textC, false, text.length());
 
-			uint32 style = 0;
+			uint32_t style = 0;
 			if (st & kStyleBold)			style |= MDevice::eTextStyleBold;
 			if (st & kStyleUnderline)		style |= MDevice::eTextStyleUnderline;
 
@@ -1133,7 +1133,7 @@ void MTerminalView::Draw(cairo_t* inCairo)
 
 		// draw background rects
 		backColorOffset.push_back(text.length());
-		for (uint32 b = 0; b < backColorIndex.size(); ++b)
+		for (uint32_t b = 0; b < backColorIndex.size(); ++b)
 		{
 			if (backColorIndex[b] == 0)
 				continue;
@@ -1175,7 +1175,7 @@ void MTerminalView::DeactivateSelf()
 	Invalidate();
 }
 
-void MTerminalView::AdjustCursor(int32 inX, int32 inY, uint32 inModifiers)
+void MTerminalView::AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	SetCursor(eNormalCursor);
 }
@@ -1183,14 +1183,14 @@ void MTerminalView::AdjustCursor(int32 inX, int32 inY, uint32 inModifiers)
 void MTerminalView::Idle(double inTime)
 {
 	bool update = false;
-	int32 savedCursorX = mCursor.x, savedCursorY = mCursor.y;
+	int32_t savedCursorX = mCursor.x, savedCursorY = mCursor.y;
 
 	if (not mInputBuffer.empty() and
 		(mNextSmoothScroll == 0 or
 		(abs(mNextSmoothScroll) <= GetLocalTime())))
 	{
 		mScrollForwardCount = 0;
-		int32 topLine = GetTopLine();
+		int32_t topLine = GetTopLine();
 
 		if (mNextSmoothScroll < 0)
 			mBuffer->ScrollBackward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
@@ -1241,7 +1241,7 @@ void MTerminalView::Idle(double inTime)
 		mTerminalChannel->KeepAliveIfNeeded();
 }
 
-string MTerminalView::ProcessKeyCommon(uint32 inKeyCode, uint32 inModifiers)
+string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	string text;
 
@@ -1276,7 +1276,7 @@ string MTerminalView::ProcessKeyCommon(uint32 inKeyCode, uint32 inModifiers)
 	return text;
 }
 
-string MTerminalView::ProcessKeyVT52(uint32 inKeyCode, uint32 inModifiers)
+string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	string text;
 	
@@ -1340,7 +1340,7 @@ string MTerminalView::ProcessKeyVT52(uint32 inKeyCode, uint32 inModifiers)
 	return text;
 }
 
-string MTerminalView::ProcessKeyANSI(uint32 inKeyCode, uint32 inModifiers)
+string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	string text;
 
@@ -1444,7 +1444,7 @@ string MTerminalView::ProcessKeyANSI(uint32 inKeyCode, uint32 inModifiers)
 	return text;
 }
 
-string MTerminalView::ProcessKeyXTerm(uint32 inKeyCode, uint32 inModifiers)
+string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	string text;
 	
@@ -1565,7 +1565,7 @@ string MTerminalView::ProcessKeyXTerm(uint32 inKeyCode, uint32 inModifiers)
 	return text;
 }
 
-bool MTerminalView::HandleKeyDown(uint32 inKeyCode, uint32 inModifiers,
+bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 	bool inRepeat)
 {
 PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
@@ -1729,7 +1729,7 @@ PRINT(("HandleCharacter(0x%x)", inText[0]));
 	return handled;
 }
 
-bool MTerminalView::UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 inItemIndex, bool& outEnabled, bool& outChecked)
+bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex, bool& outEnabled, bool& outChecked)
 {
 	bool handled = true;
 	switch (inCommand)
@@ -1815,7 +1815,7 @@ bool MTerminalView::UpdateCommandStatus(uint32 inCommand, MMenu* inMenu, uint32 
 	return handled;
 }
 
-bool MTerminalView::ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32 inItemIndex, uint32 inModifiers)
+bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool handled = true;
 	switch (inCommand)
@@ -1858,7 +1858,7 @@ bool MTerminalView::ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32
 		
 		case cmd_Reset:
 		{
-			value_changer<int32> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
+			value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
 			Reset();
 			break;
 		}
@@ -1915,7 +1915,7 @@ bool MTerminalView::ProcessCommand(uint32 inCommand, const MMenu* inMenu, uint32
 	return handled;
 }
 
-void MTerminalView::EnterTOTP(uint32 inItemIndex)
+void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 {
 	vector<string> totp;
 	Preferences::GetArray("totp", totp);
@@ -1934,22 +1934,22 @@ void MTerminalView::EnterTOTP(uint32 inItemIndex)
 		
 		using namespace CryptoPP;
 		
-		vector<uint8> h;
+		vector<uint8_t> h;
 		decode_base32(hash, h);
 		
 		int timestamp = time(nullptr) / 30;
 
-		uint8 val[8];
+		uint8_t val[8];
 		for (int i = 8; i-- > 0; timestamp >>= 8)
-			val[i] = static_cast<uint8>(timestamp);
+			val[i] = static_cast<uint8_t>(timestamp);
 		
 		HMAC<SHA1> hmac(h.data(), h.size());
 		hmac.Update(val, 8);
-		vector<uint8> computed(hmac.DigestSize());
+		vector<uint8_t> computed(hmac.DigestSize());
 		hmac.Final(computed.data());
 
 		int offset = computed.back() & 0xf;
-		uint32 truncated = 0;
+		uint32_t truncated = 0;
 		for (int i = 0; i < 4; ++i)
 		{
 			truncated <<= 8;
@@ -1970,12 +1970,12 @@ void MTerminalView::EnterTOTP(uint32 inItemIndex)
 
 void MTerminalView::FindNext(MSearchDirection inSearchDirection)
 {
-	int32 l1, l2, c1, c2;
+	int32_t l1, l2, c1, c2;
 	bool block;
 	
 	mBuffer->GetSelection(l1, c1, l2, c2, block);
 	
-	int32 line, column;
+	int32_t line, column;
 	
 	bool wrapped = false, found;
 	bool ignoreCase = mSearchPanel->GetIgnoreCase();
@@ -2008,7 +2008,7 @@ void MTerminalView::FindNext(MSearchDirection inSearchDirection)
 		}
 	}
 	
-	int32 startLine = line, startColumn = column;
+	int32_t startLine = line, startColumn = column;
 	
 	for (;;)
 	{
@@ -2053,21 +2053,21 @@ void MTerminalView::FindNext(MSearchDirection inSearchDirection)
 	}
 }
 
-int32 MTerminalView::GetTopLine() const
+int32_t MTerminalView::GetTopLine() const
 {
-	int32 result = 0;
+	int32_t result = 0;
 	if (mBuffer->BufferedLines() > 0)
 		result = mScrollbar->GetValue() - mScrollbar->GetMaxValue();
 	return result;
 }
 
-void MTerminalView::AdjustScrollbar(int32 inTopLine)
+void MTerminalView::AdjustScrollbar(int32_t inTopLine)
 {
 	// recalculate scrollbar values
-	int32 min = 0;
-	int32 max = mBuffer->BufferedLines();
-	int32 page = mTerminalHeight;
-	int32 value = max + inTopLine;
+	int32_t min = 0;
+	int32_t max = mBuffer->BufferedLines();
+	int32_t page = mTerminalHeight;
+	int32_t value = max + inTopLine;
 	
 	if (value < min)
 		value = min;
@@ -2087,9 +2087,9 @@ void MTerminalView::Scroll(MScrollMessage inMessage)
 	if (mBuffer->BufferedLines() == 0)
 		return;
 	
-	int32 max = mScrollbar->GetMaxValue();
-	int32 min = mScrollbar->GetMinValue();
-	int32 value = mScrollbar->GetValue();
+	int32_t max = mScrollbar->GetMaxValue();
+	int32_t min = mScrollbar->GetMinValue();
+	int32_t value = mScrollbar->GetValue();
 	
 	switch (inMessage)
 	{
@@ -2128,19 +2128,19 @@ void MTerminalView::Scroll(MScrollMessage inMessage)
 		case kScrollToSelection:
 			if (not mBuffer->IsSelectionEmpty())
 			{
-				int32 lb, le, cb, ce;
+				int32_t lb, le, cb, ce;
 				bool block;
 				mBuffer->GetSelection(lb, cb, le, ce, block);
 				
 				bool forceCenter = false;
 
-				int32 minLine = GetTopLine();
+				int32_t minLine = GetTopLine();
 				if (lb == minLine - 1 and lb < 0)
 					mScrollbar->SetValue(max + lb);
 				else if (lb < minLine)
 					forceCenter = true;
 				
-				int32 maxLine = minLine + mTerminalHeight;
+				int32_t maxLine = minLine + mTerminalHeight;
 				if (lb == maxLine and lb < 0)
 					mScrollbar->SetValue(max + lb);
 				else if (lb > maxLine)
@@ -2165,29 +2165,29 @@ void MTerminalView::Scroll(MScrollMessage inMessage)
 	GetWindow()->UpdateNow();
 }
 
-void MTerminalView::GetTerminalMetrics(uint32 inColumns, uint32 inRows, bool inStatusLine,
-	uint32& outWidth, uint32& outHeight)
+void MTerminalView::GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
+	uint32_t& outWidth, uint32_t& outHeight)
 {
 	MDevice dev;
 	dev.SetFont(Preferences::GetString("font", Preferences::GetString("font", "Consolas 10")));
 
 	float charWidth = dev.GetXWidth();
-	uint32 lineHeight = dev.GetLineHeight();
+	uint32_t lineHeight = dev.GetLineHeight();
 
-	outWidth = static_cast<uint32>(ceil(inColumns * charWidth) + 2 * kBorderWidth);
+	outWidth = static_cast<uint32_t>(ceil(inColumns * charWidth) + 2 * kBorderWidth);
 	outHeight = inRows * lineHeight + 2 * kBorderWidth;
 	if (inStatusLine)
 		outHeight += lineHeight;
 }
 
-MRect MTerminalView::GetIdealTerminalBounds(uint32 inColumns, uint32 inRows)
+MRect MTerminalView::GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows)
 {
-	uint32 w, h;
+	uint32_t w, h;
 	GetTerminalMetrics(inColumns, inRows, Preferences::GetBoolean("show-status-line", false), w, h);
 	return MRect(0, 0, w, h);
 }
 
-void MTerminalView::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
+void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	MCanvas::ResizeFrame(inWidthDelta, inHeightDelta);
 	
@@ -2198,11 +2198,11 @@ void MTerminalView::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
 	dev.SetFont(mFont);
 
 	// avoid absurd sizes	
-	if (static_cast<uint32>(bounds.width) <= 2 * kBorderWidth or static_cast<uint32>(bounds.height) <= 2 * kBorderWidth)
+	if (static_cast<uint32_t>(bounds.width) <= 2 * kBorderWidth or static_cast<uint32_t>(bounds.height) <= 2 * kBorderWidth)
 		return;
 	
-	int32 w = static_cast<int32>((bounds.width - 2 * kBorderWidth) / dev.GetXWidth());
-	int32 h = static_cast<int32>((bounds.height - 2 * kBorderWidth) / dev.GetLineHeight());
+	int32_t w = static_cast<int32_t>((bounds.width - 2 * kBorderWidth) / dev.GetXWidth());
+	int32_t h = static_cast<int32_t>((bounds.height - 2 * kBorderWidth) / dev.GetLineHeight());
 	
 	if (mDECSSDT > 0)
 		h -= 1;
@@ -2212,7 +2212,7 @@ void MTerminalView::ResizeFrame(int32 inWidthDelta, int32 inHeightDelta)
 }
 
 #if DEBUG
-extern void print(ostream& os, const vector<uint8>& b);
+extern void print(ostream& os, const vector<uint8_t>& b);
 #endif
 
 void MTerminalView::SendCommand(string inData)
@@ -2234,7 +2234,7 @@ void MTerminalView::SendCommand(string inData)
 		}
 
 #if DEBUG
-vector<uint8> b;
+vector<uint8_t> b;
 copy(inData.begin(), inData.end(), back_inserter(b));
 print(cerr, b);
 #endif
@@ -2243,9 +2243,9 @@ print(cerr, b);
 	}
 }
 
-void MTerminalView::SendMouseCommand(int32 inButton, int32 inX, int32 inY, uint32 inModifiers)
+void MTerminalView::SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY, uint32_t inModifiers)
 {
-	int32 line, column;
+	int32_t line, column;
 	GetCharacterForPosition(inX, inY, line, column);
 	
 	if (inButton == 32)
@@ -2266,7 +2266,7 @@ void MTerminalView::SendMouseCommand(int32 inButton, int32 inX, int32 inY, uint3
 	if (inModifiers & kControlKey)
 		cb |= 16;
 
-	const int32 kMaxPosition = '~' - '!';
+	const int32_t kMaxPosition = '~' - '!';
 
 	if (line < 0)
 		line = 0;
@@ -2285,7 +2285,7 @@ void MTerminalView::SendMouseCommand(int32 inButton, int32 inX, int32 inY, uint3
 
 void MTerminalView::Opened()
 {
-	value_changer<int32> x(mCursor.x, 0), y(mCursor.y, 0);
+	value_changer<int32_t> x(mCursor.x, 0), y(mCursor.y, 0);
 	
 	mStatusbar->SetStatusText(0, _("Connected"), false);
 	
@@ -2382,12 +2382,12 @@ void MTerminalView::HandleReceived(const boost::system::error_code& ec, streambu
 // --------------------------------------------------------------------
 //
 
-void MTerminalView::EraseInDisplay(uint32 inMode, bool inSelective)
+void MTerminalView::EraseInDisplay(uint32_t inMode, bool inSelective)
 {
 	mBuffer->EraseDisplay(mCursor.y, mCursor.x, inMode, inSelective);
 }
 
-void MTerminalView::EraseInLine(uint32 inMode, bool inSelective)
+void MTerminalView::EraseInLine(uint32_t inMode, bool inSelective)
 {
 	mBuffer->EraseLine(mCursor.y, mCursor.x, inMode, inSelective);
 }
@@ -2415,9 +2415,9 @@ void MTerminalView::WriteChar(unicode inChar)
 {
 	MTerminalBuffer* buffer = mDECSASD ? &mStatusLineBuffer : mBuffer;
 
-	int32 mr = mCursor.DECOM ? mMarginRight : mTerminalWidth - 1;
-	int32 ml = mCursor.DECOM ? mMarginLeft : 0;
-	int32 mb = mCursor.DECOM ? mMarginBottom : mTerminalHeight - 1;
+	int32_t mr = mCursor.DECOM ? mMarginRight : mTerminalWidth - 1;
+	int32_t ml = mCursor.DECOM ? mMarginLeft : 0;
+	int32_t mb = mCursor.DECOM ? mMarginBottom : mTerminalHeight - 1;
 
 	if (mCursor.x >= mr + 1)
 	{
@@ -2447,7 +2447,7 @@ void MTerminalView::WriteChar(unicode inChar)
 
 void MTerminalView::MoveCursor(MCursorMovement inDirection)
 {
-	int32 x = mCursor.x, y = mCursor.y;
+	int32_t x = mCursor.x, y = mCursor.y;
 	
 	switch (inDirection)
 	{
@@ -2540,14 +2540,14 @@ void MTerminalView::MoveCursor(MCursorMovement inDirection)
 			break;
 		
 		case kMoveSL:
-			for (int32 line = 0; line < mTerminalHeight; ++line)
+			for (int32_t line = 0; line < mTerminalHeight; ++line)
 				mBuffer->DeleteCharacter(line, mMarginLeft, mMarginRight);
 			if (mCursor.x > 0)
 				--mCursor.x;
 			break;
 
 		case kMoveSR:
-			for (int32 line = 0; line < mTerminalHeight - 1; ++line)
+			for (int32_t line = 0; line < mTerminalHeight - 1; ++line)
 				mBuffer->InsertCharacter(line, mMarginLeft, mMarginRight);
 			if (mCursor.x < mMarginRight)
 				++mCursor.x;
@@ -2558,7 +2558,7 @@ void MTerminalView::MoveCursor(MCursorMovement inDirection)
 		mBuffer->SetDirty(true);
 }
 
-void MTerminalView::MoveCursorTo(int32 inX, int32 inY)
+void MTerminalView::MoveCursorTo(int32_t inX, int32_t inY)
 {
 	if (mCursor.DECOM)
 	{
@@ -2624,7 +2624,7 @@ void MTerminalView::Emulate()
 		}
 #endif
 		// process bytes. We try to keep this code UTF-8 savvy
-		uint8 ch = mInputBuffer.front();
+		uint8_t ch = mInputBuffer.front();
 		mInputBuffer.pop_front();
 		
 		// start by testing if this byte is a control code
@@ -2809,7 +2809,7 @@ void MTerminalView::Emulate()
 			{
 				if (mEncoding == kEncodingUTF8)
 				{
-					uint32 len = 1;
+					uint32_t len = 1;
 					if ((ch & 0x0E0) == 0x0C0)		len = 2;
 					else if ((ch & 0x0F0) == 0x0E0)	len = 3;
 					else if ((ch & 0x0F8) == 0x0F0)	len = 4;
@@ -2839,18 +2839,18 @@ void MTerminalView::Emulate()
 	}
 }
 
-inline uint32 MTerminalView::GetParam(uint32 inParamNr, uint32 inDefault)
+inline uint32_t MTerminalView::GetParam(uint32_t inParamNr, uint32_t inDefault)
 {
-	uint32 result = inDefault;
+	uint32_t result = inDefault;
 	if (inParamNr < mArgs.size())
 		result = mArgs[inParamNr];
 	return result;
 }
 
-void MTerminalView::GetRectParam(uint32 inParamOffset, int32& outTop, int32& outLeft, int32& outBottom, int32& outRight)
+void MTerminalView::GetRectParam(uint32_t inParamOffset, int32_t& outTop, int32_t& outLeft, int32_t& outBottom, int32_t& outRight)
 {
-//	int32 dx = mCursor.DECOM ? mMarginLeft : 0;
-//	int32 dy = mCursor.DECOM ? mMarginTop : 0;
+//	int32_t dx = mCursor.DECOM ? mMarginLeft : 0;
+//	int32_t dy = mCursor.DECOM ? mMarginTop : 0;
 	
 	outTop =	GetParam(inParamOffset + 0, 1) - 1;
 	outLeft =	GetParam(inParamOffset + 1, 1) - 1;
@@ -2871,7 +2871,7 @@ void MTerminalView::GetRectParam(uint32 inParamOffset, int32& outTop, int32& out
 	}
 }
 
-void MTerminalView::EscapeVT52(uint8 inChar)
+void MTerminalView::EscapeVT52(uint8_t inChar)
 {
 	mEscState = eESC_NONE;
 	mArgs.clear();
@@ -2901,7 +2901,7 @@ void MTerminalView::EscapeVT52(uint8 inChar)
 	}
 }
 
-void MTerminalView::EscapeStart(uint8 inChar)
+void MTerminalView::EscapeStart(uint8_t inChar)
 {
 	mEscState = eESC_NONE;
 	mArgs.clear();
@@ -2965,7 +2965,7 @@ void MTerminalView::EscapeStart(uint8 inChar)
 	}
 }
 
-void MTerminalView::EscapeCSI(uint8 inChar)
+void MTerminalView::EscapeCSI(uint8_t inChar)
 {
 	if (mState == 0)
 	{
@@ -2987,13 +2987,13 @@ void MTerminalView::EscapeCSI(uint8 inChar)
 	else if (inChar == ';')
 		mArgs.push_back(0);
 	else if (inChar >= ' ' and inChar <= '?')
-		mCSICmd = mCSICmd << 8 | uint8(inChar);
+		mCSICmd = mCSICmd << 8 | uint8_t(inChar);
 	else if (not (inChar >= '0' and inChar <= '~'))
 		mEscState = eESC_NONE;	// error
 	else
 	{
 		mEscState = eESC_NONE;
-		mCSICmd = mCSICmd << 8 | uint8(inChar);
+		mCSICmd = mCSICmd << 8 | uint8_t(inChar);
 
 		PRINT(("CSI: %s (%s)", mCtrlSeq.c_str(), Cmd2Name(mCSICmd)));
 		
@@ -3006,9 +3006,9 @@ void MTerminalView::EscapeCSI(uint8 inChar)
 	}
 }
 
-void MTerminalView::ProcessCSILevel1(uint32 inCmd)
+void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 {
-	uint32 n = GetParam(0, 1);
+	uint32_t n = GetParam(0, 1);
 	if (n == 0)
 		n = 1;
 
@@ -3200,7 +3200,7 @@ void MTerminalView::ProcessCSILevel1(uint32 inCmd)
 						{
 							case 5:
 							{
-								uint8 colorIndex = static_cast<uint8>(mArgs[++i]);
+								uint8_t colorIndex = static_cast<uint8_t>(mArgs[++i]);
 								if (a == 38)
 									mCursor.style.SetForeColor((MXTermColor)colorIndex);
 								else
@@ -3234,22 +3234,22 @@ void MTerminalView::ProcessCSILevel1(uint32 inCmd)
 		
 		// SM_ANSI -- Set Mode ANSI
 		case eSM_ANSI:
-			for (uint32 a: mArgs)
+			for (uint32_t a: mArgs)
 				SetResetMode(a, true, true);
 			break;
 		// RM_ANSI -- Reset Mode ANSI
 		case eRM_ANSI:
-			for (uint32 a: mArgs)
+			for (uint32_t a: mArgs)
 				SetResetMode(a, true, false);
 			break;
 		// SM_DEC -- Set Mode DEC
 		case eSM_DEC:
-			for (uint32 a: mArgs)
+			for (uint32_t a: mArgs)
 				SetResetMode(a, false, true);
 			break;
 		// RM_DEC -- Reset Mode DEC
 		case eRM_DEC:
-			for (uint32 a: mArgs)
+			for (uint32_t a: mArgs)
 				SetResetMode(a, false, false);
 			break;
 		// SAVEMODE -- Save DEC Private Mode Values
@@ -3320,9 +3320,9 @@ void MTerminalView::ProcessCSILevel1(uint32 inCmd)
 	}
 }
 
-void MTerminalView::ProcessCSILevel4(uint32 inCmd)
+void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 {
-	uint32 n = GetParam(0, 1);
+	uint32_t n = GetParam(0, 1);
 	if (n == 0)
 		n = 1;
 
@@ -3366,12 +3366,12 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 		// DECCARA -- Change attributes in rectangular area
 		case eDECCARA:
 		{
-			int32 t, l, b, r;
+			int32_t t, l, b, r;
 			GetRectParam(0, t, l, b, r);
 
 			for (int a: mArgs)
 			{
-				mBuffer->ForeachInRectangle(t, l, b, r, [a](MChar& inChar, int32 inLine, int32 inColumn)
+				mBuffer->ForeachInRectangle(t, l, b, r, [a](MChar& inChar, int32_t inLine, int32_t inColumn)
 				{
 					switch (a)
 					{
@@ -3398,12 +3398,12 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 			if (ps != 1 or pd != 1)
 				break;
 
-			int32 t, l, b, r;
+			int32_t t, l, b, r;
 			GetRectParam(0, t, l, b, r);
 			
-			int32 w = r - l, h = b - t;
-			int32 dt = GetParam(5, 1) - 1;	if (mCursor.DECOM) dt += mMarginTop;
-			int32 dl = GetParam(6, 1) - 1;	if (mCursor.DECOM) dl += mMarginLeft;
+			int32_t w = r - l, h = b - t;
+			int32_t dt = GetParam(5, 1) - 1;	if (mCursor.DECOM) dt += mMarginTop;
+			int32_t dl = GetParam(6, 1) - 1;	if (mCursor.DECOM) dl += mMarginLeft;
 			
 			if (dt + h > mTerminalHeight)
 			{
@@ -3421,9 +3421,9 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 				break;	
 			
 			vector<MChar> buffer(mTerminalWidth * mTerminalHeight);
-			uint32 i = 0;
+			uint32_t i = 0;
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[&i, &buffer](MChar& inChar, int32 inLine, int32 inColumn)
+				[&i, &buffer](MChar& inChar, int32_t inLine, int32_t inColumn)
 				{
 					buffer[i++] = inChar;
 				}
@@ -3433,7 +3433,7 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 			i = 0;
 			
 			mBuffer->ForeachInRectangle(dt, dl, dt + h, dl + w,
-				[&i, &buffer](MChar& inChar, int32 inLine, int32 inColumn)
+				[&i, &buffer](MChar& inChar, int32_t inLine, int32_t inColumn)
 				{
 					inChar = buffer[i++];
 				}
@@ -3447,12 +3447,12 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 		// DECERA -- Erase rectangular area
 		case eDECERA:
 		{
-			int32 t, l, b, r;
+			int32_t t, l, b, r;
 			GetRectParam(0, t, l, b, r);
 
 			MChar ch(' ', mCursor.style);
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[ch](MChar& inChar, int32 inLine, int32 inColumn)
+				[ch](MChar& inChar, int32_t inLine, int32_t inColumn)
 				{
 					inChar = ch;
 				}
@@ -3462,12 +3462,12 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 		// DECFRA -- Fill rectangular area
 		case eDECFRA:
 		{
-			int32 t, l, b, r;
+			int32_t t, l, b, r;
 			GetRectParam(1, t, l, b, r);
 
 			MChar ch(GetParam(0, ' '), mCursor.style);				
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[ch](MChar& inChar, int32 inLine, int32 inColumn)
+				[ch](MChar& inChar, int32_t inLine, int32_t inColumn)
 				{
 					inChar = ch;
 				}
@@ -3485,12 +3485,12 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 		// DECRARA -- Reverse attributes in rectangular area
 		case eDECRARA:
 		{
-			int32 t, l, b, r;
+			int32_t t, l, b, r;
 			GetRectParam(0, t, l, b, r);
 			
-			for (uint32 ai = 4; ai < mArgs.size(); ++ai)
+			for (uint32_t ai = 4; ai < mArgs.size(); ++ai)
 			{
-				uint32 flag;
+				uint32_t flag;
 				switch (mArgs[ai])
 				{
 					case 0: flag = kStyleBold|kStyleUnderline|kStyleBlink|kStyleInverse;	break;
@@ -3501,7 +3501,7 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 				}
 
 				mBuffer->ForeachInRectangle(t, l, b, r,
-					[flag](MChar& inChar, int32 inLine, int32 inColumn)
+					[flag](MChar& inChar, int32_t inLine, int32_t inColumn)
 					{
 						inChar.ReverseFlag(MCharStyle(flag));
 					}
@@ -3604,11 +3604,11 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 		// DECSERA -- Selective erase rectangular area
 		case eDECSERA:
 		{
-			int32 t, l, b, r;
+			int32_t t, l, b, r;
 			GetRectParam(0, t, l, b, r);
 
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[](MChar& inChar, int32 inLine, int32 inColumn)
+				[](MChar& inChar, int32_t inLine, int32_t inColumn)
 				{
 					if (not (inChar & kUnerasable))
 						inChar = ' ';
@@ -3660,10 +3660,10 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 //			else
 			if (mDECVSSM)
 			{
-				int32 left = GetParam(0, 1);
+				int32_t left = GetParam(0, 1);
 				if (left < 1)
 					left = 1;
-				int32 right = GetParam(1, mTerminalWidth);
+				int32_t right = GetParam(1, mTerminalWidth);
 				if (right > mTerminalWidth)
 					right = mTerminalWidth;
 				if (right < left + 1)
@@ -3688,10 +3688,10 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 		// DECSTBM -- Set Top and Bottom Margin
 		case eDECSTBM:
 		{
-			int32 top = GetParam(0, 1);
+			int32_t top = GetParam(0, 1);
 			if (top < 1)
 				top = 1;
-			int32 bottom = GetParam(1, mTerminalHeight);
+			int32_t bottom = GetParam(1, mTerminalHeight);
 			if (bottom > mTerminalHeight)
 				bottom = mTerminalHeight;
 			if (bottom < top + 1)
@@ -3730,7 +3730,7 @@ void MTerminalView::ProcessCSILevel4(uint32 inCmd)
 	}
 }
 
-void MTerminalView::SelectCharSet(uint8 inChar)
+void MTerminalView::SelectCharSet(uint8_t inChar)
 {
 	mEscState = eESC_NONE;
 	
@@ -3789,7 +3789,7 @@ void MTerminalView::SelectCharSet(uint8 inChar)
 	}
 }
 
-void MTerminalView::SelectControlTransmission(uint8 inCode)
+void MTerminalView::SelectControlTransmission(uint8_t inCode)
 {
 	switch (inCode)
 	{
@@ -3809,7 +3809,7 @@ void MTerminalView::SelectControlTransmission(uint8 inCode)
 	mEscState = eESC_NONE;
 }
 
-void MTerminalView::SelectDouble(uint8 inDoubleMode)
+void MTerminalView::SelectDouble(uint8_t inDoubleMode)
 {
 	mEscState = eESC_NONE;
 
@@ -3828,7 +3828,7 @@ void MTerminalView::CommitPFK()
 	for (auto k: mNewPFK->key)
 	{
 		string s;
-		for (uint32 i = 0; i < k.second.length(); i += 2)
+		for (uint32_t i = 0; i < k.second.length(); i += 2)
 		{
 			char c1 = tolower(k.second[i]);
 			char c2 = 0;
@@ -3860,7 +3860,7 @@ void MTerminalView::CommitPFK()
 	mNewPFK = nullptr;
 }
 
-void MTerminalView::EscapeDCS(uint8 inChar)
+void MTerminalView::EscapeDCS(uint8_t inChar)
 {
 	if (inChar == ST)
 	{
@@ -4004,7 +4004,7 @@ void MTerminalView::EscapeDCS(uint8 inChar)
 				mPFKKeyNr = 0;
 			else if (isxdigit(inChar))
 			{
-				uint32 keyCode;
+				uint32_t keyCode;
 				switch (mPFKKeyNr)
 				{
 					case eF1: keyCode = kF1KeyCode; break;
@@ -4055,7 +4055,7 @@ void MTerminalView::EscapeDCS(uint8 inChar)
 	}
 }
 
-void MTerminalView::EscapeOSC(uint8 inChar)
+void MTerminalView::EscapeOSC(uint8_t inChar)
 {
 	if (inChar == BEL or inChar == ST)
 	{
@@ -4240,7 +4240,7 @@ void MTerminalView::Beep()
 		mLastBeep = now;
 }
 
-void MTerminalView::SetResetMode(uint32 inMode, bool inANSI, bool inSet)
+void MTerminalView::SetResetMode(uint32_t inMode, bool inANSI, bool inSet)
 {
 	if (inANSI)
 	{
@@ -4330,7 +4330,7 @@ void MTerminalView::SetResetMode(uint32 inMode, bool inANSI, bool inSet)
 	}
 }
 
-bool MTerminalView::GetMode(uint32 inMode, bool inANSI)
+bool MTerminalView::GetMode(uint32_t inMode, bool inANSI)
 {
 	bool result = false;
 	

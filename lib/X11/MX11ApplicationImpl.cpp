@@ -139,7 +139,7 @@ int MX11ApplicationImpl::RunEventLoop()
 		free(e);
 	}
 	
-//	uint32 snooper = gtk_key_snooper_install(&MX11ApplicationImpl::Snooper, nullptr);
+//	uint32_t snooper = gtk_key_snooper_install(&MX11ApplicationImpl::Snooper, nullptr);
 //
 //	g_timeout_add(50, &MX11ApplicationImpl::Timeout, nullptr);
 //

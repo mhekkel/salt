@@ -28,7 +28,7 @@ class MWinException : public MException
 {
   public:
 				MWinException(const char* inErrMsg, ...);
-				MWinException(int32 inHResult, const char* inErrMsg, ...);
+				MWinException(int32_t inHResult, const char* inErrMsg, ...);
 };
 #endif
 

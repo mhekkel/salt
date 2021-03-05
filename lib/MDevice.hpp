@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include <cairo.h>
+#include <cairo/cairo.h>
 
 #include "MTypes.hpp"
 #include "MColor.hpp"
@@ -68,23 +68,23 @@ class MBitmap
 				MBitmap();
 				MBitmap(MBitmap&& inBitmap);
 	MBitmap&	operator=(MBitmap&& inBitmap);
-				MBitmap(uint32 inWidth, uint32 inHeight, bool inUseAlpha = false);
-				MBitmap(const void* inPNG, uint32 inLength);
+				MBitmap(uint32_t inWidth, uint32_t inHeight, bool inUseAlpha = false);
+				MBitmap(const void* inPNG, uint32_t inLength);
 				MBitmap(const MBitmap& inSource, MRect inCopyRect);
 	virtual		~MBitmap();
 	
-	uint32*		Data() const				{ return mData; }
-	uint32		Stride() const				{ return mStride; }
+	uint32_t*		Data() const				{ return mData; }
+	uint32_t		Stride() const				{ return mStride; }
 	bool		UseAlpha() const			{ return mUseAlpha; }
 	
-	uint32		Width() const				{ return mWidth; }
-	uint32		Height() const				{ return mHeight; }
+	uint32_t		Width() const				{ return mWidth; }
+	uint32_t		Height() const				{ return mHeight; }
 
   private:
 				MBitmap(const MBitmap&);
 	MBitmap&	operator=(const MBitmap&);
-	uint32*		mData;
-	uint32		mWidth, mHeight, mStride;
+	uint32_t*		mData;
+	uint32_t		mWidth, mHeight, mStride;
 	bool		mUseAlpha;
 };
 
@@ -105,7 +105,7 @@ class MDevice
 	void		Restore();
 	bool		IsPrinting() const;
 	
-	int32		GetPageNr() const;
+	int32_t		GetPageNr() const;
 	MRect		GetBounds() const;
 	
 	static void	ListFonts(bool inFixedWidthOnly, std::vector<std::string>& outFonts);
@@ -120,8 +120,8 @@ class MDevice
 	//void		ClipRegion(MRegion inRegion);
 	void		EraseRect(MRect inRect);
 	void		FillRect(MRect inRect);
-	void		StrokeRect(MRect inRect, uint32 inLineWidth = 1);
-	void		StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32 inLineWidth = 1);
+	void		StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
+	void		StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32_t inLineWidth = 1);
 //	void		StrokeBezier(float inCntrlPtX[4], float inCntrlPtY[4]);
 
 	void		FillEllipse(MRect inRect);
@@ -129,14 +129,14 @@ class MDevice
 	void		FillGeometry(MGeometry& inGeometry);
 	void		DrawBitmap(const MBitmap& inBitmap, float inX, float inY);
 	
-	// void		CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32 inWidth = 4, float inRotation = 45.f);
+	// void		CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth = 4, float inRotation = 45.f);
 	
 	float		GetAscent() const;
 	float		GetDescent() const;
 	float		GetLeading() const;
-	int32		GetLineHeight() const;
+	int32_t		GetLineHeight() const;
 	float		GetXWidth() const;
-	void		DrawString(const std::string& inText, float inX, float inY, uint32 inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
+	void		DrawString(const std::string& inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
 	void		DrawString(const std::string& inText, MRect inBounds, MAlignment inAlign = eAlignNone);
 	// Text Layout options
 	void		SetText(const std::string& inText);
@@ -144,7 +144,7 @@ class MDevice
 	float		GetTextWidth() const;
 	void		SetTabStops(float inTabWidth);
 	
-	void		SetTextColors(uint32 inColorCount, uint32 inColorIndices[], uint32 inOffsets[], MColor inColors[]);
+	void		SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]);
 	enum MTextStyle {
 		eTextStyleNormal	= 0,
 		eTextStyleItalic	= 1 << 0,
@@ -152,20 +152,20 @@ class MDevice
 		eTextStyleUnderline	= 1 << 2
 	};
 	
-	void		SetTextStyles(uint32 inStyleCount, uint32 inStyles[], uint32 inOffsets[]);
+	void		SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
 	
-	void		RenderTextBackground(float inX, float inY, uint32 inStart, uint32 inLength, MColor inColor);
-	void		SetTextSelection(uint32 inStart, uint32 inLength, MColor inSelectionColor);
+	void		RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor);
+	void		SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor);
 	
-	void		IndexToPosition(uint32 inIndex, bool inTrailing, int32& outPosition);
-//	bool		PositionToIndex(// int32 inPosition, // uint32& outIndex, // bool& outTrailing);
+	void		IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t& outPosition);
+//	bool		PositionToIndex(// int32_t inPosition, // uint32_t& outIndex, // bool& outTrailing);
 
-	bool		PositionToIndex(int32 inPosition, uint32& outIndex);
+	bool		PositionToIndex(int32_t inPosition, uint32_t& outIndex);
 	
 	void		RenderText(float inX, float inY);
-	void		DrawCaret(float inX, float inY, uint32 inOffset);
+	void		DrawCaret(float inX, float inY, uint32_t inOffset);
 	
-	void		BreakLines(uint32 inWidth, std::vector<uint32>& outBreaks);
+	void		BreakLines(uint32_t inWidth, std::vector<uint32_t>& outBreaks);
 	void		MakeTransparent(float inOpacity);
 	//GdkPixmap*	GetPixmap() const;
 	void		SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor);

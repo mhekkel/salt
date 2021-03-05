@@ -16,19 +16,19 @@
 
 using namespace std;
 
-uint16 CalculateCRC(const void* inData, uint32 inLength, uint16 inCRC)
+uint16_t CalculateCRC(const void* inData, uint32_t inLength, uint16_t inCRC)
 {
-	const uint8* p = reinterpret_cast<const uint8*>(inData);
+	const uint8_t* p = reinterpret_cast<const uint8_t*>(inData);
 
 	while (inLength-- > 0)
 	{
-		inCRC = static_cast<uint16>(inCRC ^ (static_cast<uint16>(*p++) << 8));
-		for (uint16 i = 0; i < 8; i++)
+		inCRC = static_cast<uint16_t>(inCRC ^ (static_cast<uint16_t>(*p++) << 8));
+		for (uint16_t i = 0; i < 8; i++)
 		{
 			if (inCRC & 0x8000)
-				inCRC = static_cast<uint16>((inCRC << 1) ^ 0x1021);
+				inCRC = static_cast<uint16_t>((inCRC << 1) ^ 0x1021);
 			else
-				inCRC = static_cast<uint16>(inCRC << 1);
+				inCRC = static_cast<uint16_t>(inCRC << 1);
 		}
 	}
 
@@ -101,7 +101,7 @@ string Unescape(string inString)
 
 void HexDump(
 	const void*		inBuffer,
-	uint32			inLength,
+	uint32_t			inLength,
 	ostream&		outStream)
 {
 	const char kHex[] = "0123456789abcdef";
@@ -110,7 +110,7 @@ void HexDump(
 	const int kAsciiOffset = 53;
 	
 	const unsigned char* data = reinterpret_cast<const unsigned char*>(inBuffer);
-	uint32 offset = 0;
+	uint32_t offset = 0;
 	
 	while (offset < inLength)
 	{
@@ -153,7 +153,7 @@ void HexDump(
 
 void decode_base64(
 	const string&		inString,
-	vector<uint8>&		outBinary)
+	vector<uint8_t>&		outBinary)
 {
     const char kLookupTable[] =
     {
@@ -172,12 +172,12 @@ void decode_base64(
     
 	while (b != e)
 	{
-		uint8 s[4] = {};
+		uint8_t s[4] = {};
 		int n = 0;
 		
 		for (int i = 0; i < 4 and b != e; ++i)
 		{
-			uint8 ix = uint8(*b++);
+			uint8_t ix = uint8_t(*b++);
 
 			if (ix == '=')
 				break;
@@ -186,7 +186,7 @@ void decode_base64(
 			if (ix <= 127) 
 				v = kLookupTable[ix];
 			if (v < 0)	THROW(("Invalid character in base64 encoded string"));
-			s[i] = uint8(v);
+			s[i] = uint8_t(v);
 			++n;
 		}
 
@@ -196,12 +196,12 @@ void decode_base64(
 	}
 }
 
-void decode_base32(const string& inString, vector<uint8>& outBinary)
+void decode_base32(const string& inString, vector<uint8_t>& outBinary)
 {
 	int buffer = 0;
 	int bitsLeft = 0;
 
-	for (uint8 ch: inString)
+	for (uint8_t ch: inString)
 	{
 		if (ch == ' ' or ch == '\t' or ch == '\r' or ch == '\n' or ch == '-')
 			continue;

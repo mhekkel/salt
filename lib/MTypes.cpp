@@ -14,8 +14,8 @@
 using namespace std;
 
 void MRect::InsetBy(
-	int32				inDeltaX,
-	int32				inDeltaY)
+	int32_t				inDeltaX,
+	int32_t				inDeltaY)
 {
 	if (inDeltaX < 0 or 2 * inDeltaX <= width)
 	{
@@ -41,8 +41,8 @@ void MRect::InsetBy(
 }
 
 void MRect::PinPoint(
-	int32&				ioX,
-	int32&				ioY) const
+	int32_t&				ioX,
+	int32_t&				ioY) const
 {
 	if (ioX < x)
 		ioX = x;
@@ -65,19 +65,19 @@ MRect MRect::operator&(
 MRect& MRect::operator&=(
 	const MRect&		inRhs)
 {
-	int32 nx = x;
+	int32_t nx = x;
 	if (nx < inRhs.x)
 		nx = inRhs.x;
 
-	int32 ny = y;
+	int32_t ny = y;
 	if (ny < inRhs.y)
 		ny = inRhs.y;
 	
-	int32 nx2 = x + width;
+	int32_t nx2 = x + width;
 	if (nx2 > inRhs.x + inRhs.width)
 		nx2 = inRhs.x + inRhs.width;
 	
-	int32 ny2 = y + height;
+	int32_t ny2 = y + height;
 	if (ny2 > inRhs.y + inRhs.height)
 		ny2 = inRhs.y + inRhs.height;
 	
@@ -98,19 +98,19 @@ MRect& MRect::operator&=(
 MRect& MRect::operator|=(
 	const MRect&		inRhs)
 {
-	int32 nx = x;
+	int32_t nx = x;
 	if (nx > inRhs.x)
 		nx = inRhs.x;
 
-	int32 ny = y;
+	int32_t ny = y;
 	if (ny > inRhs.y)
 		ny = inRhs.y;
 	
-	int32 nx2 = x + width;
+	int32_t nx2 = x + width;
 	if (nx2 < inRhs.x + inRhs.width)
 		nx2 = inRhs.x + inRhs.width;
 	
-	int32 ny2 = y + height;
+	int32_t ny2 = y + height;
 	if (ny2 < inRhs.y + inRhs.height)
 		ny2 = inRhs.y + inRhs.height;
 	
@@ -236,12 +236,12 @@ MRegion::operator bool() const
 	return result;
 }
 
-void MRegion::OffsetBy(int32 inX, int32 inY)
+void MRegion::OffsetBy(int32_t inX, int32_t inY)
 {
 	assert(false);
 }
 
-bool MRegion::ContainsPoint(int32 inX, int32 inY) const
+bool MRegion::ContainsPoint(int32_t inX, int32_t inY) const
 {
 	return find_if(mImpl->begin(), mImpl->end(),
 		[&inX, &inY](const MRect& r) { return r.ContainsPoint(inX, inY); }) != mImpl->end();

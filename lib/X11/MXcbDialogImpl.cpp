@@ -47,36 +47,36 @@ namespace ba = boost::algorithm;
 //	virtual bool OnKeyPressEvent(GdkEventKey* inEvent);
 //
 //	virtual void Append(MXcbWidgetMixin* inChild, MControlPacking inPacking,
-//						bool inExpand, bool inFill, uint32 inPadding);
+//						bool inExpand, bool inFill, uint32_t inPadding);
 //
 //	void GetMargins(xml::element* inTemplate,
-//		int32& outLeftMargin, int32& outTopMargin, int32& outRightMargin, int32& outBottomMargin);
+//		int32_t& outLeftMargin, int32_t& outTopMargin, int32_t& outRightMargin, int32_t& outBottomMargin);
 //
-//	MView* CreateControls(xml::element* inTemplate, int32 inX, int32 inY);
+//	MView* CreateControls(xml::element* inTemplate, int32_t inX, int32_t inY);
 //
-//	MView* CreateButton(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateColorSwatch(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateCaption(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateCheckbox(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateRadiobutton(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateExpander(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateCombobox(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateEdittext(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreatePopup(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateScrollbar(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateSeparator(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateBox(xml::element* inTemplate, int32 inX, int32 inY, bool inHorizontal);
-//	MView* CreateTable(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateNotebook(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreatePager(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateListBox(xml::element* inTemplate, int32 inX, int32 inY);
-//	MView* CreateListView(xml::element* inTemplate, int32 inX, int32 inY);
+//	MView* CreateButton(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateColorSwatch(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateCaption(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateCheckbox(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateRadiobutton(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateExpander(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateCombobox(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateEdittext(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreatePopup(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateScrollbar(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateBox(xml::element* inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
+//	MView* CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateNotebook(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreatePager(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateListBox(xml::element* inTemplate, int32_t inX, int32_t inY);
+//	MView* CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY);
 //
-//	uint32 GetTextWidth(const string& inText, const wchar_t* inClass, int inPartID, int inStateID);
+//	uint32_t GetTextWidth(const string& inText, const wchar_t* inClass, int inPartID, int inStateID);
 //
 //	string l(const string& s)					{ return GetLocalisedStringForContext(mRsrc, s); }
 //
-//	void OnResponse(int32 inResponseID)
+//	void OnResponse(int32_t inResponseID)
 //	{
 //		PRINT(("Response: %d", inResponseID));
 //
@@ -103,14 +103,14 @@ namespace ba = boost::algorithm;
 //		}
 //	}
 //	
-//	MSlot<void(int32)> mResponse;
+//	MSlot<void(int32_t)> mResponse;
 //
 //	float mDLUX, mDLUY;
 //
 //	string mRsrc;
 //	list<MRadiobutton*> mRadioGroup;
 //	vector<string> mResponseIDs;
-//	int32 mDefaultResponse;
+//	int32_t mDefaultResponse;
 //	bool mResultIsOK;
 //};
 //
@@ -122,8 +122,8 @@ namespace ba = boost::algorithm;
 //	{
 //		PRINT(("MXcbDialogImpl::OnKeyPressEvent"));
 //
-//		uint32 keyCode = MapKeyCode(inEvent->keyval);
-//		uint32 modifiers = MapModifier(inEvent->state);
+//		uint32_t keyCode = MapKeyCode(inEvent->keyval);
+//		uint32_t modifiers = MapModifier(inEvent->state);
 //		
 //		if ((keyCode == kEnterKeyCode or keyCode == kReturnKeyCode) and modifiers == 0)
 //		{
@@ -179,12 +179,12 @@ namespace ba = boost::algorithm;
 //	if (ba::contains(flags, "nosizebox"))
 //		mFlags = MWindowFlags(mFlags | kMNoSizeBox);
 //
-//	uint32 minWidth = 40;
+//	uint32_t minWidth = 40;
 //	if (not dialog->get_attribute("width").empty())
-//		minWidth = boost::lexical_cast<uint32>(dialog->get_attribute("width"));
-//	uint32 minHeight = 40;
+//		minWidth = boost::lexical_cast<uint32_t>(dialog->get_attribute("width"));
+//	uint32_t minHeight = 40;
 //	if (not dialog->get_attribute("height").empty())
-//		minHeight = boost::lexical_cast<uint32>(dialog->get_attribute("height"));
+//		minHeight = boost::lexical_cast<uint32_t>(dialog->get_attribute("height"));
 //
 //	MRect bounds(0, 0, minWidth, minHeight);
 //
@@ -229,7 +229,7 @@ namespace ba = boost::algorithm;
 //		{
 //			mResponseIDs.push_back(button->get_attribute("id"));
 //			
-//			int32 response = mResponseIDs.size();
+//			int32_t response = mResponseIDs.size();
 //			if (button->get_attribute("id") == "ok")
 //				response = GTK_RESPONSE_OK;
 //			else if (button->get_attribute("id") == "cancel")
@@ -249,7 +249,7 @@ namespace ba = boost::algorithm;
 //}
 //
 //void MXcbDialogImpl::Append(MXcbWidgetMixin* inChild, MControlPacking inPacking,
-//	bool inExpand, bool inFill, uint32 inPadding)
+//	bool inExpand, bool inFill, uint32_t inPadding)
 //{
 //	GtkWidget* box = 
 //		gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
@@ -261,7 +261,7 @@ namespace ba = boost::algorithm;
 //}
 //
 //void MXcbDialogImpl::GetMargins(xml::element* inTemplate,
-//	int32& outLeftMargin, int32& outTopMargin, int32& outRightMargin, int32& outBottomMargin)
+//	int32_t& outLeftMargin, int32_t& outTopMargin, int32_t& outRightMargin, int32_t& outBottomMargin)
 //{
 //	outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 0;
 //	
@@ -271,39 +271,39 @@ namespace ba = boost::algorithm;
 //	string m = inTemplate->get_attribute("margin");
 //	if (not m.empty())
 //		outLeftMargin = outRightMargin =
-//		outTopMargin = outBottomMargin = boost::lexical_cast<int32>(m);
+//		outTopMargin = outBottomMargin = boost::lexical_cast<int32_t>(m);
 //
 //	m = inTemplate->get_attribute("margin-left-right");
 //	if (not m.empty())
-//		outLeftMargin = outRightMargin = boost::lexical_cast<int32>(m);
+//		outLeftMargin = outRightMargin = boost::lexical_cast<int32_t>(m);
 //
 //	m = inTemplate->get_attribute("margin-top-bottom");
 //	if (not m.empty())
-//		outTopMargin = outBottomMargin = boost::lexical_cast<int32>(m);
+//		outTopMargin = outBottomMargin = boost::lexical_cast<int32_t>(m);
 //
 //	m = inTemplate->get_attribute("margin-left");
 //	if (not m.empty())
-//		outLeftMargin = boost::lexical_cast<int32>(m);
+//		outLeftMargin = boost::lexical_cast<int32_t>(m);
 //
 //	m = inTemplate->get_attribute("margin-top");
 //	if (not m.empty())
-//		outTopMargin = boost::lexical_cast<int32>(m);
+//		outTopMargin = boost::lexical_cast<int32_t>(m);
 //
 //	m = inTemplate->get_attribute("margin-right");
 //	if (not m.empty())
-//		outRightMargin = boost::lexical_cast<int32>(m);
+//		outRightMargin = boost::lexical_cast<int32_t>(m);
 //
 //	m = inTemplate->get_attribute("margin-bottom");
 //	if (not m.empty())
-//		outBottomMargin = boost::lexical_cast<int32>(m);
+//		outBottomMargin = boost::lexical_cast<int32_t>(m);
 //
-////	outLeftMargin = static_cast<int32>(outLeftMargin * mDLUX);
-////	outRightMargin = static_cast<int32>(outRightMargin * mDLUX);
-////	outTopMargin = static_cast<int32>(outTopMargin * mDLUY);
-////	outBottomMargin = static_cast<int32>(outBottomMargin * mDLUY);
+////	outLeftMargin = static_cast<int32_t>(outLeftMargin * mDLUX);
+////	outRightMargin = static_cast<int32_t>(outRightMargin * mDLUX);
+////	outTopMargin = static_cast<int32_t>(outTopMargin * mDLUY);
+////	outBottomMargin = static_cast<int32_t>(outBottomMargin * mDLUY);
 //}
 //
-//MView* MXcbDialogImpl::CreateButton(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateButton(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	string title = l(inTemplate->get_attribute("title"));
@@ -311,7 +311,7 @@ namespace ba = boost::algorithm;
 ////	float idealWidth = GetTextWidth(title, VSCLASS_BUTTON, BP_PUSHBUTTON, PBS_NORMAL) + 10 * mDLUX;
 ////	if (idealWidth < 50 * mDLUX)
 ////		idealWidth = 50 * mDLUX;
-//	MRect bounds;//(inX, inY, static_cast<int32>(idealWidth), static_cast<int32>(14 * mDLUY));
+//	MRect bounds;//(inX, inY, static_cast<int32_t>(idealWidth), static_cast<int32_t>(14 * mDLUY));
 //
 //	MButtonFlags flags = eBF_None;
 //	
@@ -334,11 +334,11 @@ namespace ba = boost::algorithm;
 //	return button;
 //}
 //
-//MView* MXcbDialogImpl::CreateColorSwatch(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateColorSwatch(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	
-//	MRect bounds;//(inX, inY, static_cast<int32>(25 * mDLUX), static_cast<int32>(14 * mDLUY));
+//	MRect bounds;//(inX, inY, static_cast<int32_t>(25 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 //
 //	MColor color(inTemplate->get_attribute("color").c_str());
 //	MColorSwatch* swatch = new MColorSwatch(id, bounds, color);
@@ -348,15 +348,15 @@ namespace ba = boost::algorithm;
 //	return swatch;
 //}
 //
-//MView* MXcbDialogImpl::CreateExpander(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateExpander(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	string title = l(inTemplate->get_attribute("title"));
 //	
 //	MRect bounds;//(inX, inY,
-////		static_cast<int32>((13 + 3) * mDLUX) +
+////		static_cast<int32_t>((13 + 3) * mDLUX) +
 ////			GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_LABEL, 0),
-////		static_cast<int32>(12 * mDLUY));
+////		static_cast<int32_t>(12 * mDLUY));
 //
 //	MExpander* expander = new MExpander(id, bounds, title);
 //	AddRoute(expander->eClicked, static_cast<MDialog*>(mWindow)->eButtonClicked);
@@ -367,25 +367,25 @@ namespace ba = boost::algorithm;
 //	return expander;
 //}
 //
-//MView* MXcbDialogImpl::CreateCaption(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateCaption(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	if (id.empty())
 //		id = "caption";
 //	string text = l(inTemplate->get_attribute("text"));
 //
-//	MRect bounds;//(inX, static_cast<int32>(inY), 0, static_cast<int32>(10 * mDLUY));
+//	MRect bounds;//(inX, static_cast<int32_t>(inY), 0, static_cast<int32_t>(10 * mDLUY));
 ////	bounds.width = GetTextWidth(text, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 //	return new MCaption(id, bounds, text);
 //}
 //
-//MView* MXcbDialogImpl::CreateCheckbox(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateCheckbox(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	string title = l(inTemplate->get_attribute("title"));
 //
-//	MRect bounds;//(inX, inY, 0, static_cast<int32>(10 * mDLUY));
-////	bounds.width = static_cast<int32>(14 * mDLUX) +
+//	MRect bounds;//(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
+////	bounds.width = static_cast<int32_t>(14 * mDLUX) +
 ////		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 ////		//GetTextWidth(title, VSCLASS_BUTTON, BP_CHECKBOX, PBS_NORMAL);
 //
@@ -395,13 +395,13 @@ namespace ba = boost::algorithm;
 //	return checkbox;
 //}
 //
-//MView* MXcbDialogImpl::CreateRadiobutton(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateRadiobutton(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	string title = l(inTemplate->get_attribute("title"));
 //
-//	MRect bounds;//(inX, inY, 0, static_cast<int32>(10 * mDLUY));
-////	bounds.width = static_cast<int32>(14 * mDLUX) +
+//	MRect bounds;//(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
+////	bounds.width = static_cast<int32_t>(14 * mDLUX) +
 ////		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 ////		GetTextWidth(title, VSCLASS_BUTTON, BP_RADIOBUTTON, PBS_NORMAL);
 //	MRadiobutton* radiobutton = new MRadiobutton(id, bounds, title);
@@ -413,22 +413,22 @@ namespace ba = boost::algorithm;
 //	return radiobutton;
 //}
 //
-//MView* MXcbDialogImpl::CreateCombobox(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateCombobox(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
-//	MRect bounds;//(inX, inY, static_cast<int32>(50 * mDLUX), static_cast<int32>(14 * mDLUY));
+//	MRect bounds;//(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 //	MCombobox* combobox = new MCombobox(id, bounds);
 //	AddRoute(combobox->eValueChanged,
 //		static_cast<MDialog*>(mWindow)->eTextChanged);
 //	return combobox;
 //}
 //
-//MView* MXcbDialogImpl::CreateEdittext(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateEdittext(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	
-//	uint32 flags = eMEditTextNoFlags;
+//	uint32_t flags = eMEditTextNoFlags;
 //	if (ba::contains(inTemplate->get_attribute("style"), "right"))
 //		flags |= eMEditTextAlignRight;
 //	if (ba::contains(inTemplate->get_attribute("style"), "number"))
@@ -438,7 +438,7 @@ namespace ba = boost::algorithm;
 //	if (ba::contains(inTemplate->get_attribute("style"), "readonly"))
 //		flags |= eMEditTextReadOnly;
 //
-//	MRect bounds;//(inX, inY, static_cast<int32>(5 * mDLUX), static_cast<int32>(14 * mDLUY));
+//	MRect bounds;//(inX, inY, static_cast<int32_t>(5 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 //	MEdittext* edittext = new MEdittext(id, bounds, flags);
 //
 //	if (inTemplate->get_attribute("password") == "true")
@@ -449,23 +449,23 @@ namespace ba = boost::algorithm;
 //	return edittext;
 //}
 //
-//MView* MXcbDialogImpl::CreatePopup(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreatePopup(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
-//	MRect bounds;//(inX, inY, 0, static_cast<int32>(14 * mDLUY));
+//	MRect bounds;//(inX, inY, 0, static_cast<int32_t>(14 * mDLUY));
 //	
 //	vector<string> choices;
 //	for (xml::element* option: inTemplate->find("./option"))
 //	{
 //		string label = option->content();
-////		int32 width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
+////		int32_t width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
 ////		if (bounds.width < width)
 ////			bounds.width = width;
 //		choices.push_back(label);
 //	}
 //
-////	bounds.width += static_cast<int32>(14 * mDLUX);
+////	bounds.width += static_cast<int32_t>(14 * mDLUX);
 //
 //	MPopup* popup = new MPopup(id, bounds);
 //
@@ -476,7 +476,7 @@ namespace ba = boost::algorithm;
 //	return popup;
 //}
 //
-//MView* MXcbDialogImpl::CreateNotebook(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateNotebook(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
@@ -530,7 +530,7 @@ namespace ba = boost::algorithm;
 //	return result;
 //}
 //
-//MView* MXcbDialogImpl::CreatePager(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreatePager(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
@@ -561,7 +561,7 @@ namespace ba = boost::algorithm;
 //	return result;
 //}
 //
-//MView* MXcbDialogImpl::CreateListBox(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
@@ -571,13 +571,13 @@ namespace ba = boost::algorithm;
 //	for (xml::element* listitem: inTemplate->find("./listitem"))
 //	{
 //		string text = l(listitem->content());
-////		int32 textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
+////		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
 ////		if (r.width < textWidth)
 ////			r.width = textWidth;
 //		result->AddItem(text);
 //	}
 //	
-////	r.width += static_cast<int32>(mDLUX * 6);
+////	r.width += static_cast<int32_t>(mDLUX * 6);
 ////	result->SetFrame(r);
 //
 //	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
@@ -585,7 +585,7 @@ namespace ba = boost::algorithm;
 //	return result;
 //}
 //
-//MView* MXcbDialogImpl::CreateListView(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
@@ -595,13 +595,13 @@ namespace ba = boost::algorithm;
 //	for (xml::element* listitem: inTemplate->find("./listitem"))
 //	{
 //		string text = l(listitem->content());
-////		int32 textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
+////		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
 ////		if (r.width < textWidth)
 ////			r.width = textWidth;
 //		result->AddItem(text);
 //	}
 //	
-////	r.width += static_cast<int32>(mDLUX * 6);
+////	r.width += static_cast<int32_t>(mDLUX * 6);
 ////	result->SetFrame(r);
 //
 //	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
@@ -609,13 +609,13 @@ namespace ba = boost::algorithm;
 //	return result;
 //}
 //
-//MView* MXcbDialogImpl::CreateSeparator(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	MRect bounds(inX, inY, 2, 2);
 //	return new MSeparator("separator", bounds);
 //}
 //
-//MView* MXcbDialogImpl::CreateScrollbar(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateScrollbar(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //	string orientation = inTemplate->get_attribute("orientation");
@@ -630,17 +630,17 @@ namespace ba = boost::algorithm;
 //	return new MScrollbar(id, bounds);
 //}
 //
-//MView* MXcbDialogImpl::CreateBox(xml::element* inTemplate, int32 inX, int32 inY, bool inHorizontal)
+//MView* MXcbDialogImpl::CreateBox(xml::element* inTemplate, int32_t inX, int32_t inY, bool inHorizontal)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
-//	uint32 spacing = 4;
+//	uint32_t spacing = 4;
 //	if (not inTemplate->get_attribute("spacing").empty())
-//		spacing = boost::lexical_cast<uint32>(inTemplate->get_attribute("spacing"));
+//		spacing = boost::lexical_cast<uint32_t>(inTemplate->get_attribute("spacing"));
 //
-//	uint32 padding = 4;
+//	uint32_t padding = 4;
 //	if (not inTemplate->get_attribute("padding").empty())
-//		spacing = boost::lexical_cast<uint32>(inTemplate->get_attribute("padding"));
+//		spacing = boost::lexical_cast<uint32_t>(inTemplate->get_attribute("padding"));
 //
 //	bool expand = inTemplate->get_attribute("expand") == "true";
 //	bool fill = inTemplate->get_attribute("fill") == "true";
@@ -655,16 +655,16 @@ namespace ba = boost::algorithm;
 //	return result;
 //}
 //
-//MView* MXcbDialogImpl::CreateTable(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	string id = inTemplate->get_attribute("id");
 //
 //	vector<MView*> views;
-//	uint32 colCount = 0, rowCount = 0;
+//	uint32_t colCount = 0, rowCount = 0;
 //	
 //	for (xml::element* row: inTemplate->find("./row"))
 //	{
-//		uint32 cn = 0;
+//		uint32_t cn = 0;
 //		
 //		for (xml::element* col: row->children<xml::element>())
 //		{
@@ -683,13 +683,13 @@ namespace ba = boost::algorithm;
 //	
 //	MRect r(inX, inY, 0, 0);
 //	MTable* result = new MTable(id, r,
-////		&views[0], colCount, rowCount, static_cast<int32>(4 * mDLUX), static_cast<int32>(4 * mDLUY));
+////		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
 //		&views[0], colCount, rowCount, 4, 4);
 //	
 //	return result;
 //}
 //
-//MView* MXcbDialogImpl::CreateControls(xml::element* inTemplate, int32 inX, int32 inY)
+//MView* MXcbDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int32_t inY)
 //{
 //	MView* result = nullptr;
 //
@@ -736,19 +736,19 @@ namespace ba = boost::algorithm;
 //
 //	MControlBase* control = dynamic_cast<MControlBase*>(result);
 //
-//	int32 marginLeft, marginTop, marginRight, marginBottom;
+//	int32_t marginLeft, marginTop, marginRight, marginBottom;
 //	GetMargins(inTemplate, marginLeft, marginTop, marginRight, marginBottom);
 ////	result->SetMargins(marginLeft, marginTop, marginRight, marginBottom);
 //
 //	if (not inTemplate->get_attribute("width").empty())
 //	{
-//		int32 width = marginLeft + marginRight;
+//		int32_t width = marginLeft + marginRight;
 //		
 //		if (inTemplate->get_attribute("width") == "scrollbarwidth")
 //			width += kScrollbarWidth;
 //		else
-////			width += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->get_attribute("width")) * mDLUX);
-//			width += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->get_attribute("width")));
+////			width += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("width")) * mDLUX);
+//			width += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("width")));
 //
 //		MXcbWidgetMixin* impl = dynamic_cast<MXcbWidgetMixin*>(control->GetControlImplBase());
 //		if (impl != nullptr)
@@ -757,13 +757,13 @@ namespace ba = boost::algorithm;
 //	
 ////	if (not inTemplate->get_attribute("height").empty())
 ////	{
-////		int32 height = marginTop + marginBottom;
+////		int32_t height = marginTop + marginBottom;
 ////		
 ////		if (inTemplate->get_attribute("height") == "scrollbarheight")
 ////			height += kScrollbarWidth;
 ////		else
-//////			height += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->get_attribute("height")) * mDLUY);
-////			height += static_cast<int32>(boost::lexical_cast<int32>(inTemplate->get_attribute("height")));
+//////			height += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("height")) * mDLUY);
+////			height += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("height")));
 ////		
 ////		MRect frame;
 ////		result->GetFrame(frame);
@@ -777,16 +777,16 @@ namespace ba = boost::algorithm;
 //			inTemplate->get_attribute("packing") == "end" ? ePackEnd : ePackStart,
 //			inTemplate->get_attribute("expand") == "true" ? true : false,
 //			inTemplate->get_attribute("fill") == "true" ? true : false,
-//			inTemplate->get_attribute("padding").empty() ? 0 : boost::lexical_cast<int32>(inTemplate->get_attribute("padding")));
+//			inTemplate->get_attribute("padding").empty() ? 0 : boost::lexical_cast<int32_t>(inTemplate->get_attribute("padding")));
 //	}
 //
 //	return result;
 //}
 //
-//uint32 MXcbDialogImpl::GetTextWidth(const string& inText,
+//uint32_t MXcbDialogImpl::GetTextWidth(const string& inText,
 //	const wchar_t* inClass, int inPartID, int inStateID)
 //{
-//	uint32 result = 0;
+//	uint32_t result = 0;
 ////	wstring text(c2w(inText));
 ////	
 ////	HTHEME hTheme = ::OpenThemeData(GetHandle(), inClass);
@@ -802,7 +802,7 @@ namespace ba = boost::algorithm;
 ////	else
 ////	{
 ////		SIZE size;
-////		::GetTextExtentPoint32(mDC, text.c_str(), text.length(), &size);
+////		::GetTextExtentPoint32_t(mDC, text.c_str(), text.length(), &size);
 ////		result = size.cx;
 ////	}
 //	

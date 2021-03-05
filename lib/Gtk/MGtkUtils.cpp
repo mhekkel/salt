@@ -99,7 +99,7 @@ string GetDateTime()
 //		g_date_set_time_t(date, time(nullptr)); 
 //	
 //		char buffer[1024] = "";
-//		uint32 size = g_date_strftime(buffer, sizeof(buffer),
+//		uint32_t size = g_date_strftime(buffer, sizeof(buffer),
 //			"%A %d %B, %Y", date);
 //		
 //		result.assign(buffer, buffer + size);
@@ -129,7 +129,7 @@ bool IsModifierDown(
 
 GdkPixbuf* CreateDot(
 	MColor			inColor,
-	uint32			inSize)
+	uint32_t			inSize)
 {
 	// first draw in a buffer with cairo
 	cairo_surface_t* cs = cairo_image_surface_create(
@@ -153,16 +153,16 @@ GdkPixbuf* CreateDot(
 	unsigned char* dst = gdk_pixbuf_get_pixels(result);
 	unsigned char* src = cairo_image_surface_get_data(cs);
 	
-	uint32 dst_rowstride = gdk_pixbuf_get_rowstride(result);
-	uint32 src_rowstride = cairo_image_surface_get_stride(cs);
-	uint32 n_channels = gdk_pixbuf_get_n_channels(result);
+	uint32_t dst_rowstride = gdk_pixbuf_get_rowstride(result);
+	uint32_t src_rowstride = cairo_image_surface_get_stride(cs);
+	uint32_t n_channels = gdk_pixbuf_get_n_channels(result);
 
-	for (uint32 x = 0; x < inSize; ++x)
+	for (uint32_t x = 0; x < inSize; ++x)
 	{
-		for (uint32 y = 0; y < inSize; ++y)
+		for (uint32_t y = 0; y < inSize; ++y)
 		{
 			unsigned char* p = dst + y * dst_rowstride + x * n_channels;
-			uint32 cp = *reinterpret_cast<uint32*>(src + y * src_rowstride + x * 4);
+			uint32_t cp = *reinterpret_cast<uint32_t*>(src + y * src_rowstride + x * 4);
 
 			p[0] = inColor.red;
 			p[1] = inColor.green;
@@ -222,9 +222,9 @@ string GetApplicationVersion()
 	return VERSION;
 }
 
-uint32 MapModifier(uint32 inModifier)
+uint32_t MapModifier(uint32_t inModifier)
 {
-	uint32 result = 0;
+	uint32_t result = 0;
 	
 	if (inModifier & GDK_SHIFT_MASK)	 result |= kShiftKey;
 	if (inModifier & GDK_CONTROL_MASK)	 result |= kControlKey;
@@ -232,9 +232,9 @@ uint32 MapModifier(uint32 inModifier)
 	return result;	
 }
 
-uint32 MapKeyCode(uint32 inKeyValue)
+uint32_t MapKeyCode(uint32_t inKeyValue)
 {
-	uint32 result;
+	uint32_t result;
 	
 	switch (inKeyValue)
 	{

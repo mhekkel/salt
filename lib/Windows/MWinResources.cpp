@@ -28,7 +28,7 @@ struct rsrc_imp
 	HRSRC		rsrc;
 	HGLOBAL		hmem;
 	const char*	data;
-	uint32		size;
+	uint32_t		size;
 	string		name;
 };
 
@@ -74,7 +74,7 @@ index::index()
 	for (xml::element* rsrc: doc.find("//rsrc"))
 	{
 		string name = rsrc->get_attribute("name");
-		uint32 nr = boost::lexical_cast<int>(rsrc->get_attribute("nr"));
+		uint32_t nr = boost::lexical_cast<int>(rsrc->get_attribute("nr"));
 		
 		rsrc_imp& impl(m_index[name]);
 

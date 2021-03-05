@@ -15,8 +15,8 @@ class MTerminalChannel
 
 	virtual void SetMessageCallback(MessageCallback&& inMessageCallback);
 	
-	virtual void SetTerminalSize(uint32 inColumns, uint32 inRows,
-		uint32 inPixelWidth, uint32 inPixelHeight) = 0;
+	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+		uint32_t inPixelWidth, uint32_t inPixelHeight) = 0;
 	
 	virtual void Open(const std::string& inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
@@ -34,9 +34,9 @@ class MTerminalChannel
 	virtual void SendSignal(const std::string& inSignal) = 0;
 	virtual void ReadData(ReadCallback&& inCallback) = 0;
 	
-	boost::asio::io_service& GetIOService() { return mIOService; }
+	boost::asio::io_context& GetIOContext() { return mIOContext; }
 	
-	static MTerminalChannel* Create(pinch::basic_connection* inConnection);
+	static MTerminalChannel* Create(std::shared_ptr<pinch::basic_connection> inConnection);
 	static MTerminalChannel* Create(boost::asio::io_service& inIOService);
 
 	const std::vector<std::string>& GetConnectionInfo() const
@@ -48,15 +48,15 @@ class MTerminalChannel
 	
   protected:
 
-	MTerminalChannel(boost::asio::io_service& inIOService);
+	MTerminalChannel(boost::asio::io_context& inIOContext);
 	virtual ~MTerminalChannel();
 
-	uint32 mTerminalWidth, mTerminalHeight, mPixelWidth, mPixelHeight;
+	uint32_t mTerminalWidth, mTerminalHeight, mPixelWidth, mPixelHeight;
 
 	OpenCallback mOpenCB;
 	MessageCallback mMessageCB;
 	
-	boost::asio::io_service& mIOService;
+	boost::asio::io_context& mIOContext;
 	std::vector<std::string> mConnectionInfo;
-	uint32 mRefCount;
+	uint32_t mRefCount;
 };

@@ -45,8 +45,8 @@ GtkWidget* CreateAlertWithArgs(
 		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
 	
 	string instruction, content;
-	vector<pair<string,uint32> > btns;
-	int32 defaultButton = -1;
+	vector<pair<string,uint32_t> > btns;
+	int32_t defaultButton = -1;
 	GtkMessageType type = GTK_MESSAGE_INFO;
 	
 	if (root->attr("type") == "warning")
@@ -93,7 +93,7 @@ GtkWidget* CreateAlertWithArgs(
 				if (button.qname() == "button")
 				{
 					string label = GetLocalisedStringForContext(inResourceName, button.attr("title"));
-					uint32 cmd = stoul(button.attr("cmd"));
+					uint32_t cmd = stoul(button.attr("cmd"));
 
 					if (button.attr("default") == "true")
 						defaultButton = cmd;
@@ -119,9 +119,9 @@ GtkWidget* CreateAlertWithArgs(
 	return dlg;
 }
 
-int32 DisplayAlert(MWindow* inParent, const string& inResourceName, vector<string>& inArgs)
+int32_t DisplayAlert(MWindow* inParent, const string& inResourceName, vector<string>& inArgs)
 {
-	int32 result = -1;
+	int32_t result = -1;
 
 	try
 	{

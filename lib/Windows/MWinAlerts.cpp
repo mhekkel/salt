@@ -30,7 +30,7 @@ string localise(const string& inResourceName, const string& inText)
 	return GetLocalisedStringForContext(inResourceName, inText);
 }
 
-int32 DisplayAlert(
+int32_t DisplayAlert(
 	MWindow*			inParent,
 	const string&		inResourceName,
 	vector<string>&		inArguments)
@@ -76,8 +76,8 @@ int32 DisplayAlert(
 	else
 		config.pszMainIcon = TD_INFORMATION_ICON;
 	
-	uint32 cancelID = 0;
-	const uint32 kButtenNrOffset = 0x01000;
+	uint32_t cancelID = 0;
+	const uint32_t kButtenNrOffset = 0x01000;
 
 	for (xml::element* item: *root)
 	{
@@ -118,7 +118,7 @@ int32 DisplayAlert(
 				if (button->qname() == "button")
 				{
 					string label = localise(inResourceName, button->get_attribute("title"));
-					uint32 cmd = atoi(button->get_attribute("cmd").c_str());
+					uint32_t cmd = atoi(button->get_attribute("cmd").c_str());
 
 					assert(cmd < 10);
 					cmd += kButtenNrOffset;

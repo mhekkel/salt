@@ -27,6 +27,6 @@ class MGtkSshAgentImpl : public MSshAgentImpl
 
 	int					mSock;
 	MSshPacket			mIdentities;
-	uint32				mCount;
+	uint32_t				mCount;
 	CryptoPP::Integer	e, n;
 };

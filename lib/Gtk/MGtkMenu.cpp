@@ -39,7 +39,7 @@ struct MCommandToString
 	char mCommandString[10];
 	
 	MCommandToString(
-		uint32			inCommand)
+		uint32_t			inCommand)
 	{
 		strcpy(mCommandString, "MCmd_xxxx");
 		
@@ -94,7 +94,7 @@ typedef list<MMenuItem*> MMenuItemList;
 struct MMenuItem
 {
   public:
-	MMenuItem(MMenu* inMenu, const string& inLabel, uint32 inCommand);
+	MMenuItem(MMenu* inMenu, const string& inLabel, uint32_t inCommand);
 
 	void CreateWidget();						// plain, simple item
 	void CreateWidget(GSList*& ioRadioGroup);	// radio menu item
@@ -109,8 +109,8 @@ struct MMenuItem
 
 	GtkWidget*		mGtkMenuItem;
 	string			mLabel;
-	uint32			mCommand;
-	uint32			mIndex;
+	uint32_t			mCommand;
+	uint32_t			mIndex;
 	MMenu*			mMenu;
 	MMenu*			mSubMenu;
 	bool			mEnabled;
@@ -119,7 +119,7 @@ struct MMenuItem
 	bool			mInhibitCallBack;
 };
 
-MMenuItem::MMenuItem(MMenu* inMenu, const string& inLabel, uint32 inCommand)
+MMenuItem::MMenuItem(MMenu* inMenu, const string& inLabel, uint32_t inCommand)
 	: mCallback(this, &MMenuItem::ItemCallback)
 //	, mRecentItemActivated(this, &MMenuItem::RecentItemActivated)
 	, mGtkMenuItem(nullptr)
@@ -199,7 +199,7 @@ void MMenuItem::ItemCallback()
 			auto w = gdk_display_get_default_group(gdk_display_get_default());
 			gdk_window_get_device_position(w, mouse_device, nullptr, nullptr, &gdkModifiers);
 
-			uint32 modifiers = 0;
+			uint32_t modifiers = 0;
 			if (gdkModifiers & GDK_SHIFT_MASK)		modifiers |= kShiftKey;
 			if (gdkModifiers & GDK_CONTROL_MASK)	modifiers |= kControlKey;
 			if (gdkModifiers & GDK_MOD1_MASK)		modifiers |= kOptionKey;
@@ -240,19 +240,19 @@ class MGtkMenuImpl : public MMenuImpl
 	MGtkMenuImpl(MMenu* inMenu);
 
 	virtual void SetTarget(MHandler* inHandler);
-	virtual void SetItemState(uint32 inItem, bool inEnabled, bool inChecked);
-	virtual void AppendItem(const string& inLabel, uint32 inCommand);
+	virtual void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked);
+	virtual void AppendItem(const string& inLabel, uint32_t inCommand);
 	virtual void AppendSubmenu(MMenu* inSubmenu);
 	virtual void AppendSeparator();
-	virtual void AppendCheckbox(const string& inLabel, uint32 inCommand);
-	virtual void AppendRadiobutton(const string& inLabel, uint32 inCommand);
-	virtual uint32 CountItems() const;
-	virtual void RemoveItems(uint32 inFirstIndex, uint32 inCount);
-	virtual string GetItemLabel(uint32 inIndex) const;
-	virtual void SetItemCommand(uint32 inIndex, uint32 inCommand);
-	virtual uint32 GetItemCommand(uint32 inIndex) const;
-	virtual MMenu* GetSubmenu(uint32 inIndex) const;
-	virtual void Popup(MWindow* inHandler, int32 inX, int32 inY, bool inBottomMenu);
+	virtual void AppendCheckbox(const string& inLabel, uint32_t inCommand);
+	virtual void AppendRadiobutton(const string& inLabel, uint32_t inCommand);
+	virtual uint32_t CountItems() const;
+	virtual void RemoveItems(uint32_t inFirstIndex, uint32_t inCount);
+	virtual string GetItemLabel(uint32_t inIndex) const;
+	virtual void SetItemCommand(uint32_t inIndex, uint32_t inCommand);
+	virtual uint32_t GetItemCommand(uint32_t inIndex) const;
+	virtual MMenu* GetSubmenu(uint32_t inIndex) const;
+	virtual void Popup(MWindow* inHandler, int32_t inX, int32_t inY, bool inBottomMenu);
 	virtual void AddToWindow(MWindowImpl* inWindow);
 	virtual void MenuUpdated();
 
@@ -266,7 +266,7 @@ class MGtkMenuImpl : public MMenuImpl
 
   protected:
 
-	MMenuItem* CreateNewItem(const std::string& inLabel, uint32 inCommand, GSList** ioRadioGroup);
+	MMenuItem* CreateNewItem(const std::string& inLabel, uint32_t inCommand, GSList** ioRadioGroup);
 	
 	// for the menubar
 	MGtkMenuImpl(MMenu* inMenu, GtkWidget* inWidget)
@@ -281,7 +281,7 @@ class MGtkMenuImpl : public MMenuImpl
 	MMenuItemList	mItems;
 	MHandler*		mTarget;
 	GSList*			mRadioGroup;
-	int32			mPopupX, mPopupY;
+	int32_t			mPopupX, mPopupY;
 };
 
 MGtkMenuImpl::MGtkMenuImpl(MMenu* inMenu)
@@ -306,7 +306,7 @@ void MGtkMenuImpl::SetTarget(MHandler* inHandler)
 	}
 }
 
-void MGtkMenuImpl::SetItemState(uint32 inIndex, bool inEnabled, bool inChecked)
+void MGtkMenuImpl::SetItemState(uint32_t inIndex, bool inEnabled, bool inChecked)
 {
 	if (inIndex >= mItems.size())
 		THROW(("Item index out of range"));
@@ -324,7 +324,7 @@ void MGtkMenuImpl::SetItemState(uint32 inIndex, bool inEnabled, bool inChecked)
 		(*item)->SetChecked(inChecked);
 }
 
-MMenuItem* MGtkMenuImpl::CreateNewItem(const string& inLabel, uint32 inCommand, GSList** ioRadioGroup)
+MMenuItem* MGtkMenuImpl::CreateNewItem(const string& inLabel, uint32_t inCommand, GSList** ioRadioGroup)
 {
 	MMenuItem* item = new MMenuItem(mMenu, inLabel, inCommand);
 
@@ -345,7 +345,7 @@ MMenuItem* MGtkMenuImpl::CreateNewItem(const string& inLabel, uint32 inCommand, 
 	return item;
 }
 
-void MGtkMenuImpl::AppendItem(const string& inLabel, uint32 inCommand)
+void MGtkMenuImpl::AppendItem(const string& inLabel, uint32_t inCommand)
 {
 	CreateNewItem(inLabel, inCommand, nullptr);
 }
@@ -371,20 +371,20 @@ void MGtkMenuImpl::AppendSeparator()
 	CreateNewItem("-", 0, nullptr);
 }
 
-void MGtkMenuImpl::AppendCheckbox(const string& inLabel, uint32 inCommand)
+void MGtkMenuImpl::AppendCheckbox(const string& inLabel, uint32_t inCommand)
 {
 }
 
-void MGtkMenuImpl::AppendRadiobutton(const string& inLabel, uint32 inCommand)
+void MGtkMenuImpl::AppendRadiobutton(const string& inLabel, uint32_t inCommand)
 {
 }
 
-uint32 MGtkMenuImpl::CountItems() const
+uint32_t MGtkMenuImpl::CountItems() const
 {
 	return mItems.size();
 }
 
-void MGtkMenuImpl::RemoveItems(uint32 inFirstIndex, uint32 inCount)
+void MGtkMenuImpl::RemoveItems(uint32_t inFirstIndex, uint32_t inCount)
 {
 	if (inFirstIndex < mItems.size())
 	{
@@ -404,7 +404,7 @@ void MGtkMenuImpl::RemoveItems(uint32 inFirstIndex, uint32 inCount)
 	}
 }
 
-string MGtkMenuImpl::GetItemLabel(uint32 inIndex) const
+string MGtkMenuImpl::GetItemLabel(uint32_t inIndex) const
 {
 	if (inIndex >= mItems.size())
 		THROW(("Item index out of range"));
@@ -415,7 +415,7 @@ string MGtkMenuImpl::GetItemLabel(uint32 inIndex) const
 	return (*i)->mLabel;
 }
 
-void MGtkMenuImpl::SetItemCommand(uint32 inIndex, uint32 inCommand)
+void MGtkMenuImpl::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
 {
 	if (inIndex >= mItems.size())
 		THROW(("Item index out of range"));
@@ -426,7 +426,7 @@ void MGtkMenuImpl::SetItemCommand(uint32 inIndex, uint32 inCommand)
 	(*i)->mCommand = inCommand;
 }
 
-uint32 MGtkMenuImpl::GetItemCommand(uint32 inIndex) const
+uint32_t MGtkMenuImpl::GetItemCommand(uint32_t inIndex) const
 {
 	if (inIndex >= mItems.size())
 		THROW(("Item index out of range"));
@@ -437,7 +437,7 @@ uint32 MGtkMenuImpl::GetItemCommand(uint32 inIndex) const
 	return (*i)->mCommand;
 }
 
-MMenu* MGtkMenuImpl::GetSubmenu(uint32 inIndex) const
+MMenu* MGtkMenuImpl::GetSubmenu(uint32_t inIndex) const
 {
 	if (inIndex >= mItems.size())
 		THROW(("Item index out of range"));
@@ -448,7 +448,7 @@ MMenu* MGtkMenuImpl::GetSubmenu(uint32 inIndex) const
 	return (*i)->mSubMenu;
 }
 
-void MGtkMenuImpl::Popup(MWindow* inHandler, int32 inX, int32 inY, bool inBottomMenu)
+void MGtkMenuImpl::Popup(MWindow* inHandler, int32_t inX, int32_t inY, bool inBottomMenu)
 {
 }
 
@@ -480,7 +480,7 @@ void MGtkMenuImpl::SetAcceleratorGroup(GtkAccelGroup* inAcceleratorGroup)
 	
 	for (auto& item : mItems)
 	{
-		uint32 key, mod;
+		uint32_t key, mod;
 		
 		if (at.GetAcceleratorKeyForCommand(item->mCommand, key, mod))
 		{
@@ -556,23 +556,23 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //
 //	static MMenu*	CreateFromResource(const char* inResourceName);
 //
-//	void			AppendItem(const std::string& inLabel, uint32 inCommand);
+//	void			AppendItem(const std::string& inLabel, uint32_t inCommand);
 //	
-//	void			AppendRadioItem(const std::string& inLabel, uint32 inCommand);
+//	void			AppendRadioItem(const std::string& inLabel, uint32_t inCommand);
 //	
-//	void			AppendCheckItem(const std::string& inLabel, uint32 inCommand);
+//	void			AppendCheckItem(const std::string& inLabel, uint32_t inCommand);
 //	
 //	void			AppendSeparator();
 //
 //	virtual void	AppendMenu(MMenu* inMenu);
 //
-//	uint32			CountItems();
+//	uint32_t			CountItems();
 //	
-//	void			RemoveItems(uint32 inFromIndex, uint32 inCount);
+//	void			RemoveItems(uint32_t inFromIndex, uint32_t inCount);
 //
-//	std::string		GetItemLabel(uint32 inIndex) const;
+//	std::string		GetItemLabel(uint32_t inIndex) const;
 //
-//	bool			GetRecentItem(uint32 inIndex, MFile& outURL) const;
+//	bool			GetRecentItem(uint32_t inIndex, MFile& outURL) const;
 //
 //	void			SetTarget(MHandler* inHandler);
 //
@@ -584,7 +584,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //	
 //	void			SetAcceleratorGroup(GtkAccelGroup* inAcceleratorGroup);
 //
-//	void			Popup(MHandler* inTarget, GdkEventButton* inEvent, int32 inX, int32 inY, bool inBottomMenu);
+//	void			Popup(MHandler* inTarget, GdkEventButton* inEvent, int32_t inX, int32_t inY, bool inBottomMenu);
 //	
 //	bool			IsRecentMenu() const;
 //	
@@ -594,7 +594,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //
 //	static void		MenuPosition(GtkMenu* inMenu, gint* inX, gint* inY, gboolean* inPushIn, gpointer inUserData);
 //
-//	MMenuItem*		CreateNewItem(const std::string& inLabel, uint32 inCommand, GSList** ioRadioGroup);
+//	MMenuItem*		CreateNewItem(const std::string& inLabel, uint32_t inCommand, GSList** ioRadioGroup);
 //
 //	virtual bool	OnDestroy();
 //	virtual void	OnSelectionDone();
@@ -607,7 +607,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //	MMenuItemList	mItems;
 //	MHandler*		mTarget;
 //	GSList*			mRadioGroup;
-//	int32			mPopupX, mPopupY;
+//	int32_t			mPopupX, mPopupY;
 //};
 //
 //class MMenubar
@@ -721,7 +721,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //					if (cs.length() != 4)
 //						THROW(("Invalid menu item specification, cmd is not correct"));
 //					
-//					uint32 cmd = 0;
+//					uint32_t cmd = 0;
 //					for (int i = 0; i < 4; ++i)
 //						cmd |= cs[i] << ((3 - i) * 8);
 //					
@@ -748,7 +748,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //
 //MMenuItem* MMenu::CreateNewItem(
 //	const string&	inLabel,
-//	uint32			inCommand,
+//	uint32_t			inCommand,
 //	GSList**		ioRadioGroup)
 //{
 //	MMenuItem* item = new MMenuItem(this, inLabel, inCommand);
@@ -772,21 +772,21 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //
 //void MMenu::AppendItem(
 //	const string&	inLabel,
-//	uint32			inCommand)
+//	uint32_t			inCommand)
 //{
 //	CreateNewItem(inLabel, inCommand, nullptr);
 //}
 //
 //void MMenu::AppendRadioItem(
 //	const string&	inLabel,
-//	uint32			inCommand)
+//	uint32_t			inCommand)
 //{
 //	CreateNewItem(inLabel, inCommand, &mRadioGroup);
 //}
 //
 //void MMenu::AppendCheckItem(
 //	const string&	inLabel,
-//	uint32			inCommand)
+//	uint32_t			inCommand)
 //{
 //	MMenuItem* item = new MMenuItem(this, inLabel, inCommand);
 //
@@ -826,14 +826,14 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 ////	item->mRecentItemActivated.Connect(recMenu, "item-activated");
 ////}
 ////
-//uint32 MMenu::CountItems()
+//uint32_t MMenu::CountItems()
 //{
 //	return mItems.size();
 //}
 //
 //void MMenu::RemoveItems(
-//	uint32			inFromIndex,
-//	uint32			inCount)
+//	uint32_t			inFromIndex,
+//	uint32_t			inCount)
 //{
 //	if (inFromIndex < mItems.size())
 //	{
@@ -854,7 +854,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //}
 //
 //string MMenu::GetItemLabel(
-//	uint32				inIndex) const
+//	uint32_t				inIndex) const
 //{
 //	if (inIndex >= mItems.size())
 //		THROW(("Item index out of range"));
@@ -866,7 +866,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //}
 //
 //bool MMenu::GetRecentItem(
-//	uint32				inIndex,
+//	uint32_t				inIndex,
 //	MFile&				outURL) const
 //{
 //	if (inIndex >= mItems.size())
@@ -961,7 +961,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //	{
 //		MMenuItem* item = *mi;
 //		
-//		uint32 key, mod;
+//		uint32_t key, mod;
 //		
 //		if (at.GetAcceleratorKeyForCommand(item->mCommand, key, mod))
 //		{
@@ -991,8 +991,8 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //void MMenu::Popup(
 //	MHandler*			inHandler,
 //	GdkEventButton*		inEvent,
-//	int32				inX,
-//	int32				inY,
+//	int32_t				inX,
+//	int32_t				inY,
 //	bool				inBottomMenu)
 //{
 //	SetTarget(inHandler);
@@ -1006,8 +1006,8 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //
 //	gtk_widget_show_all(mGtkMenu);
 //
-//	int32 button = 0;
-//	uint32 time = 0;
+//	int32_t button = 0;
+//	uint32_t time = 0;
 //	if (inEvent != nullptr)
 //	{
 //		button = inEvent->button;
@@ -1102,7 +1102,7 @@ bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton* inEvent)
 //					if (cs.length() != 4)
 //						THROW(("Invalid menu item specification, cmd is not correct"));
 //					
-//					uint32 cmd = 0;
+//					uint32_t cmd = 0;
 //					for (int i = 0; i < 4; ++i)
 //						cmd |= cs[i] << ((3 - i) * 8);
 //					
