@@ -226,7 +226,7 @@ void proxy_connection::handle_connect()
 	string::size_type cp = host.find(':');
 	if (cp != string::npos)
 	{
-		port = boost::lexical_cast<uint16>(host.substr(cp + 1));
+		port = std::to_string(host.substr(cp + 1));
 		host.erase(cp, string::npos);
 	}
 
@@ -256,14 +256,14 @@ void proxy_connection::handle_request()
 				host = "localhost";
 
 			if (mr[4].matched)
-				port = boost::lexical_cast<uint16>(mr[4]);
+				port = std::to_string(mr[4]);
 		}
 		else
 		{
 			string::size_type cp = host.find(':');
 			if (cp != string::npos)
 			{
-				port = boost::lexical_cast<uint16>(host.substr(cp + 1));
+				port = std::to_string(host.substr(cp + 1));
 				host.erase(cp, string::npos);
 			}
 		}

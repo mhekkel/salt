@@ -342,7 +342,7 @@ void MSaltApp::OpenRecent(const string& inRecent)
 	{
 		string user = m[1];
 		string host = m[2];
-		uint16 port = m[3].matched ? boost::lexical_cast<uint16>(m[3]) : 22;
+		uint16 port = m[3].matched ? std::to_string(m[3]) : 22;
 		string command = m[6];
 		
 		MWindow* w;
@@ -351,7 +351,7 @@ void MSaltApp::OpenRecent(const string& inRecent)
 		{
 			string proxy_user = m[4];
 			string proxy_host = m[5];
-			uint16 proxy_port = m[6].matched ? boost::lexical_cast<uint16>(m[6]) : 22;
+			uint16 proxy_port = m[6].matched ? std::to_string(m[6]) : 22;
 			string proxy_cmd  = m[7];
 			
 			pinch::basic_connection* connection = mConnectionPool.get(
@@ -430,7 +430,7 @@ void MSaltApp::Open(const string& inFile)
 	{
 		string user = m[1];
 		string host = m[3];
-		uint16 port = m[4].matched ? boost::lexical_cast<uint16>(m[4]) : 22;
+		uint16 port = m[4].matched ? std::to_string(m[4]) : 22;
 		string command;
 		
 		pinch::basic_connection* connection = mConnectionPool.get(user, host, port);

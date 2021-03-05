@@ -167,8 +167,8 @@ bool MConnectDialog::OKClicked()
 		
 		if (not IsChecked("use-proxy"))
 		{
-			auto connection = pool.get(user, host, boost::lexical_cast<uint16>(port));
-			w = MTerminalWindow::Create(user, host, boost::lexical_cast<uint16>(port), command, connection);
+			auto connection = pool.get(user, host, std::to_string(port));
+			w = MTerminalWindow::Create(user, host, std::to_string(port), command, connection);
 			break;
 		}
 
@@ -190,10 +190,10 @@ bool MConnectDialog::OKClicked()
 			break;
 		
 		std::shared_ptr<pinch::basic_connection> connection(
-			pool.get(user, host, boost::lexical_cast<uint16>(port),
-				proxy_user, proxy_host, boost::lexical_cast<uint16>(proxy_port), proxy_cmd));
+			pool.get(user, host, std::to_string(port),
+				proxy_user, proxy_host, std::to_string(proxy_port), proxy_cmd));
 
-		w = MTerminalWindow::Create(user, host, boost::lexical_cast<uint16>(port), command, connection);
+		w = MTerminalWindow::Create(user, host, std::to_string(port), command, connection);
 		
 		// store this recent proxy
 		vector<string> ss;

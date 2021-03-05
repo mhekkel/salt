@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <pinch/connection.hpp>
+#include <pinch/channel.hpp>
 
 class MTerminalChannel
 {

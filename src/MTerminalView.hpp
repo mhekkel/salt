@@ -10,7 +10,7 @@
 #include <boost/function.hpp>
 #include <boost/format.hpp>
 
-//#include <pinch/terminal_channel.hpp>
+#include <pinch/terminal_channel.hpp>
 
 #include "MCanvas.hpp"
 #include "MHandler.hpp"

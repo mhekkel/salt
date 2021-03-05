@@ -43,7 +43,7 @@ bool MPortForwardingDialog::OKClicked()
 	
 	try
 	{
-		uint16 listenPort = boost::lexical_cast<uint16>(GetText("listen"));
+		uint16 listenPort = std::to_string(GetText("listen"));
 		string connect = GetText("connect");
 				
 		uint16 connectPort = listenPort;
@@ -55,7 +55,7 @@ bool MPortForwardingDialog::OKClicked()
 			throw runtime_error("Invalid host");
 		
 		if (m[2].matched)
-			connectPort = boost::lexical_cast<uint16>(m[2]);
+			connectPort = std::to_string(m[2]);
 		
 		mConnection->forward_port("::", listenPort, m[1], connectPort);
 
@@ -100,7 +100,7 @@ bool MSOCKS5ProxyDialog::OKClicked()
 	
 	try
 	{
-		uint16 listenPort = boost::lexical_cast<uint16>(GetText("listen"));
+		uint16 listenPort = std::to_string(GetText("listen"));
 		mConnection->forward_socks5("::", listenPort);
 		Preferences::SetString("socks5-proxy-port", boost::lexical_cast<string>(listenPort));
 		result = true;
@@ -153,7 +153,7 @@ bool MHTTPProxyDialog::OKClicked()
 	
 	try
 	{
-		uint16 listenPort = boost::lexical_cast<uint16>(GetText("listen"));
+		uint16 listenPort = std::to_string(GetText("listen"));
 		bool log = IsChecked("log");
 		
 		string user = GetText("user");

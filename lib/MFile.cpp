@@ -493,7 +493,7 @@ MFileImpl* MFile::CreateImpl(const string& inURL, bool isAbsoluteURL)
 		//		if (isAbsoluteURL)
 		//			file.insert(file.begin(), '/');
 
-		//		result = new MSFTPFileImpl(host, username, boost::lexical_cast<uint16>(port), file);
+		//		result = new MSFTPFileImpl(host, username, std::to_string(port), file);
 		//	}
 		//	else
 		//		THROW(("Malformed URL: '%s'", inURL.c_str()));
