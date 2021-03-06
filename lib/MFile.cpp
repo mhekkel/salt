@@ -7,21 +7,19 @@
 
 #include <cstring>
 
+#include <regex>
 #include <sys/stat.h>
 #include <stack>
 #include <fstream>
 #include <cassert>
 #include <cerrno>
 #include <limits>
+#include <filesystem>
 
-#include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
-#include <boost/bind.hpp>
 
 #include "MFile.hpp"
 #include "MDocument.hpp"
@@ -187,7 +185,7 @@ void MFileImpl::DoLoad()
 	mModDate = fs::last_write_time(mPath);
 	mReadOnly = FileIsReadOnly(mPath);
 	
-	fs::ifstream file(mPath, ios::binary);
+	std::ifstream file(mPath, ios::binary);
 	mIODocument->IOReadFile(file);
 	mIODocument->IOProgress(1.0f, "");
 
@@ -196,7 +194,7 @@ void MFileImpl::DoLoad()
 
 void MFileImpl::DoSave()
 {
-	fs::ofstream file(mPath, ios::trunc|ios::binary);
+	std::ofstream file(mPath, ios::trunc|ios::binary);
 		
 	if (not file.is_open())
 		THROW(("Could not open file %s for writing", mPath.filename().c_str()));
@@ -220,15 +218,15 @@ void MFileImpl::CancelIO()
 bool MFileImpl::IsModifiedOnDisk()
 {
 	bool result = false;
-	if (mModDate != 0)
-	{
-		time_t modDate = fs::last_write_time(mPath);
+	// if (mModDate)
+	// {
+		auto modDate = fs::last_write_time(mPath);
 		if (modDate > mModDate)
 		{
 			mModDate = modDate;
 			result = true;
 		}
-	}
+	// }
 	return result;
 }
 
@@ -464,9 +462,9 @@ MFileImpl* MFile::CreateImpl(const string& inURL, bool isAbsoluteURL)
 {
 	MFileImpl* result = nullptr;
 
-	boost::regex re("^([-+a-zA-Z]+)://(.+)");
-	boost::smatch m;
-	if (boost::regex_match(inURL, m, re))
+	std::regex re("^([-+a-zA-Z]+)://(.+)");
+	std::smatch m;
+	if (std::regex_match(inURL, m, re))
 	{
 		string scheme = ba::to_lower_copy(m[1].str());
 		string path = m[2];
@@ -474,12 +472,12 @@ MFileImpl* MFile::CreateImpl(const string& inURL, bool isAbsoluteURL)
 		URLDecode(path);
 		
 		if (scheme == "file")
-			result = new MFileImpl(fs::system_complete(path));
+			result = new MFileImpl(fs::canonical(path));
 		//else if (scheme == "sftp" or scheme == "ssh")
 		//{
-		//	boost::regex re2("^(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?/(.+)");
+		//	std::regex re2("^(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?/(.+)");
 		//	
-		//	if (boost::regex_match(path, m, re2))
+		//	if (std::regex_match(path, m, re2))
 		//	{
 		//		string username = m[1];
 		//		string password = m[2];
@@ -502,7 +500,7 @@ MFileImpl* MFile::CreateImpl(const string& inURL, bool isAbsoluteURL)
 			THROW(("Unsupported URL scheme '%s'", scheme.c_str()));
 	}
 	else // assume it is a simple path
-		result = new MFileImpl(fs::system_complete(inURL));
+		result = new MFileImpl(fs::canonical(inURL));
 	
 	return result;
 }
@@ -608,9 +606,9 @@ bool MFile::Exists() const
 	return result;
 }
 
-std::time_t MFile::GetModDate() const
+fs::file_time_type MFile::GetModDate() const
 {
-	return mImpl ? mImpl->GetModDate() : 0;
+	return mImpl ? mImpl->GetModDate() : fs::file_time_type{};
 }
 
 bool MFile::IsModifiedOnDisk() const

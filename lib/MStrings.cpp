@@ -34,8 +34,8 @@ struct ls
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int version)
 	{
-		ar & BOOST_SERIALIZATION_NVP(key)
-		   & BOOST_SERIALIZATION_NVP(value)
+		ar & zeep::make_nvp("key", key)
+		   & zeep::make_nvp("value", value)
 		   & zeep::xml::make_attribute_nvp("context", context);
 	}
 };

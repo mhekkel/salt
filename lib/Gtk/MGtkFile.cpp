@@ -5,7 +5,8 @@
 
 #include "MGtkLib.hpp"
 
-#include <boost/filesystem.hpp>
+#include <cassert>
+#include <filesystem>
 
 #include "MError.hpp"
 #include "MStrings.hpp"
@@ -13,7 +14,7 @@
 #include "MApplication.hpp"
 
 using namespace std;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // ------------------------------------------------------------------
 //

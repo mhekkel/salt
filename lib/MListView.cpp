@@ -5,8 +5,6 @@
 
 #include "MLib.hpp"
 
-#include <boost/format.hpp>
-
 #include "MListView.hpp"
 #include "MControls.hpp"
 #include "MCanvas.hpp"

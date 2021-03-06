@@ -22,7 +22,7 @@ struct MPrimaryImpl
 	bool				HasText();
 	void				GetText(string& outText);
 	void				SetText(const string& inText);
-	void				SetText(boost::function<void(std::string&)> provider);
+	void				SetText(std::function<void(std::string&)> provider);
 	void				LoadClipboardIfNeeded();
 
 	static void			GtkClipboardGet(
@@ -39,7 +39,7 @@ struct MPrimaryImpl
 							GdkEventOwnerChange*inEvent);
 	
 	string										mText;
-	boost::function<void(string&)>				mProvider;
+	std::function<void(string&)>				mProvider;
 	MSlot<void(GdkEventOwnerChange*)>			mOwnerChange;
 	GtkClipboard*								mGtkClipboard;
 	bool										mClipboardIsMine;
@@ -70,10 +70,10 @@ void MPrimaryImpl::GtkClipboardGet(
 {
 	MPrimaryImpl* self = reinterpret_cast<MPrimaryImpl*>(inUserDataOrOwner);
 	
-	if (self->mText.empty() and not self->mProvider.empty())
+	if (self->mText.empty() and self->mProvider)
 	{
 		self->mProvider(self->mText);
-		self->mProvider.clear();
+		self->mProvider = {};
 	}
 	
 	gtk_selection_data_set_text(inSelectionData, self->mText.c_str(), self->mText.length());
@@ -90,7 +90,7 @@ void MPrimaryImpl::GtkClipboardClear(
 		self->mOwnerChanged = true;
 		self->mClipboardIsMine = false;
 		self->mText.clear();
-		self->mProvider.clear();
+		self->mProvider = {};
 	}
 }
 
@@ -101,7 +101,7 @@ void MPrimaryImpl::OnOwnerChange(
 	{
 		mOwnerChanged = true;
 		mText.clear();
-		mProvider.clear();
+		mProvider = {};
 	}
 }
 
@@ -124,21 +124,21 @@ void MPrimaryImpl::LoadClipboardIfNeeded()
 bool MPrimaryImpl::HasText()
 {
 	LoadClipboardIfNeeded();
-	return not (mText.empty() and mProvider.empty());
+	return not (mText.empty() and not mProvider);
 }
 
 void MPrimaryImpl::GetText(string& outText)
 {
 	if (not mText.empty())
 		outText = mText;
-	else if (not mProvider.empty())
+	else if (mProvider)
 		mProvider(outText);
 }
 
 void MPrimaryImpl::SetText(const string& inText)
 {
 	mText = inText;
-	mProvider.clear();
+	mProvider = {};
 	
 	GtkTargetEntry targets[] = {
 		{ const_cast<gchar*>("UTF8_STRING"), 0, 0 },
@@ -157,7 +157,7 @@ void MPrimaryImpl::SetText(const string& inText)
 	mClipboardIsMine = true;
 }
 
-void MPrimaryImpl::SetText(boost::function<void(string&)> provider)
+void MPrimaryImpl::SetText(std::function<void(string&)> provider)
 {
 	SetText(string(""));
 	mProvider = provider;
@@ -196,7 +196,7 @@ void MPrimary::SetText(const string& text)
 	mImpl->SetText(text);
 }
 
-void MPrimary::SetText(boost::function<void(std::string&)> provider)
+void MPrimary::SetText(std::function<void(std::string&)> provider)
 {
 	mImpl->SetText(provider);
 }

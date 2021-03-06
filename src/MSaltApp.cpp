@@ -4,6 +4,7 @@
 #include "MSalt.hpp"
 
 #include <regex>
+#include <filesystem>
 
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -13,9 +14,7 @@
 
 #include <pinch/ssh_agent.hpp>
 
-#include <cryptopp/base64.h>
-#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
-#include <cryptopp/md5.h>
+#include <zeep/crypto.hpp>
 
 #include "MAcceleratorTable.hpp"
 #include "MMenu.hpp"
@@ -39,7 +38,7 @@
 
 using namespace std;
 namespace ba = boost::algorithm;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 const char
 	kAppName[] = "salt";
@@ -50,7 +49,7 @@ namespace
 #define HOST "([-[:alnum:].]+)"
 #define PORT "(?::(\\d+))?"
 
-boost::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)" ")?(?: >> (.+))?$");
+std::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)" ")?(?: >> (.+))?$");
 }
 
 // --------------------------------------------------------------------
@@ -97,7 +96,7 @@ void MSaltApp::Initialise()
 	Preferences::GetArray("recent-sessions", recent);
 	for (const string& r: recent)
 	{
-		if (boost::regex_match(r, kRecentRE))
+		if (std::regex_match(r, kRecentRE))
 			mRecent.push_back(r);
 	}
 	// known hosts
@@ -105,12 +104,12 @@ void MSaltApp::Initialise()
 	vector<string> knownHosts;
 	Preferences::GetArray("known-hosts", knownHosts);
 	
-	boost::regex rx("^(\\S+) (ssh-rsa|ssh-dss) (.+)");
+	std::regex rx("^(\\S+) (ssh-rsa|ssh-dss) (.+)");
 	
 	for (const string& known: knownHosts)
 	{
-		boost::smatch m;
-		if (boost::regex_match(known, m, rx))
+		std::smatch m;
+		if (std::regex_match(known, m, rx))
 		{
 			MKnownHost host = { m[1].str(), m[2].str(), m[3].str() };
 			mKnownHosts.push_back(host);
@@ -279,16 +278,18 @@ PRINT(("window titel: '%s'", label.c_str()));
 
 void MSaltApp::UpdateRecentSessionMenu(MMenu* inMenu)
 {
+	using namespace std::literals;
+
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 	
 	for (const string& recent: mRecent)
 	{
-		boost::smatch m;
+		std::smatch m;
 	
-		if (boost::regex_match(recent, m, kRecentRE))
+		if (std::regex_match(recent, m, kRecentRE))
 		{
-			inMenu->AppendItem(m[1] + '@' + m[2] +
-				(m[3].matched ? (string(":") + m[3]) : ""), cmd_OpenRecentSession);
+			inMenu->AppendItem(m[1].str() + "@"s + m[2].str() +
+				(m[3].matched ? (":"s + m[3].str()) : ""), cmd_OpenRecentSession);
 		}
 	}
 }
@@ -322,7 +323,7 @@ void MSaltApp::UpdateTOTPMenu(
 
 void MSaltApp::AddRecent(const string& inRecent)
 {
-	if (boost::regex_match(inRecent, kRecentRE))
+	if (std::regex_match(inRecent, kRecentRE))
 	{
 		mRecent.erase(remove(mRecent.begin(), mRecent.end(), inRecent), mRecent.end());
 		mRecent.push_front(inRecent);
@@ -336,9 +337,9 @@ void MSaltApp::AddRecent(const string& inRecent)
 
 void MSaltApp::OpenRecent(const string& inRecent)
 {
-	boost::smatch m;
+	std::smatch m;
 
-	if (boost::regex_match(inRecent, m, kRecentRE))
+	if (std::regex_match(inRecent, m, kRecentRE))
 	{
 		string user = m[1];
 		string host = m[2];
@@ -426,10 +427,10 @@ void MSaltApp::DoNew()
 
 void MSaltApp::Open(const string& inFile)
 {
-	boost::regex re("^(?:ssh://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?$");
-	boost::smatch m;
+	std::regex re("^(?:ssh://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?$");
+	std::smatch m;
 	
-	if (boost::regex_match(inFile, m, re))
+	if (std::regex_match(inFile, m, re))
 	{
 		string user = m[1];
 		string host = m[3];
@@ -476,32 +477,18 @@ void MSaltApp::Pulse()
 bool MSaltApp::ValidateHost(const string& inHost, const string& inAlgorithm, const vector<uint8_t>& inHostKey)
 {
 	bool result = true;
-	
-	string value;
-	CryptoPP::Base64Encoder e(new CryptoPP::StringSink(value), false);
-	e.Put(&inHostKey[0], inHostKey.size());
-	e.MessageEnd();
+	std::string_view hsv(reinterpret_cast<const char*>(inHostKey.data()), inHostKey.size());
+
+	std::string value = zeep::encode_base64(hsv);
+	std::string H = zeep::md5(hsv);
 
 	string fingerprint;
 	
-#if CRYPTOPP_VERSION >= 552
-	CryptoPP::Weak::MD5 hash;
-#else
-	CryptoPP::MD5 hash;
-#endif
-	uint32_t dLen = hash.DigestSize();
-	vector<char>	H(dLen);
-	
-	hash.Update(&inHostKey[0], inHostKey.size());
-	hash.Final(reinterpret_cast<unsigned char*>(&H[0]));
-	
-	for (uint32_t i = 0; i < dLen; ++i)
+	for (auto b: H)
 	{
 		if (not fingerprint.empty())
 			fingerprint += ':';
-		
-		char b = H[i];
-		
+
 		fingerprint += kHexChars[(b >> 4) & 0x0f];
 		fingerprint += kHexChars[b & 0x0f];
 	}
@@ -617,7 +604,7 @@ void MApplication::Install(const string& inPrefix)
 	desktopFile = applicationsDir / "salt.desktop";
 	cout << "writing desktop file " << desktopFile << endl;
 
-	fs::ofstream file(desktopFile, ios::trunc);
+	std::ofstream file(desktopFile, ios::trunc);
 	file << desktop;
 	file.close();
 

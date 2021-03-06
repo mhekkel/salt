@@ -9,9 +9,8 @@
 #include <istream>
 #include <list>
 
-#include <boost/bind.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 //#include "mrsrc.hpp"
 

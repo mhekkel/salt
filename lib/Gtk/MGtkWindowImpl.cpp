@@ -6,8 +6,6 @@
 #include "MGtkLib.hpp"
 
 #include <iostream>
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
 
 #include <gdk/gdkx.h>
 

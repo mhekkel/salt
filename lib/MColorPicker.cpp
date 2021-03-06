@@ -5,9 +5,7 @@
 
 #include "MLib.hpp"
 
-#include <boost/format.hpp>
-#include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
+#include <regex>
 
 #include "MColorPicker.hpp"
 #include "MCanvas.hpp"
@@ -486,9 +484,9 @@ void MColorPicker::TextChanged(const string& inID, const string& inText)
 	
 	if (inID == "hex")
 	{
-		const boost::regex re("([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})");
-		boost::smatch m;
-		if (boost::regex_match(inText, m, re))
+		const std::regex re("([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})");
+		std::smatch m;
+		if (std::regex_match(inText, m, re))
 		{
 			MColor color(
 				static_cast<uint8_t>(strtoul(m[1].str().c_str(), nullptr, 16)),
@@ -503,7 +501,7 @@ void MColorPicker::TextChanged(const string& inID, const string& inText)
 
 		try
 		{
-			v = boost::lexical_cast<uint32_t>(inText);
+			v = std::stoi(inText);
 			
 			if (inID == "red-text")				SetRGB(v / 255.f, mGreen, mBlue);
 			else if (inID == "green-text")		SetRGB(mRed, v / 255.f, mBlue);
@@ -512,7 +510,7 @@ void MColorPicker::TextChanged(const string& inID, const string& inText)
 			else if (inID == "saturation-text")	SetHSV(mHue, v / 100.f, mValue);
 			else if (inID == "value-text")		SetHSV(mHue, mSaturation, v / 100.f);
 		}
-		catch (boost::bad_lexical_cast&)
+		catch (std::invalid_argument&)
 		{
 			
 		}
@@ -548,17 +546,17 @@ void MColorPicker::UpdateColor()
 	uint32_t green = static_cast<uint32_t>(mGreen * 255);
 	uint32_t blue = static_cast<uint32_t>(mBlue * 255);
 
-	SetText("red-text", boost::lexical_cast<string>(red));
-	SetText("green-text", boost::lexical_cast<string>(green));
-	SetText("blue-text", boost::lexical_cast<string>(blue));
+	SetText("red-text", std::to_string(red));
+	SetText("green-text", std::to_string(green));
+	SetText("blue-text", std::to_string(blue));
 
 	uint32_t hue = static_cast<uint32_t>(mHue * 360);
 	uint32_t saturation = static_cast<uint32_t>(mSaturation * 100);
 	uint32_t value = static_cast<uint32_t>(mValue * 100);
 
-	SetText("hue-text", boost::lexical_cast<string>(hue));
-	SetText("saturation-text", boost::lexical_cast<string>(saturation));
-	SetText("value-text", boost::lexical_cast<string>(value));
+	SetText("hue-text", std::to_string(hue));
+	SetText("saturation-text", std::to_string(saturation));
+	SetText("value-text", std::to_string(value));
 
 	char hex[7] = {};
 	hex[0] = kHexChars[red >> 4];

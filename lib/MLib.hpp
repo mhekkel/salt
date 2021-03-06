@@ -26,10 +26,4 @@
 #define DEBUG	1
 #endif
 
-//#if DEBUG
-//#define _MEMDEBUG
-//#define _MEMDEBUGDEFINE
-//#include "memtoolscpp.hpp"
-//#endif
-
 #include "MTypes.hpp"

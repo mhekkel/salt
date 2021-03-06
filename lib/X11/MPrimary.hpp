@@ -6,7 +6,6 @@
 #pragma once
 
 #include <string>
-#include <boost/function.hpp>
 
 // MPrimary is a class used to handle PRIMARY atom selections in X
 // (that is, selected text, which you can paste somewhere else with the
@@ -20,7 +19,7 @@ class MPrimary
 	bool				HasText();
 	void				GetText(std::string& text);
 	void				SetText(const std::string& text);
-	void				SetText(boost::function<void(std::string&)> provider);
+	void				SetText(std::function<void(std::string&)> provider);
 
   private:
 						MPrimary();

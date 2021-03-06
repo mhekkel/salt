@@ -10,6 +10,8 @@
 
 #include "MLib.hpp"
 
+#include <cassert>
+
 #include <sstream>
 
 #include "MDialog.hpp"

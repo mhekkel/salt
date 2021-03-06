@@ -11,10 +11,6 @@
 
 #include <wincodec.h>
 
-#if not defined(_MSC_VER) or _MSC_VER <= 1600
-#include <boost/tr1/tuple.hpp>
-#endif
-
 #include <cmath>
 #include <cstring>
 #include <stack>

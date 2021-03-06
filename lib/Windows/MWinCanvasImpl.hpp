@@ -8,7 +8,7 @@
 #include <cassert>
 #include "comptr.hpp"
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include "MWinProcMixin.hpp"
 #include "MCanvasImpl.hpp"

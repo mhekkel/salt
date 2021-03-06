@@ -6,8 +6,6 @@
 #include "MWinLib.hpp"
 
 #include <boost/program_options.hpp>
-#include <boost/regex.hpp>
-#include <boost/format.hpp>
 
 #include <windows.h>
 #include <ddeml.h>
@@ -173,7 +171,7 @@ HDDEDATA MDDEImpl::Callback(UINT uType, UINT uFmt, HCONV hconv,
 				static boost::wregex rx(L"\\[(open|new)(\\(\"(.+?)\"(,\\s*(\\d+))?\\))?\\]");
 
 				boost::wsmatch match;
-				if (boost::regex_match(text, match, rx))
+				if (std::regex_match(text, match, rx))
 				{
 					//MDocument* doc = nullptr;
 					bool read = false;

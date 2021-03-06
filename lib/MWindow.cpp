@@ -9,8 +9,6 @@
 
 #include "zeep/xml/document.hpp"
 
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 

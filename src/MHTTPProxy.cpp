@@ -49,7 +49,7 @@
 // namespace zh = zeep::http;
 // namespace el = zeep::el;
 // namespace ba = boost::algorithm;
-// namespace fs = boost::filesystem;
+// namespace fs = std::filesystem;
 
 // using namespace boost::posix_time;
 
@@ -241,10 +241,10 @@
 // 	string host = m_request.get_header("Host");
 // 	uint16_t port = 80;
 
-// 	boost::regex re("^(?:http://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?(/.*)?");
-// 	boost::smatch mr;
+// 	std::regex re("^(?:http://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?(/.*)?");
+// 	std::smatch mr;
 
-// 	if (not boost::regex_match(m_request.uri, mr, re))
+// 	if (not std::regex_match(m_request.uri, mr, re))
 // 		send_error_reply(zh::bad_request);
 // 	else
 // 	{
@@ -552,7 +552,7 @@
 // 	{
 // 		using namespace boost::local_time;
 
-// 		m_log.reset(new fs::ofstream(gPrefsDir / "proxy.log", ios::app));
+// 		m_log.reset(new std::ofstream(gPrefsDir / "proxy.log", ios::app));
 
 // 		local_time_facet* lf(new local_time_facet("[%d/%b/%Y:%H:%M:%S %z]"));
 // 		m_log->imbue(locale(cout.getloc(), lf));
@@ -647,7 +647,7 @@
 // 		stringstream s;
 // 		s.imbue(std::locale(std::cout.getloc(), lf));
 		
-// 		ptime pt = from_time_t(boost::filesystem::last_write_time(gExecutablePath));
+// 		ptime pt = from_time_t(std::filesystem::last_write_time(gExecutablePath));
 // 		local_date_time t2(pt, time_zone_ptr());
 // 		s << t2;
 	

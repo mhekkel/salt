@@ -9,10 +9,6 @@
 #include <list>
 #include <limits>
 
-#include <boost/filesystem/fstream.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/bind.hpp>
-
 //#include "MObjectFile.hpp"
 #include "MResources.hpp"
 //#include "MPatriciaTree.hpp"
@@ -142,7 +138,7 @@ void MResourceFile::Add(
 	const string&	inPath,
 	const fs::path&	inFile)
 {
-	fs::ifstream f(inFile, ios::binary);
+	std::ifstream f(inFile, ios::binary);
 
 	if (not f.is_open())
 		THROW(("Could not open resource file"));

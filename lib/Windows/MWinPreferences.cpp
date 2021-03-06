@@ -8,7 +8,7 @@
 #include "MApplication.hpp"
 
 using namespace std;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 fs::path	gPrefsDir;
 string		gPrefsFileName = string(kAppName) + "-settings";

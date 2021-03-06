@@ -9,13 +9,6 @@
 #include <vector>
 #include <set>
 
-#include <boost/noncopyable.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/tr1/tuple.hpp>
-#include <tr1/type_traits>
-#include <boost/type_traits.hpp>
-
 #include "MView.hpp"
 #include "MP2PEvents.hpp"
 #include "MError.hpp"
@@ -38,7 +31,7 @@ struct g_type_mapped
 		{ return MGtkRendererInfo(gtk_cell_renderer_text_new(), "text", can_toggle, can_edit, can_change); }
 	static void to_g_value(GValue& gv, T v)
 	{
-		g_value_set_string(&gv, boost::lexical_cast<std::string>(v).c_str());
+		g_value_set_string(&gv, std::to_string(v).c_str());
 	}
 };
 

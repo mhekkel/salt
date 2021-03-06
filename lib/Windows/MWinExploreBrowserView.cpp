@@ -12,8 +12,6 @@
 #include <shlwapi.h>
 #include <propkey.h>
 
-#include <boost/bind.hpp>
-
 #include "MWinUtils.hpp"
 
 #include "MWinWindowImpl.hpp"

@@ -7,7 +7,6 @@
 
 #include <cstring>
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
 
 #include "MDocument.hpp"
 #include "MController.hpp"
@@ -331,7 +330,7 @@ string MDocument::GetWindowTitle() const
 
 	if (mFile.IsLocal())
 	{
-		fs::path file = fs::system_complete(mFile.GetPath());
+		fs::path file = fs::canonical(mFile.GetPath());
 		
 		NormalizePath(file);
 		result = file.string();

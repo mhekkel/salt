@@ -635,8 +635,6 @@ PINCH_LIBS
 PINCH_CFLAGS
 ZEEP_LDFLAGS
 ZEEP_CPPFLAGS
-AX_PACKAGE_REQUIRES_PRIVATE
-AX_PACKAGE_REQUIRES
 ZEEP_LIBS
 ZEEP_CFLAGS
 BOOST_DATE_TIME_LIB
@@ -644,6 +642,10 @@ BOOST_PROGRAM_OPTIONS_LIB
 BOOST_IOSTREAMS_LIB
 BOOST_LDFLAGS
 BOOST_CPPFLAGS
+AX_PACKAGE_REQUIRES_PRIVATE
+AX_PACKAGE_REQUIRES
+GTK3_LIBS
+GTK3_CFLAGS
 CXXCPP
 USE_RSRC
 MRC
@@ -750,6 +752,8 @@ CPP
 DEBUG
 MRC
 CXXCPP
+GTK3_CFLAGS
+GTK3_LIBS
 ZEEP_CFLAGS
 ZEEP_LIBS
 ZEEP_CPPFLAGS
@@ -1437,6 +1441,8 @@ Some influential environment variables:
   DEBUG       Build a debug version of the application
   MRC         Specify a location for the mrc executable
   CXXCPP      C++ preprocessor
+  GTK3_CFLAGS C compiler flags for GTK3, overriding pkg-config
+  GTK3_LIBS   linker flags for GTK3, overriding pkg-config
   ZEEP_CFLAGS C compiler flags for ZEEP, overriding pkg-config
   ZEEP_LIBS   linker flags for ZEEP, overriding pkg-config
   ZEEP_CPPFLAGS
@@ -5939,6 +5945,90 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+
+
+
+
+
+
+    AX_PACKAGE_REQUIRES="$AX_PACKAGE_REQUIRES gtk+-3.0"
+    AX_PACKAGE_REQUIRES_PRIVATE="$AX_PACKAGE_REQUIRES_PRIVATE "
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GTK3" >&5
+$as_echo_n "checking for GTK3... " >&6; }
+
+if test -n "$GTK3_CFLAGS"; then
+    pkg_cv_GTK3_CFLAGS="$GTK3_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 \""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 ") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GTK3_CFLAGS=`$PKG_CONFIG --cflags "gtk+-3.0 " 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$GTK3_LIBS"; then
+    pkg_cv_GTK3_LIBS="$GTK3_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 \""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 ") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GTK3_LIBS=`$PKG_CONFIG --libs "gtk+-3.0 " 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        GTK3_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtk+-3.0 " 2>&1`
+        else
+	        GTK3_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtk+-3.0 " 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$GTK3_PKG_ERRORS" >&5
+
+	as_fn_error $? "libgtk-3-dev is not installed" "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	as_fn_error $? "libgtk-3-dev is not installed" "$LINENO" 5
+else
+	GTK3_CFLAGS=$pkg_cv_GTK3_CFLAGS
+	GTK3_LIBS=$pkg_cv_GTK3_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+    # Substitute output.
+
+
 
 
 

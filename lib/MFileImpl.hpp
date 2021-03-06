@@ -10,7 +10,6 @@ struct MFileImpl
 							MFileImpl(const fs::path& inPath)
 								: mPath(inPath)
 								, mReadOnly(false)
-								, mModDate(0)
 								, mIODocument(nullptr) {}
 
 	virtual					~MFileImpl() {}
@@ -29,7 +28,7 @@ struct MFileImpl
 	virtual std::string		GetURL() const;
 	virtual bool			IsLocal() const;
 	virtual bool			IsReadOnly() const				{ return mReadOnly; }
-	virtual std::time_t		GetModDate() const				{ return mModDate; }
+	virtual fs::file_time_type		GetModDate() const				{ return mModDate; }
 	virtual bool			IsModifiedOnDisk();
 
 	// Override the following three for other scheme's
@@ -41,6 +40,6 @@ struct MFileImpl
   protected:
 	fs::path				mPath;
 	bool					mReadOnly;
-	std::time_t				mModDate;
+	fs::file_time_type		mModDate;
 	MDocument*				mIODocument;
 };

@@ -5,8 +5,7 @@
 
 // MTypes.h
 
-#ifndef MTYPES_H
-#define MTYPES_H
+#pragma once
 
 #include <cstdint>
 
@@ -265,5 +264,3 @@ inline bool MRect::operator!=(const MRect &rhs) const
 	return x != rhs.x or y != rhs.y or
 		   width != rhs.width or height != rhs.height;
 }
-
-#endif

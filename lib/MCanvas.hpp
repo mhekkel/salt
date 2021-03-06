@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include "MControls.hpp"
 #include "MHandler.hpp"
@@ -33,7 +33,7 @@ class MCanvas : public MControl<MCanvasImpl>
 	virtual bool	Drop(bool inMove, int32_t inX, int32_t inY,
 						const std::string& inText);
 	virtual bool	Drop(int32_t inX, int32_t inY,
-						const boost::filesystem::path& inFile);
+						const std::filesystem::path& inFile);
 
 	virtual void	StartDrag();
 	virtual void	DragSendData(std::string& outData);

@@ -73,7 +73,7 @@ bool MCanvas::Drop(bool inMove, int32_t inX, int32_t inY, const string& inText)
 	return false;
 }
 
-bool MCanvas::Drop(int32_t inX, int32_t inY, const boost::filesystem::path& inFile)
+bool MCanvas::Drop(int32_t inX, int32_t inY, const std::filesystem::path& inFile)
 {
 	try
 	{

@@ -6,7 +6,6 @@
 #include "MWinLib.hpp"
 
 #include <fstream>
-#include <boost/bind.hpp>
 
 #include "zeep/xml/document.hpp"
 

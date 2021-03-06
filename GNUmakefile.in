@@ -31,17 +31,18 @@ CXXFLAGS			= @BOOST_CPPFLAGS@ \
 					  @CXXFLAGS@ \
 					  @CPPFLAGS@ \
 					  @PTHREAD_CFLAGS@ \
+					  @GTK3_CFLAGS@ \
 					  @ZEEP_CFLAGS@ \
 					  @PINCH_CFLAGS@
 LDFLAGS				= @BOOST_LDFLAGS@ \
 					  @LDFLAGS@ \
 					  @PTHREAD_CFLAGS@
 LIBS				= @PTHREAD_LIBS@ \
+					  @GTK3_LIBS@ \
 					  @ZEEP_LIBS@ \
 					  @BOOST_PROGRAM_OPTIONS_LIB@ \
 					  @BOOST_IOSTREAMS_LIB@ \
 					  @BOOST_DATE_TIME_LIB@ \
-					  @BOOST_REGEX_LIB@ \
 					  @PINCH_LIBS@ \
 					  @LIBS@
 
@@ -126,8 +127,7 @@ OBJECTS = \
 	MGtkWidgetMixin.o \
 	MGtkWindowImpl.o \
 	MPrimary.o \
-	bsd-closefrom.o \
-	MSalt_rsrc.o
+	bsd-closefrom.o
 
 RESOURCES = \
 	Menus/terminal-window-menu.xml \
@@ -198,6 +198,10 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: %.cpp | $(OBJDIR)
+	@ echo ">>" $<
+	@ $(CXX) -MD -c -o $@ $< $(CFLAGS) $(CXXFLAGS)
+
+$(OBJDIR)/%.o: %.c | $(OBJDIR)
 	@ echo ">>" $<
 	@ $(CXX) -MD -c -o $@ $< $(CFLAGS) $(CXXFLAGS)
 

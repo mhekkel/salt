@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
 #include <string>
 #include <map>
 

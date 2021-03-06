@@ -3,17 +3,13 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MFILE
-#define MFILE
+#pragma once
 
 #include <vector>
+#include <filesystem>
+#include <functional>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/function.hpp>
-
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 class MDocument;
 class MWindow;
@@ -45,7 +41,7 @@ class MFile
 	bool		IsLocal() const;
 	bool		IsReadOnly() const;
 	bool		Exists() const;
-	std::time_t	GetModDate() const;
+	fs::file_time_type	GetModDate() const;
 	bool		IsModifiedOnDisk() const;
 
 	int32_t		ReadAttribute(const char* inName, void* outData, uint32_t inDataSize) const;
@@ -57,7 +53,7 @@ class MFile
 	bool		IsIOActive() const;
 	void		CancelIO();
 
-	typedef boost::function<struct MFileImpl*(const std::string&,bool)> ImplCreatorFunc;
+	typedef std::function<struct MFileImpl*(const std::string&,bool)> ImplCreatorFunc;
 	static void	RegisterImplCreator(const char* inScheme, ImplCreatorFunc inFunc);
 
   private:
@@ -119,5 +115,3 @@ void URLDecode(std::string& ioURL);
 void URLEncode(std::string& ioURL);
 
 std::time_t GetFileCreationTime(const fs::path& inFile);
-
-#endif

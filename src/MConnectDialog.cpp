@@ -3,10 +3,11 @@
 
 #include "MSalt.hpp"
 
-#include <boost/regex.hpp>
+#include <filesystem>
+#include <fstream>
+#include <regex>
+
 #include <boost/format.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "MConnectDialog.hpp"
 #include "MTerminalWindow.hpp"
@@ -26,7 +27,7 @@ namespace {
 #define USER "(?:([-$_.+!*'(),[:alnum:];?&=]+)@)?"
 #define HOST "([-[:alnum:].]+(?::\\d+)?)"
 
-const boost::regex
+const std::regex
 	kServerPortRE("^([-[:alnum:].]+):(\\d+)$"),
 //	kSessionRE("^(?:([-$_.+!*'(),[:alnum:];?&=]+)@)?([-[:alnum:].]+(?::\\d+)?)(?:;(.+))?$"),
 	kRecentRE("^" USER HOST "(?:;" USER HOST ";(.+))?(?: >> (.+))?$"),
@@ -45,13 +46,13 @@ MConnectDialog::MConnectDialog()
 	//SetEnabled("proxy-host", false);
 	//SetEnabled("proxy-command", false);
 
-	boost::smatch m;
+	std::smatch m;
 	vector<string> ss, hosts;
 
 	Preferences::GetArray("recent-proxies", ss);
 	for (string& s: ss)
 	{
-		if (boost::regex_match(s, m, kProxyRE))
+		if (std::regex_match(s, m, kProxyRE))
 		{
 			hosts.push_back(m[2]);
 			
@@ -73,7 +74,7 @@ MConnectDialog::MConnectDialog()
 	Preferences::GetArray("recent-sessions", ss);
 	for (string& s: ss)
 	{
-		if (boost::regex_match(s, m, kRecentRE))
+		if (std::regex_match(s, m, kRecentRE))
 		{
 			hosts.push_back(m[2]);
 			mRecentSessions.push_back(s);
@@ -105,7 +106,7 @@ void MConnectDialog::ButtonClicked(const string& inID)
 
 		if (MFileDialogs::ChooseOneFile(this, pemFile))
 		{
-			fs::ifstream file(pemFile);
+			std::ifstream file(pemFile);
 			if (not file.is_open())
 				throw runtime_error("Could not open private key file");
 
@@ -153,8 +154,8 @@ bool MConnectDialog::OKClicked()
 		
 		recent = user + '@' + host;
 		
-		boost::smatch m;
-		if (boost::regex_match(host, m, kServerPortRE))
+		std::smatch m;
+		if (std::regex_match(host, m, kServerPortRE))
 		{
 			port = m[2];
 			host = m[1];
@@ -180,7 +181,7 @@ bool MConnectDialog::OKClicked()
 		string proxy = proxy_user + '@' + proxy_host + ';' + proxy_cmd;
 		recent = recent + ';' + proxy;
 
-		if (boost::regex_match(proxy_host, m, kServerPortRE))
+		if (std::regex_match(proxy_host, m, kServerPortRE))
 		{
 			proxy_port = m[2];
 			proxy_host = m[1];
@@ -224,7 +225,7 @@ bool MConnectDialog::OKClicked()
 
 void MConnectDialog::TextChanged(const string& inID, const string& inText)
 {
-	boost::smatch m;
+	std::smatch m;
 
 	if (inID == "host")
 		SelectRecent(inText);
@@ -236,8 +237,8 @@ void MConnectDialog::SelectRecent(const string& inRecent)
 {
 	for (const string& recent: mRecentSessions)
 	{
-		boost::smatch m;
-		if (boost::regex_match(recent, m, kRecentRE) and m[2] == inRecent)
+		std::smatch m;
+		if (std::regex_match(recent, m, kRecentRE) and m[2] == inRecent)
 		{
 			SetText("user", m[1]);
 
@@ -301,8 +302,8 @@ void MConnectDialog::SelectProxy(const string& inProxy)
 		
 		for (string& recent: mRecentProxies)
 		{
-			boost::smatch m;
-			if (boost::regex_match(recent, m, kProxyRE) and m[2] == inProxy)
+			std::smatch m;
+			if (std::regex_match(recent, m, kProxyRE) and m[2] == inProxy)
 			{	// we have a recent match for this host
 				// automatically fill in the user
 				proxy_user = m[1];

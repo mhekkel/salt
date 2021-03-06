@@ -5,6 +5,8 @@
 
 #include "MWinLib.hpp"
 
+#include <filesystem>
+
 #include <comdef.h>
 #include <Dwmapi.h>
 
@@ -13,7 +15,6 @@
 #include "zeep/xml/document.hpp"
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include "MWinWindowImpl.hpp"
 #include "MWindow.hpp"

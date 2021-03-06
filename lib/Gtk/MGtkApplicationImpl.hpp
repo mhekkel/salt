@@ -29,6 +29,6 @@ class MGtkApplicationImpl : public MApplicationImpl
 					sInstance;
 };
 
-extern boost::filesystem::path gExecutablePath, gPrefixPath;
+extern std::filesystem::path gExecutablePath, gPrefixPath;
 
 #endif

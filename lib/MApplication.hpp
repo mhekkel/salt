@@ -8,8 +8,7 @@
 #include <list>
 #include <vector>
 #include <deque>
-
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include "MTypes.hpp"
 #include "MHandler.hpp"
@@ -17,7 +16,7 @@
 
 extern const char kAppName[], kVersionString[];
 
-extern boost::filesystem::path gExecutablePath;
+extern std::filesystem::path gExecutablePath;
 
 class MWindow;
 class MApplicationImpl;

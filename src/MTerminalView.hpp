@@ -132,7 +132,7 @@ class MTerminalView : public MCanvas
 	void			ScrollForward();
 	void			ScrollBackward();
 	
-//	typedef boost::function<void(char)>	EscapeHandler;
+//	typedef std::function<void(char)>	EscapeHandler;
 	void			EscapeStart(uint8_t inChar);
 	void			EscapeVT52(uint8_t inChar);
 	void			SelectCharSet(uint8_t inChar);

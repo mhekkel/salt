@@ -8,10 +8,9 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include "MGtkApplicationImpl.hpp"
@@ -21,7 +20,7 @@
 
 using namespace std;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 namespace ba = boost::algorithm;
 
 #define MGDBUS_SERVER_NAME "com.hekkelman.GDBus.SaltServer"
@@ -308,12 +307,12 @@ int main(int argc, char* argv[])
 		if (r > 0)
 		{
 			exePath[r] = 0;
-			gExecutablePath = fs::system_complete(exePath);
+			gExecutablePath = fs::canonical(exePath);
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 		
 		if (not fs::exists(gExecutablePath))
-			gExecutablePath = fs::system_complete(argv[0]);
+			gExecutablePath = fs::canonical(argv[0]);
 
 		if (vm.count("install"))
 		{

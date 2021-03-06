@@ -8,7 +8,6 @@
 #include "zeep/xml/document.hpp"
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include "MDialog.hpp"

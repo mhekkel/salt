@@ -48,10 +48,10 @@
 				
 // 		uint16_t connectPort = listenPort;
 		
-// 		boost::smatch m;
-// 		boost::regex rx("([-[:alnum:].]+)(?::(\\d+)?)");
+// 		std::smatch m;
+// 		std::regex rx("([-[:alnum:].]+)(?::(\\d+)?)");
 		
-// 		if (not boost::regex_match(connect, m, rx))
+// 		if (not std::regex_match(connect, m, rx))
 // 			throw runtime_error("Invalid host");
 		
 // 		if (m[2].matched)

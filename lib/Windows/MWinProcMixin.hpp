@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
 #include <string>
 #include <map>
 
@@ -32,13 +29,13 @@ class MWinProcMixin
 
 	virtual void	SubClass();
 
-	typedef boost::function<bool(HWND inHWnd, UINT inUMsg, WPARAM inWParam,
+	typedef std::function<bool(HWND inHWnd, UINT inUMsg, WPARAM inWParam,
 						LPARAM inLParam, LRESULT& outResult)> MWMCall;
 	
 	void			AddHandler(UINT inMessage, MWMCall inCallback)
 						{ mHandlers[inMessage] = inCallback; }
 
-	typedef boost::function<bool(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)> MNotification;
+	typedef std::function<bool(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)> MNotification;
 
 	void			AddNotify(uint32_t inCode, HWND inHWND, MNotification inCallback)
 					{

@@ -8,11 +8,10 @@
 #include "MLib.hpp"
 
 #include <iostream>
+#include <filesystem>
 
-#include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options.hpp>
-#include <boost/bind.hpp>
 
 #include "MApplication.hpp"
 #include "MWindow.hpp"
@@ -28,7 +27,7 @@
 using namespace std;
 namespace ba = boost::algorithm;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #if DEBUG
 int VERBOSE, TRACE;

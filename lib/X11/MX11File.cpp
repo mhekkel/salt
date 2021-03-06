@@ -5,7 +5,7 @@
 
 #include "MX11Lib.hpp"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "MError.hpp"
 #include "MStrings.hpp"
@@ -13,7 +13,7 @@
 #include "MApplication.hpp"
 
 using namespace std;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // ------------------------------------------------------------------
 //

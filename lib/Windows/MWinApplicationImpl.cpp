@@ -19,7 +19,7 @@
 #pragma comment (lib, "comctl32")
 
 using namespace std;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 COLORREF kDialogBackgroundColorRef((COLORREF)::GetSysColor(COLOR_BTNFACE));
 const MColor kDialogBackgroundColor(

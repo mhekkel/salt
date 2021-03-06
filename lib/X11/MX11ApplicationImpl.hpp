@@ -65,6 +65,6 @@ class MX11ApplicationImpl : public MApplicationImpl
 	xcb_screen_t*		mScreen;
 };
 
-extern boost::filesystem::path gExecutablePath, gPrefixPath;
+extern std::filesystem::path gExecutablePath, gPrefixPath;
 
 #endif

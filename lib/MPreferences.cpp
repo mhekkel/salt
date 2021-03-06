@@ -11,13 +11,10 @@
 #include "MLib.hpp"
 
 #include <sstream>
+#include <fstream>
 #include <cerrno>
 #include <cstring>
 #include <map>
-
-#include <boost/bind.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 #include <cstring>
 
@@ -34,7 +31,7 @@
 
 using namespace std;
 namespace xml = zeep::xml;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 fs::path	gPrefsDir;
 string		gPrefsFileName = string(kAppName) + ".cfg";
@@ -50,8 +47,8 @@ struct preference
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int version)
 	{
-		ar & BOOST_SERIALIZATION_NVP(name)
-		   & BOOST_SERIALIZATION_NVP(value);
+		ar & zeep::make_nvp("name", name)
+		   & zeep::make_nvp("value", value);
 	}
 };
 
@@ -117,7 +114,7 @@ IniFile::IniFile()
 		
 		if (fs::exists(mPrefsFile))
 		{
-			fs::ifstream data(mPrefsFile, ios::binary);
+			std::ifstream data(mPrefsFile, ios::binary);
 			
 			if (data.is_open())
 			{
@@ -163,7 +160,7 @@ void IniFile::Save()
 		
 		fs::path tmpPrefs = mPrefsFile.parent_path() / (mPrefsFile.filename().string() + "-new");
 		
-		fs::ofstream data(tmpPrefs);
+		std::ofstream data(tmpPrefs);
 	
 		if (data.is_open())
 		{

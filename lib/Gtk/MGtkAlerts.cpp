@@ -41,7 +41,7 @@ GtkWidget* CreateAlertWithArgs(
 	// build an alert
 	xml::element* root = doc.find_first("/alert");
 	
-	if (root->qname() != "alert")
+	if (root->name() != "alert")
 		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
 	
 	string instruction, content;
@@ -49,18 +49,18 @@ GtkWidget* CreateAlertWithArgs(
 	int32_t defaultButton = -1;
 	GtkMessageType type = GTK_MESSAGE_INFO;
 	
-	if (root->attr("type") == "warning")
+	if (root->get_attribute("type") == "warning")
 		type = GTK_MESSAGE_WARNING;
-	else if (root->attr("type") == "error")
+	else if (root->get_attribute("type") == "error")
 		type = GTK_MESSAGE_ERROR;
 	
 	for (auto item: *root)
 	{
-		if (item.qname() == "content")
+		if (item.name() == "content")
 		{
 			// replace parameters
 			char s[] = "^0";
-			string text = GetLocalisedStringForContext(inResourceName, item.content());
+			string text = GetLocalisedStringForContext(inResourceName, item.get_content());
 	
 			for (auto a: inArgs)
 			{
@@ -72,11 +72,11 @@ GtkWidget* CreateAlertWithArgs(
 
 			content = text;
 		}
-		else if (item.qname() == "instruction")
+		else if (item.name() == "instruction")
 		{
 			// replace parameters
 			char s[] = "^0";
-			string text = GetLocalisedStringForContext(inResourceName, item.content());
+			string text = GetLocalisedStringForContext(inResourceName, item.get_content());
 	
 			for (auto a: inArgs)
 			{
@@ -86,16 +86,16 @@ GtkWidget* CreateAlertWithArgs(
 
 			instruction = text;
 		}
-		else if (item.qname() == "buttons")
+		else if (item.name() == "buttons")
 		{
 			for (auto button: item)
 			{
-				if (button.qname() == "button")
+				if (button.name() == "button")
 				{
-					string label = GetLocalisedStringForContext(inResourceName, button.attr("title"));
-					uint32_t cmd = stoul(button.attr("cmd"));
+					string label = GetLocalisedStringForContext(inResourceName, button.get_attribute("title"));
+					uint32_t cmd = stoul(button.get_attribute("cmd"));
 
-					if (button.attr("default") == "true")
+					if (button.get_attribute("default") == "true")
 						defaultButton = cmd;
 					
 					btns.push_back(make_pair(label, cmd));

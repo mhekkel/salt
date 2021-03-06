@@ -7,13 +7,13 @@
 #define MUTILS_H
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "MTypes.hpp"
 #include "MColor.hpp"
 #include "MFile.hpp"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 struct no_swapper
 {

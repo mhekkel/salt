@@ -7,12 +7,12 @@
 
 #include <string>
 #include <vector>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include "MColor.hpp"
 #include "MTypes.hpp"
 
-extern boost::filesystem::path	gPrefsDir;
+extern std::filesystem::path	gPrefsDir;
 extern std::string				gPrefsFileName;
 
 namespace Preferences

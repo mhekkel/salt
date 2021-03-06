@@ -11,7 +11,6 @@
 
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <zeep/xml/document.hpp>
 

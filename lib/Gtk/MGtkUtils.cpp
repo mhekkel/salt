@@ -219,7 +219,8 @@ string GetPrefsDirectory()
 
 string GetApplicationVersion()
 {
-	return VERSION;
+	// return PACKAGE_VERSION;
+	return "?.?";
 }
 
 uint32_t MapModifier(uint32_t inModifier)
