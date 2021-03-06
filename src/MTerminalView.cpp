@@ -2233,11 +2233,11 @@ void MTerminalView::SendCommand(string inData)
 			ba::replace_all(inData, "\033]", "\235");	// OSC
 		}
 
-#if DEBUG
-vector<uint8_t> b;
-copy(inData.begin(), inData.end(), back_inserter(b));
-print(cerr, b);
-#endif
+// #if DEBUG
+// vector<uint8_t> b;
+// copy(inData.begin(), inData.end(), back_inserter(b));
+// print(cerr, b);
+// #endif
 
 		mTerminalChannel->SendData(inData, [](const boost::system::error_code&, size_t) {});
 	}

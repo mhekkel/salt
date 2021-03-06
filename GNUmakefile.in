@@ -130,42 +130,16 @@ OBJECTS = \
 	bsd-closefrom.o
 
 RESOURCES = \
-	Menus/terminal-window-menu.xml \
-	Alerts/only-openssh-server-supported.xml \
-	Alerts/algo-unsupported.xml \
-	Alerts/failed-to-install-public-key.xml \
-	Alerts/close-session-alert.xml \
-	Alerts/error-alert.xml \
-	Alerts/old.xml \
-	Alerts/about-alert.xml \
-	Alerts/host-key-changed-alert.xml \
-	Alerts/unknown-host-alert.xml \
-	Alerts/expired.xml \
-	Alerts/installed-public-key.xml \
-	Alerts/exception-alert.xml \
-	Alerts/close-all-sessions-alert.xml \
-	Icons/appicon-small.ico \
+	Menus \
+	Alerts \
 	close.png \
 	version.rc \
-	templates/status.html \
-	templates/style.css \
-	templates/index.html \
-	templates/error.html \
+	templates \
 	salt.desktop \
-	Icons/appicon.png \
-	Dialogs/connect-dialog.xml \
-	Dialogs/color-picker.xml \
-	Dialogs/http-proxy-dialog.xml \
-	Dialogs/prefs-dialog.xml \
-	Dialogs/find-dialog.xml \
-	Dialogs/auth-dialog.xml \
-	Dialogs/port-forwarding-dialog.xml \
-	Dialogs/socks5-proxy-dialog.xml \
-	Dialogs/add-totp-hash.xml \
+	Dialogs \
 	strings.xml.nl \
 	MakeRes.pl \
-	Icons/appicon-small.png \
-	Icons/appicon.ico
+	Icons
 
 RESOURCES := $(RESOURCES:%=rsrc/%)
 
@@ -245,7 +219,7 @@ OBJECTS += $(PROGRAM)_rsrc.o
 	gunzip -c $^ > $@
 
 $(OBJDIR)/$(PROGRAM)_rsrc.o: $(RESOURCES)
-	$(MRC) -o $@ $^
+	$(MRC) -v -o $@ $^
 
 endif
 
