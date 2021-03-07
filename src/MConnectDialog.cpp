@@ -187,7 +187,7 @@ bool MConnectDialog::OKClicked()
 			proxy_host = m[1];
 		}
 		
-		if (proxy_host.empty() or proxy_user.empty() or proxy_cmd.empty())
+		if (proxy_host.empty() or proxy_user.empty())
 			break;
 		
 		std::shared_ptr<pinch::basic_connection> connection(

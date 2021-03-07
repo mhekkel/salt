@@ -35,7 +35,44 @@ AX_MRC
 
 AX_FILESYSTEM
 
-AX_PKG_CHECK_MODULES([GTK3], [gtk+-3.0], [], [], [AC_MSG_ERROR([libgtk-3-dev is not installed])])
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS([dlfcn.h dirent.h fcntl.h malloc.h stdlib.h string.h syslog.h unistd.h utime.h values.h])
+
+# Test for F_CLOSEM
+AC_CHECK_DECL(F_CLOSEM,
+          AC_DEFINE(HAVE_FCNTL_CLOSEM,1,[Use F_CLOSEM fcntl for closefrom]),
+          [],
+          [ #include <limits.h>
+            #include <fcntl.h> ]
+         )
+# Test for existence /proc/$$/fd
+AC_MSG_CHECKING([for /proc/pid/fd directory])
+if test -d "/proc/$$/fd" ; then
+        AC_DEFINE(HAVE_PROC_PID, 1, [Define if you have /proc/$pid/fd])
+        AC_MSG_RESULT(yes)
+else
+        AC_MSG_RESULT(no)
+    # Test for existence /dev/fd, e.g. on MacOS
+    AC_MSG_CHECKING([for /dev/fd directory])
+    if test -d "/dev/fd" ; then
+        AC_DEFINE(HAVE_DEV_FD, 1, [Define if you have /dev/fd])
+        AC_MSG_RESULT(yes)
+    else
+        AC_MSG_RESULT(no)
+    fi
+fi
+
+# Checks for library functions.
+AC_CHECK_FUNCS([closefrom closedir dirfd getsid setenv stat strchr strdup strerror strncasecmp strtol sysconf])
+
+AC_CHECK_LIB([dl], [dlsym])
+AC_CHECK_LIB([X11], [XGetWindowAttributes])
+AC_CHECK_LIB([util], [openpty])
+
+AX_LIBCRYPTOPP
+
+AX_PKG_CHECK_MODULES([GTK3], [libcanberra-gtk3], [], [], [AC_MSG_ERROR([libgtk-3-dev is not installed])])
 
 AX_BOOST_BASE([1.71.0], [], [AC_MSG_ERROR([Could not find a recent version of boost])])
 AX_BOOST_IOSTREAMS

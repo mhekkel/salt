@@ -32,6 +32,7 @@ CXXFLAGS			= @BOOST_CPPFLAGS@ \
 					  @CPPFLAGS@ \
 					  @PTHREAD_CFLAGS@ \
 					  @GTK3_CFLAGS@ \
+					  @CRYPTOPP_CFLAGS@ \
 					  @ZEEP_CFLAGS@ \
 					  @PINCH_CFLAGS@
 LDFLAGS				= @BOOST_LDFLAGS@ \
@@ -39,6 +40,7 @@ LDFLAGS				= @BOOST_LDFLAGS@ \
 					  @PTHREAD_CFLAGS@
 LIBS				= @PTHREAD_LIBS@ \
 					  @GTK3_LIBS@ \
+					  @CRYPTOPP_LIBS@ \
 					  @ZEEP_LIBS@ \
 					  @BOOST_PROGRAM_OPTIONS_LIB@ \
 					  @BOOST_IOSTREAMS_LIB@ \

@@ -16,6 +16,8 @@
 
 //#include "includes.hpp"
 
+#include "MSaltConfig.hpp"
+
 #ifndef HAVE_CLOSEFROM
 
 #include <sys/types.h>

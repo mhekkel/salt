@@ -642,10 +642,14 @@ BOOST_PROGRAM_OPTIONS_LIB
 BOOST_IOSTREAMS_LIB
 BOOST_LDFLAGS
 BOOST_CPPFLAGS
-AX_PACKAGE_REQUIRES_PRIVATE
-AX_PACKAGE_REQUIRES
 GTK3_LIBS
 GTK3_CFLAGS
+CRYPTOPP_LDFLAGS
+CRYPTOPP_CPPFLAGS
+AX_PACKAGE_REQUIRES_PRIVATE
+AX_PACKAGE_REQUIRES
+CRYPTOPP_LIBS
+CRYPTOPP_CFLAGS
 CXXCPP
 USE_RSRC
 MRC
@@ -726,6 +730,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_resources
+with_crypto__
 with_boost
 with_boost_libdir
 with_boost_iostreams
@@ -752,6 +757,10 @@ CPP
 DEBUG
 MRC
 CXXCPP
+CRYPTOPP_CFLAGS
+CRYPTOPP_LIBS
+CRYPTOPP_CPPFLAGS
+CRYPTOPP_LDFLAGS
 GTK3_CFLAGS
 GTK3_LIBS
 ZEEP_CFLAGS
@@ -1395,6 +1404,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-crypto++=[location]
+                          Use the libcrypto++ library as specified.
   --with-boost[=ARG]      use Boost library from a standard location
                           (ARG=yes), from the specified location (ARG=<path>),
                           or disable it (ARG=no) [ARG=yes]
@@ -1441,6 +1452,14 @@ Some influential environment variables:
   DEBUG       Build a debug version of the application
   MRC         Specify a location for the mrc executable
   CXXCPP      C++ preprocessor
+  CRYPTOPP_CFLAGS
+              C compiler flags for CRYPTOPP, overriding pkg-config
+  CRYPTOPP_LIBS
+              linker flags for CRYPTOPP, overriding pkg-config
+  CRYPTOPP_CPPFLAGS
+              C preprocessor flags for CRYPTOPP headers
+  CRYPTOPP_LDFLAGS
+              linker flags for CRYPTOPP libraries
   GTK3_CFLAGS C compiler flags for GTK3, overriding pkg-config
   GTK3_LIBS   linker flags for GTK3, overriding pkg-config
   ZEEP_CFLAGS C compiler flags for ZEEP, overriding pkg-config
@@ -1950,6 +1969,119 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_cxx_try_link
+
+# ac_fn_cxx_check_decl LINENO SYMBOL VAR INCLUDES
+# -----------------------------------------------
+# Tests whether SYMBOL is declared in INCLUDES, setting cache variable VAR
+# accordingly.
+ac_fn_cxx_check_decl ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  as_decl_name=`echo $2|sed 's/ *(.*//'`
+  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
+$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+int
+main ()
+{
+#ifndef $as_decl_name
+#ifdef __cplusplus
+  (void) $as_decl_use;
+#else
+  (void) $as_decl_name;
+#endif
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_cxx_check_decl
+
+# ac_fn_cxx_check_func LINENO FUNC VAR
+# ------------------------------------
+# Tests whether FUNC exists, setting the cache variable VAR accordingly
+ac_fn_cxx_check_func ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+/* Define $2 to an innocuous variant, in case <limits.h> declares $2.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define $2 innocuous_$2
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $2 (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef $2
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char $2 ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined __stub_$2 || defined __stub___$2
+choke me
+#endif
+
+int
+main ()
+{
+return $2 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_cxx_check_func
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -5947,28 +6079,528 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 
+ac_header_dirent=no
+for ac_hdr in dirent.h sys/ndir.h sys/dir.h ndir.h; do
+  as_ac_Header=`$as_echo "ac_cv_header_dirent_$ac_hdr" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_hdr that defines DIR" >&5
+$as_echo_n "checking for $ac_hdr that defines DIR... " >&6; }
+if eval \${$as_ac_Header+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#include <$ac_hdr>
+
+int
+main ()
+{
+if ((DIR *) 0)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  eval "$as_ac_Header=yes"
+else
+  eval "$as_ac_Header=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$as_ac_Header
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_hdr" | $as_tr_cpp` 1
+_ACEOF
+
+ac_header_dirent=$ac_hdr; break
+fi
+
+done
+# Two versions of opendir et al. are in -ldir and -lx on SCO Xenix.
+if test $ac_header_dirent = dirent.h; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing opendir" >&5
+$as_echo_n "checking for library containing opendir... " >&6; }
+if ${ac_cv_search_opendir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char opendir ();
+int
+main ()
+{
+return opendir ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' dir; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_opendir=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_opendir+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_opendir+:} false; then :
+
+else
+  ac_cv_search_opendir=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_opendir" >&5
+$as_echo "$ac_cv_search_opendir" >&6; }
+ac_res=$ac_cv_search_opendir
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing opendir" >&5
+$as_echo_n "checking for library containing opendir... " >&6; }
+if ${ac_cv_search_opendir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char opendir ();
+int
+main ()
+{
+return opendir ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' x; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_opendir=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_opendir+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_opendir+:} false; then :
+
+else
+  ac_cv_search_opendir=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_opendir" >&5
+$as_echo "$ac_cv_search_opendir" >&6; }
+ac_res=$ac_cv_search_opendir
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
+$as_echo_n "checking for ANSI C header files... " >&6; }
+if ${ac_cv_header_stdc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ac_cv_header_stdc=yes
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+if test $ac_cv_header_stdc = yes; then
+  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <string.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "memchr" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "free" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
+  if test "$cross_compiling" = yes; then :
+  :
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ctype.h>
+#include <stdlib.h>
+#if ((' ' & 0x0FF) == 0x020)
+# define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
+# define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
+#else
+# define ISLOWER(c) \
+		   (('a' <= (c) && (c) <= 'i') \
+		     || ('j' <= (c) && (c) <= 'r') \
+		     || ('s' <= (c) && (c) <= 'z'))
+# define TOUPPER(c) (ISLOWER(c) ? ((c) | 0x40) : (c))
+#endif
+
+#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
+int
+main ()
+{
+  int i;
+  for (i = 0; i < 256; i++)
+    if (XOR (islower (i), ISLOWER (i))
+	|| toupper (i) != TOUPPER (i))
+      return 2;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_run "$LINENO"; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_header_stdc" >&5
+$as_echo "$ac_cv_header_stdc" >&6; }
+if test $ac_cv_header_stdc = yes; then
+
+$as_echo "#define STDC_HEADERS 1" >>confdefs.h
+
+fi
+
+for ac_header in dlfcn.h dirent.h fcntl.h malloc.h stdlib.h string.h syslog.h unistd.h utime.h values.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+# Test for F_CLOSEM
+ac_fn_cxx_check_decl "$LINENO" "F_CLOSEM" "ac_cv_have_decl_F_CLOSEM" " #include <limits.h>
+            #include <fcntl.h>
+
+"
+if test "x$ac_cv_have_decl_F_CLOSEM" = xyes; then :
+
+$as_echo "#define HAVE_FCNTL_CLOSEM 1" >>confdefs.h
+
+fi
+
+# Test for existence /proc/$$/fd
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for /proc/pid/fd directory" >&5
+$as_echo_n "checking for /proc/pid/fd directory... " >&6; }
+if test -d "/proc/$$/fd" ; then
+
+$as_echo "#define HAVE_PROC_PID 1" >>confdefs.h
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    # Test for existence /dev/fd, e.g. on MacOS
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/fd directory" >&5
+$as_echo_n "checking for /dev/fd directory... " >&6; }
+    if test -d "/dev/fd" ; then
+
+$as_echo "#define HAVE_DEV_FD 1" >>confdefs.h
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    fi
+fi
+
+# Checks for library functions.
+for ac_func in closefrom closedir dirfd getsid setenv stat strchr strdup strerror strncasecmp strtol sysconf
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlsym in -ldl" >&5
+$as_echo_n "checking for dlsym in -ldl... " >&6; }
+if ${ac_cv_lib_dl_dlsym+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlsym ();
+int
+main ()
+{
+return dlsym ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_dl_dlsym=yes
+else
+  ac_cv_lib_dl_dlsym=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlsym" >&5
+$as_echo "$ac_cv_lib_dl_dlsym" >&6; }
+if test "x$ac_cv_lib_dl_dlsym" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBDL 1
+_ACEOF
+
+  LIBS="-ldl $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for XGetWindowAttributes in -lX11" >&5
+$as_echo_n "checking for XGetWindowAttributes in -lX11... " >&6; }
+if ${ac_cv_lib_X11_XGetWindowAttributes+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lX11  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char XGetWindowAttributes ();
+int
+main ()
+{
+return XGetWindowAttributes ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_X11_XGetWindowAttributes=yes
+else
+  ac_cv_lib_X11_XGetWindowAttributes=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_X11_XGetWindowAttributes" >&5
+$as_echo "$ac_cv_lib_X11_XGetWindowAttributes" >&6; }
+if test "x$ac_cv_lib_X11_XGetWindowAttributes" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBX11 1
+_ACEOF
+
+  LIBS="-lX11 $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for openpty in -lutil" >&5
+$as_echo_n "checking for openpty in -lutil... " >&6; }
+if ${ac_cv_lib_util_openpty+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lutil  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char openpty ();
+int
+main ()
+{
+return openpty ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_util_openpty=yes
+else
+  ac_cv_lib_util_openpty=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_util_openpty" >&5
+$as_echo "$ac_cv_lib_util_openpty" >&6; }
+if test "x$ac_cv_lib_util_openpty" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBUTIL 1
+_ACEOF
+
+  LIBS="-lutil $LIBS"
+
+fi
 
 
 
 
-    AX_PACKAGE_REQUIRES="$AX_PACKAGE_REQUIRES gtk+-3.0"
+# Check whether --with-crypto++ was given.
+if test "${with_crypto__+set}" = set; then :
+  withval=$with_crypto__;
+				if test -d ${withval}/include; then :
+
+else
+
+					as_fn_error $? "'${withval}'' is not a valid directory for --with-crypto++" "$LINENO" 5
+
+fi
+
+				CRYPTOPP_CFLAGS="-I ${withval}"
+				CRYPTOPP_LIBS="-L${withval} -lcrypto++"
+
+				CRYPTOPP_CFLAGS=$CRYPTOPP_CFLAGS
+
+				CRYPTOPP_LIBS=$CRYPTOPP_LIBS
+
+
+fi
+
+
+	if test "x$CRYPTOPP_LIBS" = "x"; then :
+
+		if test -x "$PKG_CONFIG"
+		then
+
+
+
+
+    AX_PACKAGE_REQUIRES="$AX_PACKAGE_REQUIRES libcrypto++"
     AX_PACKAGE_REQUIRES_PRIVATE="$AX_PACKAGE_REQUIRES_PRIVATE "
 
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GTK3" >&5
-$as_echo_n "checking for GTK3... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for CRYPTOPP" >&5
+$as_echo_n "checking for CRYPTOPP... " >&6; }
 
-if test -n "$GTK3_CFLAGS"; then
-    pkg_cv_GTK3_CFLAGS="$GTK3_CFLAGS"
+if test -n "$CRYPTOPP_CFLAGS"; then
+    pkg_cv_CRYPTOPP_CFLAGS="$CRYPTOPP_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 \""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 ") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcrypto++ \""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcrypto++ ") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GTK3_CFLAGS=`$PKG_CONFIG --cflags "gtk+-3.0 " 2>/dev/null`
+  pkg_cv_CRYPTOPP_CFLAGS=`$PKG_CONFIG --cflags "libcrypto++ " 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -5976,16 +6608,16 @@ fi
  else
     pkg_failed=untried
 fi
-if test -n "$GTK3_LIBS"; then
-    pkg_cv_GTK3_LIBS="$GTK3_LIBS"
+if test -n "$CRYPTOPP_LIBS"; then
+    pkg_cv_CRYPTOPP_LIBS="$CRYPTOPP_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 \""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 ") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcrypto++ \""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcrypto++ ") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GTK3_LIBS=`$PKG_CONFIG --libs "gtk+-3.0 " 2>/dev/null`
+  pkg_cv_CRYPTOPP_LIBS=`$PKG_CONFIG --libs "libcrypto++ " 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -6006,9 +6638,220 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        GTK3_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtk+-3.0 " 2>&1`
+	        CRYPTOPP_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libcrypto++ " 2>&1`
         else
-	        GTK3_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtk+-3.0 " 2>&1`
+	        CRYPTOPP_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libcrypto++ " 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$CRYPTOPP_PKG_ERRORS" >&5
+
+	as_fn_error $? "the required package libcrypto++-dev is not installed" "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	as_fn_error $? "the required package libcrypto++-dev is not installed" "$LINENO" 5
+else
+	CRYPTOPP_CFLAGS=$pkg_cv_CRYPTOPP_CFLAGS
+	CRYPTOPP_LIBS=$pkg_cv_CRYPTOPP_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+    # Substitute output.
+
+
+
+		else
+
+
+			case ${host_cpu} in #(
+  x86_64) :
+    libsubdirs="lib64 libx32 lib lib64" ;; #(
+  ppc64|powerpc64|s390x|sparc64|aarch64|ppc64le|powerpc64le|riscv64) :
+    libsubdirs="lib64 lib lib64" ;; #(
+  *) :
+    libsubdirs="lib"
+			 ;;
+esac
+
+			for _AX_CRYPTOPP_path in /usr /usr/local /opt /opt/local ; do
+				if test -d "$_AX_CRYPTOPP_path/include/crypto++" && test -r "$_AX_CRYPTOPP_path/include/crypto++" ; then
+
+					for libsubdir in $search_libsubdirs ; do
+						if ls "$_AX_CRYPTOPP_path/$libsubdir/libcrypto++"* >/dev/null 2>&1 ; then break; fi
+					done
+					CRYPTOPP_LDFLAGS="-L$_AX_CRYPTOPP_path/$libsubdir"
+					CRYPTOPP_CFLAGS="-I$_AX_CRYPTOPP_path/include"
+					break;
+				fi
+			done
+
+			save_LDFLAGS=$LDFLAGS; LDFLAGS="$LDFLAGS $CRYPTOPP_LDFLAGS"
+			save_CPPFLAGS=$CPPFLAGS; CPPFLAGS="$CPPFLAGS $CRYPTOPP_CFLAGS"
+
+			ac_fn_cxx_check_header_mongrel "$LINENO" "crypto++/cryptlib.h" "ac_cv_header_cryptopp_cryptlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_cryptopp_cryptlib_h" = xyes; then :
+
+else
+  as_fn_error $? "
+Can't find the libcrypto++ header, crypto++/cryptlib.h. Make sure that libcrypto++
+is installed, and either use the --with-crypto++ option or install pkg-config." "$LINENO" 5
+fi
+
+
+
+
+
+
+
+  if ${ax_cv_have_CRYPTOPP+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  save_CPPFLAGS="$CPPFLAGS"
+     save_LDFLAGS="$LDFLAGS"
+     save_LIBS="$LIBS"
+
+     if test "x$CRYPTOPP_CPPFLAGS" != "x"; then :
+  CPPFLAGS="$CPPFLAGS $CRYPTOPP_CPPFLAGS"
+fi
+
+     if test "x$CRYPTOPP_LDFLAGS" != "x"; then :
+  LDFLAGS="$LDFLAGS $CRYPTOPP_LDFLAGS"
+fi
+
+     ac_fn_cxx_check_header_mongrel "$LINENO" "crypto++/cryptlib.h" "ac_cv_header_cryptopp_cryptlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_cryptopp_cryptlib_h" = xyes; then :
+
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lcrypto++" >&5
+$as_echo_n "checking for main in -lcrypto++... " >&6; }
+if ${ac_cv_lib_cryptopp_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto++  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_cryptopp_main=yes
+else
+  ac_cv_lib_cryptopp_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cryptopp_main" >&5
+$as_echo "$ac_cv_lib_cryptopp_main" >&6; }
+if test "x$ac_cv_lib_cryptopp_main" = xyes; then :
+  ax_cv_have_CRYPTOPP=yes
+else
+  ax_cv_have_CRYPTOPP=no
+fi
+
+
+else
+  ax_cv_have_CRYPTOPP=no
+fi
+
+
+
+     CPPFLAGS="$save_CPPFLAGS"
+     LDFLAGS="$save_LDFLAGS"
+     LIBS="$save_LIBS"
+
+fi
+
+
+  if test "$ax_cv_have_CRYPTOPP" = "yes"; then :
+
+$as_echo "#define HAVE_CRYPTOPP 1" >>confdefs.h
+
+     CRTYPOPP_LIBS="-lcrypto++"
+else
+   as_fn_error $? "libcrypto++ not found" "$LINENO" 5
+fi
+
+
+			LDFLAGS=$save_LDFLAGS
+			CPPFLAGS=$save_CPPFLAGS
+		fi
+
+fi
+
+
+
+
+
+
+    AX_PACKAGE_REQUIRES="$AX_PACKAGE_REQUIRES libcanberra-gtk3"
+    AX_PACKAGE_REQUIRES_PRIVATE="$AX_PACKAGE_REQUIRES_PRIVATE "
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GTK3" >&5
+$as_echo_n "checking for GTK3... " >&6; }
+
+if test -n "$GTK3_CFLAGS"; then
+    pkg_cv_GTK3_CFLAGS="$GTK3_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcanberra-gtk3 \""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcanberra-gtk3 ") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GTK3_CFLAGS=`$PKG_CONFIG --cflags "libcanberra-gtk3 " 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$GTK3_LIBS"; then
+    pkg_cv_GTK3_LIBS="$GTK3_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcanberra-gtk3 \""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcanberra-gtk3 ") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GTK3_LIBS=`$PKG_CONFIG --libs "libcanberra-gtk3 " 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        GTK3_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libcanberra-gtk3 " 2>&1`
+        else
+	        GTK3_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libcanberra-gtk3 " 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$GTK3_PKG_ERRORS" >&5
