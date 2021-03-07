@@ -3,8 +3,6 @@
 
 #include "MSalt.hpp"
 
-#include <boost/bind.hpp>
-
 #include "MExploreBrowserWindow.hpp"
 #include "MExploreBrowserView.hpp"
 #include "MStrings.hpp"
@@ -41,7 +39,7 @@ MExploreBrowserWindow::MExploreBrowserWindow(std::shared_ptr<pinch::basic_connec
 	AddChild(mBrowserView);
 	
 	mStatusbar->SetStatusText(0, _("Trying to connect"), false);
-	mSFTPChannel.open(boost::bind(&MExploreBrowserWindow::ChannelOpened, this, _1));
+	mSFTPChannel.open(std::bind(&MExploreBrowserWindow::ChannelOpened, this, _1));
 }
 
 MExploreBrowserWindow::~MExploreBrowserWindow()
@@ -58,7 +56,7 @@ void MExploreBrowserWindow::ChannelOpened(const boost::system::error_code& ec)
 		mStatusbar->SetStatusText(0, _("Connected"), false);
 		mStatusbar->SetStatusText(1, mSFTPChannel.get_connection_parameters(pinch::client2server), false);
 		
-		mSFTPChannel.read_dir(".", boost::bind(&MExploreBrowserWindow::ReadDir, this, _1, _2, _3, _4));
+		mSFTPChannel.read_dir(".", std::bind(&MExploreBrowserWindow::ReadDir, this, _1, _2, _3, _4));
 	}
 }
 
@@ -69,7 +67,7 @@ bool MExploreBrowserWindow::ReadDir(const boost::system::error_code& ec,
 	Item item = { inName, inLongName, attr };
 	mItems.push_back(item);
 
-	mBrowserView->AddItem(inName, boost::lexical_cast<string>(attr.uid), attr.size, attr.mtime);
+	mBrowserView->AddItem(inName, std::to_string(attr.uid), attr.size, attr.mtime);
 
 	return true;
 }

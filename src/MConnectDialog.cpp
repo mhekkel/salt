@@ -7,8 +7,6 @@
 #include <fstream>
 #include <regex>
 
-#include <boost/format.hpp>
-
 #include "MConnectDialog.hpp"
 #include "MTerminalWindow.hpp"
 #include "MTerminalView.hpp"

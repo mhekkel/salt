@@ -195,6 +195,11 @@ MColor MColor::Bleach(float inBleachFactor) const
 	return MColor(r, g, b);
 }
 
+std::string MColor::str() const
+{
+	return hex();
+}
+
 ostream& operator<<(ostream& os, const MColor& inColor)
 {
 	ios_base::fmtflags flags = os.setf(ios_base::hex, ios_base::basefield);

@@ -343,14 +343,14 @@ MButtonImpl* MButtonImpl::Create(MButton* inButton, const string& inLabel,
 //	, mMouseTracking(false)
 //	, mLastExit(0)
 //{
-////	AddHandler(WM_PAINT,			boost::bind(&MXcbExpanderImpl::WMPaint, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_ACTIVATE,			boost::bind(&MXcbExpanderImpl::WMActivate, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_LBUTTONDOWN,		boost::bind(&MXcbExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_LBUTTONDBLCLK,	boost::bind(&MXcbExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_LBUTTONUP,		boost::bind(&MXcbExpanderImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_MOUSEMOVE,		boost::bind(&MXcbExpanderImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_MOUSELEAVE,		boost::bind(&MXcbExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
-////	AddHandler(WM_CAPTURECHANGED,	boost::bind(&MXcbExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_PAINT,			std::bind(&MXcbExpanderImpl::WMPaint, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_ACTIVATE,			std::bind(&MXcbExpanderImpl::WMActivate, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_LBUTTONDOWN,		std::bind(&MXcbExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_LBUTTONDBLCLK,	std::bind(&MXcbExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_LBUTTONUP,		std::bind(&MXcbExpanderImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_MOUSEMOVE,		std::bind(&MXcbExpanderImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_MOUSELEAVE,		std::bind(&MXcbExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+////	AddHandler(WM_CAPTURECHANGED,	std::bind(&MXcbExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
 //}
 //
 //MXcbExpanderImpl::~MXcbExpanderImpl()
@@ -1215,7 +1215,7 @@ MListHeaderImpl* MListHeaderImpl::Create(MListHeader* inListHeader)
 ////	GetParentAndBounds(parent, bounds);
 ////	
 ////	parent->AddNotify(TCN_SELCHANGE, GetWidget(),
-////		boost::bind(&MXcbNotebookImpl::TCNSelChange, this, _1, _2, _3));
+////		std::bind(&MXcbNotebookImpl::TCNSelChange, this, _1, _2, _3));
 //}
 //
 //void MXcbNotebookImpl::FrameResized()
@@ -1577,9 +1577,9 @@ MListBoxImpl* MListBoxImpl::Create(MListBox* inListBox)
 ////	if (inParent != nullptr)
 ////	{
 ////		inParent->AddNotify(LVN_ITEMACTIVATE, GetWidget(),
-////			boost::bind(&MXcbListViewImpl::LVMItemActivate, this, _1, _2, _3));
+////			std::bind(&MXcbListViewImpl::LVMItemActivate, this, _1, _2, _3));
 ////		inParent->AddNotify(LVN_GETDISPINFO, GetWidget(),
-////			boost::bind(&MXcbListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
+////			std::bind(&MXcbListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
 ////	}
 ////}
 ////

@@ -73,7 +73,7 @@ index::index()
 	for (xml::element* rsrc: doc.find("//rsrc"))
 	{
 		string name = rsrc->get_attribute("name");
-		uint32_t nr = boost::lexical_cast<int>(rsrc->get_attribute("nr"));
+		uint32_t nr = std::stoi(rsrc->get_attribute("nr"));
 		
 		rsrc_imp& impl(m_index[name]);
 

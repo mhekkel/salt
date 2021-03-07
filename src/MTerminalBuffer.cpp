@@ -3,6 +3,8 @@
 
 #include "MSalt.hpp"
 
+#include <algorithm>
+
 #include "MTerminalBuffer.hpp"
 #include "MPreferences.hpp"
 #include "MError.hpp"
@@ -10,7 +12,7 @@
 
 using namespace std;
 
-BOOST_STATIC_ASSERT(sizeof(MChar) == 8);
+static_assert(sizeof(MChar) == 8, "An MChar should be eight bytes");
 
 // --------------------------------------------------------------------
 
@@ -21,7 +23,7 @@ MLine::MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor)
 	, mDoubleWidth(false)
 	, mDoubleHeight(false)
 {
-	for_each(mCharacters, mCharacters + mSize,
+	std::for_each(mCharacters, mCharacters + mSize,
 		[inForeColor, inBackColor](MChar& ch) { ch = MChar(inForeColor, inBackColor); });
 }
 

@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <boost/system/error_code.hpp>
-#include <boost/lexical_cast.hpp>
 
 class MWindow;
 

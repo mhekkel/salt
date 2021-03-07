@@ -5,6 +5,8 @@
 
 #include "MGtkLib.hpp"
 
+#include <cassert>
+
 #include "MGtkWidgetMixin.hpp"
 
 using namespace std;

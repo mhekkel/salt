@@ -453,7 +453,7 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 //			THROW(("SetWindowPosition called to fast"));
 //		
 //		mTransitionThread =
-//			new boost::thread(boost::bind(&MGtkWindowImpl::TransitionTo, this, inPosition));
+//			new boost::thread(std::bind(&MGtkWindowImpl::TransitionTo, this, inPosition));
 	}
 	else
 	{

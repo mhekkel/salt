@@ -343,7 +343,7 @@ MMenuImpl* MMenuImpl::CreateBar(MMenu* inMenu)
 //	//mWindow->GetBounds(r);
 //	Create(inWindowImpl, r, L"menubar");
 //
-//	inWindowImpl->AddNotify(TBN_DROPDOWN, GetHandle(), boost::bind(&MWinMenubar::NDropDown, this, _1, _2, _3));
+//	inWindowImpl->AddNotify(TBN_DROPDOWN, GetHandle(), std::bind(&MWinMenubar::NDropDown, this, _1, _2, _3));
 //
 //	vector<TBBUTTON> buttons;
 //	list<wstring> labels;

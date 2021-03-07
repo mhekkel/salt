@@ -1,0 +1,10 @@
+obj.dbg/
+obj/
+autom4te.cache
+.vscode
+aclocal.m4
+config.log
+config.status
+GNUmakefile
+salt
+src/MSaltConfig.*

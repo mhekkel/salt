@@ -38,9 +38,9 @@ MWinClipboardImpl::MWinClipboardImpl(MClipboard* inClipboard)
 {
 	MWinProcMixin::CreateHandle(nullptr, MRect(0, 0, 0, 0), L"MWinClipboardImpl");
 
-	AddHandler(WM_RENDERFORMAT,	boost::bind(&MWinClipboardImpl::WMRenderClipboard, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_RENDERFORMAT,	std::bind(&MWinClipboardImpl::WMRenderClipboard, this, _1, _2, _3, _4, _5));
 //	AddMessageHandler(WM_RENDERALLFORMATS,
-//										boost::bind(&MWinClipboardImpl::WMRenderClipboard, this, _1, _2, _3, _4, _5));
+//										std::bind(&MWinClipboardImpl::WMRenderClipboard, this, _1, _2, _3, _4, _5));
 }
 
 void MWinClipboardImpl::CreateParams(

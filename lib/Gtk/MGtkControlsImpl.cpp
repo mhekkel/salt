@@ -992,7 +992,7 @@ void MGtkNotebookImpl::AddedToWindow()
 //	GetParentAndBounds(parent, bounds);
 //	
 //	parent->AddNotify(TCN_SELCHANGE, GetWidget(),
-//		boost::bind(&MGtkNotebookImpl::TCNSelChange, this, _1, _2, _3));
+//		std::bind(&MGtkNotebookImpl::TCNSelChange, this, _1, _2, _3));
 }
 
 void MGtkNotebookImpl::FrameResized()
@@ -1353,9 +1353,9 @@ void MGtkListViewImpl::CreateWidget()
 //	if (inParent != nullptr)
 //	{
 //		inParent->AddNotify(LVN_ITEMACTIVATE, GetWidget(),
-//			boost::bind(&MGtkListViewImpl::LVMItemActivate, this, _1, _2, _3));
+//			std::bind(&MGtkListViewImpl::LVMItemActivate, this, _1, _2, _3));
 //		inParent->AddNotify(LVN_GETDISPINFO, GetWidget(),
-//			boost::bind(&MGtkListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
+//			std::bind(&MGtkListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
 //	}
 //}
 //

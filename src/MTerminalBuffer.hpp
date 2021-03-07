@@ -61,7 +61,7 @@ class MStyle
   public:
 	MStyle() : mData(kDefaultStyle)
 	{
-		BOOST_STATIC_ASSERT(sizeof(MStyle) == 4);
+		static_assert(sizeof(MStyle) == 4, "style should be four bytes");
 	}
 
 	explicit MStyle(MCharStyle inStyle) : mData(inStyle)

@@ -13,7 +13,7 @@ class MTerminalChannel
 	typedef std::function<void(boost::system::error_code, std::size_t)> WriteCallback;
 	typedef std::function<void(boost::system::error_code, std::streambuf& inData)> ReadCallback;
 
-	virtual void SetMessageCallback(MessageCallback&& inMessageCallback);
+	virtual void SetMessageCallback(const MessageCallback& inMessageCallback);
 	
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 		uint32_t inPixelWidth, uint32_t inPixelHeight) = 0;
@@ -21,7 +21,7 @@ class MTerminalChannel
 	virtual void Open(const std::string& inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
 		const std::string& inCommand, const std::vector<std::string>& env,
-		OpenCallback&& inOpenCallback) = 0;
+		const OpenCallback& inOpenCallback) = 0;
 	virtual bool IsOpen() const = 0;
 	virtual void Close() = 0;
 	
@@ -30,9 +30,9 @@ class MTerminalChannel
 
 	void Release();
 
-	virtual void SendData(const std::string& inData, WriteCallback&& inCallback) = 0;
+	virtual void SendData(const std::string& inData, const WriteCallback& inCallback) = 0;
 	virtual void SendSignal(const std::string& inSignal) = 0;
-	virtual void ReadData(ReadCallback&& inCallback) = 0;
+	virtual void ReadData(const ReadCallback& inCallback) = 0;
 	
 	boost::asio::io_service& GetIOService() { return mIOService; }
 	

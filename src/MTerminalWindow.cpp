@@ -5,7 +5,6 @@
 
 #include <cryptopp/base64.h>
 
-#include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include "MTerminalWindow.hpp"
@@ -76,9 +75,11 @@ MSshTerminalWindow::MSshTerminalWindow(const string& inUser, const string& inHos
 	, mPort(inPort)
 	, mSSHCommand(inSSHCommand)
 {
-	mConnection->set_validate_callback(boost::bind(&MSaltApp::ValidateHost, static_cast<MSaltApp*>(gApp), _1, _2, _3));
-	mConnection->set_password_callback(boost::bind(&MSshTerminalWindow::RequestedPassword, this));
-	mConnection->set_keyboard_interactive_callback(boost::bind(&MSshTerminalWindow::KeyboardInteractive, this, _1, _2, _3));
+	using namespace std::placeholders;
+
+	mConnection->set_validate_callback(std::bind(&MSaltApp::ValidateHost, static_cast<MSaltApp*>(gApp), _1, _2, _3));
+	mConnection->set_password_callback(std::bind(&MSshTerminalWindow::RequestedPassword, this));
+	mConnection->set_keyboard_interactive_callback(std::bind(&MSshTerminalWindow::KeyboardInteractive, this, _1, _2, _3));
 
 	stringstream title;
 	title << mUser << '@' << mServer;

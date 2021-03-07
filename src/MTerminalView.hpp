@@ -7,7 +7,6 @@
 #include <list>
 #include <map>
 
-#include <boost/function.hpp>
 #include <boost/format.hpp>
 
 #include <pinch/terminal_channel.hpp>

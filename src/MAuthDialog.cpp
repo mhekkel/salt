@@ -11,7 +11,6 @@
 #include "MLib.hpp"
 
 #include <cmath>
-#include <boost/lexical_cast.hpp>
 
 #include <pinch/channel.hpp>
 
@@ -35,21 +34,21 @@ MAuthDialog::MAuthDialog(std::string inTitle, std::string inInstruction, const v
 	int32_t id = 1;
 	for (auto prompt: prompts)
 	{
-		SetVisible("label-" + boost::lexical_cast<string>(id), true);
-		SetVisible("edit-" + boost::lexical_cast<string>(id), true);
+		SetVisible("label-" + std::to_string(id), true);
+		SetVisible("edit-" + std::to_string(id), true);
 
-		SetText("label-" + boost::lexical_cast<string>(id), prompt.str);
+		SetText("label-" + std::to_string(id), prompt.str);
 
 		//if (not prompt.echo)
-			SetPasswordChar("edit-" + boost::lexical_cast<string>(id));
+			SetPasswordChar("edit-" + std::to_string(id));
 		
 		++id;
 	}
 
 	for (id = mFields + 1; id <= 5; ++id)
 	{
-		SetVisible("label-" + boost::lexical_cast<string>(id), false);
-		SetVisible("edit-" + boost::lexical_cast<string>(id), false);
+		SetVisible("label-" + std::to_string(id), false);
+		SetVisible("edit-" + std::to_string(id), false);
 	}
 	
 	SetFocus("edit-1");
@@ -66,7 +65,7 @@ bool MAuthDialog::OKClicked()
 	vector<string> args;
 	
 	for (int32_t id = 1; id <= mFields; ++id)
-		args.push_back(GetText("edit-" + boost::lexical_cast<string>(id)));
+		args.push_back(GetText("edit-" + std::to_string(id)));
 	
 	eAuthInfo(args);
 	mSentCredentials = true;

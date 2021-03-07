@@ -44,6 +44,8 @@ struct MColor
 
 	std::string	hex() const;
 	void		hex(const std::string& inHex);
+
+	std::string	str() const;
 };
 
 extern const MColor

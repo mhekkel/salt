@@ -227,37 +227,37 @@ LRESULT MWinWindowImpl::WinProc(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARA
 
 void MWinWindowImpl::Create(MRect inBounds, const wstring& inTitle)
 {
-	AddHandler(WM_CREATE,			boost::bind(&MWinWindowImpl::WMCreate, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_CLOSE,			boost::bind(&MWinWindowImpl::WMClose, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_ACTIVATE,			boost::bind(&MWinWindowImpl::WMActivate, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSEACTIVATE,	boost::bind(&MWinWindowImpl::WMMouseActivate, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SIZE,				boost::bind(&MWinWindowImpl::WMSize, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SIZING,			boost::bind(&MWinWindowImpl::WMSizing, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_PAINT,			boost::bind(&MWinWindowImpl::WMPaint, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CREATE,			std::bind(&MWinWindowImpl::WMCreate, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CLOSE,			std::bind(&MWinWindowImpl::WMClose, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_ACTIVATE,			std::bind(&MWinWindowImpl::WMActivate, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSEACTIVATE,	std::bind(&MWinWindowImpl::WMMouseActivate, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SIZE,				std::bind(&MWinWindowImpl::WMSize, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SIZING,			std::bind(&MWinWindowImpl::WMSizing, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_PAINT,			std::bind(&MWinWindowImpl::WMPaint, this, _1, _2, _3, _4, _5));
 	if (mFlags & (kMDialogBackground | kMNoEraseOnUpdate))
-		AddHandler(WM_ERASEBKGND,	boost::bind(&MWinWindowImpl::WMEraseBkgnd, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_INITMENU,			boost::bind(&MWinWindowImpl::WMInitMenu, this, _1, _2, _3, _4, _5));
-//	AddHandler(WM_MENUCHAR,			boost::bind(&MWinWindowImpl::WMMenuChar, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MENUCOMMAND,		boost::bind(&MWinWindowImpl::WMMenuCommand, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONDOWN,		boost::bind(&MWinWindowImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONDBLCLK,	boost::bind(&MWinWindowImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONUP,		boost::bind(&MWinWindowImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSEMOVE,		boost::bind(&MWinWindowImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSELEAVE,		boost::bind(&MWinWindowImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_CAPTURECHANGED,	boost::bind(&MWinWindowImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_CONTEXTMENU,		boost::bind(&MWinWindowImpl::WMContextMenu, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SETCURSOR,		boost::bind(&MWinWindowImpl::WMSetCursor, this, _1, _2, _3, _4, _5));
-//	AddHandler(WM_IME_COMPOSITION,	boost::bind(&MWinWindowImpl::WMImeComposition, this, _1, _2, _3, _4, _5));
+		AddHandler(WM_ERASEBKGND,	std::bind(&MWinWindowImpl::WMEraseBkgnd, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_INITMENU,			std::bind(&MWinWindowImpl::WMInitMenu, this, _1, _2, _3, _4, _5));
+//	AddHandler(WM_MENUCHAR,			std::bind(&MWinWindowImpl::WMMenuChar, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MENUCOMMAND,		std::bind(&MWinWindowImpl::WMMenuCommand, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONDOWN,		std::bind(&MWinWindowImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONDBLCLK,	std::bind(&MWinWindowImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONUP,		std::bind(&MWinWindowImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSEMOVE,		std::bind(&MWinWindowImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSELEAVE,		std::bind(&MWinWindowImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CAPTURECHANGED,	std::bind(&MWinWindowImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CONTEXTMENU,		std::bind(&MWinWindowImpl::WMContextMenu, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SETCURSOR,		std::bind(&MWinWindowImpl::WMSetCursor, this, _1, _2, _3, _4, _5));
+//	AddHandler(WM_IME_COMPOSITION,	std::bind(&MWinWindowImpl::WMImeComposition, this, _1, _2, _3, _4, _5));
 //	AddHandler(WM_IME_STARTCOMPOSITION,
-//									boost::bind(&MWinWindowImpl::WMImeStartComposition, this, _1, _2, _3, _4, _5));
-//	AddHandler(WM_IME_REQUEST,		boost::bind(&MWinWindowImpl::WMImeRequest, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_DROPFILES,		boost::bind(&MWinWindowImpl::WMDropFiles, this, _1, _2, _3, _4, _5));
+//									std::bind(&MWinWindowImpl::WMImeStartComposition, this, _1, _2, _3, _4, _5));
+//	AddHandler(WM_IME_REQUEST,		std::bind(&MWinWindowImpl::WMImeRequest, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_DROPFILES,		std::bind(&MWinWindowImpl::WMDropFiles, this, _1, _2, _3, _4, _5));
 
-	AddHandler(WM_THEMECHANGED,		boost::bind(&MWinWindowImpl::WMThemeChanged, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_THEMECHANGED,		std::bind(&MWinWindowImpl::WMThemeChanged, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_DWMCOMPOSITIONCHANGED,
-									boost::bind(&MWinWindowImpl::WMDwmCompositionChanged, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_NCCALCSIZE,		boost::bind(&MWinWindowImpl::WMNCCalcSize, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_NCHITTEST,		boost::bind(&MWinWindowImpl::WMNCHitTest, this, _1, _2, _3, _4, _5));
+									std::bind(&MWinWindowImpl::WMDwmCompositionChanged, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_NCCALCSIZE,		std::bind(&MWinWindowImpl::WMNCCalcSize, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_NCHITTEST,		std::bind(&MWinWindowImpl::WMNCHitTest, this, _1, _2, _3, _4, _5));
 
 	if (mFlags & kMPostionDefault)
 		inBounds.x = inBounds.y = CW_USEDEFAULT;

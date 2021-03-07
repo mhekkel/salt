@@ -24,17 +24,17 @@ MWinProcMixin::MWinProcMixin(MHandler* inHandler)
 	, mOldWinProc(nullptr)
 	, mHandledKeyDown(false)
 {
-	AddHandler(WM_DESTROY,		boost::bind(&MWinProcMixin::WMDestroy, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_KEYDOWN,		boost::bind(&MWinProcMixin::WMKeydown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SYSKEYDOWN,	boost::bind(&MWinProcMixin::WMKeydown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_CHAR,			boost::bind(&MWinProcMixin::WMChar, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_UNICHAR,		boost::bind(&MWinProcMixin::WMUniChar, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSEWHEEL,	boost::bind(&MWinProcMixin::WMMouseWheel, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SETFOCUS,		boost::bind(&MWinProcMixin::WMSetFocus, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_KILLFOCUS,	boost::bind(&MWinProcMixin::WMKillFocus, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_DESTROY,		std::bind(&MWinProcMixin::WMDestroy, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_KEYDOWN,		std::bind(&MWinProcMixin::WMKeydown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SYSKEYDOWN,	std::bind(&MWinProcMixin::WMKeydown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CHAR,			std::bind(&MWinProcMixin::WMChar, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_UNICHAR,		std::bind(&MWinProcMixin::WMUniChar, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSEWHEEL,	std::bind(&MWinProcMixin::WMMouseWheel, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SETFOCUS,		std::bind(&MWinProcMixin::WMSetFocus, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_KILLFOCUS,	std::bind(&MWinProcMixin::WMKillFocus, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_QUERYENDSESSION,
-								boost::bind(&MWinProcMixin::WMQueryEndSession, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_ENDSESSION,	boost::bind(&MWinProcMixin::WMEndSession, this, _1, _2, _3, _4, _5));
+								std::bind(&MWinProcMixin::WMQueryEndSession, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_ENDSESSION,	std::bind(&MWinProcMixin::WMEndSession, this, _1, _2, _3, _4, _5));
 }
 
 MWinProcMixin::~MWinProcMixin()

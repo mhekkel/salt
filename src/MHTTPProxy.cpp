@@ -8,14 +8,9 @@
 
 // #include <fstream>
 
-// #include <boost/bind.hpp>
-// #include <boost/lexical_cast.hpp>
-// #include <boost/regex.hpp>
-// #include <boost/array.hpp>
 // #include <boost/algorithm/string.hpp>
 // #include <boost/date_time/posix_time/posix_time.hpp>
 // #include <boost/date_time/local_time/local_time.hpp>
-// #include <boost/filesystem/fstream.hpp>
 // #include <boost/asio/spawn.hpp>
 
 // #include <pinch/connection.hpp>
@@ -133,7 +128,7 @@
 // {
 // 	++s_connection_count;
 // 	boost::asio::async_read(m_socket, m_request_buffer, boost::asio::transfer_at_least(1),
-// 		boost::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
+// 		std::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
 // }
 
 // void proxy_connection::handle_read_request(const boost::system::error_code& ec)
@@ -146,7 +141,7 @@
 // 	else if (m_request_buffer.in_avail() == 0)
 // 	{
 // 		boost::asio::async_read(m_socket, m_request_buffer, boost::asio::transfer_at_least(1),
-// 			boost::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // 	else
 // 	{
@@ -188,7 +183,7 @@
 // 			}
 // 			else
 // 				boost::asio::async_read(m_socket, m_request_buffer, boost::asio::transfer_at_least(1),
-// 					boost::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
+// 					std::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
 // 		}
 // 		catch (zh::authorization_stale_exception& e)
 // 		{
@@ -233,7 +228,7 @@
 // 	if (m_channel)
 // 		m_channel->close();
 // 	m_channel.reset(new forwarding_channel(m_proxy->get_connection(), host, port));
-// 	m_channel->async_open(boost::bind(&proxy_connection::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, true));
+// 	m_channel->async_open(std::bind(&proxy_connection::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, true));
 // }
 
 // void proxy_connection::handle_request()
@@ -288,7 +283,7 @@
 // 				if (m_channel)
 // 					m_channel->close();
 // 				m_channel.reset(new forwarding_channel(m_proxy->get_connection(), host, port));
-// 				m_channel->async_open(boost::bind(&proxy_connection::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, false));
+// 				m_channel->async_open(std::bind(&proxy_connection::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, false));
 // 			}
 // 		}
 // 	}
@@ -312,7 +307,7 @@
 // 		iostream out(buffer.get());
 // 		out << m_request;
 
-// 		boost::asio::async_write(*m_channel, *buffer, boost::bind(&proxy_connection::handle_wrote_request, shared_from_this(),
+// 		boost::asio::async_write(*m_channel, *buffer, std::bind(&proxy_connection::handle_wrote_request, shared_from_this(),
 // 			boost::asio::placeholders::error, buffer));
 // 	}
 // }
@@ -326,7 +321,7 @@
 // 		m_reply_parser.reset();
 
 // 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 			boost::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // }
 
@@ -337,7 +332,7 @@
 // 	else if (m_reply_buffer.in_avail() == 0)
 // 	{
 // 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 			boost::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // 	else
 // 	{
@@ -349,7 +344,7 @@
 // 			send_error_reply(zh::bad_gateway);
 // 		else
 // 			boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 				boost::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 				std::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // }
 
@@ -363,7 +358,7 @@
 // 	else if (m_reply_buffer.in_avail() == 0)
 // 	{
 // 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 			boost::bind(&proxy_connection::handle_read_reply_content, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_connection::handle_read_reply_content, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // 	else
 // 	{
@@ -372,7 +367,7 @@
 // 		boost::tribool result = m_reply_parser.parse_content(m_reply, m_reply_buffer, *sink);
 
 // 		boost::asio::async_write(m_socket, *sink,
-// 			boost::bind(&proxy_connection::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, sink, result ? rf_last_part : rf_part));
+// 			std::bind(&proxy_connection::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, sink, result ? rf_last_part : rf_part));
 // 	}
 // }
 
@@ -428,7 +423,7 @@
 // 			// causing aborting exceptions, so I moved it here.
 // 	{
 // 		boost::asio::ip::address addr = m_socket.remote_endpoint().address();
-// 		client = boost::lexical_cast<string>(addr);
+// 		client = std::to_string(addr);
 // 	}
 // 	catch (...)
 // 	{
@@ -442,7 +437,7 @@
 // 	out << reply;
 
 // 	(void)boost::asio::async_write(m_socket, *buffer,
-// 		boost::bind(&proxy_connection::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, buffer, rf));
+// 		std::bind(&proxy_connection::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, buffer, rf));
 // }
 
 // // --------------------------------------------------------------------
@@ -666,7 +661,7 @@
 // 	m_new_connection.reset(new proxy_connection(m_connection, shared_from_this()));
 
 // 	boost::asio::ip::tcp::resolver resolver(m_connection->get_io_service());
-// 	boost::asio::ip::tcp::resolver::query query(address, boost::lexical_cast<string>(port));
+// 	boost::asio::ip::tcp::resolver::query query(address, std::to_string(port));
 // 	boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
 
 // 	m_acceptor->open(endpoint.protocol());
@@ -674,7 +669,7 @@
 // 	m_acceptor->bind(endpoint);
 // 	m_acceptor->listen();
 // 	m_acceptor->async_accept(m_new_connection->get_socket(),
-// 		boost::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
+// 		std::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
 // }
 
 // void MHTTPProxy::stop()
@@ -689,7 +684,7 @@
 // 		m_new_connection->start();
 // 		m_new_connection.reset(new proxy_connection(m_connection, shared_from_this()));
 // 		m_acceptor->async_accept(m_new_connection->get_socket(),
-// 			boost::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
+// 			std::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
 // 	}
 // }
 

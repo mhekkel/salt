@@ -200,7 +200,7 @@ void MDocApplication::UpdateRecentMenu(MMenu* inMenu)
 
 //	mRecentFiles.erase(
 //		remove_if(mRecentFiles.begin(), mRecentFiles.end(),
-//			boost::bind(&MFile::IsLocal, _1) == true and boost::bind(&MFile::Exists, _1) == false),
+//			std::bind(&MFile::IsLocal, _1) == true and std::bind(&MFile::Exists, _1) == false),
 //		mRecentFiles.end());
 
 	for (string& url: mRecentFiles)

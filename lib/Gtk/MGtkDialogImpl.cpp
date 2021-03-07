@@ -183,10 +183,10 @@ void MGtkDialogImpl::Finish()
 
 	uint32_t minWidth = 40;
 	if (not dialog->get_attribute("width").empty())
-		minWidth = boost::lexical_cast<uint32_t>(dialog->get_attribute("width"));
+		minWidth = std::stoul(dialog->get_attribute("width"));
 	uint32_t minHeight = 40;
 	if (not dialog->get_attribute("height").empty())
-		minHeight = boost::lexical_cast<uint32_t>(dialog->get_attribute("height"));
+		minHeight = std::stoul(dialog->get_attribute("height"));
 
 	MRect bounds(0, 0, minWidth, minHeight);
 
@@ -273,31 +273,31 @@ void MGtkDialogImpl::GetMargins(xml::element* inTemplate,
 	string m = inTemplate->get_attribute("margin");
 	if (not m.empty())
 		outLeftMargin = outRightMargin =
-		outTopMargin = outBottomMargin = boost::lexical_cast<int32_t>(m);
+		outTopMargin = outBottomMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-left-right");
 	if (not m.empty())
-		outLeftMargin = outRightMargin = boost::lexical_cast<int32_t>(m);
+		outLeftMargin = outRightMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-top-bottom");
 	if (not m.empty())
-		outTopMargin = outBottomMargin = boost::lexical_cast<int32_t>(m);
+		outTopMargin = outBottomMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-left");
 	if (not m.empty())
-		outLeftMargin = boost::lexical_cast<int32_t>(m);
+		outLeftMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-top");
 	if (not m.empty())
-		outTopMargin = boost::lexical_cast<int32_t>(m);
+		outTopMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-right");
 	if (not m.empty())
-		outRightMargin = boost::lexical_cast<int32_t>(m);
+		outRightMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-bottom");
 	if (not m.empty())
-		outBottomMargin = boost::lexical_cast<int32_t>(m);
+		outBottomMargin = std::stoi(m);
 
 //	outLeftMargin = static_cast<int32_t>(outLeftMargin * mDLUX);
 //	outRightMargin = static_cast<int32_t>(outRightMargin * mDLUX);
@@ -638,11 +638,11 @@ MView* MGtkDialogImpl::CreateBox(xml::element* inTemplate, int32_t inX, int32_t 
 
 	uint32_t spacing = 4;
 	if (not inTemplate->get_attribute("spacing").empty())
-		spacing = boost::lexical_cast<uint32_t>(inTemplate->get_attribute("spacing"));
+		spacing = std::stoul(inTemplate->get_attribute("spacing"));
 
 	uint32_t padding = 4;
 	if (not inTemplate->get_attribute("padding").empty())
-		spacing = boost::lexical_cast<uint32_t>(inTemplate->get_attribute("padding"));
+		spacing = std::stoul(inTemplate->get_attribute("padding"));
 
 	bool expand = inTemplate->get_attribute("expand") == "true";
 	bool fill = inTemplate->get_attribute("fill") == "true";
@@ -749,8 +749,8 @@ MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int
 		if (inTemplate->get_attribute("width") == "scrollbarwidth")
 			width += kScrollbarWidth;
 		else
-//			width += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("width")) * mDLUX);
-			width += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("width")));
+//			width += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("width")) * mDLUX);
+			width += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("width")));
 
 		MGtkWidgetMixin* impl = dynamic_cast<MGtkWidgetMixin*>(control->GetControlImplBase());
 		if (impl != nullptr)
@@ -764,8 +764,8 @@ MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int
 //		if (inTemplate->get_attribute("height") == "scrollbarheight")
 //			height += kScrollbarWidth;
 //		else
-////			height += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("height")) * mDLUY);
-//			height += static_cast<int32_t>(boost::lexical_cast<int32_t>(inTemplate->get_attribute("height")));
+////			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")) * mDLUY);
+//			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")));
 //		
 //		MRect frame;
 //		result->GetFrame(frame);
@@ -779,7 +779,7 @@ MView* MGtkDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int
 			inTemplate->get_attribute("packing") == "end" ? ePackEnd : ePackStart,
 			inTemplate->get_attribute("expand") == "true" ? true : false,
 			inTemplate->get_attribute("fill") == "true" ? true : false,
-			inTemplate->get_attribute("padding").empty() ? 0 : boost::lexical_cast<int32_t>(inTemplate->get_attribute("padding")));
+			inTemplate->get_attribute("padding").empty() ? 0 : std::stoi(inTemplate->get_attribute("padding")));
 	}
 
 	return result;

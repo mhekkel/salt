@@ -11,15 +11,12 @@
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
 #include <boost/format.hpp>
-#include <boost/bind.hpp>
+#include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "MTerminalView.hpp"
 #include "MDevice.hpp"
@@ -190,7 +187,8 @@ MTerminalView::MTerminalView(const string& inID, MRect inBounds,
 	, mGraphicalBeep(nullptr)
 	, mDisabledFactor(mAnimationManager->CreateVariable(1, 0, 1))
 {
-	mTerminalChannel->SetMessageCallback(boost::bind(&MTerminalView::HandleMessage, this, _1, _2));
+	mTerminalChannel->SetMessageCallback(
+		[this](const std::string& msg, const std::string& lang) { this->HandleMessage(msg, lang); });
 
 	ReadPreferences();
 
@@ -215,9 +213,9 @@ MTerminalView::MTerminalView(const string& inID, MRect inBounds,
 	AddRoute(mAnimationManager->eAnimate, eAnimate);
 
 //	mTerminalChannel->set_message_callbacks(
-//		boost::bind(&MTerminalView::HandleMessage, this, _1, _2),
-//		boost::bind(&MTerminalView::HandleMessage, this, _1, _2),
-//		boost::bind(&MTerminalView::HandleMessage, this, _1, _2)
+//		std::bind(&MTerminalView::HandleMessage, this, _1, _2),
+//		std::bind(&MTerminalView::HandleMessage, this, _1, _2),
+//		std::bind(&MTerminalView::HandleMessage, this, _1, _2)
 //		);
 //
 	AdjustScrollbar(0);
@@ -272,7 +270,9 @@ void MTerminalView::Open()
 		Preferences::GetBoolean("forward-agent", true),
 		Preferences::GetBoolean("forward-x11", true),
 		mSSHCommand, env,
-		boost::bind(&MTerminalView::HandleOpened, this, boost::asio::placeholders::error));
+		[this](const boost::system::error_code& ec) {
+			this->HandleOpened(ec);
+		});
 }
 
 void MTerminalView::Close()
@@ -2340,7 +2340,8 @@ void MTerminalView::HandleOpened(const boost::system::error_code& ec)
 	else
 	{
 		Opened();
-		mTerminalChannel->ReadData(boost::bind(&MTerminalView::HandleReceived, this, _1, _2));
+		mTerminalChannel->ReadData([this](boost::system::error_code ec, std::streambuf& inData)
+			{ this->HandleReceived(ec, inData); });
 	}
 }
 
@@ -2373,7 +2374,8 @@ void MTerminalView::HandleReceived(const boost::system::error_code& ec, streambu
 		
 		io::copy(in, out);
 		
-		mTerminalChannel->ReadData(boost::bind(&MTerminalView::HandleReceived, this, _1, _2));
+		mTerminalChannel->ReadData([this](boost::system::error_code ec, std::streambuf& inData)
+			{ this->HandleReceived(ec, inData); });
 
 		Idle(GetLocalTime());
 	}		
@@ -3557,7 +3559,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 				{
 					vector<string> ts;
 					for (int i = 0; i < mTerminalWidth; ++i)
-						if (mTabStops[i]) ts.push_back(boost::lexical_cast<string>(i + 1));
+						if (mTabStops[i]) ts.push_back(std::to_string(i + 1));
 					SendCommand(kDCS + "2$u" + ba::join(ts, "/") + "\033\\");
 					break;
 				}
@@ -3879,9 +3881,9 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 				if (mCursor.style & kStyleInverse)		sgr.push_back("7");
 				if (mCursor.style & kStyleInvisible)	sgr.push_back("8");
 				if (mCursor.style.GetForeColor() != kXTermColorNone)
-					sgr.push_back(boost::lexical_cast<string>(30 + mCursor.style.GetForeColor()));
+					sgr.push_back(std::to_string(30 + mCursor.style.GetForeColor()));
 				if (mCursor.style.GetBackColor() != kXTermColorNone)
-					sgr.push_back(boost::lexical_cast<string>(40 + mCursor.style.GetBackColor()));
+					sgr.push_back(std::to_string(40 + mCursor.style.GetBackColor()));
 				
 				response = (boost::format("\033P1$r%s") % ba::join(sgr, ";")).str();
 			}

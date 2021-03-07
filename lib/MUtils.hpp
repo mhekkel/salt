@@ -6,7 +6,6 @@
 #ifndef MUTILS_H
 #define MUTILS_H
 
-#include <boost/iterator/iterator_facade.hpp>
 #include <filesystem>
 
 #include "MTypes.hpp"

@@ -282,7 +282,7 @@ void MWinButtonImpl::CreateHandle(MWinProcMixin* inParent,
 	if (inParent != nullptr and mFlags & eBF_Split)
 	{
 		inParent->AddNotify(BCN_DROPDOWN, GetHandle(),
-			boost::bind(&MWinButtonImpl::BCMSetDropDownState, this, _1, _2, _3));
+			std::bind(&MWinButtonImpl::BCMSetDropDownState, this, _1, _2, _3));
 	}
 }
 
@@ -396,14 +396,14 @@ MWinExpanderImpl::MWinExpanderImpl(MExpander* inExpander, const string& inLabel)
 	, mLastExit(0)
 	, mDC(nullptr)
 {
-	AddHandler(WM_PAINT,			boost::bind(&MWinExpanderImpl::WMPaint, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_ACTIVATE,			boost::bind(&MWinExpanderImpl::WMActivate, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONDOWN,		boost::bind(&MWinExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONDBLCLK,	boost::bind(&MWinExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONUP,		boost::bind(&MWinExpanderImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSEMOVE,		boost::bind(&MWinExpanderImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSELEAVE,		boost::bind(&MWinExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_CAPTURECHANGED,	boost::bind(&MWinExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_PAINT,			std::bind(&MWinExpanderImpl::WMPaint, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_ACTIVATE,			std::bind(&MWinExpanderImpl::WMActivate, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONDOWN,		std::bind(&MWinExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONDBLCLK,	std::bind(&MWinExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONUP,		std::bind(&MWinExpanderImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSEMOVE,		std::bind(&MWinExpanderImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSELEAVE,		std::bind(&MWinExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CAPTURECHANGED,	std::bind(&MWinExpanderImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
 }
 
 MWinExpanderImpl::~MWinExpanderImpl()
@@ -814,7 +814,7 @@ void MWinStatusbarImpl::CreateHandle(MWinProcMixin* inParent,
 	if (inParent != nullptr)
 	{
 		inParent->AddNotify(NM_CLICK, GetHandle(),
-			boost::bind(&MWinStatusbarImpl::NMClick, this, _1, _2, _3));
+			std::bind(&MWinStatusbarImpl::NMClick, this, _1, _2, _3));
 	}
 }
 
@@ -1027,7 +1027,7 @@ void MWinPopupImpl::AddedToWindow()
 {
 	MWinControlImpl::AddedToWindow();
 	
-//	AddHandler(WM_MOUSEWHEEL, boost::bind(&MWinPopupImpl::WMMouseWheel, this, _1, _2, _3, _4, _5));
+//	AddHandler(WM_MOUSEWHEEL, std::bind(&MWinPopupImpl::WMMouseWheel, this, _1, _2, _3, _4, _5));
 
 	if (not mChoices.empty())
 		SetChoices(mChoices);
@@ -1478,11 +1478,11 @@ void MWinListHeaderImpl::CreateHandle(MWinProcMixin* inParent, MRect inBounds,
 		}
 
 		inParent->AddNotify(HDN_TRACK, GetHandle(),
-			boost::bind(&MWinListHeaderImpl::HDNTrack, this, _1, _2, _3));
+			std::bind(&MWinListHeaderImpl::HDNTrack, this, _1, _2, _3));
 		inParent->AddNotify(HDN_BEGINTRACK, GetHandle(),
-			boost::bind(&MWinListHeaderImpl::HDNBeginTrack, this, _1, _2, _3));
+			std::bind(&MWinListHeaderImpl::HDNBeginTrack, this, _1, _2, _3));
 		inParent->AddNotify(HDN_BEGINDRAG, GetHandle(),
-			boost::bind(&MWinListHeaderImpl::HDNBeginDrag, this, _1, _2, _3));
+			std::bind(&MWinListHeaderImpl::HDNBeginDrag, this, _1, _2, _3));
 	}
 }
 
@@ -1580,7 +1580,7 @@ void MWinNotebookImpl::AddedToWindow()
 	GetParentAndBounds(parent, bounds);
 	
 	parent->AddNotify(TCN_SELCHANGE, GetHandle(),
-		boost::bind(&MWinNotebookImpl::TCNSelChange, this, _1, _2, _3));
+		std::bind(&MWinNotebookImpl::TCNSelChange, this, _1, _2, _3));
 }
 
 void MWinNotebookImpl::FrameResized()
@@ -1890,9 +1890,9 @@ void MWinListViewImpl::CreateHandle(MWinProcMixin* inParent, MRect inBounds, con
 	if (inParent != nullptr)
 	{
 		inParent->AddNotify(LVN_ITEMACTIVATE, GetHandle(),
-			boost::bind(&MWinListViewImpl::LVMItemActivate, this, _1, _2, _3));
+			std::bind(&MWinListViewImpl::LVMItemActivate, this, _1, _2, _3));
 		inParent->AddNotify(LVN_GETDISPINFO, GetHandle(),
-			boost::bind(&MWinListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
+			std::bind(&MWinListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
 	}
 }
 

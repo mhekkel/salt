@@ -5,6 +5,8 @@
 
 #include "MLib.hpp"
 
+#include <cassert>
+
 #include "MWindow.hpp"
 #include "MCommands.hpp"
 #include "MDocument.hpp"

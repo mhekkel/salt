@@ -276,8 +276,8 @@ int32_t GetInteger(
 
 	try
 	{
-		result = boost::lexical_cast<int32_t>(GetString(
-			inName, boost::lexical_cast<string>(inDefaultValue)));
+		result = std::stoi(GetString(
+			inName, std::to_string(inDefaultValue)));
 	}
 	catch (...)
 	{
@@ -290,7 +290,7 @@ void SetInteger(
 	const char*	inName,
 	int32_t		inValue)
 {
-	SetString(inName, boost::lexical_cast<string>(inValue));
+	SetString(inName, std::to_string(inValue));
 }
 
 string GetString(

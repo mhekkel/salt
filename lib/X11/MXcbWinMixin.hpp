@@ -7,8 +7,6 @@
 
 #include <list>
 
-#include <boost/thread/mutex.hpp>
-
 class MXcbWinMixin
 {
   public:

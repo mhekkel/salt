@@ -344,11 +344,11 @@ bool MFileImpl::IsModifiedOnDisk()
 //	assert(mChannel == nullptr);
 //	mChannel = new MSftpChannel(mHost, mUser, mPort);
 //
-//	mChannel->eReceiveData = boost::bind(&MSFTPFileImpl::ReceiveData, this, _1, _2, _3);
-//	//mChannel->eChannelMessage = boost::bind(&MSFTPFileImpl::ChannelMessage, this, _1);
-//	//mChannel->eChannelError = boost::bind(&MSFTPFileImpl::ChannelError, this, _1);
-//	mChannel->eSFTPInitialised = boost::bind(&MSFTPFileImpl::SFTPInitialised, this);
-//	mChannel->eFileClosed = boost::bind(&MSFTPFileImpl::FileClosed, this);
+//	mChannel->eReceiveData = std::bind(&MSFTPFileImpl::ReceiveData, this, _1, _2, _3);
+//	//mChannel->eChannelMessage = std::bind(&MSFTPFileImpl::ChannelMessage, this, _1);
+//	//mChannel->eChannelError = std::bind(&MSFTPFileImpl::ChannelError, this, _1);
+//	mChannel->eSFTPInitialised = std::bind(&MSFTPFileImpl::SFTPInitialised, this);
+//	mChannel->eFileClosed = std::bind(&MSFTPFileImpl::FileClosed, this);
 //
 //	mChannel->Open();
 //}
@@ -363,11 +363,11 @@ bool MFileImpl::IsModifiedOnDisk()
 //	assert(mChannel == nullptr);
 //	mChannel = new MSftpChannel(mHost, mUser, mPort);
 //
-//	mChannel->eSendData = boost::bind(&MSFTPFileImpl::SendData, this, _1, _2, _3);
-//	//mChannel->eChannelMessage = boost::bind(&MSFTPFileImpl::ChannelMessage, this, _1);
-//	//mChannel->eChannelError = boost::bind(&MSFTPFileImpl::ChannelError, this, _1);
-//	mChannel->eSFTPInitialised = boost::bind(&MSFTPFileImpl::SFTPInitialised, this);
-//	mChannel->eFileClosed = boost::bind(&MSFTPFileImpl::FileClosed, this);
+//	mChannel->eSendData = std::bind(&MSFTPFileImpl::SendData, this, _1, _2, _3);
+//	//mChannel->eChannelMessage = std::bind(&MSFTPFileImpl::ChannelMessage, this, _1);
+//	//mChannel->eChannelError = std::bind(&MSFTPFileImpl::ChannelError, this, _1);
+//	mChannel->eSFTPInitialised = std::bind(&MSFTPFileImpl::SFTPInitialised, this);
+//	mChannel->eFileClosed = std::bind(&MSFTPFileImpl::FileClosed, this);
 //
 //	mChannel->Open();
 //}

@@ -10,7 +10,6 @@
 #include <map>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "MResources.hpp"
 #include "MError.hpp"

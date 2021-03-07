@@ -450,18 +450,18 @@ MWinCanvasImpl::MWinCanvasImpl(
 	, mLastClickTime(0)
 	, mMonitor(nullptr)
 {
-	AddHandler(WM_PAINT,			boost::bind(&MWinCanvasImpl::WMPaint, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_DISPLAYCHANGE,	boost::bind(&MWinCanvasImpl::WMPaint, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_ERASEBKGND,		boost::bind(&MWinCanvasImpl::WMEraseBkgnd, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SIZE,				boost::bind(&MWinCanvasImpl::WMSize, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_WINDOWPOSCHANGED,	boost::bind(&MWinCanvasImpl::WMWindowPosChanged, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONDOWN,		boost::bind(&MWinCanvasImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONDBLCLK,	boost::bind(&MWinCanvasImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_LBUTTONUP,		boost::bind(&MWinCanvasImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSEMOVE,		boost::bind(&MWinCanvasImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_MOUSELEAVE,		boost::bind(&MWinCanvasImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_CAPTURECHANGED,	boost::bind(&MWinCanvasImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
-	AddHandler(WM_SETCURSOR,		boost::bind(&MWinCanvasImpl::WMSetCursor, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_PAINT,			std::bind(&MWinCanvasImpl::WMPaint, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_DISPLAYCHANGE,	std::bind(&MWinCanvasImpl::WMPaint, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_ERASEBKGND,		std::bind(&MWinCanvasImpl::WMEraseBkgnd, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SIZE,				std::bind(&MWinCanvasImpl::WMSize, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_WINDOWPOSCHANGED,	std::bind(&MWinCanvasImpl::WMWindowPosChanged, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONDOWN,		std::bind(&MWinCanvasImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONDBLCLK,	std::bind(&MWinCanvasImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_LBUTTONUP,		std::bind(&MWinCanvasImpl::WMMouseUp, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSEMOVE,		std::bind(&MWinCanvasImpl::WMMouseMove, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_MOUSELEAVE,		std::bind(&MWinCanvasImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_CAPTURECHANGED,	std::bind(&MWinCanvasImpl::WMMouseExit, this, _1, _2, _3, _4, _5));
+	AddHandler(WM_SETCURSOR,		std::bind(&MWinCanvasImpl::WMSetCursor, this, _1, _2, _3, _4, _5));
 }
 
 MWinCanvasImpl::~MWinCanvasImpl()

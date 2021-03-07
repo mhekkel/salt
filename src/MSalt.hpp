@@ -5,7 +5,4 @@
 
 #include "MLib.hpp"
 
-#include <boost/filesystem/path.hpp>
-
 #include "MTypes.hpp"
-#include "MColor.hpp"

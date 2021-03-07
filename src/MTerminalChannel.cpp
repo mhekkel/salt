@@ -56,9 +56,9 @@ void MTerminalChannel::Release()
 		delete this;
 }
 
-void MTerminalChannel::SetMessageCallback(MessageCallback&& inMessageCallback)
+void MTerminalChannel::SetMessageCallback(const MessageCallback& inMessageCallback)
 {
-	mMessageCB = move(inMessageCallback);
+	mMessageCB = inMessageCallback;
 }
 
 void MTerminalChannel::Disconnect(bool disconnectProxy)
@@ -78,7 +78,7 @@ class MSshTerminalChannel : public MTerminalChannel
 	MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection);
 	~MSshTerminalChannel();
 	
-	virtual void SetMessageCallback(MessageCallback&& inMessageCallback);
+	virtual void SetMessageCallback(const MessageCallback& inMessageCallback);
 	
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 		uint32_t inPixelWidth, uint32_t inPixelHeight);
@@ -86,7 +86,7 @@ class MSshTerminalChannel : public MTerminalChannel
 	virtual void Open(const string& inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
 		const string& inCommand, const vector<string>& env,
-		OpenCallback&& inOpenCallback);
+		const OpenCallback& inOpenCallback);
 
 	virtual void Close();
 
@@ -96,9 +96,9 @@ class MSshTerminalChannel : public MTerminalChannel
 	virtual bool CanDisconnect() const { return true; }
 	virtual void Disconnect(bool disconnectProxy);
 
-	virtual void SendData(const string& inData, WriteCallback&& inCallback);
+	virtual void SendData(const string& inData, const WriteCallback& inCallback);
 	virtual void SendSignal(const string& inSignal);
-	virtual void ReadData(ReadCallback&& inCallback);
+	virtual void ReadData(const ReadCallback& inCallback);
 
   private:
 	shared_ptr<pinch::terminal_channel> mChannel;
@@ -115,9 +115,9 @@ MSshTerminalChannel::~MSshTerminalChannel()
 {
 }
 
-void MSshTerminalChannel::SetMessageCallback(MessageCallback&& inMessageCallback)
+void MSshTerminalChannel::SetMessageCallback(const MessageCallback& inMessageCallback)
 {
-	MTerminalChannel::SetMessageCallback(move(inMessageCallback));
+	MTerminalChannel::SetMessageCallback(inMessageCallback);
 	mChannel->set_message_callbacks(mMessageCB, mMessageCB, mMessageCB);
 }
 
@@ -136,7 +136,7 @@ void MSshTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 void MSshTerminalChannel::Open(const string& inTerminalType,
 	bool inForwardAgent, bool inForwardX11,
 	const string& inCommand, const vector<string>& env,
-	OpenCallback&& inOpenCallback)
+	const OpenCallback& inOpenCallback)
 {
 	// env is ignored anyway...
 	
@@ -175,7 +175,7 @@ void MSshTerminalChannel::Disconnect(bool disconnectProxy)
 	// mChannel->disconnect(disconnectProxy);
 }
 
-void MSshTerminalChannel::SendData(const string& inData, WriteCallback&& inCallback)
+void MSshTerminalChannel::SendData(const string& inData, const WriteCallback& inCallback)
 {
 	mChannel->send_data(inData, 
 		[this, inCallback](const boost::system::error_code& ec, size_t bytes)
@@ -190,7 +190,7 @@ void MSshTerminalChannel::SendSignal(const string& inSignal)
 	mChannel->send_signal(inSignal);
 }
 
-void MSshTerminalChannel::ReadData(ReadCallback&& inCallback)
+void MSshTerminalChannel::ReadData(const ReadCallback& inCallback)
 {
 	boost::asio::async_read(*mChannel, mResponse,
 		boost::asio::transfer_at_least(1),
@@ -222,15 +222,15 @@ class MPtyTerminalChannel : public MTerminalChannel
 	virtual void Open(const string& inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
 		const string& inCommand, const vector<string>& env,
-		OpenCallback&& inOpenCallback);
+		const OpenCallback& inOpenCallback);
 
 	virtual void Close();
 
 	virtual bool IsOpen() const;
 
-	virtual void SendData(const string& inData, WriteCallback&& inCallback);
+	virtual void SendData(const string& inData, const WriteCallback& inCallback);
 	virtual void SendSignal(const string& inSignal);
-	virtual void ReadData(ReadCallback&& inCallback);
+	virtual void ReadData(const ReadCallback& inCallback);
 
   private:
 
@@ -290,7 +290,7 @@ void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 void MPtyTerminalChannel::Open(const string& inTerminalType,
 	bool inForwardAgent, bool inForwardX11,
 	const string& inCommand, const vector<string>& env,
-	OpenCallback&& inOpenCallback)
+	const OpenCallback& inOpenCallback)
 {
 	int ptyfd = -1, ttyfd = -1;
 	
@@ -451,7 +451,7 @@ bool MPtyTerminalChannel::IsOpen() const
 	return mPty.is_open();
 }
 
-void MPtyTerminalChannel::SendData(const string& inData, WriteCallback&& inCallback)
+void MPtyTerminalChannel::SendData(const string& inData, const WriteCallback& inCallback)
 {
 	shared_ptr<boost::asio::streambuf> buffer(new boost::asio::streambuf);
 	ostream out(buffer.get());
@@ -469,7 +469,7 @@ void MPtyTerminalChannel::SendSignal(const string& inSignal)
 {
 }
 
-void MPtyTerminalChannel::ReadData(ReadCallback&& inCallback)
+void MPtyTerminalChannel::ReadData(const ReadCallback& inCallback)
 {
 	boost::asio::async_read(mPty, mResponse,
 		boost::asio::transfer_at_least(1),

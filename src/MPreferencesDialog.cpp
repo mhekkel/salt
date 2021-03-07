@@ -3,11 +3,10 @@
 
 #include "MSalt.hpp"
 
+#include <set>
 #include <sstream>
 
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <pinch/types.hpp>
 
@@ -60,8 +59,7 @@ MPreferencesDialog::MPreferencesDialog()
 		SetValue("size", 1);
 	}
 
-	SetText("buffer", boost::lexical_cast<string>(
-		Preferences::GetInteger("buffer-size", 5000)));
+	SetText("buffer", std::to_string(Preferences::GetInteger("buffer-size", 5000)));
 	SetChecked("block-cursor", Preferences::GetBoolean("block-cursor", false));
 	SetChecked("blink-cursor", Preferences::GetBoolean("blink-cursor", false));
 	SetText("terminal-type", Preferences::GetString("terminal-type", "xterm"));
@@ -131,9 +129,8 @@ bool MPreferencesDialog::OKClicked()
 void MPreferencesDialog::Apply()
 {
 	Preferences::SetString("font", GetText("font") + ' ' + GetText("size"));
-	Preferences::SetString("back-color", boost::lexical_cast<string>(GetColor("back-color")));
-	Preferences::SetInteger("buffer-size", 
-		boost::lexical_cast<uint32_t>(GetText("buffer")));
+	Preferences::SetString("back-color", GetColor("back-color").str());
+	Preferences::SetInteger("buffer-size",  std::stoul(GetText("buffer")));
 	Preferences::SetBoolean("block-cursor", IsChecked("block-cursor"));
 	Preferences::SetBoolean("blink-cursor", IsChecked("blink-cursor"));
 	Preferences::SetString("terminal-type", GetText("terminal-type"));
@@ -194,7 +191,7 @@ void MPreferencesDialog::Apply()
 	{
 		bool ok = true;
 		
-		set<string> allowed;
+		std::set<std::string> allowed;
 		ba::split(allowed, alg.def, ba::is_any_of(","));
 		
 		vector<string> v;

@@ -6,6 +6,8 @@
 #ifndef MDEVICEIMPL_H
 #define MDEVICEIMPL_H
 
+#include <cmath>
+
 #include "MDevice.hpp"
 
 // --------------------------------------------------------------------

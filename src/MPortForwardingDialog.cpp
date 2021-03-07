@@ -3,8 +3,6 @@
 
 // #include "MSalt.hpp"
 
-// #include <boost/regex.hpp>
-
 // #include <pinch/port_forwarding.hpp>
 // #include <pinch/connection.hpp>
 
@@ -60,7 +58,7 @@
 // 		mConnection->forward_port("::", listenPort, m[1], connectPort);
 
 // 		Preferences::SetString("port-forwarding-host", connect);
-// 		Preferences::SetString("port-forwarding-port", boost::lexical_cast<string>(listenPort));
+// 		Preferences::SetString("port-forwarding-port", std::to_string(listenPort));
 
 // 		result = true;
 // 	}
@@ -102,7 +100,7 @@
 // 	{
 // 		uint16_t listenPort = std::to_string(GetText("listen"));
 // 		mConnection->forward_socks5("::", listenPort);
-// 		Preferences::SetString("socks5-proxy-port", boost::lexical_cast<string>(listenPort));
+// 		Preferences::SetString("socks5-proxy-port", std::to_string(listenPort));
 // 		result = true;
 // 	}
 // 	catch (boost::bad_lexical_cast& e)
@@ -158,7 +156,7 @@
 		
 // 		string user = GetText("user");
 		
-// 		Preferences::SetString("http-proxy-port", boost::lexical_cast<string>(listenPort));
+// 		Preferences::SetString("http-proxy-port", std::to_string(listenPort));
 // 		Preferences::SetBoolean("http-proxy-log", log);
 // 		Preferences::SetString("http-proxy-user", user);
 
