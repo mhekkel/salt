@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MAPPLICATION_IMPL_H
-#define MAPPLICATION_IMPL_H
+#pragma once
 
 #include "MApplication.hpp"
 
@@ -18,5 +17,3 @@ class MApplicationImpl
 	virtual int		RunEventLoop() = 0;
 	virtual void	Quit() = 0;
 };
-
-#endif

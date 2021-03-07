@@ -8,8 +8,7 @@
 	Created Wednesday July 21 2004 18:18:19
 */
 
-#ifndef MCLIPBOARDIMPL_H
-#define MCLIPBOARDIMPL_H
+#pragma once
 
 #include "MClipboard.hpp"
 
@@ -31,5 +30,3 @@ class MClipboardImpl
   protected:
 	MClipboard*		mClipboard;				
 };
-
-#endif

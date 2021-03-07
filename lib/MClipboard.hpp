@@ -8,8 +8,7 @@
 	Created Wednesday July 21 2004 18:18:19
 */
 
-#ifndef MCLIPBOARD_H
-#define MCLIPBOARD_H
+#pragma once
 
 #include <string>
 #include "MTypes.hpp"
@@ -52,5 +51,3 @@ class MClipboard
 	Data*				mRing[kClipboardRingSize];
 	uint32_t				mCount;
 };
-
-#endif // MCLIPBOARD_H

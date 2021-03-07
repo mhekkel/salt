@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MGTKWINDOWIMPL_H
-#define MGTKWINDOWIMPL_H
+#pragma once
 
 #include <list>
 
@@ -94,5 +93,3 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	
 	static std::list<MWindow*>	sRecycle;
 };
-
-#endif

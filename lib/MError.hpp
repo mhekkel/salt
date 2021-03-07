@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MERROR_H
-#define MERROR_H
+#pragma once
 
 #include <exception>
 #include <iostream>
@@ -105,5 +104,3 @@ void __debug_printf(const char* inMsg, ...);
 #endif
 
 #define ASSERT(x, m)		if (not (x)) { SIGNAL_THROW(#x " => " #m); throw MException m; }
-
-#endif

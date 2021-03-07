@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MDEVICEIMPL_H
-#define MDEVICEIMPL_H
+#pragma once
 
 #include <cmath>
 
@@ -104,5 +103,3 @@ class MDeviceImpl
 	// static MDeviceImpl*		Create(MView* inView, MRect inRect, bool inCreateOffscreen);
 	static MDeviceImpl*		Create(MView* inView, cairo_t* inCairo);
 };
-
-#endif

@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MGTKCANVASIMPL_H
-#define MGTKCANVASIMPL_H
+#pragma once
 
 #include "MCanvasImpl.hpp"
 #include "MGtkControlsImpl.hpp"
@@ -66,5 +65,3 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
 	virtual bool	OnScrollEvent(GdkEventScroll* inEvent);
 };
-
-#endif

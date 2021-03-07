@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MCANVASIMPL_H
-#define MCANVASIMPL_H
+#pragma once
 
 #include "MCanvas.hpp"
 #include "MControlsImpl.hpp"
@@ -25,6 +24,3 @@ class MCanvasImpl : public MControlImpl<MCanvas>
 	static MCanvasImpl*
 					Create(MCanvas* inCanvas, uint32_t inWidth, uint32_t inHeight);
 };
-
-#endif
-

@@ -369,12 +369,9 @@ void MSaltApp::OpenRecent(const string& inRecent)
 	}
 }
 
-#warning "version"
-const char* kRevision = "0.1";
-
 void MSaltApp::DoAbout()
 {
-	DisplayAlert(nullptr, "about-alert", GetApplicationVersion(), kRevision);
+	DisplayAlert(nullptr, "about-alert", GetApplicationVersion(), PACKAGE_VERSION);
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)

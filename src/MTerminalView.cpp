@@ -40,7 +40,7 @@
 
 #include "MTerminalColours.hpp"
 
-#include "X11/MPrimary.hpp"
+#include "Gtk/MPrimary.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;

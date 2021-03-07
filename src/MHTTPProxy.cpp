@@ -4,7 +4,6 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #include "MSalt.hpp"
-#include <pinch/config.hpp>
 
 // #include <fstream>
 
@@ -13,7 +12,7 @@
 // #include <boost/date_time/local_time/local_time.hpp>
 // #include <boost/asio/spawn.hpp>
 
-// #include <pinch/connection.hpp>
+#include <pinch/channel.hpp>
 
 // // #include <zeep/http/webapp.hpp>
 // #include <zeep/http/message-parser.hpp>

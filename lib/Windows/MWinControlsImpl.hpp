@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MWINCONTROLSIMPL_H
-#define MWINCONTROLSIMPL_H
+#pragma once
 
 #include "MControlsImpl.hpp"
 #include "MWinProcMixin.hpp"

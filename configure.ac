@@ -20,7 +20,7 @@ AX_CHECK_COMPILE_FLAG([-fstandalone-debug],
 AC_CONFIG_SRCDIR([src/MSaltApp.cpp])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([config/m4])
-AC_CONFIG_HEADERS([src/MSaltConfig.hpp])
+AC_CONFIG_HEADERS([lib/MConfig.hpp])
 
 AC_PREFIX_DEFAULT(/usr/local)
 

@@ -3875,7 +3875,7 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
-ac_config_headers="$ac_config_headers src/MSaltConfig.hpp"
+ac_config_headers="$ac_config_headers lib/MConfig.hpp"
 
 
 
@@ -9203,7 +9203,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "src/MSaltConfig.hpp") CONFIG_HEADERS="$CONFIG_HEADERS src/MSaltConfig.hpp" ;;
+    "lib/MConfig.hpp") CONFIG_HEADERS="$CONFIG_HEADERS lib/MConfig.hpp" ;;
     "GNUmakefile") CONFIG_FILES="$CONFIG_FILES GNUmakefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

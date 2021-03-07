@@ -63,7 +63,7 @@ PROGRAM				= @PACKAGE_NAME@
 
 VERSION				= @PACKAGE_VERSION@
 
-SEARCH_PATHS		= src test lib lib/Gtk lib/X11
+SEARCH_PATHS		= src test lib lib/Gtk
 CXXFLAGS			+= $(SEARCH_PATHS:%=-I%)
 
 OBJECTS = \

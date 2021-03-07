@@ -16,7 +16,7 @@
 
 //#include "includes.hpp"
 
-#include "MSaltConfig.hpp"
+#include "MConfig.hpp"
 
 #ifndef HAVE_CLOSEFROM
 

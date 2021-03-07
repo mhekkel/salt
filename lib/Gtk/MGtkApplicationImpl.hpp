@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MGTKAPPLICATION_IMPL_H
-#define MGTKAPPLICATION_IMPL_H
+#pragma once
 
 #include "MApplicationImpl.hpp"
 
@@ -30,5 +29,3 @@ class MGtkApplicationImpl : public MApplicationImpl
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;
-
-#endif

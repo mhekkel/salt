@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MRESOURCES_H
-#define MRESOURCES_H
+#pragma once
 
 #include <istream>
 #include <list>
@@ -81,5 +80,3 @@ class rsrc
 };
 
 }
-
-#endif

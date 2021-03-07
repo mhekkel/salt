@@ -3,8 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MUTILS_H
-#define MUTILS_H
+#pragma once
 
 #include <filesystem>
 
@@ -200,5 +199,3 @@ std::string GetUserLocaleName();
 std::string GetApplicationVersion();
 
 void closefrom(int fd);
-
-#endif
