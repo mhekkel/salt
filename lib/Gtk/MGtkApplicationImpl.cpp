@@ -15,7 +15,7 @@
 #include "MGtkWindowImpl.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 
 using namespace std;
 

@@ -20,7 +20,7 @@
 #include "MAcceleratorTable.hpp"
 #include "MFile.hpp"
 #include "MStrings.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MUtils.hpp"
 #include "MError.hpp"
 #include "MPreferences.hpp"

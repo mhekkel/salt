@@ -15,7 +15,7 @@
 #include "MError.hpp"
 #include "MApplication.hpp"
 #include "MGtkWindowImpl.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 
 using namespace std;
 

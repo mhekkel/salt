@@ -20,7 +20,7 @@
 
 // #include "MHTTPProxy.hpp"
 // #include "MPreferences.hpp"
-// #include "MResources.hpp"
+// #include "mrsrc.hpp"
 // #include "MApplication.hpp"
 
 // #if defined(_MSC_VER)

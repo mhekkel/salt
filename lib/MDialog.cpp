@@ -16,7 +16,6 @@
 
 #include "MDialog.hpp"
 #include "MWindowImpl.hpp"
-#include "MResources.hpp"
 #include "MPreferences.hpp"
 #include "MError.hpp"
 #include "MControls.hpp"

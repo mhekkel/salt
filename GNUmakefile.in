@@ -102,7 +102,6 @@ OBJECTS = \
 	MMenu.o \
 	MPreferences.o \
 	MPrinter.o \
-	MResources.o \
 	MStrings.o \
 	MTypes.o \
 	MUnicode.o \
@@ -123,7 +122,6 @@ OBJECTS = \
 	MGtkList.o \
 	MGtkMain.o \
 	MGtkMenu.o \
-	MGtkResources.o \
 	MGtkSound.o \
 	MGtkUtils.o \
 	MGtkWidgetMixin.o \
@@ -173,11 +171,14 @@ endif
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-$(OBJDIR)/%.o: %.cpp | $(OBJDIR)
+src/mrsrc.hpp:
+	$(MRC) --header > $@
+
+$(OBJDIR)/%.o: %.cpp | $(OBJDIR) src/mrsrc.hpp
 	@ echo ">>" $<
 	@ $(CXX) -MD -c -o $@ $< $(CFLAGS) $(CXXFLAGS)
 
-$(OBJDIR)/%.o: %.c | $(OBJDIR)
+$(OBJDIR)/%.o: %.c | $(OBJDIR) src/mrsrc.hpp
 	@ echo ">>" $<
 	@ $(CXX) -MD -c -o $@ $< $(CFLAGS) $(CXXFLAGS)
 

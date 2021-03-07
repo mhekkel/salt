@@ -28,7 +28,7 @@
 #include "MUtils.hpp"
 #include "MAlerts.hpp"
 #include "MError.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MAddTOTPHashDialog.hpp"
 
 #if defined(_MSC_VER)

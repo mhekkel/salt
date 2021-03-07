@@ -13,7 +13,6 @@
 #include "MSaltApp.hpp"
 #include "MPreferences.hpp"
 #include "MMenu.hpp"
-#include "MResources.hpp"
 #include "MAuthDialog.hpp"
 #include "MStrings.hpp"
 #include "MPortForwardingDialog.hpp"

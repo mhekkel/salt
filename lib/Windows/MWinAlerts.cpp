@@ -12,7 +12,7 @@
 #include <zeep/xml/document.hpp>
 
 #include "MAlerts.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MError.hpp"
 #include "MStrings.hpp"
 #include "MWinUtils.hpp"

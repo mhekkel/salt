@@ -20,7 +20,7 @@
 #include "MGtkControlsImpl.hpp"
 #include "MUtils.hpp"
 #include "MDevice.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MAcceleratorTable.hpp"
 
 using namespace std;

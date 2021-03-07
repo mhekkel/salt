@@ -11,7 +11,7 @@
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MError.hpp"
 #include "MUtils.hpp"
 

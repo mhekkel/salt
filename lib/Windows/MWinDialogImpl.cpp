@@ -21,7 +21,7 @@
 #include "MWinUtils.hpp"
 #include "MWinMenuImpl.hpp"
 #include "MDevice.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MAcceleratorTable.hpp"
 #include "MControls.hpp"
 #include "MDialog.hpp"

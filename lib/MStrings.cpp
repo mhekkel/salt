@@ -18,7 +18,7 @@
 
 #include "MStrings.hpp"
 #include "MUtils.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;

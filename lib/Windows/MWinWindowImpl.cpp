@@ -25,7 +25,6 @@
 #include "MUtils.hpp"
 #include "MWinUtils.hpp"
 #include "MWinMenuImpl.hpp"
-#include "MResources.hpp"
 #include "MAcceleratorTable.hpp"
 
 using namespace std;

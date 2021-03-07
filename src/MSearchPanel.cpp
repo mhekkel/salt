@@ -3,7 +3,7 @@
 
 #include "MSalt.hpp"
 
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MSearchPanel.hpp"
 #include "MDevice.hpp"
 #include "MControls.hpp"

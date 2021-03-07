@@ -18,7 +18,7 @@
 #include "MApplication.hpp"
 #include "MWindowImpl.hpp"
 #include "MMenu.hpp"
-#include "MResources.hpp"
+#include "mrsrc.hpp"
 #include "MUtils.hpp"
 
 using namespace std;
