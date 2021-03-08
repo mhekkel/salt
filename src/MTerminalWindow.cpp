@@ -3,9 +3,9 @@
 
 #include "MSalt.hpp"
 
-#include <cryptopp/base64.h>
-
 #include <boost/algorithm/string.hpp>
+
+#include <zeep/crypto.hpp>
 
 #include "MTerminalWindow.hpp"
 #include "MControls.hpp"
@@ -219,12 +219,7 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 	pinch::opacket p;
 	p << inKeyToDrop;
 	
-	string blob;
-	CryptoPP::Base64Encoder enc(new CryptoPP::StringSink(blob));
-	
-	const vector<uint8_t>& data(p);
-	enc.Put(&data[0], data.size());
-	enc.MessageEnd(true);
+	string blob = zeep::encode_base64(p);
 	
 	// create a command
 	ba::replace_all(blob, "\n", "");

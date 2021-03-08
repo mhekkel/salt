@@ -3,7 +3,7 @@
 
 #include "MSalt.hpp"
 
-#include <cryptopp/base32.h>
+#include <zeep/crypto.hpp>
 
 #include "MPreferences.hpp"
 #include "MAddTOTPHashDialog.hpp"
@@ -39,24 +39,11 @@ bool MAddTOTPHashDialog::OKClicked()
 			throw runtime_error("Empty hash");
 
 		// validate hash
-		
-		using namespace CryptoPP;
-		
-		Base32Decoder decoder;
-		
-		decoder.Put((const unsigned char*)hash.c_str(), hash.length(), true);
-		decoder.MessageEnd();
-		
-		word64 size = decoder.MaxRetrievable();
-//		if (size != 8)
-//			throw runtime_error("invalid hash");
 
-		if (size < 8) // or (size % 8) != 0)
+		std::string b = zeep::decode_base32(hash);
+		if (b.length() < 8) // or (size % 8) != 0)
 			throw runtime_error("invalid hash");
 
-		vector<uint8_t> h(size);
-	    decoder.Get(h.data(), size);
-	    
 	    vector<string> totp;
 	    Preferences::GetArray("totp", totp);
 	    totp.push_back(name + ";" + hash);

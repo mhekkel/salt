@@ -9,24 +9,24 @@ class MSshPacket;
 
 class MGtkSshAgentImpl : public MSshAgentImpl
 {
-  public:
-	static MSshAgent*	Create();
+public:
+	static MSshAgent *Create();
 
-	bool				GetFirstIdentity(CryptoPP::Integer& e, CryptoPP::Integer& n, std::string& outComment);
-	
-	bool				GetNextIdentity(CryptoPP::Integer& e, CryptoPP::Integer& n, std::string& outComment);
-	
-	void				SignData(const std::string& inBlob, const std::string& inData, std::string& outSignature);
-	
-  public:
-						MSshAgent(int inSock);
+	bool GetFirstIdentity(CryptoPP::Integer &e, CryptoPP::Integer &n, std::string &outComment);
 
-						~MSshAgent();	
+	bool GetNextIdentity(CryptoPP::Integer &e, CryptoPP::Integer &n, std::string &outComment);
 
-	bool				RequestReply(MSshPacket& out, MSshPacket& in);
+	void SignData(const std::string &inBlob, const std::string &inData, std::string &outSignature);
 
-	int					mSock;
-	MSshPacket			mIdentities;
-	uint32_t				mCount;
-	CryptoPP::Integer	e, n;
+public:
+	MSshAgent(int inSock);
+
+	~MSshAgent();
+
+	bool RequestReply(MSshPacket &out, MSshPacket &in);
+
+	int mSock;
+	MSshPacket mIdentities;
+	uint32_t mCount;
+	CryptoPP::Integer e, n;
 };
