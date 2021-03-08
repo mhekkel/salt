@@ -104,7 +104,7 @@ void MSaltApp::Initialise()
 	vector<string> knownHosts;
 	Preferences::GetArray("known-hosts", knownHosts);
 	
-	std::regex rx("^(\\S+) (ssh-rsa|ssh-dss) (.+)");
+	std::regex rx("^(\\S+) (\\S+) (.+)");
 	
 	for (const string& known: knownHosts)
 	{

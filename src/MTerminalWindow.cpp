@@ -149,8 +149,7 @@ bool MSshTerminalWindow::ProcessCommand(
 		}
 
 		case cmd_Rekey:
-#warning "fix"
-			// mConnection->rekey();
+			mConnection->rekey();
 			break;
 
 		// case cmd_ForwardPort:

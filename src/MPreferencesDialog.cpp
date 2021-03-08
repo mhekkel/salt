@@ -9,6 +9,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <pinch/types.hpp>
+#include <pinch/key_exchange.hpp>
 
 #include "MPreferencesDialog.hpp"
 #include "MTerminalWindow.hpp"
