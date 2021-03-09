@@ -144,13 +144,12 @@ void MSshTerminalChannel::Open(const string& inTerminalType,
 		inTerminalType, inForwardAgent, inForwardX11, inCommand,
 		[this, inOpenCallback](const boost::system::error_code& ec)
 		{
-
-#warning "fix"
-			// mConnectionInfo = vector<string>({
-			// 	mChannel->get_connection_parameters(pinch::client2server),
-			// 	mChannel->get_connection_parameters(pinch::server2client),
-			// 	mChannel->get_key_exchange_algoritm()
-			// });
+			auto& connection = mChannel->get_connection();
+			mConnectionInfo = vector<string>({
+				connection.get_connection_parameters(pinch::direction::c2s),
+				connection.get_connection_parameters(pinch::direction::s2c),
+				connection.get_key_exchange_algorithm()
+			});
 
 			mConnectionInfo.erase(unique(mConnectionInfo.begin(), mConnectionInfo.end()), mConnectionInfo.end());
 
@@ -171,8 +170,7 @@ bool MSshTerminalChannel::IsOpen() const
 
 void MSshTerminalChannel::Disconnect(bool disconnectProxy)
 {
-#warning "fix"
-	// mChannel->disconnect(disconnectProxy);
+	mChannel->get_connection().disconnect();
 }
 
 void MSshTerminalChannel::SendData(const string& inData, const WriteCallback& inCallback)

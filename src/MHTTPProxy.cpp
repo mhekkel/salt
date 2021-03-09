@@ -18,7 +18,7 @@
 // #include <zeep/http/message-parser.hpp>
 // #include <zeep/crypto.hpp>
 
-// #include "MHTTPProxy.hpp"
+#include "MHTTPProxy.hpp"
 // #include "MPreferences.hpp"
 // #include "mrsrc.hpp"
 // #include "MApplication.hpp"
@@ -44,6 +44,78 @@
 // namespace el = zeep::el;
 // namespace ba = boost::algorithm;
 // namespace fs = std::filesystem;
+
+
+
+
+struct MHTTPProxyImpl
+{
+
+};
+
+MHTTPProxy::MHTTPProxy()
+	: m_impl(nullptr)
+{
+}
+
+MHTTPProxy::~MHTTPProxy()
+{
+	delete m_impl;
+}
+
+MHTTPProxy& MHTTPProxy::instance()
+{
+	static std::unique_ptr<MHTTPProxy> s_instance(new MHTTPProxy);
+	return *s_instance;
+}
+
+void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
+		uint16_t inPort, bool require_authentication, log_level log)
+{
+
+}
+
+
+
+// 	void set_log_flags(uint32_t log_flags);
+
+// 	using zeep::http::server::log_request;
+
+// 	void log_request(const std::string &client,
+// 					 const zeep::http::request &req, const std::string &request_line,
+// 					 const zeep::http::reply &rep);
+// 	void log_error(const std::exception &e);
+// 	void log_error(const boost::system::error_code &ec);
+
+// 	void validate(zeep::http::request &request);
+
+// 	std::shared_ptr<pinch::basic_connection> get_connection() const { return m_connection; }
+
+// private:
+// 	MHTTPProxy(std::shared_ptr<pinch::basic_connection> connection, bool require_authentication, uint32_t log_flags);
+
+// 	void listen(uint16_t port);
+// 	void stop();
+
+// 	virtual void load_template(const std::string &file, zeep::xml::document &doc);
+// 	virtual void handle_file(const zeep::http::request &request, const zeep::http::scope &scope, zeep::http::reply &reply);
+
+// 	void handle_accept(const boost::system::error_code &ec);
+
+// 	void welcome(const zeep::http::request &request, const zeep::http::scope &scope, zeep::http::reply &reply);
+// 	void status(const zeep::http::request &request, const zeep::http::scope &scope, zeep::http::reply &reply);
+
+// 	static std::shared_ptr<MHTTPProxy> sInstance;
+
+// 	std::shared_ptr<pinch::basic_connection> m_connection;
+// 	std::shared_ptr<proxy_connection> m_new_connection;
+// 	std::shared_ptr<std::ostream> m_log;
+// 	std::shared_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
+// 	uint32_t m_log_flags;
+// 	// zeep::http::authentication_validation_base *m_proxy_authentication = nullptr;
+
+
+
 
 // using namespace boost::posix_time;
 

@@ -5,70 +5,35 @@
 
 #pragma once
 
-// #include <pinch/config.hpp>
+#include <pinch/port_forwarding.hpp>
 
-// #include <pinch/port_forwarding.hpp>
+class proxy_connection;
+class proxy_channel;
 
-// #include <zeep/http/request.hpp>
-// #include <zeep/http/reply.hpp>
-// #include <zeep/http/el-processing.hpp>
+const std::string kSaltProxyRealm;
 
-// class proxy_connection;
-// class proxy_channel;
+enum class log_level
+{
+	none = 0,
+	request = 1 << 0,
+	debug = 1 << 1
+};
 
-// enum log_level
-// {
-// 	e_log_none =	0,
-// 	e_log_request =	1 << 0,
-// 	e_log_debug =	1 << 1
-// };
+class MHTTPProxy
+{
+public:
+	MHTTPProxy(const MHTTPProxy&) = delete;
+	MHTTPProxy& operator=(const MHTTPProxy&) = delete;
 
-// extern const std::string kSaltProxyRealm;
+	~MHTTPProxy();
 
-// class MHTTPProxy : public std::enable_shared_from_this<MHTTPProxy>
-// 				 , public zeep::http::rsrc_based_webapp
-// {
-//   public:
+	static MHTTPProxy& instance();
 
-// 	~MHTTPProxy();
+	void Init(std::shared_ptr<pinch::basic_connection> inConnection,
+		uint16_t inPort, bool require_authentication, log_level log);
 
-// 	static void InitializeProxy(std::shared_ptr<pinch::basic_connection> inConnection, uint16_t inPort, bool require_authentication, log_level log);
+private:
+	MHTTPProxy();
 
-// 	void set_log_flags(uint32_t log_flags);
-
-// 	using zeep::http::server::log_request;
-
-// 	void log_request(const std::string& client,
-// 		const zeep::http::request& req, const std::string& request_line,
-// 		const zeep::http::reply& rep);
-// 	void log_error(const std::exception& e);
-// 	void log_error(const boost::system::error_code& ec);
-
-// 	void validate(zeep::http::request& request);
-
-// 	std::shared_ptr<pinch::basic_connection> get_connection() const { return m_connection; }
-
-//   private:
-
-// 	MHTTPProxy(std::shared_ptr<pinch::basic_connection> connection, bool require_authentication, uint32_t log_flags);
-	
-// 	void listen(uint16_t port);
-// 	void stop();
-
-// 	virtual void load_template(const std::string& file, zeep::xml::document& doc);
-// 	virtual void handle_file(const zeep::http::request& request, const zeep::http::scope& scope, zeep::http::reply& reply);
-
-// 	void handle_accept(const boost::system::error_code& ec);
-
-// 	void welcome(const zeep::http::request& request, const zeep::http::scope& scope, zeep::http::reply& reply);
-// 	void status(const zeep::http::request& request, const zeep::http::scope& scope, zeep::http::reply& reply);
-
-// 	static std::shared_ptr<MHTTPProxy> sInstance;
-
-// 	std::shared_ptr<pinch::basic_connection> m_connection;
-// 	std::shared_ptr<proxy_connection> m_new_connection;
-// 	std::shared_ptr<std::ostream> m_log;
-// 	std::shared_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
-// 	uint32_t m_log_flags;
-// 	zeep::http::authentication_validation_base* m_proxy_authentication = nullptr;
-// };
+	struct MHTTPProxyImpl* m_impl;
+};

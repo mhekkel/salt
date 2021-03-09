@@ -20,10 +20,13 @@
 
 using namespace std;
 
-MAuthDialog::MAuthDialog(std::string inTitle, std::string inInstruction, const vector<pinch::prompt>& prompts)
+MAuthDialog::MAuthDialog(const std::string& inTitle, pinch::auth_state_type state,
+							const std::string& name, const std::string& inInstruction,
+							const std::vector<pinch::prompt>& prompts)
 	: MDialog("auth-dialog")
 	, ePulse(this, &MAuthDialog::Pulse)
 	, mSentCredentials(false)
+	, mState(state)
 {
 	mFields = prompts.size();
 
@@ -67,7 +70,7 @@ bool MAuthDialog::OKClicked()
 	for (int32_t id = 1; id <= mFields; ++id)
 		args.push_back(GetText("edit-" + std::to_string(id)));
 	
-	eAuthInfo(args);
+	eAuthInfo(mState, args);
 	mSentCredentials = true;
 
 	return true;
@@ -77,7 +80,7 @@ bool MAuthDialog::CancelClicked()
 {
 	vector<string> args;
 	
-	eAuthInfo(args);
+	eAuthInfo(mState, args);
 	mSentCredentials = true;
 	
 	return true;
@@ -93,7 +96,7 @@ void MAuthDialog::Pulse(
 function<bool(string&)> MAuthDialog::RequestSimplePassword(
 	const string& inDialogTitle, const string& inInstruction)
 {
-	return [inDialogTitle, inInstruction](string& outPassword) -> bool
+	return [inDialogTitle, inInstruction](string& outPassword)
 	{
 		bool result = false;
 		
@@ -104,10 +107,10 @@ function<bool(string&)> MAuthDialog::RequestSimplePassword(
 			prompts[0].str = _("Password");
 			prompts[0].echo = false;
 
-			MAuthDialog* dlog = new MAuthDialog(inDialogTitle, inInstruction, prompts);
+			MAuthDialog* dlog = new MAuthDialog(inDialogTitle, pinch::auth_state_type::password, "", inInstruction, prompts);
 
-			MEventIn<void(vector<string>&)> pwevent(
-				[&outPassword](vector<string>& pws) { outPassword = pws[0]; });
+			MEventIn<void(pinch::auth_state_type, vector<string>&)> pwevent(
+				[&outPassword](pinch::auth_state_type, vector<string>& pws) { outPassword = pws[0]; });
 			AddRoute(dlog->eAuthInfo, pwevent);
 
 			result = dlog->ShowModal(nullptr);

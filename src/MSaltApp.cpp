@@ -526,7 +526,7 @@ bool MSaltApp::ValidateHost(const string& inHost, const string& inAlgorithm, con
 
 #if not defined(_MSC_VER)
 
-// #include <gtk/gtk.h>
+#include <gtk/gtk.h>
 
 void MApplication::Install(const string& inPrefix)
 {
@@ -581,8 +581,7 @@ void MApplication::Install(const string& inPrefix)
 	
 	fs::path desktopFile, applicationsDir;
 	
-#warning "fix"
-	const char* const* config_dirs = nullptr;//g_get_system_data_dirs();
+	const char* const* config_dirs = g_get_system_data_dirs();
 	for (const char* const* dir = config_dirs; *dir != nullptr; ++dir)
 	{
 		applicationsDir = fs::path(*dir) / "applications";

@@ -15,12 +15,13 @@
 class MAuthDialog : public MDialog
 {
   public:
-						MAuthDialog(std::string inTitle, std::string inInstruction,
+						MAuthDialog(const std::string& inTitle, pinch::auth_state_type state,
+							const std::string& name, const std::string& inInstruction,
 							const std::vector<pinch::prompt>& prompts);
 
 	virtual				~MAuthDialog();
 
-	MEventOut<void(std::vector<std::string>&)>
+	MEventOut<void(pinch::auth_state_type, std::vector<std::string>&)>
 						eAuthInfo;
 
 	static std::function<bool(std::string&)>
@@ -40,4 +41,5 @@ class MAuthDialog : public MDialog
 	
 	int32_t				mFields;
 	bool				mSentCredentials;
+	pinch::auth_state_type mState;
 };
