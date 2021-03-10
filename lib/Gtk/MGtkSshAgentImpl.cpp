@@ -74,23 +74,23 @@ MSshAgent* MSshAgent::Create()
 
 	const char* authSock = getenv("SSH_AUTH_SOCK");
 	
-	//if (authSock != nullptr)
-	//{
-	//	struct sockaddr_un addr = {};
-	//	addr.sun_family = AF_LOCAL;
-	//	strcpy(addr.sun_path, authSock);
-	//	
-	//	int sock = socket(AF_LOCAL, SOCK_STREAM, 0);
-	//	if (sock >= 0)
-	//	{
-	//		if (fcntl(sock, F_SETFD, 1) < 0)
-	//			close(sock);
-	//		else if (connect(sock, (const sockaddr*)&addr, sizeof(addr)) < 0)
-	//			close(sock);
-	//		else
-	//			result.reset(new MSshAgent(sock));
-	//	}
-	//}
+	if (authSock != nullptr)
+	{
+		struct sockaddr_un addr = {};
+		addr.sun_family = AF_LOCAL;
+		strcpy(addr.sun_path, authSock);
+		
+		int sock = socket(AF_LOCAL, SOCK_STREAM, 0);
+		if (sock >= 0)
+		{
+			if (fcntl(sock, F_SETFD, 1) < 0)
+				close(sock);
+			else if (connect(sock, (const sockaddr*)&addr, sizeof(addr)) < 0)
+				close(sock);
+			else
+				result.reset(new MSshAgent(sock));
+		}
+	}
 
 	return result.release();
 }
@@ -104,7 +104,7 @@ MSshAgent::MSshAgent(
 
 MSshAgent::~MSshAgent()
 {
-	//close(mSock);
+	close(mSock);
 }
 
 bool MSshAgent::GetFirstIdentity(
@@ -169,39 +169,39 @@ bool MSshAgent::RequestReply(
 {
 	bool result = false;
 	
-//	net_swapper swap;
-//	
-//	uint32_t l = out.size();
-//	l = swap(l);
-//	
-//	if (write(mSock, &l, sizeof(l)) == sizeof(l) and
-//		write(mSock, out.peek(), out.size()) == int32_t(out.size()) and
-//		read(mSock, &l, sizeof(l)) == sizeof(l))
-//	{
-//		l = swap(l);
-//		
-//		if (l < 256 * 1024)
-//		{
-//			char b[1024];
-//
-//			uint32_t k = l;
-//			if (k > sizeof(b))
-//				k = sizeof(b);
-//			
-//			while (l > 0)
-//			{
-//				if (read(mSock, b, k) != k)
-//					break;
-//				
-//				in.data.append(b, k);
-//				
-//				l -= k;
-//			}
-//			
-//			result = (l == 0);
-//		}
-//	}
-//	
+	net_swapper swap;
+	
+	uint32_t l = out.size();
+	l = swap(l);
+	
+	if (write(mSock, &l, sizeof(l)) == sizeof(l) and
+		write(mSock, out.peek(), out.size()) == int32_t(out.size()) and
+		read(mSock, &l, sizeof(l)) == sizeof(l))
+	{
+		l = swap(l);
+		
+		if (l < 256 * 1024)
+		{
+			char b[1024];
+
+			uint32_t k = l;
+			if (k > sizeof(b))
+				k = sizeof(b);
+			
+			while (l > 0)
+			{
+				if (read(mSock, b, k) != k)
+					break;
+				
+				in.data.append(b, k);
+				
+				l -= k;
+			}
+			
+			result = (l == 0);
+		}
+	}
+	
 	return result;
 }
 

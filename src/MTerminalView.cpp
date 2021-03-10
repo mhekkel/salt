@@ -7,9 +7,6 @@
 
 #include <cmath>
 #include <map>
-#include <cryptopp/base32.h>
-#include <cryptopp/hmac.h>
-#include <cryptopp/sha.h>
 
 #include <boost/format.hpp>
 #include <boost/asio.hpp>
@@ -17,6 +14,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/copy.hpp>
+
+#include <zeep/crypto.hpp>
 
 #include "MTerminalView.hpp"
 #include "MDevice.hpp"
@@ -1932,10 +1931,7 @@ void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 
 		string hash = totp[inItemIndex].substr(s + 1, string::npos);
 		
-		using namespace CryptoPP;
-		
-		vector<uint8_t> h;
-		decode_base32(hash, h);
+		auto h = zeep::decode_base32(hash);
 		
 		int timestamp = time(nullptr) / 30;
 
@@ -1943,10 +1939,7 @@ void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 		for (int i = 8; i-- > 0; timestamp >>= 8)
 			val[i] = static_cast<uint8_t>(timestamp);
 		
-		HMAC<SHA1> hmac(h.data(), h.size());
-		hmac.Update(val, 8);
-		vector<uint8_t> computed(hmac.DigestSize());
-		hmac.Final(computed.data());
+		auto computed = zeep::hmac_sha1(std::string_view((char*)val, 8), h);
 
 		int offset = computed.back() & 0xf;
 		uint32_t truncated = 0;
