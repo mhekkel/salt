@@ -40,12 +40,12 @@ LDFLAGS				= @BOOST_LDFLAGS@ \
 					  @PTHREAD_CFLAGS@
 LIBS				= @PTHREAD_LIBS@ \
 					  @GTK3_LIBS@ \
-					  @CRYPTOPP_LIBS@ \
 					  @ZEEP_LIBS@ \
 					  @BOOST_PROGRAM_OPTIONS_LIB@ \
 					  @BOOST_IOSTREAMS_LIB@ \
 					  @BOOST_DATE_TIME_LIB@ \
 					  @PINCH_LIBS@ \
+					  @CRYPTOPP_LIBS@ \
 					  @LIBS@
 
 prefix				= $(DESTDIR)@prefix@

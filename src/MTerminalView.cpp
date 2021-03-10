@@ -1067,10 +1067,10 @@ void MTerminalView::Draw(cairo_t* inCairo)
 			}
 			
 			if (c >= sc1 and c < sc2)	// 'selected!'
-			{
 				backC = selectionColor;
-				textC = kBlack.Distinct(backC);
-			}
+
+			if (textColorIx < 16)
+				textC = textC.Distinct(backC);
 			
 			// wow, quite a few conditions:			
 			bool drawCaret = mCursor.y == lineNr and mCursor.x == c and

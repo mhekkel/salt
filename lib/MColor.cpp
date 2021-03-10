@@ -157,7 +157,9 @@ MColor MColor::Disable(const MColor& inBackColor, float inScale) const
 
 MColor MColor::Distinct(const MColor& inBackColor) const
 {
-	const uint32_t kDistinctColorTresholdSquare = 10000;
+	const uint32_t
+		kDistinctColorTresholdSquare_1 = 10000,
+		kDistinctColorTresholdSquare_2 = 50000;
 
 	// Does a simple distance based color comparison, returns an
 	// inverse color if colors close enough
@@ -165,13 +167,38 @@ MColor MColor::Distinct(const MColor& inBackColor) const
 	uint32_t greenDelta = (uint32_t)green - (uint32_t)inBackColor.green;
 	uint32_t blueDelta = (uint32_t)blue - (uint32_t)inBackColor.blue;
 
-	if (redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta > kDistinctColorTresholdSquare)
-		return *this;
+	auto distance = redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta;
 
 	MColor result;
-	result.red =	static_cast<uint8_t> (255 - red); 
-	result.green =	static_cast<uint8_t> (255 - green); 
-	result.blue =	static_cast<uint8_t> (255 - blue);
+
+	if (distance > kDistinctColorTresholdSquare_2)	// very good distance
+		result = *this;
+	else if (distance > kDistinctColorTresholdSquare_1)	// poor distance
+	{
+		float fr = (red / 255.f), fg = (green / 255.f), fb = (blue / 255.f);
+		float br = (inBackColor.red / 255.f), bg = (inBackColor.green / 255.f), bb = (inBackColor.blue / 255.f);
+
+		float fh, fs, fv, bh, bs, bv;
+		rgb2hsv(fr, fg, fb, fh, fs, fv);
+		rgb2hsv(br, bg, bb, bh, bs, bv);
+		
+		if (fv > bv)	// fore color is lighter than background, make it even lighter
+			fv = (1 + fv) / 2;
+		else
+			fv = (0 + fv) / 2;
+		
+		hsv2rgb(fh, fs, fv, fr, fg, fb);
+
+		result.red   = static_cast<uint8_t> (fr * 255);
+		result.green = static_cast<uint8_t> (fg * 255);
+		result.blue  = static_cast<uint8_t> (fb * 255);
+	}
+	else	// really need to invert
+	{
+		result.red =	static_cast<uint8_t> (255 - red); 
+		result.green =	static_cast<uint8_t> (255 - green); 
+		result.blue =	static_cast<uint8_t> (255 - blue);
+	}
 	
 	return result;
 }
