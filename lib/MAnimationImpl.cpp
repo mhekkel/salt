@@ -9,6 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <numeric>
 
 #include "MAnimation.hpp"
 #include "MAnimationImpl.hpp"
@@ -134,7 +135,7 @@ bool MFallBackStoryboardImpl::Done(double inTime)
 
 	for (auto vs: mVariableStories)
 	{
-		double totalDuration = accumulate(vs.mTransistions.begin(), vs.mTransistions.end(), 0.0,
+		double totalDuration = std::accumulate(vs.mTransistions.begin(), vs.mTransistions.end(), 0.0,
 			[](double time, const MTransition& ts) -> double { return time + ts.mDuration; });
 		
 		if (totalDuration > inTime)
@@ -271,7 +272,7 @@ void MFallBackAnimationManagerImpl::Run()
 				// gdk_threads_leave();
 			}
 			
-			mStoryboards.erase(remove_if(mStoryboards.begin(), mStoryboards.end(),
+			mStoryboards.erase(std::remove_if(mStoryboards.begin(), mStoryboards.end(),
 				[now](MScheduledStoryboard& storyboard) -> bool
 				{
 					MFallBackStoryboardImpl* storyboardImpl = static_cast<MFallBackStoryboardImpl*>(storyboard.mStoryboard->GetImpl());
@@ -280,7 +281,7 @@ void MFallBackAnimationManagerImpl::Run()
 		}
 		catch (...) {}
 
-		usleep(10000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
 
@@ -288,6 +289,7 @@ void MFallBackAnimationManagerImpl::Run()
 
 MAnimationManagerImpl* MAnimationManagerImpl::Create(MAnimationManager* inManager)
 {
-	return new MGtkAnimationManagerImpl(inManager);
+//	return new MGtkAnimationManagerImpl(inManager);
+	return new MWinAnimationManagerImpl(inManager);
 }
 

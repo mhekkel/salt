@@ -6,6 +6,7 @@
 #include "MWinLib.hpp"
 
 #include <UIAnimation.h>
+#include <stdexcept>
 
 #include "comptr.hpp"
 
@@ -246,7 +247,7 @@ MWinAnimationManagerImpl::MWinAnimationManagerImpl(MAnimationManager* inManager)
 		mTimer->SetTimerEventHandler(new MWinAnimationTimerEventHandler(inManager));
 	}
 	else
-		throw runtime_error("Animation Manager not supported");
+		throw std::runtime_error("Animation Manager not supported");
 }
 
 MWinAnimationManagerImpl::~MWinAnimationManagerImpl()

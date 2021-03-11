@@ -13,8 +13,7 @@
 #include <list>
 #include <vector>
 
-#include <cairo/cairo.h>
-
+#include "MTypes.hpp"
 #include "MP2PEvents.hpp"
 
 class MWindow;

@@ -8,3 +8,8 @@ config.status
 GNUmakefile
 salt
 src/MSaltConfig.*
+msvc/Debug
+msvc/Release
+msvc/x64
+.vs/
+msvc/salt.vcxproj.user
