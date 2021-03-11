@@ -36,8 +36,16 @@ AC_DEFUN([AX_LIBCRYPTOPP],
 					AC_MSG_ERROR(['${withval}'' is not a valid directory for --with-crypto++])
 				])
 
+				save_LDFLAGS=$LDFLAGS; LDFLAGS="$LDFLAGS -L${with_val}/lib"
+				save_CPPFLAGS=$CPPFLAGS; CPPFLAGS="$CPPFLAGS -I ${with_val}/include"
+
+				AX_CHECK_LIBRARY([CRYPTOPP], [cryptopp/cryptlib.h], [cryptopp],
+					[ CRYPTOPP_LIBS="-L${with_val}/lib -lcryptopp" ], [], [])
+
+				LDFLAGS=$save_LDFLAGS
+				CPPFLAGS=$save_CPPFLAGS
+
 				CRYPTOPP_CFLAGS="-I ${withval}"
-				CRYPTOPP_LIBS="-L${withval} -lcrypto++"
 
 				AC_SUBST([CRYPTOPP_CFLAGS], [$CRYPTOPP_CFLAGS])
 				AC_SUBST([CRYPTOPP_LIBS], [$CRYPTOPP_LIBS])
@@ -79,8 +87,10 @@ Can't find the libcrypto++ header, crypto++/cryptlib.h. Make sure that libcrypto
 is installed, and either use the --with-crypto++ option or install pkg-config.])])
 
 			AX_CHECK_LIBRARY([CRYPTOPP], [crypto++/cryptlib.h], [crypto++],
-				[ CRTYPOPP_LIBS="-lcrypto++" ],
-				[ AC_MSG_ERROR([libcrypto++ not found]) ])
+				[ CRYPTOPP_LIBS="-lcrypto++" ])
+			
+			AX_CHECK_LIBRARY([CRYPTOPP], [crypto++/cryptlib.h], [cryptopp],
+				[ CRYPTOPP_LIBS="-lcryptopp" ])
 
 			LDFLAGS=$save_LDFLAGS
 			CPPFLAGS=$save_CPPFLAGS

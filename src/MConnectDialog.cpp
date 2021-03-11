@@ -120,7 +120,7 @@ void MConnectDialog::ButtonClicked(const string& inID)
 
 			pinch::ssh_agent::instance().add(key, pemFile.filename().string(),
 				MAuthDialog::RequestSimplePassword(_("Adding Private Key"),
-						FormatString("Please enter password for the private key ^0", pemFile.filename().string())));
+						FormatString("Please enter password for the private key ^0", pemFile.filename().string()), this));
 		}
 	}
 	else

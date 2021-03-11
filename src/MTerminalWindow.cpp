@@ -69,7 +69,7 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 {
 	using namespace std::placeholders;
 
-	mConnection->set_validate_callback(std::bind(&MSaltApp::ValidateHost, static_cast<MSaltApp *>(gApp), _1, _2, _3));
+	mConnection->set_validate_callback(std::bind(&MSaltApp::ValidateHost, static_cast<MSaltApp *>(gApp), this, _1, _2, _3));
 	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::KeyboardInteractive, this, _1, _2, _3, _4, _5));
 
 	stringstream title;
@@ -171,7 +171,7 @@ void MSshTerminalWindow::KeyboardInteractive(
 	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
 		state, name,
 		instruction.empty() ? FormatString("Please enter the requested info for account ^0", mUser) : instruction,
-		prompts));
+		prompts, this));
 
 	AddRoute(dlog->eAuthInfo, eRecvPassword);
 

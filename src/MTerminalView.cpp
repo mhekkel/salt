@@ -1,8 +1,6 @@
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#define BOOST_ASIO_HAS_MOVE 1
-
 #include "MSalt.hpp"
 
 #include <cmath>

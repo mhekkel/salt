@@ -13,83 +13,84 @@
 
 class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 {
-  public:
-					MGtkWindowImpl(MWindowFlags inFlags,
-						const std::string& inMenu, MWindow* inWindow);
-	virtual			~MGtkWindowImpl();
+public:
+	MGtkWindowImpl(MWindowFlags inFlags,
+				   const std::string &inMenu, MWindow *inWindow);
+	virtual ~MGtkWindowImpl();
 
-	static void		RecycleWindows();
+	static void RecycleWindows();
 
-	virtual void	Create(MRect inBounds, const std::string& inTitle);
-	
+	virtual void Create(MRect inBounds, const std::string &inTitle);
+
 	// A window contains a VBox, and in this VBox you have to add the various elements.
 	// (in the right order, please!)
-	virtual void	AddMenubarWidget(GtkWidget* inWidget);
-	virtual void	AddStatusbarWidget(MGtkWidgetMixin* inChild);
-	virtual void	Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
+	virtual void AddMenubarWidget(GtkWidget *inWidget);
+	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
+	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 						bool inExpand, bool inFill, uint32_t inPadding);
 
-	virtual void	SetTitle(std::string inTitle);
+	virtual void SetTitle(std::string inTitle);
 
-	virtual void	Show();
-	virtual void	Hide();
+	virtual void Show();
+	virtual void Hide();
 
-	virtual bool	Visible() const;
+	virtual void SetTransientFor(MWindow* inWindow);
 
-	virtual void	Select();
-	virtual void	Close();
+	virtual bool Visible() const;
 
-	virtual void	ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
+	virtual void Select();
+	virtual void Close();
 
-	virtual void	SetWindowPosition(MRect inBounds, bool inTransition);
-	virtual void	GetWindowPosition(MRect& outBounds) const;
-	
-	virtual void	Invalidate(MRect inRect);
-	virtual void	Validate(MRect inRect);
-	virtual void	UpdateNow();
+	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
-	virtual void	ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV);
-	
-	virtual bool	GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers);
-	virtual bool	WaitMouseMoved(int32_t inX, int32_t inY);
+	virtual void SetWindowPosition(MRect inBounds, bool inTransition);
+	virtual void GetWindowPosition(MRect &outBounds) const;
 
-	virtual void	SetCursor(MCursor inCursor);
-	virtual void	ObscureCursor();
+	virtual void Invalidate(MRect inRect);
+	virtual void Validate(MRect inRect);
+	virtual void UpdateNow();
 
-	virtual void	ConvertToScreen(int32_t& ioX, int32_t& ioY) const;
-	virtual void	ConvertFromScreen(int32_t& ioX, int32_t& ioY) const;
+	virtual void ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV);
 
-	virtual uint32_t	GetModifiers() const;
+	virtual bool GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers);
+	virtual bool WaitMouseMoved(int32_t inX, int32_t inY);
 
-	MWindow*		GetWindow() const						{ return mWindow; }
-	
-	virtual MHandler* GetFocus();
+	virtual void SetCursor(MCursor inCursor);
+	virtual void ObscureCursor();
 
-  protected:
+	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
+	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
 
-	virtual bool	DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string& inText);
+	virtual uint32_t GetModifiers() const;
 
-	virtual bool	OnDestroy();
-	virtual bool	OnDelete(GdkEvent* inEvent);
+	MWindow *GetWindow() const { return mWindow; }
 
-	bool			ChildFocus(GdkEventFocus* inEvent);
-	MSlot<bool(GdkEventFocus*)> mChildFocus;
-	
-	bool			OnMapEvent(GdkEvent* inEvent);
-	MSlot<bool(GdkEvent*)> mMapEvent;
+	virtual MHandler *GetFocus();
 
-	virtual bool	OnConfigureEvent(GdkEventConfigure* inEvent);
+protected:
+	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText);
 
-//	void			Changed();
-//	MSlot<void()>	mChanged;
+	virtual bool OnDestroy();
+	virtual bool OnDelete(GdkEvent *inEvent);
 
-	virtual void	DoForEach(GtkWidget* inWidget);
-	static void		DoForEachCallBack(GtkWidget* inWidget, gpointer inUserData);
+	bool ChildFocus(GdkEventFocus *inEvent);
+	MSlot<bool(GdkEventFocus *)> mChildFocus;
 
-	MMenuBar*		mMenubar;
-	GtkWidget*		mMainVBox;
-	MGtkWidgetMixin*mFocus;
-	bool			mConfigured;
-	
-	static std::list<MWindow*>	sRecycle;
+	bool OnMapEvent(GdkEvent *inEvent);
+	MSlot<bool(GdkEvent *)> mMapEvent;
+
+	virtual bool OnConfigureEvent(GdkEventConfigure *inEvent);
+
+	//	void			Changed();
+	//	MSlot<void()>	mChanged;
+
+	virtual void DoForEach(GtkWidget *inWidget);
+	static void DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData);
+
+	MMenuBar *mMenubar;
+	GtkWidget *mMainVBox;
+	MGtkWidgetMixin *mFocus;
+	bool mConfigured;
+
+	static std::list<MWindow *> sRecycle;
 };

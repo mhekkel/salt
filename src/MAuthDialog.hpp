@@ -14,32 +14,35 @@
 
 class MAuthDialog : public MDialog
 {
-  public:
-						MAuthDialog(const std::string& inTitle, pinch::auth_state_type state,
-							const std::string& name, const std::string& inInstruction,
-							const std::vector<pinch::prompt>& prompts);
+public:
+	MAuthDialog(const std::string &inTitle, pinch::auth_state_type state,
+				const std::string &name, const std::string &inInstruction,
+				const std::vector<pinch::prompt> &prompts, MWindow* inParent);
 
-	virtual				~MAuthDialog();
+	virtual ~MAuthDialog();
 
-	MEventOut<void(pinch::auth_state_type, std::vector<std::string>&)>
-						eAuthInfo;
+	MEventOut<void(pinch::auth_state_type, std::vector<std::string> &)> eAuthInfo;
 
-	static std::function<bool(std::string&)>
-						RequestSimplePassword(const std::string& inDialogTitle,
-							const std::string& inInstruction);
-	
-  protected:
-	virtual bool		OKClicked();
-	virtual bool		CancelClicked();
-	
-	MEventIn<void(double)>		ePulse;
+	static std::function<bool(std::string &)>
+	RequestSimplePassword(const std::string &inDialogTitle,
+						  const std::string &inInstruction,
+						  MWindow *inParent);
 
-	void				Pulse(double inSystemTime);
+protected:
+	virtual bool OKClicked();
+	virtual bool CancelClicked();
 
-	bool				RequestSimplePassword(const std::string& inDialogTitle,
-							const std::string& inInstruction, std::string& outPassword);
-	
-	int32_t				mFields;
-	bool				mSentCredentials;
+	MEventIn<void(double)> ePulse;
+
+	void Pulse(double inSystemTime);
+
+	bool RequestSimplePassword(const std::string &inDialogTitle,
+							   const std::string &inInstruction,
+							   MWindow *inParent,
+							   std::string &outPassword);
+
+	int32_t mFields;
+	bool mSentCredentials;
 	pinch::auth_state_type mState;
+	MWindow* mParent;
 };

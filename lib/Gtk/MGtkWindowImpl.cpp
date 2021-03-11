@@ -144,31 +144,12 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
 		gtk_box_pack_end(GTK_BOX(mMainVBox), inChild->GetWidget(), inExpand, inFill, inPadding);
 }
 
-//void MGtkWindowImpl::ConnectChildSignals()
-//{
-//	gtk_container_foreach(GTK_CONTAINER(GetWidget()), &MGtkWindowImpl::DoForEachCallBack, this);
-//}
-//
-//void MGtkWindowImpl::RemoveWindowFromList(
-//	MWindow*		inWindow)
-//{
-//	if (inWindow == sFirst)
-//		sFirst = inWindow->mNext;
-//	else if (sFirst != nullptr)
-//	{
-//		MWindow* w = sFirst;
-//		while (w != nullptr)
-//		{
-//			MWindow* next = w->mNext;
-//			if (next == inWindow)
-//			{
-//				w->mNext = inWindow->mNext;
-//				break;
-//			}
-//			w = next;
-//		}
-//	}
-//}
+void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
+{
+	gtk_window_set_transient_for(
+		GTK_WINDOW(GetWidget()),
+		GTK_WINDOW(static_cast<MGtkWindowImpl*>(inWindow->GetImpl())->GetWidget()));
+}
 	
 void MGtkWindowImpl::Show()
 {
