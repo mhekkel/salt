@@ -32,7 +32,7 @@
 #include "MAddTOTPHashDialog.hpp"
 
 #if defined(_MSC_VER)
-#pragma comment(lib, "libassh")
+#pragma comment(lib, "libpinch")
 #pragma comment(lib, "libz")
 #endif
 
@@ -91,7 +91,6 @@ void MSaltApp::Initialise()
 		pinch::ssh_agent::instance().expose_pageant(true);
 
 	// recent menu
-
 	vector<string> recent;
 	Preferences::GetArray("recent-sessions", recent);
 	for (const string &r : recent)
@@ -99,8 +98,8 @@ void MSaltApp::Initialise()
 		if (std::regex_match(r, kRecentRE))
 			mRecent.push_back(r);
 	}
-	// known hosts
 
+	// known hosts
 	vector<string> knownHosts;
 	Preferences::GetArray("known-hosts", knownHosts);
 
@@ -295,8 +294,7 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 	}
 }
 
-void MSaltApp::UpdatePublicKeyMenu(
-	MMenu *inMenu)
+void MSaltApp::UpdatePublicKeyMenu(MMenu *inMenu)
 {
 	inMenu->RemoveItems(0, inMenu->CountItems());
 
@@ -305,8 +303,7 @@ void MSaltApp::UpdatePublicKeyMenu(
 		inMenu->AppendItem(key->get_comment(), cmd_DropPublicKey);
 }
 
-void MSaltApp::UpdateTOTPMenu(
-	MMenu *inMenu)
+void MSaltApp::UpdateTOTPMenu(MMenu *inMenu)
 {
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 
