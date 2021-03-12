@@ -66,16 +66,37 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 
 int MGtkApplicationImpl::RunEventLoop()
 {
-	g_timeout_add(50, &MGtkApplicationImpl::Timeout, nullptr);
+	mPulseID = g_timeout_add(50, &MGtkApplicationImpl::Timeout, nullptr);
+	auto id = g_idle_add(G_SOURCE_FUNC(&MGtkApplicationImpl::Idle), this);
 
 	gtk_main();
+
+	g_source_remove(id);
 	
 	return 0;
 }
 
 void MGtkApplicationImpl::Quit()
 {
+	if (mPulseID)
+		g_source_remove(mPulseID);
+
 	gtk_main_quit();
+}
+
+gboolean MGtkApplicationImpl::Idle(gpointer inData)
+{
+	try
+	{
+		sInstance->mIOService.reset();
+		sInstance->mIOService.poll();
+	}
+	catch (exception &e)
+	{
+		DisplayError(e);
+	}
+
+	return true;
 }
 
 gboolean MGtkApplicationImpl::Timeout(gpointer inData)

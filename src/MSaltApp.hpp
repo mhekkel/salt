@@ -6,8 +6,6 @@
 #if defined(_MSC_VER)
 #pragma comment(lib, "libzeep")
 #pragma comment(lib, "cryptlib")
-#pragma comment(lib, "MLib")
-#pragma comment(lib, "MWinLib")
 #endif
 
 #include <pinch/connection_pool.hpp>
@@ -80,8 +78,6 @@ private:
 	virtual void Initialise();
 	virtual void SaveGlobals();
 
-	virtual void Pulse();
-
 	struct MKnownHost
 	{
 		std::string host;
@@ -97,7 +93,7 @@ private:
 	typedef std::list<MKnownHost> MKnownHostsList;
 
 	std::deque<std::string> mRecent;
-	boost::asio::io_service mIOService;
+	boost::asio::io_service& mIOService;
 	pinch::connection_pool mConnectionPool;
 	MKnownHostsList mKnownHosts;
 };

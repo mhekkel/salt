@@ -19,6 +19,7 @@
 #include "MAcceleratorTable.hpp"
 #include "MMenu.hpp"
 #include "MSaltApp.hpp"
+#include "MApplicationImpl.hpp"
 #include "MTerminalWindow.hpp"
 #include "MConnectDialog.hpp"
 #include "MPreferences.hpp"
@@ -55,9 +56,8 @@ namespace
 
 // --------------------------------------------------------------------
 
-MSaltApp::MSaltApp(
-	MApplicationImpl *inImpl)
-	: MApplication(inImpl), mConnectionPool(mIOService)
+MSaltApp::MSaltApp(MApplicationImpl *inImpl)
+	: MApplication(inImpl), mIOService(inImpl->mIOService), mConnectionPool(mIOService)
 {
 	MAcceleratorTable &at = MAcceleratorTable::Instance();
 
@@ -139,19 +139,14 @@ void MSaltApp::SaveGlobals()
 	MApplication::SaveGlobals();
 }
 
-MApplication *MApplication::Create(
-	MApplicationImpl *inImpl)
+MApplication *MApplication::Create(MApplicationImpl *inImpl)
 {
 	return new MSaltApp(inImpl);
 }
 
 // --------------------------------------------------------------------
 
-bool MSaltApp::ProcessCommand(
-	uint32_t inCommand,
-	const MMenu *inMenu,
-	uint32_t inItemIndex,
-	uint32_t inModifiers)
+bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool result = true;
 
@@ -212,12 +207,7 @@ bool MSaltApp::ProcessCommand(
 	return result;
 }
 
-bool MSaltApp::UpdateCommandStatus(
-	uint32_t inCommand,
-	MMenu *inMenu,
-	uint32_t inItemIndex,
-	bool &outEnabled,
-	bool &outChecked)
+bool MSaltApp::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 {
 	bool result = true;
 
@@ -438,38 +428,7 @@ void MSaltApp::Open(const string &inFile)
 	}
 }
 
-void MSaltApp::Pulse()
-{
-	MApplication::Pulse();
-
-	try
-	{
-		// poll for data for as long as 0.25 seconds
-		double stop = GetLocalTime() + 0.25;
-		mIOService.reset();
-
-		for (;;)
-		{
-			size_t n = mIOService.poll_one();
-			if (n == 0)
-				break;
-
-#if BOOST_VERSION >= 104700
-			if (mIOService.stopped())
-				break;
-#endif
-
-			if (GetLocalTime() > stop)
-				break;
-		}
-	}
-	catch (exception &e)
-	{
-		DisplayError(e);
-	}
-}
-
-bool MSaltApp::ValidateHost(MWindow* window, const string &inHost, const string &inAlgorithm, const vector<uint8_t> &inHostKey)
+bool MSaltApp::ValidateHost(MWindow *window, const string &inHost, const string &inAlgorithm, const vector<uint8_t> &inHostKey)
 {
 	bool result = true;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());

@@ -9,23 +9,24 @@
 
 class MGtkApplicationImpl : public MApplicationImpl
 {
-  public:
-					MGtkApplicationImpl();
-	virtual			~MGtkApplicationImpl();
+public:
+	MGtkApplicationImpl();
+	virtual ~MGtkApplicationImpl();
 
-	static MGtkApplicationImpl*
-					GetInstance()				{ return sInstance; }
+	static MGtkApplicationImpl *
+	GetInstance() { return sInstance; }
 
-	void			Initialise();
-	virtual int		RunEventLoop();
-	virtual void	Quit();
+	void Initialise();
+	virtual int RunEventLoop();
+	virtual void Quit();
 
-  private:
+private:
+	static gboolean Timeout(gpointer inData);
+	static gboolean Idle(gpointer inData);
 
-	static gboolean	Timeout(gpointer inData);
+	static MGtkApplicationImpl *sInstance;
 
-	static MGtkApplicationImpl*
-					sInstance;
+	guint mPulseID = 0;
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;

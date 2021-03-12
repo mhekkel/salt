@@ -7,13 +7,17 @@
 
 #include "MApplication.hpp"
 
+#include <boost/asio.hpp>
+
 class MApplicationImpl
 {
-  public:
-					MApplicationImpl()		{}
-	virtual			~MApplicationImpl()		{}
+public:
+	MApplicationImpl() {}
+	virtual ~MApplicationImpl() {}
 
-	virtual void	Initialise() = 0;
-	virtual int		RunEventLoop() = 0;
-	virtual void	Quit() = 0;
+	virtual void Initialise() = 0;
+	virtual int RunEventLoop() = 0;
+	virtual void Quit() = 0;
+
+	boost::asio::io_service mIOService;
 };
