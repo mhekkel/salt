@@ -74,7 +74,7 @@ AX_LIBCRYPTOPP
 
 AX_PKG_CHECK_MODULES([GTK3], [libcanberra-gtk3], [], [], [AC_MSG_ERROR([libgtk-3-dev is not installed])])
 
-AX_BOOST_BASE([1.71.0], [], [AC_MSG_ERROR([Could not find a recent version of boost])])
+AX_BOOST_BASE([1.75.0], [], [AC_MSG_ERROR([Could not find a recent version of boost])])
 AX_BOOST_IOSTREAMS
 AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_DATE_TIME
