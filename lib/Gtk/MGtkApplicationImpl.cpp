@@ -11,6 +11,7 @@
 
 #include "MAcceleratorTable.hpp"
 #include "MAlerts.hpp"
+#include "MApplication.hpp"
 #include "MGtkApplicationImpl.hpp"
 #include "MGtkWindowImpl.hpp"
 #include "MDialog.hpp"
@@ -21,6 +22,7 @@ using namespace std;
 
 MGtkApplicationImpl::MGtkApplicationImpl()
 {
+
 	sInstance = this;
 }
 
@@ -62,16 +64,42 @@ void MGtkApplicationImpl::Initialise()
 
 MGtkApplicationImpl::~MGtkApplicationImpl()
 {
+	mHandlerQueue.push_front(nullptr);
+	mCV.notify_one();
+	if (mAsyncTaskThread.joinable())
+		mAsyncTaskThread.join();
+
+	if (not mIOContext.stopped())
+		mIOContext.stop();
+	if (mIOContextThread.joinable())
+		mIOContextThread.join();
 }
 
 int MGtkApplicationImpl::RunEventLoop()
 {
-	mPulseID = g_timeout_add(50, &MGtkApplicationImpl::Timeout, nullptr);
-	auto id = g_idle_add(G_SOURCE_FUNC(&MGtkApplicationImpl::Idle), this);
+	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
+
+	// Start processing async tasks
+
+	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
+	{
+		ProcessAsyncTasks(context);
+	});
+
+	mIOContextThread = std::thread([&io_context = mIOContext]()
+	{
+		try
+		{
+			boost::asio::executor_work_guard work(io_context.get_executor());
+			io_context.run();
+		}
+		catch (const std::exception& ex)
+		{
+			std::cerr << ex.what() << std::endl;
+		}
+	});
 
 	gtk_main();
-
-	g_source_remove(id);
 	
 	return 0;
 }
@@ -82,21 +110,53 @@ void MGtkApplicationImpl::Quit()
 		g_source_remove(mPulseID);
 
 	gtk_main_quit();
+
+	mIOContext.stop();
+	
+	std::unique_lock lock(mMutex);
+	mHandlerQueue.push_front(nullptr);
+	mCV.notify_one();
 }
 
-gboolean MGtkApplicationImpl::Idle(gpointer inData)
+void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext* context)
 {
-	try
-	{
-		sInstance->mIOService.reset();
-		sInstance->mIOService.poll();
-	}
-	catch (exception &e)
-	{
-		DisplayError(e);
-	}
+	std::unique_lock lock(mMutex);
 
-	return true;
+	bool done = false;
+
+	while (not done)
+	{
+		mCV.wait(lock, [this]() { return not mHandlerQueue.empty(); });
+		
+		while (not mHandlerQueue.empty())
+		{
+			auto ah = mHandlerQueue.front();
+			mHandlerQueue.pop_front();
+
+			if (not ah)
+			{
+				done = true;
+				break;
+			}
+			
+			g_main_context_invoke_full(context, G_PRIORITY_HIGH,
+				&MGtkApplicationImpl::HandleAsyncCallback, ah,
+				(GDestroyNotify)&MGtkApplicationImpl::DeleteAsyncHandler);
+		}
+	}
+}
+
+gboolean MGtkApplicationImpl::HandleAsyncCallback(gpointer inData)
+{
+	MAsyncHandlerBase* handler = reinterpret_cast<MAsyncHandlerBase*>(inData);
+	handler->execute();
+	return G_SOURCE_REMOVE;
+}
+
+void MGtkApplicationImpl::DeleteAsyncHandler(gpointer inData)
+{
+	MAsyncHandlerBase* handler = reinterpret_cast<MAsyncHandlerBase*>(inData);
+	delete handler;
 }
 
 gboolean MGtkApplicationImpl::Timeout(gpointer inData)

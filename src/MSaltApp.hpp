@@ -55,13 +55,10 @@ public:
 	void AddRecent(const std::string &inRecent);
 	void OpenRecent(const std::string &inRecent);
 
-	boost::asio::io_service &
-	GetIOService() { return mIOService; }
-	pinch::connection_pool &
-	GetConnectionPool() { return mConnectionPool; }
+	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
 
 	bool ValidateHost(MWindow* window, const std::string &inHost,
-					  const std::string &inAlg, const std::vector<uint8_t> &inHostKey);
+					  const std::string &inAlg, const pinch::blob &inHostKey);
 
 private:
 	virtual void DoAbout();
@@ -93,7 +90,6 @@ private:
 	typedef std::list<MKnownHost> MKnownHostsList;
 
 	std::deque<std::string> mRecent;
-	boost::asio::io_service& mIOService;
 	pinch::connection_pool mConnectionPool;
 	MKnownHostsList mKnownHosts;
 };

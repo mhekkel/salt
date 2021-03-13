@@ -13,10 +13,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 
+#include "MApplication.hpp"
 #include "MGtkApplicationImpl.hpp"
 #include "MError.hpp"
-//#include "MProject.hpp"
-//#include "MDocument.hpp"
 
 using namespace std;
 namespace po = boost::program_options;

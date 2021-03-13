@@ -188,7 +188,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 
 // 	shared_ptr<forwarding_channel> m_channel;
 // 	boost::asio::ip::tcp::socket m_socket;
-// 	boost::asio::io_service::strand m_strand;
+// 	boost::asio::io_context::strand m_strand;
 
 // 	static uint32_t s_connection_count;
 // };

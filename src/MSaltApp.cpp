@@ -57,7 +57,7 @@ namespace
 // --------------------------------------------------------------------
 
 MSaltApp::MSaltApp(MApplicationImpl *inImpl)
-	: MApplication(inImpl), mIOService(inImpl->mIOService), mConnectionPool(mIOService)
+	: MApplication(inImpl), mConnectionPool(inImpl->mIOContext)
 {
 	MAcceleratorTable &at = MAcceleratorTable::Instance();
 
@@ -380,33 +380,20 @@ void MSaltApp::DoQuit()
 
 	mConnectionPool.disconnect_all();
 
-	// closing windows happens asynchronously
-	list<MWindow *> windows;
-	MWindow *w = MWindow::GetFirstWindow();
-	while (w != nullptr)
-	{
+	vector<MWindow *> windows;
+
+	for (MWindow *w = MWindow::GetFirstWindow(); w != nullptr; w = w->GetNextWindow())
 		windows.push_back(w);
-		w = w->GetNextWindow();
-	}
 
-	for_each(windows.begin(), windows.end(), [](MWindow *w) { w->Close(); });
-
-	// poll the io_service until all windows are closed
-	mIOService.reset();
-
-	for (;;)
-	{
-		size_t n = mIOService.poll_one();
-		if (n == 0 or MWindow::GetFirstWindow() == nullptr)
-			break;
-	}
+	for (auto w: windows)
+		w->Close();
 
 	MApplication::DoQuit();
 }
 
 void MSaltApp::DoNew()
 {
-	MWindow *w = MTerminalWindow::Create(mIOService);
+	MWindow *w = MTerminalWindow::Create();
 	w->Select();
 }
 

@@ -15,7 +15,6 @@
 
 #include "MApplication.hpp"
 #include "MWindow.hpp"
-#include "MApplicationImpl.hpp"
 #include "MCommands.hpp"
 #include "MPreferences.hpp"
 #include "MUtils.hpp"
@@ -35,6 +34,20 @@ int VERBOSE, TRACE;
 
 MApplication *gApp;
 fs::path gExecutablePath, gPrefixPath;
+
+// --------------------------------------------------------------------
+
+void MAsyncHandlerBase::execute()
+{
+	try
+	{
+		execute_self();
+	}
+	catch (const std::exception& ex)
+	{
+		std::cerr << ex.what() << std::endl;
+	}
+}
 
 // --------------------------------------------------------------------
 

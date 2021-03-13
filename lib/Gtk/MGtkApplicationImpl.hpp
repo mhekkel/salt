@@ -23,10 +23,15 @@ public:
 private:
 	static gboolean Timeout(gpointer inData);
 	static gboolean Idle(gpointer inData);
+	static gboolean HandleAsyncCallback(gpointer inData);
+
+	void ProcessAsyncTasks(GMainContext* context);
+	static void DeleteAsyncHandler(gpointer inData);
 
 	static MGtkApplicationImpl *sInstance;
 
 	guint mPulseID = 0;
+	std::thread mAsyncTaskThread, mIOContextThread;
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;

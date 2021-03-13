@@ -13,64 +13,76 @@
 #include "MTypes.hpp"
 #include "MHandler.hpp"
 #include "MP2PEvents.hpp"
+#include "MApplicationImpl.hpp"
 
 extern const char kAppName[], kVersionString[];
 
 extern std::filesystem::path gExecutablePath;
 
 class MWindow;
-class MApplicationImpl;
 
 // ===========================================================================
 
 class MApplication : public MHandler
 {
-  public:
-	
-	static MApplication*
-						Create(MApplicationImpl* inImpl);
-	static void			Install(const std::string& inPrefix);
+public:
+	static MApplication *Create(MApplicationImpl *inImpl);
+	static void Install(const std::string &inPrefix);
 
-						~MApplication();
-	virtual void		Initialise();
+	~MApplication();
+	virtual void Initialise();
 
-	virtual void		DoNew();
-	virtual void		DoOpen();
-	virtual void		Open(const std::string& inURL);
+	virtual void DoNew();
+	virtual void DoOpen();
+	virtual void Open(const std::string &inURL);
 
-	virtual bool		UpdateCommandStatus(uint32_t inCommand, MMenu* inMenu, uint32_t inItemIndex,
-							bool& outEnabled, bool& outChecked);
-	virtual bool		ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex,
-							uint32_t inModifiers);
+	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex,
+									 bool &outEnabled, bool &outChecked);
+	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex,
+								uint32_t inModifiers);
 
-	virtual void		UpdateSpecialMenu(const std::string& inMenuKind, MMenu* inMenu);
-	virtual void		UpdateWindowMenu(MMenu* inMenu);
+	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
+	virtual void UpdateWindowMenu(MMenu *inMenu);
 
-	MEventOut<void(double)>						eIdle;
+	MEventOut<void(double)> eIdle;
 
-	int					RunEventLoop();
-	virtual void		Pulse();
+	int RunEventLoop();
+	virtual void Pulse();
 
-	virtual bool		AllowQuit(bool inLogOff);
-	virtual void		DoQuit();
+	virtual bool AllowQuit(bool inLogOff);
+	virtual void DoQuit();
 
-	bool				IsQuitting() const						{ return mQuitPending; }
-	void				CancelQuit()							{ mQuitPending = false; }
+	bool IsQuitting() const { return mQuitPending; }
+	void CancelQuit() { mQuitPending = false; }
 
-  protected:
+	MApplicationImpl& get_executor()
+	{
+		return *mImpl;
+	}
 
-						MApplication(MApplicationImpl* inImpl);
+	boost::asio::execution_context& get_context()
+	{
+		return *mImpl->mExContext;
+	}
 
-	typedef std::list<MWindow*>		MWindowList;
+	boost::asio::io_context& get_io_context()
+	{
+		return mImpl->mIOContext;
+	}
 
-	virtual void		DoSelectWindowFromWindowMenu(uint32_t inIndex);
+protected:
+	MApplication(MApplicationImpl *inImpl);
 
-	virtual void		SaveGlobals();
+	typedef std::list<MWindow *> MWindowList;
 
-	MApplicationImpl*	mImpl;
+	virtual void DoSelectWindowFromWindowMenu(uint32_t inIndex);
 
-	bool				mQuit;
-	bool				mQuitPending;
+	virtual void SaveGlobals();
+
+	MApplicationImpl *mImpl;
+
+	bool mQuit;
+	bool mQuitPending;
 };
 
-extern MApplication*	gApp;
+extern MApplication *gApp;

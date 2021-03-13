@@ -36,11 +36,46 @@ using namespace std;
 //namespace io = boost::iostreams;
 
 // --------------------------------------------------------------------
+
+class MAppExecutor
+{
+public:
+	boost::asio::execution_context *m_context;
+
+	bool operator==(const MAppExecutor &other) const noexcept
+	{
+		return m_context == other.m_context;
+	}
+
+	bool operator!=(const MAppExecutor &other) const noexcept
+	{
+		return !(*this == other);
+	}
+
+	boost::asio::execution_context &query(boost::asio::execution::context_t) const noexcept
+	{
+		return *m_context;
+	}
+
+	static constexpr boost::asio::execution::blocking_t::never_t query(
+		boost::asio::execution::blocking_t) noexcept
+	{
+		// This executor always has blocking.never semantics.
+		return boost::asio::execution::blocking.never;
+	}
+
+	template <class F>
+	void execute(F f) const
+	{
+		gApp->get_executor().execute(std::move(f));
+	}
+};
+
+// --------------------------------------------------------------------
 // MTerminalChannel
 
-MTerminalChannel::MTerminalChannel(boost::asio::io_service& inIOService)
-	: mIOService(inIOService)
-	, mRefCount(1)
+MTerminalChannel::MTerminalChannel()
+	: mRefCount(1)
 {
 }
 
@@ -56,7 +91,7 @@ void MTerminalChannel::Release()
 		delete this;
 }
 
-void MTerminalChannel::SetMessageCallback(const MessageCallback& inMessageCallback)
+void MTerminalChannel::SetMessageCallback(const MessageCallback &inMessageCallback)
 {
 	mMessageCB = inMessageCallback;
 }
@@ -74,19 +109,19 @@ void MTerminalChannel::KeepAliveIfNeeded()
 
 class MSshTerminalChannel : public MTerminalChannel
 {
-  public:
+public:
 	MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection);
 	~MSshTerminalChannel();
-	
-	virtual void SetMessageCallback(const MessageCallback& inMessageCallback);
-	
+
+	virtual void SetMessageCallback(const MessageCallback &inMessageCallback);
+
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-		uint32_t inPixelWidth, uint32_t inPixelHeight);
-	
-	virtual void Open(const string& inTerminalType,
-		bool inForwardAgent, bool inForwardX11,
-		const string& inCommand, const vector<string>& env,
-		const OpenCallback& inOpenCallback);
+								 uint32_t inPixelWidth, uint32_t inPixelHeight);
+
+	virtual void Open(const string &inTerminalType,
+					  bool inForwardAgent, bool inForwardX11,
+					  const string &inCommand, const vector<string> &env,
+					  const OpenCallback &inOpenCallback);
 
 	virtual void Close();
 
@@ -96,18 +131,17 @@ class MSshTerminalChannel : public MTerminalChannel
 	virtual bool CanDisconnect() const { return true; }
 	virtual void Disconnect(bool disconnectProxy);
 
-	virtual void SendData(const string& inData, const WriteCallback& inCallback);
-	virtual void SendSignal(const string& inSignal);
-	virtual void ReadData(const ReadCallback& inCallback);
+	virtual void SendData(const string &inData);
+	virtual void SendSignal(const string &inSignal);
+	virtual void ReadData(const ReadCallback &inCallback);
 
-  private:
+private:
 	shared_ptr<pinch::terminal_channel> mChannel;
 	boost::asio::streambuf mResponse;
 };
 
 MSshTerminalChannel::MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection)
-	: MTerminalChannel(static_cast<MSaltApp*>(gApp)->GetIOService())
-	, mChannel(new pinch::terminal_channel(inConnection))
+	: mChannel(new pinch::terminal_channel(inConnection))
 {
 }
 
@@ -115,47 +149,57 @@ MSshTerminalChannel::~MSshTerminalChannel()
 {
 }
 
-void MSshTerminalChannel::SetMessageCallback(const MessageCallback& inMessageCallback)
+void MSshTerminalChannel::SetMessageCallback(const MessageCallback &inMessageCallback)
 {
-	MTerminalChannel::SetMessageCallback(inMessageCallback);
+	MAppExecutor my_executor{&gApp->get_context()};
+
+	mMessageCB = boost::asio::bind_executor(
+		my_executor,
+		[this, inMessageCallback](const std::string &s1, const std::string &s2) {
+			inMessageCallback(s1, s2);
+		});
+
+	MTerminalChannel::SetMessageCallback(mMessageCB);
 	mChannel->set_message_callbacks(mMessageCB, mMessageCB, mMessageCB);
 }
 
 void MSshTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-	uint32_t inPixelWidth, uint32_t inPixelHeight)
+										  uint32_t inPixelWidth, uint32_t inPixelHeight)
 {
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
 	mPixelWidth = inPixelWidth;
 	mPixelHeight = inPixelHeight;
-	
+
 	if (mChannel->is_open())
 		mChannel->send_window_resize(mTerminalWidth, mTerminalHeight);
 }
 
-void MSshTerminalChannel::Open(const string& inTerminalType,
-	bool inForwardAgent, bool inForwardX11,
-	const string& inCommand, const vector<string>& env,
-	const OpenCallback& inOpenCallback)
+void MSshTerminalChannel::Open(const string &inTerminalType,
+							   bool inForwardAgent, bool inForwardX11,
+							   const string &inCommand, const vector<string> &env,
+							   const OpenCallback &inOpenCallback)
 {
 	// env is ignored anyway...
-	
-	mChannel->open_with_pty(mTerminalWidth, mTerminalHeight,
-		inTerminalType, inForwardAgent, inForwardX11, inCommand,
-		[this, inOpenCallback](const boost::system::error_code& ec)
-		{
-			auto& connection = mChannel->get_connection();
-			mConnectionInfo = vector<string>({
-				connection.get_connection_parameters(pinch::direction::c2s),
-				connection.get_connection_parameters(pinch::direction::s2c),
-				connection.get_key_exchange_algorithm()
-			});
+
+	MAppExecutor my_executor{&gApp->get_context()};
+
+	auto cb = boost::asio::bind_executor(
+		my_executor,
+		[this, inOpenCallback](const boost::system::error_code &ec) {
+			auto &connection = mChannel->get_connection();
+			mConnectionInfo = vector<string>({connection.get_connection_parameters(pinch::direction::c2s),
+											  connection.get_connection_parameters(pinch::direction::s2c),
+											  connection.get_key_exchange_algorithm()});
 
 			mConnectionInfo.erase(unique(mConnectionInfo.begin(), mConnectionInfo.end()), mConnectionInfo.end());
 
 			if (this->mRefCount > 0)
 				inOpenCallback(ec);
 		});
+
+	mChannel->open_with_pty(mTerminalWidth, mTerminalHeight,
+							inTerminalType, inForwardAgent, inForwardX11, inCommand, std::move(cb));
 }
 
 void MSshTerminalChannel::Close()
@@ -173,30 +217,28 @@ void MSshTerminalChannel::Disconnect(bool disconnectProxy)
 	mChannel->get_connection().disconnect();
 }
 
-void MSshTerminalChannel::SendData(const string& inData, const WriteCallback& inCallback)
+void MSshTerminalChannel::SendData(const string &inData)
 {
-	mChannel->send_data(inData, 
-		[this, inCallback](const boost::system::error_code& ec, size_t bytes)
-		{
-			if (this->mRefCount > 0)
-				inCallback(ec, bytes);
-		});
+	mChannel->send_data(inData);
 }
 
-void MSshTerminalChannel::SendSignal(const string& inSignal)
+void MSshTerminalChannel::SendSignal(const string &inSignal)
 {
 	mChannel->send_signal(inSignal);
 }
 
-void MSshTerminalChannel::ReadData(const ReadCallback& inCallback)
+void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	boost::asio::async_read(*mChannel, mResponse,
-		boost::asio::transfer_at_least(1),
-		[this, inCallback](const boost::system::error_code& ec, size_t inBytesReceived)
-		{
+	MAppExecutor my_executor{&gApp->get_context()};
+
+	auto cb = boost::asio::bind_executor(
+		my_executor,
+		[this, inCallback](const boost::system::error_code &ec, size_t inBytesReceived) {
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);
 		});
+
+	boost::asio::async_read(*mChannel, mResponse, boost::asio::transfer_at_least(1), std::move(cb));
 }
 
 void MSshTerminalChannel::KeepAliveIfNeeded()
@@ -210,68 +252,65 @@ void MSshTerminalChannel::KeepAliveIfNeeded()
 
 class MPtyTerminalChannel : public MTerminalChannel
 {
-  public:
-	MPtyTerminalChannel(boost::asio::io_context& inIOContext);
+public:
+	MPtyTerminalChannel();
 	~MPtyTerminalChannel();
-	
+
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-		uint32_t inPixelWidth, uint32_t inPixelHeight);
-	
-	virtual void Open(const string& inTerminalType,
-		bool inForwardAgent, bool inForwardX11,
-		const string& inCommand, const vector<string>& env,
-		const OpenCallback& inOpenCallback);
+								 uint32_t inPixelWidth, uint32_t inPixelHeight);
+
+	virtual void Open(const string &inTerminalType,
+					  bool inForwardAgent, bool inForwardX11,
+					  const string &inCommand, const vector<string> &env,
+					  const OpenCallback &inOpenCallback);
 
 	virtual void Close();
 
 	virtual bool IsOpen() const;
 
-	virtual void SendData(const string& inData, const WriteCallback& inCallback);
-	virtual void SendSignal(const string& inSignal);
-	virtual void ReadData(const ReadCallback& inCallback);
+	virtual void SendData(const string &inData);
+	virtual void SendSignal(const string &inSignal);
+	virtual void ReadData(const ReadCallback &inCallback);
 
-  private:
+private:
+	void Exec(const string &inCommand, const string &inTerminalType, int inTtyFD);
 
-	void Exec(const string& inCommand, const string& inTerminalType, int inTtyFD);
-	
 	struct ChangeWindowsSizeCommand
 	{
 		ChangeWindowsSizeCommand(uint32_t inColumns, uint32_t inRows,
-			uint32_t inPixelWidth, uint32_t inPixelHeight)
+								 uint32_t inPixelWidth, uint32_t inPixelHeight)
 		{
 			ws.ws_row = inRows;
 			ws.ws_col = inColumns;
 			ws.ws_xpixel = inPixelWidth;
 			ws.ws_ypixel = inPixelHeight;
 		}
-		
-		int name()		{ return TIOCSWINSZ; }
-		void* data()	{ return &ws; }
-		
+
+		int name() { return TIOCSWINSZ; }
+		void *data() { return &ws; }
+
 		struct winsize ws;
 	};
-	
+
 	int mPid;
 	string mTtyName;
-	
+
 	boost::asio::posix::stream_descriptor mPty;
 	boost::asio::streambuf mResponse;
 };
 
-MPtyTerminalChannel::MPtyTerminalChannel(boost::asio::io_context& inIOContext)
-	: MTerminalChannel(inIOContext)
-	, mPid(-1)
-	, mPty(mIOService)
+MPtyTerminalChannel::MPtyTerminalChannel()
+	: mPid(-1), mPty(gApp->get_io_context())
 {
 }
 
 MPtyTerminalChannel::~MPtyTerminalChannel()
 {
-PRINT(("MPtyTerminalChannel::~MPtyTerminalChannel()"));
+	PRINT(("MPtyTerminalChannel::~MPtyTerminalChannel()"));
 }
 
 void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-	uint32_t inPixelWidth, uint32_t inPixelHeight)
+										  uint32_t inPixelWidth, uint32_t inPixelHeight)
 {
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
@@ -285,52 +324,52 @@ void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 	}
 }
 
-void MPtyTerminalChannel::Open(const string& inTerminalType,
-	bool inForwardAgent, bool inForwardX11,
-	const string& inCommand, const vector<string>& env,
-	const OpenCallback& inOpenCallback)
+void MPtyTerminalChannel::Open(const string &inTerminalType,
+							   bool inForwardAgent, bool inForwardX11,
+							   const string &inCommand, const vector<string> &env,
+							   const OpenCallback &inOpenCallback)
 {
 	int ptyfd = -1, ttyfd = -1;
-	
+
 	try
 	{
 		mPty.close();
 
 		struct winsize w;
-	
+
 		w.ws_row = mTerminalHeight;
 		w.ws_col = mTerminalWidth;
 		w.ws_xpixel = mPixelWidth;
 		w.ws_ypixel = mPixelHeight;
-		
+
 		// allocate a pty
 		if (openpty(&ptyfd, &ttyfd, nullptr, nullptr, &w) < 0)
 			throw runtime_error(strerror(errno));
-			
+
 		mTtyName = ttyname(ttyfd);
-		mConnectionInfo = vector<string>({ mTtyName });
-	
+		mConnectionInfo = vector<string>({mTtyName});
+
 		mPid = fork();
 		switch (mPid)
 		{
-			case -1:
-				throw runtime_error(strerror(errno));
+		case -1:
+			throw runtime_error(strerror(errno));
 
-			case  0:
-				close(ptyfd);
-				Exec(inCommand, inTerminalType, ttyfd);
-				// does not return
-			
-			default:
-				break;
+		case 0:
+			close(ptyfd);
+			Exec(inCommand, inTerminalType, ttyfd);
+			// does not return
+
+		default:
+			break;
 		}
 
 		close(ttyfd);
 		mPty.assign(ptyfd);
-	
+
 		inOpenCallback(boost::system::error_code());
 	}
-	catch (exception& e)
+	catch (exception &e)
 	{
 		mMessageCB(e.what(), "");
 
@@ -338,15 +377,14 @@ void MPtyTerminalChannel::Open(const string& inTerminalType,
 			close(ptyfd);
 		if (ttyfd >= 0)
 			close(ttyfd);
-		
+
 		mPty.close();
-	
+
 		inOpenCallback(pinch::error::make_error_code(pinch::error::channel_closed));
 	}
 }
 
-void MPtyTerminalChannel::Exec(
-	const string& inCommand, const string& inTerminalType, int inTtyFD)
+void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminalType, int inTtyFD)
 {
 	// make the pseudo tty our controlling tty
 	int fd = open("/dev/tty", O_RDWR | O_NOCTTY);
@@ -355,9 +393,9 @@ void MPtyTerminalChannel::Exec(
 		(void)ioctl(fd, TIOCNOTTY, nullptr);
 		close(fd);
 	}
-	
+
 	(void)setsid(); // ignore error?
-	
+
 	// Verify that we are successfully disconnected from the controlling tty.
 	fd = open("/dev/tty", O_RDWR | O_NOCTTY);
 	if (fd >= 0)
@@ -382,26 +420,26 @@ void MPtyTerminalChannel::Exec(
 		cerr << "open /dev/tty failed - could not set controlling tty: " << strerror(errno) << endl;
 	else
 		close(fd);
-	
+
 	// redirect stdin/stdout/stderr from the pseudo tty
-	
+
 	if (dup2(inTtyFD, STDIN_FILENO) < 0)
 		cerr << "dup2 stdin: " << strerror(errno) << endl;
 	if (dup2(inTtyFD, STDOUT_FILENO) < 0)
 		cerr << "dup2 stdout: " << strerror(errno) << endl;
 	if (dup2(inTtyFD, STDERR_FILENO) < 0)
 		cerr << "dup2 stderr: " << strerror(errno) << endl;
-	
+
 	close(inTtyFD);
-	
-	// 
-	struct passwd* pw = getpwuid(getuid());
+
+	//
+	struct passwd *pw = getpwuid(getuid());
 	if (pw == nullptr)
 	{
 		cerr << "user not found" << strerror(errno) << endl;
 		exit(1);
 	}
-	
+
 	ifstream motd("/etc/motd");
 	while (motd.is_open() and not motd.eof())
 	{
@@ -410,24 +448,24 @@ void MPtyTerminalChannel::Exec(
 		cout << line << endl;
 	}
 	motd.close();
-	
+
 	// force a flush of all buffers
 	fflush(nullptr);
-	
+
 	string shell = pw->pw_shell;
 	if (shell.empty())
 		shell = "/bin/sh";
-	
+
 	(void)chdir(pw->pw_dir);
-	
+
 	// close all other file descriptors
 	endpwent();
 	closefrom(STDERR_FILENO + 1);
-	
-	// export TERM 
+
+	// export TERM
 	setenv("TERM", inTerminalType.c_str(), true);
-	
-	char* argv[] = { strdup(shell.c_str()), nullptr };
+
+	char *argv[] = {strdup(shell.c_str()), nullptr};
 	execvp(shell.c_str(), argv);
 	perror("exec failed");
 	exit(1);
@@ -436,7 +474,7 @@ void MPtyTerminalChannel::Exec(
 void MPtyTerminalChannel::Close()
 {
 	mPty.close();
-	
+
 	if (mPid > 0)
 	{
 		int status;
@@ -449,45 +487,42 @@ bool MPtyTerminalChannel::IsOpen() const
 	return mPty.is_open();
 }
 
-void MPtyTerminalChannel::SendData(const string& inData, const WriteCallback& inCallback)
+void MPtyTerminalChannel::SendData(const string &inData)
 {
 	shared_ptr<boost::asio::streambuf> buffer(new boost::asio::streambuf);
 	ostream out(buffer.get());
 	out << inData;
-	
-	boost::asio::async_write(mPty, *buffer,
-		[buffer, inCallback, this] (const boost::system::error_code& ec, size_t bytes)
-		{
-			if (this->mRefCount > 0)
-				inCallback(ec, bytes);
-		});
+
+	boost::asio::async_write(mPty, *buffer, [](const boost::system::error_code &, std::size_t) {});
 }
 
-void MPtyTerminalChannel::SendSignal(const string& inSignal)
+void MPtyTerminalChannel::SendSignal(const string &inSignal)
 {
 }
 
-void MPtyTerminalChannel::ReadData(const ReadCallback& inCallback)
+void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	boost::asio::async_read(mPty, mResponse,
-		boost::asio::transfer_at_least(1),
-		[this, inCallback](const boost::system::error_code& ec, size_t inBytesReceived)
-		{
+	MAppExecutor my_executor{&gApp->get_context()};
+
+	auto cb = boost::asio::bind_executor(
+		my_executor,
+		[this, inCallback](const boost::system::error_code &ec, size_t inBytesReceived) {
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);
 		});
+
+	boost::asio::async_read(mPty, mResponse, boost::asio::transfer_at_least(1), std::move(cb));
 }
 
 // --------------------------------------------------------------------
 // MTerminalChannel factory
 
-MTerminalChannel* MTerminalChannel::Create(std::shared_ptr<pinch::basic_connection> inConnection)
+MTerminalChannel *MTerminalChannel::Create(std::shared_ptr<pinch::basic_connection> inConnection)
 {
 	return new MSshTerminalChannel(inConnection);
 }
 
-MTerminalChannel* MTerminalChannel::Create(boost::asio::io_service& inIOService)
+MTerminalChannel *MTerminalChannel::Create()
 {
-	return new MPtyTerminalChannel(inIOService);
+	return new MPtyTerminalChannel();
 }
-
