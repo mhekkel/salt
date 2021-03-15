@@ -23,7 +23,7 @@ class MImageButton : public MCanvas
 	MEventOut<void()>	eClicked;
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw(cairo_t* inCairo);
+	virtual void	Draw();
 	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
 	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void	MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
@@ -54,12 +54,12 @@ MImageButton::MImageButton(const std::string& inID, MRect inBounds, const char* 
 	mCloseButtonBitmaps[2] = MBitmap(buttons, MRect(32, 0, 16, 16));
 }
 
-void MImageButton::Draw(cairo_t* inCairo)
+void MImageButton::Draw()
 {
 	MRect bounds;
 	GetBounds(bounds);
 	
-	MDevice dev(this, inCairo);
+	MDevice dev(this);
 	
 	if (kDialogBackgroundColor != kBlack)
 	{

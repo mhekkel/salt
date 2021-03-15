@@ -37,9 +37,9 @@ MControlImplBase* MControl<IMPL>::GetControlImplBase()
 }
 
 template<class IMPL>
-void MControl<IMPL>::Draw(cairo_t* inCairo)
+void MControl<IMPL>::Draw()
 {
-	mImpl->Draw(inCairo);
+	mImpl->Draw();
 }
 
 template<class IMPL>

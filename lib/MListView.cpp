@@ -38,7 +38,7 @@ class MListViewImpl : public MCanvas
 						int32_t inWidthDelta, int32_t inHeightDelta);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw(cairo_t* inCairo);
+	virtual void	Draw();
 
 	virtual bool	HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	
@@ -220,9 +220,9 @@ MListColumn* MListViewImpl::GetColumn(uint32_t inColumnNr)
 	return result;
 }
 
-void MListViewImpl::Draw(cairo_t* inCairo)
+void MListViewImpl::Draw()
 {
-	MDevice dev(this, inCairo);
+	MDevice dev(this);
 	
 	dev.EraseRect(mBounds);
 	

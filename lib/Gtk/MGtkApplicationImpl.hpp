@@ -9,7 +9,7 @@
 
 class MGtkApplicationImpl : public MApplicationImpl
 {
-public:
+  public:
 	MGtkApplicationImpl();
 	virtual ~MGtkApplicationImpl();
 
@@ -20,12 +20,12 @@ public:
 	virtual int RunEventLoop();
 	virtual void Quit();
 
-private:
+  private:
 	static gboolean Timeout(gpointer inData);
 	static gboolean Idle(gpointer inData);
 	static gboolean HandleAsyncCallback(gpointer inData);
 
-	void ProcessAsyncTasks(GMainContext* context);
+	void ProcessAsyncTasks(GMainContext *context);
 	static void DeleteAsyncHandler(gpointer inData);
 
 	static MGtkApplicationImpl *sInstance;

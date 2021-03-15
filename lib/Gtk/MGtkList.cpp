@@ -60,14 +60,14 @@
 //			}
 //		}
 //	}
-//	
+//
 //	return result;
 //}
 //
 //void MListRowBase::RowChanged()
 //{
 //	UpdateDataInTreeStore();
-//	
+//
 //	if (mRowReference != nullptr and gtk_tree_row_reference_valid(mRowReference))
 //	{
 //		GtkTreeModel* model = gtk_tree_row_reference_get_model(mRowReference);
@@ -94,7 +94,7 @@
 //
 //	outPosition = 0;
 //	outParent = nullptr;
-//	
+//
 //	if (mRowReference != nullptr and gtk_tree_row_reference_valid(mRowReference))
 //	{
 //		GtkTreeModel* model = gtk_tree_row_reference_get_model(mRowReference);
@@ -104,14 +104,14 @@
 //			if (path != nullptr)
 //			{
 //				result = true;
-//				
+//
 //				int depth = gtk_tree_path_get_depth(path);
 //				gint* indices = gtk_tree_path_get_indices(path);
 //
 //				if (depth > 0)
 //				{
 //					outPosition = indices[depth - 1];
-//					
+//
 //					if (depth > 1)
 //					{
 //						GtkTreeIter iter;
@@ -124,7 +124,7 @@
 //			}
 //		}
 //	}
-//	
+//
 //	return result;
 //}
 //
@@ -167,7 +167,7 @@
 //							gtk_tree_path_free(path);
 //						}
 //					}
-//					
+//
 //	MSlot<void(gchar*)>						eToggled;
 //
 //	void			Edited(
@@ -177,7 +177,7 @@
 //						string newText;
 //						if (inNewText != nullptr)
 //							newText = inNewText;
-//						
+//
 //						GtkTreePath* path = gtk_tree_path_new_from_string(inPath);
 //						if (path != nullptr)
 //						{
@@ -186,7 +186,7 @@
 //							gtk_tree_path_free(path);
 //						}
 //					}
-//					
+//
 //	MSlot<void(gchar*,gchar*)>				eEdited;
 //
 //	uint32_t			mColumnNr;
@@ -211,7 +211,7 @@
 //{
 //	mCursorChanged.Connect(inTreeView, "cursor-changed");
 //	mRowActivated.Connect(inTreeView, "row-activated");
-//	
+//
 //	mRowSelectedTimer.eTimedOut.SetProc(this, &MListBase::RowSelectedTimeOutWaited);
 //	mRowEditingTimedOut.eTimedOut.SetProc(this, &MListBase::DisableEditingAndTimer);
 //
@@ -245,7 +245,7 @@
 //	{
 //		sSavedRowDropPossible = dragIface->row_drop_possible;
 //		dragIface->row_drop_possible = &MListBase::RowDropPossibleCallback;
-//		
+//
 //		sSavedDragDataReceived = dragIface->drag_data_received;
 //		dragIface->drag_data_received = &MListBase::DragDataReceivedCallback;
 //	}
@@ -254,13 +254,13 @@
 //	mRowDeleted.Connect(G_OBJECT(mTreeStore), "row-deleted");
 //	mRowInserted.Connect(G_OBJECT(mTreeStore), "row-inserted");
 //	mRowsReordered.Connect(G_OBJECT(mTreeStore), "rows-reordered");
-//	
+//
 //	for (size_t i = 0; i < inRenderers.size(); ++i)
 //	{
 //	    GtkCellRenderer* renderer = get<0>(inRenderers[i]);
-//	    
+//
 //	    mRenderers.push_back(renderer);
-//	    
+//
 //	    const char* attribute = get<1>(inRenderers[i]);
 //	    GtkTreeViewColumn* column = gtk_tree_view_column_new();
 //	    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(column), renderer, TRUE);
@@ -283,11 +283,11 @@
 //	GtkTreePath*		inPath) const
 //{
 //	MListRowBase* row = nullptr;
-//	
+//
 //	GtkTreeIter iter;
 //	if (inPath != nullptr and gtk_tree_model_get_iter(GTK_TREE_MODEL(mTreeStore), &iter, inPath))
 //		gtk_tree_model_get(GTK_TREE_MODEL(mTreeStore), &iter, GetColumnCount(), &row, -1);
-//	
+//
 //	return row;
 //}
 //
@@ -315,7 +315,7 @@
 //MListRowBase* MListBase::GetCursorRow() const
 //{
 //	MListRowBase* row = nullptr;
-//	
+//
 //	GtkTreePath* path;
 //	gtk_tree_view_get_cursor(GTK_TREE_VIEW(GetGtkWidget()), &path, nullptr);
 //	if (path != nullptr)
@@ -323,7 +323,7 @@
 //		row = GetRowForPath(path);
 //		gtk_tree_path_free(path);
 //	}
-//	
+//
 //	return row;
 //}
 //
@@ -332,7 +332,7 @@
 //{
 //	GList* rows = gtk_tree_selection_get_selected_rows(
 //		gtk_tree_view_get_selection(GTK_TREE_VIEW(GetGtkWidget())), nullptr);
-//					
+//
 //	if (rows != nullptr)
 //	{
 //		GList* row = rows;
@@ -341,7 +341,7 @@
 //			outRows.push_back(GetRowForPath((GtkTreePath*)row->data));
 //			row = row->next;
 //		}
-//		
+//
 //		g_list_foreach(rows, (GFunc)(gtk_tree_path_free), nullptr);
 //		g_list_free(rows);
 //	}
@@ -408,9 +408,9 @@
 //{
 //	if (inColumnNr >= mRenderers.size())
 //		THROW(("Invalid column specified for SetListOfOptionsForColumn"));
-//	
+//
 //	GtkListStore* model = gtk_list_store_new(1, G_TYPE_STRING);
-//	
+//
 //	for (auto option = inOptions.begin(); option != inOptions.end(); ++option)
 //	{
 //		GtkTreeIter iter;
@@ -424,7 +424,7 @@
 //		"has-entry", true,
 //		"model", model,
 //		nullptr);
-//	
+//
 ////	GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), inColumnNr);
 ////	gtk_cell_layout_clear(GTK_CELL_LAYOUT(column));
 ////
@@ -478,7 +478,7 @@
 //{
 //	// store in tree
 //	GtkTreeIter iter, parent;
-//	
+//
 //	if (inParentRow != nullptr and GetTreeIterForRow(inParentRow, &parent))
 //		gtk_tree_store_append(mTreeStore, &iter, &parent);
 //	else
@@ -500,7 +500,7 @@
 //{
 //	// store in tree
 //	GtkTreeIter iter, siblingIter;
-//	
+//
 //	if (inBefore != nullptr and GetTreeIterForRow(inBefore, &siblingIter))
 //		gtk_tree_store_insert_before(mTreeStore, &iter, nullptr, &siblingIter);
 //	else
@@ -538,7 +538,7 @@
 //void MListBase::RemoveAll()
 //{
 //	gtk_tree_model_foreach(GTK_TREE_MODEL(mTreeStore), &MListBase::RemoveAllCB, this);
-//	
+//
 //	gtk_tree_store_clear(mTreeStore);
 //}
 //
@@ -549,7 +549,7 @@
 //	if (path != nullptr)
 //	{
 //		GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), 0);
-//		
+//
 //		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(GetGtkWidget()),
 //			path, column, false, 0, 0);
 //
@@ -568,7 +568,7 @@
 //	if (path != nullptr)
 //	{
 //		GtkTreeViewColumn* column = gtk_tree_view_get_column(GTK_TREE_VIEW(GetGtkWidget()), 0);
-//		
+//
 //		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(GetGtkWidget()),
 //			path, column, false, 0, 0);
 //
@@ -612,14 +612,14 @@
 //		{
 //			MListRowBase* row;
 //			gtk_tree_model_get(GTK_TREE_MODEL(mTreeStore), &iter, GetColumnCount(), &row, -1);
-//			
+//
 //			if (row != NULL)
 //				result = row->RowDropPossible();
 //		}
 //	}
-//	
+//
 //	gtk_tree_path_free(path);
-//	
+//
 //	return result;
 //}
 //
@@ -645,17 +645,17 @@
 //{
 //	RowDragged(GetRowForPath(inTreePath));
 //	return true;
-//}	
+//}
 //
 //void MListBase::CursorChanged()
 //{
 //	MListRowBase* row = GetCursorRow();
-//	
+//
 //	if (row != nullptr)
 //	{
 //		mRowSelectedTimer.Stop();
 //		mRowEditingTimedOut.Stop();
-//		
+//
 //		RowSelected(row);
 //		mRowSelectedTimer.Start(0.3);
 //	}
@@ -665,7 +665,7 @@
 //{
 //	for (auto col = mEnabledEditColumns.begin(); col != mEnabledEditColumns.end(); ++col)
 //		 g_object_set(G_OBJECT(mRenderers[*col]), "editable", true, nullptr);
-//	
+//
 //	mRowEditingTimedOut.Start(2.0);
 //}
 //
@@ -684,7 +684,7 @@
 //	mRowEditingTimedOut.Stop();
 //
 //	mEnabledEditColumns.clear();
-//	
+//
 //	MListRowBase* row = GetRowForPath(inTreePath);
 //	if (row != nullptr)
 //		RowActivated(row);
@@ -710,7 +710,7 @@
 //	GtkTreeIter*		inTreeIter)
 //{
 //	eRowsReordered();
-//	
+//
 //	MListRowBase* row = GetRowForPath(inTreePath);
 //	if (row != nullptr)
 //		row->UpdateRowReference(GTK_TREE_MODEL(mTreeStore), inTreePath);

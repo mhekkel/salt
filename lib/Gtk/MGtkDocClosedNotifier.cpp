@@ -5,35 +5,33 @@
 
 #include "MLib.hpp"
 
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 #include "MDocClosedNotifier.hpp"
 #include "MError.hpp"
 
 using namespace std;
 
-	
-	//if (inRead)
-	//{
-	//	mPreparedForStdOut = true;
-	//	mDataFD = inNotifier.GetFD();
+//if (inRead)
+//{
+//	mPreparedForStdOut = true;
+//	mDataFD = inNotifier.GetFD();
 
-	//	int flags = fcntl(mDataFD, F_GETFL, 0);
-	//	if (fcntl(mDataFD, F_SETFL, flags | O_NONBLOCK))
-	//		cerr << _("Failed to set fd non blocking: ") << strerror(errno) << endl;
-	//}
+//	int flags = fcntl(mDataFD, F_GETFL, 0);
+//	if (fcntl(mDataFD, F_SETFL, flags | O_NONBLOCK))
+//		cerr << _("Failed to set fd non blocking: ") << strerror(errno) << endl;
+//}
 
-	//if (mDataFD >= 0)
-	//{
-	//	char buffer[10240];
-	//	int r = read(mDataFD, buffer, sizeof(buffer));
-	//	if (r == 0 or (r < 0 and errno != EAGAIN))
-	//		mDataFD = -1;
-	//	else if (r > 0)
-	//		StdOut(buffer, r);
-	//}
-
+//if (mDataFD >= 0)
+//{
+//	char buffer[10240];
+//	int r = read(mDataFD, buffer, sizeof(buffer));
+//	if (r == 0 or (r < 0 and errno != EAGAIN))
+//		mDataFD = -1;
+//	else if (r > 0)
+//		StdOut(buffer, r);
+//}
 
 MDocClosedNotifierImpl::MDocClosedNotifierImpl()
 	: mRefCount(1)
@@ -59,20 +57,20 @@ void MDocClosedNotifierImpl::Release()
 // --------------------------------------------------------------------
 
 MDocClosedNotifier::MDocClosedNotifier(
-	MDocClosedNotifierImpl*	inImpl)
+	MDocClosedNotifierImpl *inImpl)
 	: mImpl(inImpl)
 {
 }
 
 MDocClosedNotifier::MDocClosedNotifier(
-	const MDocClosedNotifier&	inRHS)
+	const MDocClosedNotifier &inRHS)
 {
 	mImpl = inRHS.mImpl;
 	mImpl->AddRef();
 }
 
-MDocClosedNotifier&	MDocClosedNotifier::operator=(
-	const MDocClosedNotifier&	inRHS)
+MDocClosedNotifier &MDocClosedNotifier::operator=(
+	const MDocClosedNotifier &inRHS)
 {
 	if (mImpl != inRHS.mImpl)
 	{
@@ -80,8 +78,8 @@ MDocClosedNotifier&	MDocClosedNotifier::operator=(
 		mImpl = inRHS.mImpl;
 		mImpl->AddRef();
 	}
-	
-	return *this;	
+
+	return *this;
 }
 
 MDocClosedNotifier::~MDocClosedNotifier()
@@ -90,7 +88,7 @@ MDocClosedNotifier::~MDocClosedNotifier()
 }
 
 bool MDocClosedNotifier::ReadSome(
-	string&			outText)
+	string &outText)
 {
 	return mImpl->ReadSome(outText);
 }

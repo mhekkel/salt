@@ -132,8 +132,8 @@ MDevice::MDevice()
 // {
 // }
 
-MDevice::MDevice(MView* inView, cairo_t* inCairo)
-	: mImpl(MDeviceImpl::Create(inView, inCairo))
+MDevice::MDevice(MView* inView)
+	: mImpl(MDeviceImpl::Create(inView))
 {
 }
 
