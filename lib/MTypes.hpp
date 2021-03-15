@@ -13,31 +13,72 @@ typedef uint32_t unicode;
 
 struct MRect
 {
-	int32_t x, y;
-	int32_t width, height;
+	int32_t x = 0, y = 0;
+	int32_t width = 0, height = 0;
 
-	MRect();
-	MRect(const MRect &inRHS);
-	MRect(int32_t inX, int32_t inY, int32_t inWidth, int32_t inHeight);
-	bool Intersects(const MRect &inRHS) const;
-	bool ContainsPoint(int32_t inX, int32_t inY) const;
+	MRect() {}
+
+	MRect(const MRect &inRHS)
+		: x(inRHS.x)
+		, y(inRHS.y)
+		, width(inRHS.width)
+		, height(inRHS.height)
+	{
+	}
+
+	MRect(int32_t inX, int32_t inY, int32_t inWidth, int32_t inHeight)
+		: x(inX)
+		, y(inY)
+		, width(inWidth)
+		, height(inHeight)
+	{
+	}
+
+	bool Intersects(const MRect &inRHS) const
+
+	{
+		return x < inRHS.x + inRHS.width and
+			   x + width > inRHS.x and
+			   y < inRHS.y + inRHS.height and
+			   y + height > inRHS.y;
+	}
+
+	bool ContainsPoint(int32_t inX, int32_t inY) const
+	{
+		return x <= inX and x + width > inX and
+			   y <= inY and y + height > inY;
+	}
+
 	void PinPoint(int32_t &ioX, int32_t &ioY) const;
 	void InsetBy(int32_t inDeltaX, int32_t inDeltaY);
+
 	bool empty() const;
-	operator bool() const;
+	explicit operator bool() const		{ return not empty(); }
+
 	// Intersection
 	MRect operator&(const MRect &inRegion);
 	MRect &operator&=(const MRect &inRegion);
+
 	// Union
 	MRect operator|(const MRect &inRegion);
 	MRect &operator|=(const MRect &inRegion);
-	bool operator==(const MRect &inRect) const;
-	bool operator!=(const MRect &inRect) const;
+
+	bool operator==(const MRect &inRect) const
+	{
+		return x == inRect.x and y == inRect.y and
+			   width == inRect.width and height == inRect.height;
+	}
+
+	bool operator!=(const MRect &inRect) const
+	{
+		return x != inRect.x or y != inRect.y or
+			   width != inRect.width or height != inRect.height;
+	}
 };
 
 class MRegion
 {
-public:
+  public:
 	MRegion();
 	MRegion(const MRect &inRect);
 	MRegion(const MRegion &inRegion);
@@ -59,7 +100,7 @@ public:
 	bool ContainsPoint(int32_t inX, int32_t inY) const;
 	MRect GetBounds() const;
 
-private:
+  private:
 	struct MRegionImpl *mImpl;
 };
 
@@ -167,18 +208,19 @@ extern const char kHexChars[];
 template <class T>
 class value_changer
 {
-public:
+  public:
 	value_changer(T &inVariable, const T inTempValue);
 	~value_changer();
 
-private:
+  private:
 	T &mVariable;
 	T mValue;
 };
 
 template <class T>
 inline value_changer<T>::value_changer(T &inVariable, const T inTempValue)
-	: mVariable(inVariable), mValue(inVariable)
+	: mVariable(inVariable)
+	, mValue(inVariable)
 {
 	mVariable = inTempValue;
 }
@@ -187,60 +229,4 @@ template <class T>
 inline value_changer<T>::~value_changer()
 {
 	mVariable = mValue;
-}
-
-// --------------------------------------------------------------------
-// inlines
-
-inline MRect::MRect()
-	: x(0), y(0), width(0), height(0) {}
-
-inline MRect::MRect(const MRect &inRHS)
-	: x(inRHS.x), y(inRHS.y), width(inRHS.width), height(inRHS.height)
-{
-}
-
-//inline
-//MRect::MRect(// const GdkRectangle& inRHS)
-//	: x(inRHS.x)
-//	, y(inRHS.y)
-//	, width(inRHS.width)
-//	, height(inRHS.height)
-//{
-//}
-
-inline MRect::MRect(long inX, long inY, long inWidth, long inHeight)
-	: x(inX), y(inY), width(inWidth), height(inHeight)
-{
-}
-
-inline MRect::MRect(float inX, float inY, float inWidth, float inHeight)
-	: x(static_cast<int32_t>(inX)), y(static_cast<int32_t>(inY)), width(static_cast<int32_t>(inWidth)), height(static_cast<int32_t>(inHeight))
-{
-}
-
-inline bool MRect::Intersects(const MRect &inRHS) const
-{
-	return x < inRHS.x + inRHS.width and
-		   x + width > inRHS.x and
-		   y < inRHS.y + inRHS.height and
-		   y + height > inRHS.y;
-}
-
-inline bool MRect::ContainsPoint(int32_t inX, int32_t inY) const
-{
-	return x <= inX and x + width > inX and
-		   y <= inY and y + height > inY;
-}
-
-inline bool MRect::operator==(const MRect &rhs) const
-{
-	return x == rhs.x and y == rhs.y and
-		   width == rhs.width and height == rhs.height;
-}
-
-inline bool MRect::operator!=(const MRect &rhs) const
-{
-	return x != rhs.x or y != rhs.y or
-		   width != rhs.width or height != rhs.height;
 }

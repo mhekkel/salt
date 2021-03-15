@@ -358,20 +358,20 @@ class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
 	int32_t mNr;
 };
 
-class MGtkListViewImpl : public MGtkControlImpl<MListView>
-{
-  public:
-	MGtkListViewImpl(MListView *inListView);
+// class MGtkListViewImpl : public MGtkControlImpl<MListView>
+// {
+//   public:
+// 	MGtkListViewImpl(MListView *inListView);
 
-	virtual void CreateWidget();
-	virtual void AddedToWindow();
+// 	virtual void CreateWidget();
+// 	virtual void AddedToWindow();
 
-	virtual void AddItem(const std::string &inLabel);
+// 	virtual void AddItem(const std::string &inLabel);
 
-  private:
-	std::vector<std::string> mItems;
-	GtkListStore *mStore;
-};
+//   private:
+// 	std::vector<std::string> mItems;
+// 	GtkListStore *mStore;
+// };
 
 class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 {

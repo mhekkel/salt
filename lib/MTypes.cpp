@@ -141,11 +141,6 @@ bool MRect::empty() const
 	return width <= 0 or height <= 0;
 }
 
-MRect::operator bool() const
-{
-	return width > 0 and height > 0;
-}
-
 struct MRegionImpl : public vector<MRect> {};
 
 MRegion::MRegion()

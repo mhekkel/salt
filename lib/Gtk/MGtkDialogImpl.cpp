@@ -70,7 +70,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	MView *CreateNotebook(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateListBox(xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY);
+	// MView *CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY);
 
 	uint32_t GetTextWidth(const string &inText, const wchar_t *inClass, int inPartID, int inStateID);
 
@@ -587,29 +587,29 @@ MView *MGtkDialogImpl::CreateListBox(xml::element *inTemplate, int32_t inX, int3
 	return result;
 }
 
-MView *MGtkDialogImpl::CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY)
-{
-	string id = inTemplate->get_attribute("id");
+// MView *MGtkDialogImpl::CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY)
+// {
+// 	string id = inTemplate->get_attribute("id");
 
-	MRect r(inX, inY, 0, 0);
-	MListView *result = new MListView(id, r);
+// 	MRect r(inX, inY, 0, 0);
+// 	MListView *result = new MListView(id, r);
 
-	for (xml::element *listitem : inTemplate->find("./listitem"))
-	{
-		string text = l(listitem->get_content());
-		//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
-		//		if (r.width < textWidth)
-		//			r.width = textWidth;
-		result->AddItem(text);
-	}
+// 	for (xml::element *listitem : inTemplate->find("./listitem"))
+// 	{
+// 		string text = l(listitem->get_content());
+// 		//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
+// 		//		if (r.width < textWidth)
+// 		//			r.width = textWidth;
+// 		result->AddItem(text);
+// 	}
 
-	//	r.width += static_cast<int32_t>(mDLUX * 6);
-	//	result->SetFrame(r);
+// 	//	r.width += static_cast<int32_t>(mDLUX * 6);
+// 	//	result->SetFrame(r);
 
-	AddRoute(result->eValueChanged, static_cast<MDialog *>(mWindow)->eValueChanged);
+// 	AddRoute(result->eValueChanged, static_cast<MDialog *>(mWindow)->eValueChanged);
 
-	return result;
-}
+// 	return result;
+// }
 
 MView *MGtkDialogImpl::CreateSeparator(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
@@ -731,10 +731,12 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 		result = CreatePager(inTemplate, inX, inY);
 	else if (name == "listbox")
 		result = CreateListBox(inTemplate, inX, inY);
-	else if (name == "listview")
-		result = CreateListView(inTemplate, inX, inY);
+	// else if (name == "listview")
+	// 	result = CreateListView(inTemplate, inX, inY);
 	else if (name == "filler")
 		result = new MView(inTemplate->get_attribute("id"), MRect(inX, inY, 0, 0));
+	else
+		throw std::logic_error("This element is not defined: " + name);
 
 	MControlBase *control = dynamic_cast<MControlBase *>(result);
 

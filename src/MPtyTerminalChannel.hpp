@@ -1,3 +1,6 @@
+// Copyright Maarten L. Hekkelman 2021
+// All rights reserved
+
 #pragma once
 
 #include "MTerminalChannel.hpp"
@@ -14,21 +17,21 @@ public:
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 								 uint32_t inPixelWidth, uint32_t inPixelHeight);
 
-	virtual void Open(const string &inTerminalType,
+	virtual void Open(const std::string &inTerminalType,
 					  bool inForwardAgent, bool inForwardX11,
-					  const string &inCommand, const vector<string> &env,
+					  const std::string &inCommand, const std::vector<std::string> &env,
 					  const OpenCallback &inOpenCallback);
 
 	virtual void Close();
 
 	virtual bool IsOpen() const;
 
-	virtual void SendData(const string &inData);
-	virtual void SendSignal(const string &inSignal);
+	virtual void SendData(const std::string &inData);
+	virtual void SendSignal(const std::string &inSignal);
 	virtual void ReadData(const ReadCallback &inCallback);
 
 private:
-	void Exec(const string &inCommand, const string &inTerminalType, int inTtyFD);
+	void Exec(const std::string &inCommand, const std::string &inTerminalType, int inTtyFD);
 
 	struct ChangeWindowsSizeCommand
 	{
@@ -48,7 +51,7 @@ private:
 	};
 
 	int mPid;
-	string mTtyName;
+	std::string mTtyName;
 
 	boost::asio::posix::stream_descriptor mPty;
 	boost::asio::streambuf mResponse;

@@ -1,9 +1,24 @@
 // Copyright Maarten L. Hekkelman 2015
 // All rights reserved
 
-#define BOOST_ASIO_HAS_MOVE 1
-
 #include "MSalt.hpp"
+
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <signal.h>
+#include <pwd.h>
+#include <sys/wait.h>
+
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
+#include <stdarg.h>
+#include <string.h>
+#include <termios.h>
+#include <unistd.h>
+#include <pty.h>
 
 #include <fstream>
 
@@ -13,6 +28,7 @@
 #include "MUtils.hpp"
 #include "MError.hpp"
 #include "MSaltApp.hpp"
+#include "MPtyTerminalChannel.hpp"
 
 using namespace std;
 

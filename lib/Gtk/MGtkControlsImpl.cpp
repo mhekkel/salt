@@ -1292,41 +1292,41 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 	return new MGtkListBoxImpl(inListBox);
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MGtkListViewImpl::MGtkListViewImpl(MListView *inListView)
-	: MGtkControlImpl(inListView, "")
-	, mStore(nullptr)
-{
-}
+// MGtkListViewImpl::MGtkListViewImpl(MListView *inListView)
+// 	: MGtkControlImpl(inListView, "")
+// 	, mStore(nullptr)
+// {
+// }
 
-void MGtkListViewImpl::CreateWidget()
-{
-	mStore = gtk_list_store_new(1, G_TYPE_STRING);
+// void MGtkListViewImpl::CreateWidget()
+// {
+// 	mStore = gtk_list_store_new(1, G_TYPE_STRING);
 
-	for (string &s : mItems)
-	{
-		GtkTreeIter iter;
+// 	for (string &s : mItems)
+// 	{
+// 		GtkTreeIter iter;
 
-		gtk_list_store_append(mStore, &iter);
-		gtk_list_store_set(mStore, &iter,
-		                   0, s.c_str(),
-		                   -1);
-	}
+// 		gtk_list_store_append(mStore, &iter);
+// 		gtk_list_store_set(mStore, &iter,
+// 		                   0, s.c_str(),
+// 		                   -1);
+// 	}
 
-	SetWidget(gtk_tree_view_new_with_model(GTK_TREE_MODEL(mStore)));
+// 	SetWidget(gtk_tree_view_new_with_model(GTK_TREE_MODEL(mStore)));
 
-	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	//	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Author",
-	//                                                   renderer,
-	//                                                   "text", 0,
-	//                                                   NULL);
+// 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+// 	//	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Author",
+// 	//                                                   renderer,
+// 	//                                                   "text", 0,
+// 	//                                                   NULL);
 
-	GtkTreeViewColumn *column = gtk_tree_view_column_new();
-	gtk_tree_view_column_add_attribute(column, renderer, "text", 0);
-	gtk_tree_view_column_pack_start(column, renderer, true);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(GetWidget()), column);
-}
+// 	GtkTreeViewColumn *column = gtk_tree_view_column_new();
+// 	gtk_tree_view_column_add_attribute(column, renderer, "text", 0);
+// 	gtk_tree_view_column_pack_start(column, renderer, true);
+// 	gtk_tree_view_append_column(GTK_TREE_VIEW(GetWidget()), column);
+// }
 
 //void MGtkListViewImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
 //	wstring& outClassName, HMENU& outMenu)
@@ -1360,30 +1360,30 @@ void MGtkListViewImpl::CreateWidget()
 //	}
 //}
 //
-void MGtkListViewImpl::AddedToWindow()
-{
-	MGtkControlImpl::AddedToWindow();
+// void MGtkListViewImpl::AddedToWindow()
+// {
+// 	MGtkControlImpl::AddedToWindow();
 
-	for (string &item : mItems)
-		AddItem(item);
+// 	for (string &item : mItems)
+// 		AddItem(item);
 
-	mItems.clear();
-}
+// 	mItems.clear();
+// }
 
-void MGtkListViewImpl::AddItem(const string &inText)
-{
-	if (GetWidget() != nullptr)
-		mItems.push_back(inText);
-	else
-	{
-		GtkTreeIter iter;
+// void MGtkListViewImpl::AddItem(const string &inText)
+// {
+// 	if (GetWidget() != nullptr)
+// 		mItems.push_back(inText);
+// 	else
+// 	{
+// 		GtkTreeIter iter;
 
-		gtk_list_store_append(mStore, &iter);
-		gtk_list_store_set(mStore, &iter,
-		                   0, inText.c_str(),
-		                   -1);
-	}
-}
+// 		gtk_list_store_append(mStore, &iter);
+// 		gtk_list_store_set(mStore, &iter,
+// 		                   0, inText.c_str(),
+// 		                   -1);
+// 	}
+// }
 
 //bool MGtkListViewImpl::LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
@@ -1402,10 +1402,10 @@ void MGtkListViewImpl::AddItem(const string &inText)
 //	return true;
 //}
 //
-MListViewImpl *MListViewImpl::Create(MListView *inListView)
-{
-	return new MGtkListViewImpl(inListView);
-}
+// MListViewImpl *MListViewImpl::Create(MListView *inListView)
+// {
+// 	return new MGtkListViewImpl(inListView);
+// }
 
 // --------------------------------------------------------------------
 

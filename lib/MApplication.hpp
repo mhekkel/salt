@@ -85,4 +85,43 @@ protected:
 	bool mQuitPending;
 };
 
+// --------------------------------------------------------------------
+
 extern MApplication *gApp;
+
+// --------------------------------------------------------------------
+
+class MAppExecutor
+{
+public:
+	boost::asio::execution_context *m_context;
+
+	bool operator==(const MAppExecutor &other) const noexcept
+	{
+		return m_context == other.m_context;
+	}
+
+	bool operator!=(const MAppExecutor &other) const noexcept
+	{
+		return !(*this == other);
+	}
+
+	boost::asio::execution_context &query(boost::asio::execution::context_t) const noexcept
+	{
+		return *m_context;
+	}
+
+	static constexpr boost::asio::execution::blocking_t::never_t query(
+		boost::asio::execution::blocking_t) noexcept
+	{
+		// This executor always has blocking.never semantics.
+		return boost::asio::execution::blocking.never;
+	}
+
+	template <class F>
+	void execute(F f) const
+	{
+		gApp->get_executor().execute(std::move(f));
+	}
+};
+

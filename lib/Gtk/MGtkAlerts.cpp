@@ -22,9 +22,7 @@ namespace xml = zeep::xml;
 namespace io = boost::iostreams;
 namespace ba = boost::algorithm;
 
-GtkWidget *CreateAlertWithArgs(
-	const char *inResourceName,
-	vector<string> &inArgs)
+GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
 {
 	GtkWidget *dlg = nullptr;
 
@@ -119,7 +117,7 @@ GtkWidget *CreateAlertWithArgs(
 	return dlg;
 }
 
-int32_t DisplayAlert(MWindow *inParent, const string &inResourceName, vector<string> &inArgs)
+int32_t DisplayAlert(MWindow *inParent, const string &inResourceName, std::initializer_list<std::string> inArgs)
 {
 	int32_t result = -1;
 

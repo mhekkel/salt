@@ -73,6 +73,7 @@ OBJECTS = \
 	MHTTPProxy.o \
 	MPortForwardingDialog.o \
 	MPreferencesDialog.o \
+	MPtyTerminalChannel.o \
 	MSaltApp.o \
 	MSearchPanel.o \
 	MTerminalBuffer.o \

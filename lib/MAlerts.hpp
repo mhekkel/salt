@@ -30,4 +30,4 @@ using to_string_t = decltype(std::to_string(std::declval<const T&>()));
 template<typename T>
 constexpr bool inline has_to_string_v = std::experimental::is_detected_v<to_string_t, T>;
 
-int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, const std::vector<std::string> &inArguments);
+int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::initializer_list<std::string> inArguments);
