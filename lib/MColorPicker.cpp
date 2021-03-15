@@ -24,7 +24,7 @@ class MColorSquare : public MCanvas
 					MColorSquare(const string& inID, MRect inBounds, MColorPicker& inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw(cairo_t* inCairo);
+	virtual void	Draw();
 	
 	void			SetColor(MColor inColor);
 	void			SetMode(MPickerMode inMode);
@@ -51,9 +51,9 @@ MColorSquare::MColorSquare(const string& inID, MRect inBounds, MColorPicker& inP
 {
 }
 
-void MColorSquare::Draw(cairo_t* inCairo)
+void MColorSquare::Draw()
 {
-	MDevice dev(this, inCairo);
+	MDevice dev(this);
 	
 	MRect bounds;
 	GetBounds(bounds);
@@ -189,7 +189,7 @@ class MColorSlider : public MCanvas
 					MColorSlider(const string& inID, MRect inBounds, MColorPicker& inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw(cairo_t* inCairo);
+	virtual void	Draw();
 	
 	void			SetColor(MColor inColor);
 	void			SetMode(MPickerMode inMode);
@@ -216,9 +216,9 @@ MColorSlider::MColorSlider(const string& inID, MRect inBounds, MColorPicker& inP
 {
 }
 
-void MColorSlider::Draw(cairo_t* inCairo)
+void MColorSlider::Draw()
 {
-	MDevice dev(this, inCairo);
+	MDevice dev(this);
 	
 	MRect bounds;
 	GetBounds(bounds);
@@ -341,7 +341,7 @@ class MColorSample : public MCanvas
 					MColorSample(const string& inID, MRect inBounds, MColorPicker& inPicker, MColor& inColor);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw(cairo_t* inCairo);
+	virtual void	Draw();
 
 	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
 	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
@@ -364,9 +364,9 @@ MColorSample::MColorSample(const string& inID, MRect inBounds, MColorPicker& inP
 {
 }
 
-void MColorSample::Draw(cairo_t* inCairo)
+void MColorSample::Draw()
 {
-	MDevice dev(this, inCairo);
+	MDevice dev(this);
 
 	dev.SetForeColor(mColor);
 	

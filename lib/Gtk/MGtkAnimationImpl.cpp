@@ -6,16 +6,16 @@
 #include "MGtkLib.hpp"
 
 #include <cassert>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 #include <numeric>
+#include <thread>
 
 #include "MAnimation.hpp"
 #include "MAnimationImpl.hpp"
 #include "MApplication.hpp"
-#include "MUtils.hpp"
 #include "MError.hpp"
+#include "MUtils.hpp"
 
 using namespace std;
 
@@ -25,9 +25,13 @@ class MGtkAnimationVariableImpl : public MAnimationVariableImpl
 {
   public:
 	MGtkAnimationVariableImpl(double inValue, double inMin, double inMax)
-		: mValue(inValue), mMin(inMin), mMax(inMax) {}
+		: mValue(inValue)
+		, mMin(inMin)
+		, mMax(inMax)
+	{
+	}
 
-	virtual void	SetValue(double inValue)
+	virtual void SetValue(double inValue)
 	{
 		if (inValue > mMax)
 			inValue = mMax;
@@ -36,7 +40,7 @@ class MGtkAnimationVariableImpl : public MAnimationVariableImpl
 		mValue = inValue;
 	}
 
-	virtual double	GetValue() const			{ return mValue; }
+	virtual double GetValue() const { return mValue; }
 
   private:
 	double mValue, mMin, mMax;
@@ -48,9 +52,9 @@ class MGtkStoryboardImpl : public MStoryboardImpl
 {
   public:
 	MGtkStoryboardImpl() {}
-	virtual void AddTransition(MAnimationVariable* inVariable,
-						double inNewValue, double inDuration,
-						const char* inTransitionName);
+	virtual void AddTransition(MAnimationVariable *inVariable,
+	                           double inNewValue, double inDuration,
+	                           const char *inTransitionName);
 
 	// inTime is relative to the start of the story
 	bool Update(double inTime);
@@ -58,50 +62,50 @@ class MGtkStoryboardImpl : public MStoryboardImpl
 
 	struct MTransition
 	{
-		double	mNewValue;
-		double	mDuration;
-		string	mTransitionName;
+		double mNewValue;
+		double mDuration;
+		string mTransitionName;
 	};
-	
+
 	struct MVariableStory
 	{
-		MAnimationVariable*	mVariable;
-		double				mStartValue;
-		list<MTransition>	mTransistions;
+		MAnimationVariable *mVariable;
+		double mStartValue;
+		list<MTransition> mTransistions;
 	};
-	
+
 	list<MVariableStory> mVariableStories;
 };
 
-void MGtkStoryboardImpl::AddTransition(MAnimationVariable* inVariable,
-	double inNewValue, double inDuration, const char* inTransitionName)
+void MGtkStoryboardImpl::AddTransition(MAnimationVariable *inVariable,
+                                       double inNewValue, double inDuration, const char *inTransitionName)
 {
 	auto s = find_if(mVariableStories.begin(), mVariableStories.end(),
-		[inVariable](MVariableStory& st) -> bool { return st.mVariable == inVariable; });
+	                 [inVariable](MVariableStory &st) -> bool { return st.mVariable == inVariable; });
 
 	if (s == mVariableStories.end())
 	{
-		MVariableStory st = { inVariable, inVariable->GetValue() };
+		MVariableStory st = {inVariable, inVariable->GetValue()};
 		mVariableStories.push_back(st);
 		s = prev(mVariableStories.end());
 	}
-	
+
 	assert(s != mVariableStories.end());
-	
-	MTransition t = { inNewValue, inDuration, inTransitionName };
+
+	MTransition t = {inNewValue, inDuration, inTransitionName};
 	s->mTransistions.push_back(t);
 }
 
 bool MGtkStoryboardImpl::Update(double inTime)
 {
 	bool result = false;
-	
-	for (auto vs: mVariableStories)
+
+	for (auto vs : mVariableStories)
 	{
 		double v = vs.mStartValue;
 		double time = inTime;
-		
-		for (auto t: vs.mTransistions)
+
+		for (auto t : vs.mTransistions)
 		{
 			if (t.mDuration < time)
 			{
@@ -109,7 +113,7 @@ bool MGtkStoryboardImpl::Update(double inTime)
 				time -= t.mDuration;
 				continue;
 			}
-			
+
 			// alleen nog maar lineair
 			assert(t.mTransitionName == "acceleration-decelleration");
 			double dv = t.mNewValue - v;
@@ -118,14 +122,14 @@ bool MGtkStoryboardImpl::Update(double inTime)
 			v += dv;
 			break;
 		}
-		
+
 		if (v != vs.mVariable->GetValue())
 		{
 			result = true;
-			static_cast<MGtkAnimationVariableImpl*>(vs.mVariable->GetImpl())->SetValue(v);
+			static_cast<MGtkAnimationVariableImpl *>(vs.mVariable->GetImpl())->SetValue(v);
 		}
 	}
-	
+
 	return result;
 }
 
@@ -133,18 +137,18 @@ bool MGtkStoryboardImpl::Done(double inTime)
 {
 	bool result = true;
 
-	for (auto vs: mVariableStories)
+	for (auto vs : mVariableStories)
 	{
 		double totalDuration = accumulate(vs.mTransistions.begin(), vs.mTransistions.end(), 0.0,
-			[](double time, const MTransition& ts) -> double { return time + ts.mDuration; });
-		
+		                                  [](double time, const MTransition &ts) -> double { return time + ts.mDuration; });
+
 		if (totalDuration > inTime)
 		{
 			result = false;
 			break;
 		}
 	}
-	
+
 	return result;
 }
 
@@ -153,26 +157,26 @@ bool MGtkStoryboardImpl::Done(double inTime)
 class MGtkAnimationManagerImpl : public MAnimationManagerImpl
 {
   public:
-	MGtkAnimationManagerImpl(MAnimationManager* inManager)
+	MGtkAnimationManagerImpl(MAnimationManager *inManager)
 		: mAnimationManager(inManager)
 		, mDone(false)
 		, mThread(bind(&MGtkAnimationManagerImpl::Run, this))
 	{
 	}
-	
+
 	~MGtkAnimationManagerImpl()
 	{
 		if (not mDone)
 			Stop();
 	}
 
-	virtual bool Update()			{ return false; }
+	virtual bool Update() { return false; }
 	virtual void Stop()
 	{
 		try
 		{
 			unique_lock<mutex> lock(mMutex);
-			
+
 			if (mIdleTag != 0)
 			{
 				g_source_remove(mIdleTag);
@@ -181,39 +185,43 @@ class MGtkAnimationManagerImpl : public MAnimationManagerImpl
 
 			mStoryboards.clear();
 			mDone = true;
-			
+
 			mCondition.notify_one();
 			lock.unlock();
-			
+
 			if (mThread.joinable())
 				mThread.join();
 		}
-		catch (...)	{}
+		catch (...)
+		{
+		}
 	}
 
-	virtual MAnimationVariable* CreateVariable(double inValue, double inMin, double inMax)
+	virtual MAnimationVariable *CreateVariable(double inValue, double inMin, double inMax)
 	{
 		return new MAnimationVariable(new MGtkAnimationVariableImpl(inValue, inMin, inMax));
 	}
-	
-	virtual MStoryboard* CreateStoryboard()
+
+	virtual MStoryboard *CreateStoryboard()
 	{
 		return new MStoryboard(new MGtkStoryboardImpl());
 	}
-	
-	virtual void Schedule(MStoryboard* inStoryboard)
+
+	virtual void Schedule(MStoryboard *inStoryboard)
 	{
 		try
 		{
 			unique_lock<mutex> lock(mMutex);
-	
+
 			shared_ptr<MStoryboard> sbptr(inStoryboard);
-			MScheduledStoryboard sb = { GetLocalTime(), sbptr };
+			MScheduledStoryboard sb = {GetLocalTime(), sbptr};
 			mStoryboards.push_back(sb);
-			
+
 			mCondition.notify_one();
 		}
-		catch (...) {}
+		catch (...)
+		{
+		}
 	}
 
 	void Run();
@@ -226,7 +234,7 @@ class MGtkAnimationManagerImpl : public MAnimationManagerImpl
 		shared_ptr<MStoryboard> mStoryboard;
 	};
 
-	MAnimationManager* mAnimationManager;
+	MAnimationManager *mAnimationManager;
 	list<MScheduledStoryboard> mStoryboards;
 	mutex mMutex;
 	condition_variable mCondition, mIdleCondition;
@@ -242,40 +250,42 @@ void MGtkAnimationManagerImpl::Run()
 		try
 		{
 			unique_lock<mutex> lock(mMutex);
-			
+
 			if (mDone)
 				break;
-	
+
 			if (mStoryboards.empty())
 			{
 				mCondition.wait_for(lock, std::chrono::seconds(1));
 				continue;
 			}
-	
+
 			bool update = false;
-			
+
 			double now = GetLocalTime();
-			
-			for (auto storyboard: mStoryboards)
+
+			for (auto storyboard : mStoryboards)
 			{
-				MGtkStoryboardImpl* storyboardImpl = static_cast<MGtkStoryboardImpl*>(storyboard.mStoryboard->GetImpl());
+				MGtkStoryboardImpl *storyboardImpl = static_cast<MGtkStoryboardImpl *>(storyboard.mStoryboard->GetImpl());
 				update = storyboardImpl->Update(now - storyboard.mStartTime) or update;
 			}
-		
+
 			if (update)
 			{
 				mIdleTag = gdk_threads_add_idle(&MGtkAnimationManagerImpl::IdleCallback, this);
 				mIdleCondition.wait(lock);
 			}
-			
+
 			mStoryboards.erase(remove_if(mStoryboards.begin(), mStoryboards.end(),
-				[now](MScheduledStoryboard& storyboard) -> bool
-				{
-					MGtkStoryboardImpl* storyboardImpl = static_cast<MGtkStoryboardImpl*>(storyboard.mStoryboard->GetImpl());
-					return storyboardImpl->Done(now - storyboard.mStartTime);
-				}), mStoryboards.end());
+			                             [now](MScheduledStoryboard &storyboard) -> bool {
+											 MGtkStoryboardImpl *storyboardImpl = static_cast<MGtkStoryboardImpl *>(storyboard.mStoryboard->GetImpl());
+											 return storyboardImpl->Done(now - storyboard.mStartTime);
+										 }),
+			                   mStoryboards.end());
 		}
-		catch (...) {}
+		catch (...)
+		{
+		}
 
 		usleep(10000);
 	}
@@ -283,7 +293,7 @@ void MGtkAnimationManagerImpl::Run()
 
 gboolean MGtkAnimationManagerImpl::IdleCallback(gpointer data)
 {
-	MGtkAnimationManagerImpl* self = reinterpret_cast<MGtkAnimationManagerImpl*>(data);
+	MGtkAnimationManagerImpl *self = reinterpret_cast<MGtkAnimationManagerImpl *>(data);
 
 	self->mIdleTag = 0;
 
@@ -292,7 +302,7 @@ gboolean MGtkAnimationManagerImpl::IdleCallback(gpointer data)
 		unique_lock<mutex> lock(self->mMutex);
 		self->mAnimationManager->eAnimate();
 	}
-	catch (exception& e)
+	catch (exception &e)
 	{
 		PRINT(("Exception: %s", e.what()));
 	}
@@ -308,8 +318,7 @@ gboolean MGtkAnimationManagerImpl::IdleCallback(gpointer data)
 
 // --------------------------------------------------------------------
 
-MAnimationManagerImpl* MAnimationManagerImpl::Create(MAnimationManager* inManager)
+MAnimationManagerImpl *MAnimationManagerImpl::Create(MAnimationManager *inManager)
 {
 	return new MGtkAnimationManagerImpl(inManager);
 }
-

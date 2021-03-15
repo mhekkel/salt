@@ -861,7 +861,7 @@ void MTerminalView::ShowContextMenu(int32_t inX, int32_t inY)
 	}
 }
 
-void MTerminalView::Draw(cairo_t *inCairo)
+void MTerminalView::Draw()
 {
 	int32_t selLine1, selLine2, selCol1, selCol2;
 	bool blockSelection;
@@ -871,7 +871,7 @@ void MTerminalView::Draw(cairo_t *inCairo)
 	if (selCol1 > selCol2 and selLine1 == selLine2)
 		swap(selCol1, selCol2);
 
-	MDevice dev(this, inCairo);
+	MDevice dev(this);
 	dev.SetReplaceUnknownCharacters(true);
 
 	//	if (mDECSCNM)

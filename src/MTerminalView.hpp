@@ -12,13 +12,13 @@
 #include <pinch/terminal_channel.hpp>
 
 #include "MCanvas.hpp"
+#include "MColor.hpp"
 #include "MHandler.hpp"
 #include "MP2PEvents.hpp"
-#include "MUnicode.hpp"
-#include "MColor.hpp"
+#include "MSearchPanel.hpp"
 #include "MTerminalBuffer.hpp"
 #include "MTerminalChannel.hpp"
-#include "MSearchPanel.hpp"
+#include "MUnicode.hpp"
 
 class MStatusbar;
 class MScrollbar;
@@ -27,9 +27,9 @@ class MAnimationManager;
 
 class MTerminalView : public MCanvas
 {
-public:
+  public:
 	MTerminalView(const std::string &inID, MRect inBounds, MStatusbar *inStatusbar, MScrollbar *inScrollbar,
-				  MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::string &inSSHCommand);
+	              MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::string &inSSHCommand);
 	virtual ~MTerminalView();
 
 	static MTerminalView *
@@ -40,8 +40,7 @@ public:
 	// What lines are visible:
 	int32_t GetTopLine() const;
 
-	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw(cairo_t *inCairo);
+	virtual void Draw();
 	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
 	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void MouseExit();
@@ -49,7 +48,7 @@ public:
 	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
 	virtual void ShowContextMenu(int32_t inX, int32_t inY);
 	static void GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
-								   uint32_t &outWidth, uint32_t &outHeight);
+	                               uint32_t &outWidth, uint32_t &outHeight);
 	static MRect GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows);
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
@@ -90,7 +89,7 @@ public:
 
 	virtual bool PastePrimaryBuffer(const std::string &inText);
 
-private:
+  private:
 	virtual void ActivateSelf();
 	virtual void DeactivateSelf();
 
@@ -183,7 +182,7 @@ private:
 	void SetTabstop();
 	uint32_t GetParam(uint32_t inParamNr, uint32_t inDefaultValue);
 	void GetRectParam(uint32_t inParamOffset,
-					  int32_t &outTop, int32_t &outLeft, int32_t &outBottom, int32_t &outRight);
+	                  int32_t &outTop, int32_t &outLeft, int32_t &outBottom, int32_t &outRight);
 
 	void SetResetMode(uint32_t inMode, bool inANSI, bool inSet);
 	bool GetMode(uint32_t inMode, bool inANSI);

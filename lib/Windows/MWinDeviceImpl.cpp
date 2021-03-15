@@ -5,9 +5,9 @@
 
 #include "MWinLib.hpp"
 
-#pragma comment (lib, "d2d1")
-#pragma comment (lib, "dwrite")
-#pragma comment (lib, "windowscodecs")
+#pragma comment(lib, "d2d1")
+#pragma comment(lib, "dwrite")
+#pragma comment(lib, "windowscodecs")
 
 #include <wincodec.h>
 
@@ -15,16 +15,15 @@
 #include <cstring>
 #include <stack>
 
-#include "MWinDeviceImpl.hpp"
-#include "MView.hpp"
-#include "MWinControlsImpl.hpp"
-#include "MWinCanvasImpl.hpp"
-#include "MWinWindowImpl.hpp"
 #include "MError.hpp"
-#include "MUnicode.hpp"
-#include "MError.hpp"
-#include "MWinUtils.hpp"
 #include "MPreferences.hpp"
+#include "MUnicode.hpp"
+#include "MView.hpp"
+#include "MWinCanvasImpl.hpp"
+#include "MWinControlsImpl.hpp"
+#include "MWinDeviceImpl.hpp"
+#include "MWinUtils.hpp"
+#include "MWinWindowImpl.hpp"
 
 using namespace std;
 
@@ -32,7 +31,7 @@ using namespace std;
 namespace D2D1
 {
 
-D2D1FORCEINLINE D2D1_RECT_F RectF(const MRect& r)
+D2D1FORCEINLINE D2D1_RECT_F RectF(const MRect &r)
 {
 	return Rect<FLOAT>(
 		static_cast<float>(r.x),
@@ -41,62 +40,62 @@ D2D1FORCEINLINE D2D1_RECT_F RectF(const MRect& r)
 		static_cast<float>(r.y + r.height));
 }
 
-}
+} // namespace D2D1
 
-namespace {
+namespace
+{
 // --------------------------------------------------------------------
 // MInlineReplacedChar is a substitute for unknown characters
 
 class MInlineReplacedChar : public IDWriteInlineObject
 {
   public:
-	MInlineReplacedChar(ID2D1RenderTarget* pRenderTarget, uint32_t inUnicode, MColor inColor,
-		float inWidth, float inHeight, float inBaseline, IDWriteTextFormat* inFormat);
+	MInlineReplacedChar(ID2D1RenderTarget *pRenderTarget, uint32_t inUnicode, MColor inColor,
+	                    float inWidth, float inHeight, float inBaseline, IDWriteTextFormat *inFormat);
 	~MInlineReplacedChar();
 
-	STDMETHOD(Draw)(
-		__maybenull void* clientDrawingContext,
-		IDWriteTextRenderer* renderer,
+	STDMETHOD(Draw)
+	(
+		__maybenull void *clientDrawingContext,
+		IDWriteTextRenderer *renderer,
 		FLOAT originX,
 		FLOAT originY,
 		BOOL isSideways,
 		BOOL isRightToLeft,
-		IUnknown* clientDrawingEffect
-		);
+		IUnknown *clientDrawingEffect);
 
-	STDMETHOD(GetMetrics)(
-		__out DWRITE_INLINE_OBJECT_METRICS* metrics
-		);
+	STDMETHOD(GetMetrics)
+	(
+		__out DWRITE_INLINE_OBJECT_METRICS *metrics);
 
-	STDMETHOD(GetOverhangMetrics)(
-		__out DWRITE_OVERHANG_METRICS* overhangs
-		);
+	STDMETHOD(GetOverhangMetrics)
+	(
+		__out DWRITE_OVERHANG_METRICS *overhangs);
 
-	STDMETHOD(GetBreakConditions)(
-		__out DWRITE_BREAK_CONDITION* breakConditionBefore,
-		__out DWRITE_BREAK_CONDITION* breakConditionAfter
-		);
+	STDMETHOD(GetBreakConditions)
+	(
+		__out DWRITE_BREAK_CONDITION *breakConditionBefore,
+		__out DWRITE_BREAK_CONDITION *breakConditionAfter);
 
   public:
 	unsigned long STDMETHODCALLTYPE AddRef();
 	unsigned long STDMETHODCALLTYPE Release();
 	HRESULT STDMETHODCALLTYPE QueryInterface(
-		IID const& riid,
-		void** ppvObject
-	);
+		IID const &riid,
+		void **ppvObject);
 
   private:
-	ID2D1RenderTargetPtr	mRenderTarget;
-	IDWriteTextFormatPtr	mTextFormat;
-	uint32_t					mUnicode;
-	MColor					mColor;
-	float					mWidth, mHeight;
-	float					mBaseline;
-	unsigned long			mRefCount;
+	ID2D1RenderTargetPtr mRenderTarget;
+	IDWriteTextFormatPtr mTextFormat;
+	uint32_t mUnicode;
+	MColor mColor;
+	float mWidth, mHeight;
+	float mBaseline;
+	unsigned long mRefCount;
 };
 
-MInlineReplacedChar::MInlineReplacedChar(ID2D1RenderTarget* inRenderTarget, uint32_t inUnicode, MColor inColor,
-	float inWidth, float inHeight, float inBaseline, IDWriteTextFormat* inTextFormat)
+MInlineReplacedChar::MInlineReplacedChar(ID2D1RenderTarget *inRenderTarget, uint32_t inUnicode, MColor inColor,
+                                         float inWidth, float inHeight, float inBaseline, IDWriteTextFormat *inTextFormat)
 	: mRenderTarget(inRenderTarget)
 	, mTextFormat(inTextFormat)
 	, mUnicode(inUnicode)
@@ -113,13 +112,13 @@ MInlineReplacedChar::~MInlineReplacedChar()
 }
 
 HRESULT STDMETHODCALLTYPE MInlineReplacedChar::Draw(
-    __maybenull void* clientDrawingContext,
-    IDWriteTextRenderer* renderer,
-    FLOAT originX,
-    FLOAT originY,
-    BOOL isSideways,
-    BOOL isRightToLeft,
-    IUnknown* clientDrawingEffect)
+	__maybenull void *clientDrawingContext,
+	IDWriteTextRenderer *renderer,
+	FLOAT originX,
+	FLOAT originY,
+	BOOL isSideways,
+	BOOL isRightToLeft,
+	IUnknown *clientDrawingEffect)
 {
 	wchar_t s[2];
 	uint32_t l = 1;
@@ -137,103 +136,102 @@ HRESULT STDMETHODCALLTYPE MInlineReplacedChar::Draw(
 	ComPtr<ID2D1SolidColorBrush> effect;
 	if (clientDrawingEffect != nullptr)
 		clientDrawingEffect->QueryInterface(&effect);
-		
+
 	if (effect)
 	{
 		D2D1_COLOR_F color = effect->GetColor();
 		textColor = MColor(color.r, color.g, color.b);
 	}
-	
+
 	ComPtr<ID2D1SolidColorBrush> brush;
 	if (mRenderTarget->CreateSolidColorBrush(
 			D2D1::ColorF(textColor.red / 255.f, textColor.green / 255.f, textColor.blue / 255.f),
 			&brush) == S_OK)
 	{
 		mRenderTarget->DrawTextW(s, l, mTextFormat,
-			D2D1::RectF(originX, originY, originX + mWidth, originY + mHeight), brush);
+		                         D2D1::RectF(originX, originY, originX + mWidth, originY + mHeight), brush);
 	}
 
-    return S_OK;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE MInlineReplacedChar::GetMetrics(
-    __out DWRITE_INLINE_OBJECT_METRICS* metrics
-    )
+	__out DWRITE_INLINE_OBJECT_METRICS *metrics)
 {
-    DWRITE_INLINE_OBJECT_METRICS inlineMetrics = {};
-    inlineMetrics.width     = mWidth;
-    inlineMetrics.height    = mHeight;
-    inlineMetrics.baseline  = mBaseline;
-    *metrics = inlineMetrics;
-    return S_OK;
+	DWRITE_INLINE_OBJECT_METRICS inlineMetrics = {};
+	inlineMetrics.width = mWidth;
+	inlineMetrics.height = mHeight;
+	inlineMetrics.baseline = mBaseline;
+	*metrics = inlineMetrics;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE MInlineReplacedChar::GetOverhangMetrics(
-    __out DWRITE_OVERHANG_METRICS* overhangs
-    )
+	__out DWRITE_OVERHANG_METRICS *overhangs)
 {
-    overhangs->left      = 0;
-    overhangs->top       = 0;
-    overhangs->right     = 0;
-    overhangs->bottom    = 0;
-    return S_OK;
+	overhangs->left = 0;
+	overhangs->top = 0;
+	overhangs->right = 0;
+	overhangs->bottom = 0;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE MInlineReplacedChar::GetBreakConditions(
-    __out DWRITE_BREAK_CONDITION* breakConditionBefore,
-    __out DWRITE_BREAK_CONDITION* breakConditionAfter
-    )
+	__out DWRITE_BREAK_CONDITION *breakConditionBefore,
+	__out DWRITE_BREAK_CONDITION *breakConditionAfter)
 {
-    *breakConditionBefore = DWRITE_BREAK_CONDITION_NEUTRAL;
-    *breakConditionAfter  = DWRITE_BREAK_CONDITION_NEUTRAL;
-    return S_OK;
+	*breakConditionBefore = DWRITE_BREAK_CONDITION_NEUTRAL;
+	*breakConditionAfter = DWRITE_BREAK_CONDITION_NEUTRAL;
+	return S_OK;
 }
 
-STDMETHODIMP MInlineReplacedChar::QueryInterface(IID const& riid, void** ppvObject)
+STDMETHODIMP MInlineReplacedChar::QueryInterface(IID const &riid, void **ppvObject)
 {
-    if (__uuidof(IDWriteInlineObject) == riid)
-    {
-    	AddRef();
-        *ppvObject = dynamic_cast<IDWriteInlineObject*>(this);
-    }
-    else if (__uuidof(IUnknown) == riid)
-    {
-    	AddRef();
-        *ppvObject = dynamic_cast<IUnknown*>(this);
-    }
-    else
-    {
-        *ppvObject = NULL;
-        return E_FAIL;
-    }
+	if (__uuidof(IDWriteInlineObject) == riid)
+	{
+		AddRef();
+		*ppvObject = dynamic_cast<IDWriteInlineObject *>(this);
+	}
+	else if (__uuidof(IUnknown) == riid)
+	{
+		AddRef();
+		*ppvObject = dynamic_cast<IUnknown *>(this);
+	}
+	else
+	{
+		*ppvObject = NULL;
+		return E_FAIL;
+	}
 
-    return S_OK;
+	return S_OK;
 }
 
-STDMETHODIMP_(unsigned long) MInlineReplacedChar::AddRef()
+STDMETHODIMP_(unsigned long)
+MInlineReplacedChar::AddRef()
 {
-    return InterlockedIncrement(&mRefCount);
+	return InterlockedIncrement(&mRefCount);
 }
 
-STDMETHODIMP_(unsigned long) MInlineReplacedChar::Release()
+STDMETHODIMP_(unsigned long)
+MInlineReplacedChar::Release()
 {
 	unsigned long newCount = InterlockedDecrement(&mRefCount);
 
-    if (newCount == 0)
-    {
-        delete this;
-        return 0;
-    }
+	if (newCount == 0)
+	{
+		delete this;
+		return 0;
+	}
 
-    return newCount;
+	return newCount;
 }
 
-}
+} // namespace
 
 // --------------------------------------------------------------------
-// 
+//
 
-ID2D1Factory* MWinDeviceImpl::GetD2D1Factory()
+ID2D1Factory *MWinDeviceImpl::GetD2D1Factory()
 {
 	static ID2D1FactoryPtr sD2DFactory;
 
@@ -251,25 +249,25 @@ ID2D1Factory* MWinDeviceImpl::GetD2D1Factory()
 	return sD2DFactory;
 }
 
-IDWriteFactory*	MWinDeviceImpl::GetDWFactory()
+IDWriteFactory *MWinDeviceImpl::GetDWFactory()
 {
-	static IDWriteFactory* sDWFactory = nullptr;
+	static IDWriteFactory *sDWFactory = nullptr;
 
 	if (sDWFactory == nullptr)
 	{
 		THROW_IF_HRESULT_ERROR(::DWriteCreateFactory(
 			DWRITE_FACTORY_TYPE_SHARED,
 			__uuidof(IDWriteFactory),
-			reinterpret_cast<IUnknown**>(&sDWFactory)));
+			reinterpret_cast<IUnknown **>(&sDWFactory)));
 	}
-	
+
 	return sDWFactory;
 }
 
 wstring MWinDeviceImpl::GetLocale()
 {
 	static wstring sLocale;
-	
+
 	if (sLocale.empty())
 	{
 		wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
@@ -300,10 +298,7 @@ MWinDeviceImpl::MWinDeviceImpl()
 		mDpiScaleX = mDpiScaleY = 1.0f;
 }
 
-MWinDeviceImpl::MWinDeviceImpl(
-	MView*		inView,
-	MRect		inUpdate,
-	bool		inOffscreen)
+MWinDeviceImpl::MWinDeviceImpl(MView *inView, MRect inUpdate)
 	: mView(inView)
 	, mRenderTarget(nullptr)
 	, mClipLayer(nullptr)
@@ -334,8 +329,8 @@ MWinDeviceImpl::MWinDeviceImpl(
 	int32_t x = 0, y = 0;
 	inView->ConvertToWindow(x, y);
 
-	MCanvas* canvas = dynamic_cast<MCanvas*>(inView);
-	mRenderTarget = static_cast<MWinCanvasImpl*>(canvas->GetImpl())->GetRenderTarget();
+	MCanvas *canvas = dynamic_cast<MCanvas *>(inView);
+	mRenderTarget = static_cast<MWinCanvasImpl *>(canvas->GetImpl())->GetRenderTarget();
 
 	mRenderTarget->Flush();
 
@@ -343,7 +338,7 @@ MWinDeviceImpl::MWinDeviceImpl(
 		D2D1::Matrix3x2F::Translation(
 			static_cast<float>(x - bounds.x),
 			static_cast<float>(y - bounds.y)));
-	
+
 	mRenderTarget->SetTransform(translate);
 
 	// default to this mode:
@@ -372,13 +367,13 @@ MWinDeviceImpl::~MWinDeviceImpl()
 }
 
 MWinDeviceImpl::State::State(
-	MWinDeviceImpl&	inImpl)
+	MWinDeviceImpl &inImpl)
 	: mImpl(inImpl)
 	, mStateBlock(nullptr)
 {
 	THROW_IF_HRESULT_ERROR(GetD2D1Factory()->CreateDrawingStateBlock(&mStateBlock));
 	mImpl.mRenderTarget->SaveDrawingState(mStateBlock);
-	
+
 	mForeBrush = mImpl.mForeBrush;
 	mBackBrush = mImpl.mBackBrush;
 }
@@ -406,7 +401,7 @@ void MWinDeviceImpl::Restore()
 }
 
 void MWinDeviceImpl::SetForeColor(
-	MColor				inColor)
+	MColor inColor)
 {
 	ComPtr<ID2D1SolidColorBrush> brush;
 	THROW_IF_HRESULT_ERROR(
@@ -433,7 +428,7 @@ MColor MWinDeviceImpl::GetForeColor() const
 }
 
 void MWinDeviceImpl::SetBackColor(
-	MColor				inColor)
+	MColor inColor)
 {
 	ComPtr<ID2D1SolidColorBrush> brush;
 	THROW_IF_HRESULT_ERROR(
@@ -460,22 +455,22 @@ MColor MWinDeviceImpl::GetBackColor() const
 }
 
 void MWinDeviceImpl::ClipRect(
-	MRect				inRect)
+	MRect inRect)
 {
-//	if (mClipLayer != nullptr)
-//	{
-//		mRenderTarget->PopLayer();
-//		mClipLayer->Release();
-//	}
+	//	if (mClipLayer != nullptr)
+	//	{
+	//		mRenderTarget->PopLayer();
+	//		mClipLayer->Release();
+	//	}
 	mClipping.push(inRect);
-//	mRenderTarget->PushAxisAlignedClip(D2D1::RectF(inRect), D2D1_ANTIALIAS_MODE_ALIASED);
-//
-//	THROW_IF_HRESULT_ERROR(mRenderTarget->CreateLayer(&mClipLayer));
-//
-//	  // Push the layer with the geometric mask.
-//	mRenderTarget->PushLayer(
-//		D2D1::LayerParameters(D2D1::RectF(inRect)),
-//		mClipLayer);
+	//	mRenderTarget->PushAxisAlignedClip(D2D1::RectF(inRect), D2D1_ANTIALIAS_MODE_ALIASED);
+	//
+	//	THROW_IF_HRESULT_ERROR(mRenderTarget->CreateLayer(&mClipLayer));
+	//
+	//	  // Push the layer with the geometric mask.
+	//	mRenderTarget->PushLayer(
+	//		D2D1::LayerParameters(D2D1::RectF(inRect)),
+	//		mClipLayer);
 }
 
 //void MWinDeviceImpl::ClipRegion(
@@ -484,11 +479,11 @@ void MWinDeviceImpl::ClipRect(
 //}
 
 void MWinDeviceImpl::EraseRect(
-	MRect				inRect)
+	MRect inRect)
 {
 	if (not mClipping.empty())
 		inRect &= mClipping.top();
-	
+
 	assert(mBackBrush);
 	assert(mRenderTarget);
 
@@ -496,7 +491,7 @@ void MWinDeviceImpl::EraseRect(
 }
 
 void MWinDeviceImpl::FillRect(
-	MRect				inRect)
+	MRect inRect)
 {
 	if (not mClipping.empty())
 		inRect &= mClipping.top();
@@ -508,8 +503,8 @@ void MWinDeviceImpl::FillRect(
 }
 
 void MWinDeviceImpl::StrokeRect(
-	MRect				inRect,
-	uint32_t				inLineWidth)
+	MRect inRect,
+	uint32_t inLineWidth)
 {
 	assert(mForeBrush);
 	assert(mRenderTarget);
@@ -518,11 +513,11 @@ void MWinDeviceImpl::StrokeRect(
 }
 
 void MWinDeviceImpl::StrokeLine(
-	float				inFromX,
-	float				inFromY,
-	float				inToX,
-	float				inToY,
-	uint32_t				inLineWidth)
+	float inFromX,
+	float inFromY,
+	float inToX,
+	float inToY,
+	uint32_t inLineWidth)
 {
 	assert(mForeBrush);
 	assert(mRenderTarget);
@@ -530,34 +525,34 @@ void MWinDeviceImpl::StrokeLine(
 	mRenderTarget->DrawLine(D2D1::Point2F(inFromX, inFromY), D2D1::Point2F(inToX, inToY), mForeBrush, float(inLineWidth));
 }
 
-void MWinDeviceImpl::StrokeGeometry(MGeometryImpl& inGeometryImpl, float inLineWidth)
+void MWinDeviceImpl::StrokeGeometry(MGeometryImpl &inGeometryImpl, float inLineWidth)
 {
-	MWinGeometryImpl& impl(static_cast<MWinGeometryImpl&>(inGeometryImpl));
-	
+	MWinGeometryImpl &impl(static_cast<MWinGeometryImpl &>(inGeometryImpl));
+
 	if (impl.mSink)
 	{
 		impl.mSink->Close();
 		impl.mSink = nullptr;
 	}
-	
+
 	mRenderTarget->DrawGeometry(impl.mPath, mForeBrush, inLineWidth);
 }
 
-void MWinDeviceImpl::FillGeometry(MGeometryImpl& inGeometryImpl)
+void MWinDeviceImpl::FillGeometry(MGeometryImpl &inGeometryImpl)
 {
-	MWinGeometryImpl& impl(static_cast<MWinGeometryImpl&>(inGeometryImpl));
-	
+	MWinGeometryImpl &impl(static_cast<MWinGeometryImpl &>(inGeometryImpl));
+
 	if (impl.mSink)
 	{
 		impl.mSink->Close();
 		impl.mSink = nullptr;
 	}
-	
+
 	mRenderTarget->FillGeometry(impl.mPath, mForeBrush);
 }
 
 void MWinDeviceImpl::FillEllipse(
-	MRect				inRect)
+	MRect inRect)
 {
 	assert(mForeBrush);
 	assert(mRenderTarget);
@@ -573,25 +568,23 @@ void MWinDeviceImpl::FillEllipse(
 }
 
 void MWinDeviceImpl::DrawBitmap(
-	const MBitmap&		inBitmap,
-	float				inX,
-	float				inY)
+	const MBitmap &inBitmap,
+	float inX,
+	float inY)
 {
 	if (inBitmap.Data() != nullptr)
 	{
 		D2D1_BITMAP_PROPERTIES props =
-		{
 			{
-				DXGI_FORMAT_B8G8R8A8_UNORM,
-				D2D1_ALPHA_MODE_PREMULTIPLIED
-			},
-			mDpiScaleX, mDpiScaleY
-		};
-	
+				{DXGI_FORMAT_B8G8R8A8_UNORM,
+		         D2D1_ALPHA_MODE_PREMULTIPLIED},
+				mDpiScaleX,
+				mDpiScaleY};
+
 		ComPtr<ID2D1Bitmap> bitmap;
 
 		HRESULT err = mRenderTarget->CreateBitmap(D2D1::SizeU(inBitmap.Width(), inBitmap.Height()),
-										inBitmap.Data(), inBitmap.Stride(), &props, &bitmap);
+		                                          inBitmap.Data(), inBitmap.Stride(), &props, &bitmap);
 
 		if (SUCCEEDED(err))
 			mRenderTarget->DrawBitmap(bitmap, D2D1::RectF(inX, inY, inX + inBitmap.Width(), inY + inBitmap.Height()), 1.0f);
@@ -599,10 +592,10 @@ void MWinDeviceImpl::DrawBitmap(
 }
 
 void MWinDeviceImpl::CreateAndUsePattern(
-	MColor				inColor1,
-	MColor				inColor2,
-	uint32_t				inWidth,
-	float				inRotation)
+	MColor inColor1,
+	MColor inColor2,
+	uint32_t inWidth,
+	float inRotation)
 {
 	uint32_t data[8][8];
 
@@ -611,7 +604,7 @@ void MWinDeviceImpl::CreateAndUsePattern(
 	c1 |= inColor1.red << 16;
 	c1 |= inColor1.green << 8;
 	c1 |= inColor1.blue << 0;
-	
+
 	c2 |= inColor2.red << 16;
 	c2 |= inColor2.green << 8;
 	c2 |= inColor2.blue << 0;
@@ -624,9 +617,9 @@ void MWinDeviceImpl::CreateAndUsePattern(
 
 	ComPtr<ID2D1Bitmap> bitmap;
 	THROW_IF_HRESULT_ERROR(mRenderTarget->CreateBitmap(D2D1::SizeU(8, 8), data, 32,
-		D2D1::BitmapProperties(
-			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE)
-		), &bitmap));
+	                                                   D2D1::BitmapProperties(
+														   D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE)),
+	                                                   &bitmap));
 
 	ComPtr<ID2D1BitmapBrush> brush;
 	if (inRotation == 0)
@@ -650,7 +643,7 @@ void MWinDeviceImpl::CreateAndUsePattern(
 }
 
 void MWinDeviceImpl::SetFont(
-	const string&		inFont)
+	const string &inFont)
 {
 	string::const_iterator e = inFont.end() - 1;
 
@@ -686,18 +679,18 @@ void MWinDeviceImpl::SetFont(
 	LookupFont(mFontFamily);
 }
 
-void MWinDeviceImpl::LookupFont(const wstring& inFamily)
+void MWinDeviceImpl::LookupFont(const wstring &inFamily)
 {
-	static map<wstring,IDWriteFontPtr> sFontTable;
+	static map<wstring, IDWriteFontPtr> sFontTable;
 
-	map<wstring,IDWriteFontPtr>::iterator f = sFontTable.find(inFamily);
+	map<wstring, IDWriteFontPtr>::iterator f = sFontTable.find(inFamily);
 
 	if (f != sFontTable.end())
 	{
 		if (mFont != f->second)
 		{
 			mFont = f->second;
-			
+
 			if (mTextFormat)
 				mTextFormat = nullptr;
 		}
@@ -707,30 +700,30 @@ void MWinDeviceImpl::LookupFont(const wstring& inFamily)
 		ComPtr<IDWriteFontCollection> pFontCollection;
 		THROW_IF_HRESULT_ERROR(GetDWFactory()->GetSystemFontCollection(&pFontCollection));
 		uint32_t familyCount = pFontCollection->GetFontFamilyCount();
-	
+
 		for (uint32_t i = 0; i < familyCount; ++i)
 		{
 			ComPtr<IDWriteFontFamily> pFontFamily;
 			THROW_IF_HRESULT_ERROR(pFontCollection->GetFontFamily(i, &pFontFamily));
-	
+
 			ComPtr<IDWriteLocalizedStrings> pFamilyNames;
 			THROW_IF_HRESULT_ERROR(pFontFamily->GetFamilyNames(&pFamilyNames));
-	
+
 			uint32_t index = 0;
 			BOOL exists = false;
-			
+
 			THROW_IF_HRESULT_ERROR(pFamilyNames->FindLocaleName(GetLocale().c_str(), &index, &exists));
-			
+
 			// If the specified locale doesn't exist, select the first on the list.
 			if (not exists)
 				index = 0;
-	
+
 			UINT32_t length = 0;
 			THROW_IF_HRESULT_ERROR(pFamilyNames->GetStringLength(index, &length));
-			
+
 			vector<wchar_t> name(length + 1);
-			THROW_IF_HRESULT_ERROR(pFamilyNames->GetString(index, &name[0], length+1));
-	
+			THROW_IF_HRESULT_ERROR(pFamilyNames->GetString(index, &name[0], length + 1));
+
 			if (inFamily == &name[0])
 			{
 				pFontFamily->GetFont(index, &mFont);
@@ -753,15 +746,14 @@ void MWinDeviceImpl::CreateTextFormat()
 
 		THROW_IF_HRESULT_ERROR(
 			GetDWFactory()->CreateTextFormat(
-				mFontFamily.c_str(),				// Font family name.
-				NULL,							   // Font collection (NULL sets it to use the system font collection).
+				mFontFamily.c_str(), // Font family name.
+				NULL,                // Font collection (NULL sets it to use the system font collection).
 				DWRITE_FONT_WEIGHT_REGULAR,
 				DWRITE_FONT_STYLE_NORMAL,
 				DWRITE_FONT_STRETCH_NORMAL,
 				mFontSize,
 				GetLocale().c_str(),
-				&mTextFormat
-			));
+				&mTextFormat));
 	}
 }
 
@@ -803,7 +795,7 @@ float MWinDeviceImpl::GetXWidth()
 
 	CreateTextFormat();
 
-	IDWriteTextLayout* layout = nullptr;
+	IDWriteTextLayout *layout = nullptr;
 
 	THROW_IF_HRESULT_ERROR(
 		GetDWFactory()->CreateTextLayout(L"xxxxxxxxxx", 10, mTextFormat, 99999.0f, 99999.0f, &layout));
@@ -817,56 +809,56 @@ float MWinDeviceImpl::GetXWidth()
 }
 
 void MWinDeviceImpl::DrawString(
-	const string&		inText,
-	float				inX,
-	float				inY,
-	uint32_t				inTruncateWidth,
-	MAlignment			inAlign)
+	const string &inText,
+	float inX,
+	float inY,
+	uint32_t inTruncateWidth,
+	MAlignment inAlign)
 {
 	IDWriteTextFormatPtr savedFormat(mTextFormat), nil;
 	mTextFormat = nil;
-	
+
 	CreateTextFormat();
 
 	wstring s(c2w(inText));
 	mRenderTarget->DrawTextW(s.c_str(), s.length(),
-		mTextFormat, D2D1::RectF(inX, inY, 200.f, inY + 14.f), mForeBrush);
+	                         mTextFormat, D2D1::RectF(inX, inY, 200.f, inY + 14.f), mForeBrush);
 
 	mTextFormat = savedFormat;
 }
 
 void MWinDeviceImpl::DrawString(
-	const string&		inText,
-	MRect				inBounds,
-	MAlignment			inAlign)
+	const string &inText,
+	MRect inBounds,
+	MAlignment inAlign)
 {
 	IDWriteTextFormatPtr savedFormat(mTextFormat), nil;
 	mTextFormat = nil;
 
 	CreateTextFormat();
-	
+
 	switch (inAlign)
 	{
-		default:			mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING); break;
-		case eAlignCenter:	mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER); break;
-		case eAlignRight:	mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING); break;
+		default: mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING); break;
+		case eAlignCenter: mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER); break;
+		case eAlignRight: mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING); break;
 	}
-	
+
 	if (not mTrimmingSign)
 		GetDWFactory()->CreateEllipsisTrimmingSign(mTextFormat, &mTrimmingSign);
-	
-	DWRITE_TRIMMING trimOptions = { DWRITE_TRIMMING_GRANULARITY_CHARACTER };
+
+	DWRITE_TRIMMING trimOptions = {DWRITE_TRIMMING_GRANULARITY_CHARACTER};
 	mTextFormat->SetTrimming(&trimOptions, mTrimmingSign);
 
 	wstring s(c2w(inText));
 	mRenderTarget->DrawTextW(s.c_str(), s.length(),
-		mTextFormat, D2D1::RectF(inBounds), mForeBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+	                         mTextFormat, D2D1::RectF(inBounds), mForeBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 
 	mTextFormat = savedFormat;
 }
 
 void MWinDeviceImpl::SetText(
-	const string&		inText)
+	const string &inText)
 {
 	CreateTextFormat();
 
@@ -880,8 +872,8 @@ void MWinDeviceImpl::SetText(
 	mTextIndex.reserve(inText.length());
 
 	mSelectionLength = 0;
-	
-	typedef tr1::tuple<uint32_t,uint32_t,uint32_t> replaced_char;
+
+	typedef tr1::tuple<uint32_t, uint32_t, uint32_t> replaced_char;
 	vector<replaced_char> replaced;
 
 	for (string::const_iterator i = inText.begin(); i != inText.end(); ++i)
@@ -928,7 +920,7 @@ void MWinDeviceImpl::SetText(
 				}
 			}
 		}
-		
+
 		if (mReplaceUnknownCharacters)
 		{
 			assert(mFont);
@@ -960,63 +952,62 @@ void MWinDeviceImpl::SetText(
 			mTextFormat,
 			99999.0f,
 			99999.0f,
-			&mTextLayout
-		));
-	
+			&mTextLayout));
+
 	if (not replaced.empty())
 	{
 		float w = GetXWidth();
 		float h = float(GetLineHeight());
 		float b = GetAscent();
 		MColor color = GetForeColor();
-		
+
 		for (auto r : replaced)
 		{
 			ComPtr<MInlineReplacedChar> replaceChar(
 				new MInlineReplacedChar(mRenderTarget, tr1::get<2>(r), color, w, h, b, mTextFormat));
-			DWRITE_TEXT_RANGE textRange = { tr1::get<0>(r), tr1::get<1>(r) };
+			DWRITE_TEXT_RANGE textRange = {tr1::get<0>(r), tr1::get<1>(r)};
 			mTextLayout->SetInlineObject(replaceChar, textRange);
 		}
 	}
 }
 
 void MWinDeviceImpl::SetTabStops(
-	float				inTabWidth)
+	float inTabWidth)
 {
 	assert(mTextLayout);
-//	if (not mTextLayout)
-//		THROW(("SetText must be called first!"));
+	//	if (not mTextLayout)
+	//		THROW(("SetText must be called first!"));
 	mTextLayout->SetIncrementalTabStop(inTabWidth /** 96.f / 72.f*/);
 }
 
 void MWinDeviceImpl::SetTextColors(
-	uint32_t				inColorCount,
-	uint32_t				inColorIndices[],
-	uint32_t				inOffsets[],
-	MColor				inColors[])
+	uint32_t inColorCount,
+	uint32_t inColorIndices[],
+	uint32_t inOffsets[],
+	MColor inColors[])
 {
-	if (not mRenderTarget)	// short cut
+	if (not mRenderTarget) // short cut
 		return;
 
 	for (uint32_t ix = 0; ix < inColorCount; ++ix)
 	{
 		MColor c = inColors[inColorIndices[ix]];
-		
-//		ComPtr<MTextColor> color(new MTextColor(c));
-//
-//		DWRITE_TEXT_RANGE range;
-//		range.startPosition = mTextIndex[inOffsets[ix]];
-//		if (ix == inColorCount - 1)
-//			range.length = mText.length() - range.startPosition;
-//		else
-//			range.length = mTextIndex[inOffsets[ix + 1]] - range.startPosition;
-//		
-//		mTextLayout->SetDrawingEffect(color, range);
+
+		//		ComPtr<MTextColor> color(new MTextColor(c));
+		//
+		//		DWRITE_TEXT_RANGE range;
+		//		range.startPosition = mTextIndex[inOffsets[ix]];
+		//		if (ix == inColorCount - 1)
+		//			range.length = mText.length() - range.startPosition;
+		//		else
+		//			range.length = mTextIndex[inOffsets[ix + 1]] - range.startPosition;
+		//
+		//		mTextLayout->SetDrawingEffect(color, range);
 
 		ComPtr<ID2D1SolidColorBrush> textColorBrush;
-			THROW_IF_HRESULT_ERROR(mRenderTarget->CreateSolidColorBrush(
-				D2D1::ColorF(c.red / 255.f, c.green / 255.f, c.blue / 255.f),
-				&textColorBrush));
+		THROW_IF_HRESULT_ERROR(mRenderTarget->CreateSolidColorBrush(
+			D2D1::ColorF(c.red / 255.f, c.green / 255.f, c.blue / 255.f),
+			&textColorBrush));
 
 		DWRITE_TEXT_RANGE range;
 		range.startPosition = mTextIndex[inOffsets[ix]];
@@ -1024,17 +1015,17 @@ void MWinDeviceImpl::SetTextColors(
 			range.length = mText.length() - range.startPosition;
 		else
 			range.length = mTextIndex[inOffsets[ix + 1]] - range.startPosition;
-		
+
 		mTextLayout->SetDrawingEffect(textColorBrush, range);
 	}
 }
 
 void MWinDeviceImpl::SetTextStyles(
-	uint32_t				inStyleCount,
-	uint32_t				inStyles[],
-	uint32_t				inOffsets[])
+	uint32_t inStyleCount,
+	uint32_t inStyles[],
+	uint32_t inOffsets[])
 {
-	if (not mRenderTarget)	// short cut
+	if (not mRenderTarget) // short cut
 		return;
 
 	for (uint32_t ix = 0; ix < inStyleCount; ++ix)
@@ -1045,7 +1036,7 @@ void MWinDeviceImpl::SetTextStyles(
 			range.length = mText.length() - range.startPosition;
 		else
 			range.length = mTextIndex[inOffsets[ix + 1]] - range.startPosition;
-		
+
 		mTextLayout->SetFontWeight(
 			inStyles[ix] & MDevice::eTextStyleBold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
 			range);
@@ -1060,9 +1051,9 @@ void MWinDeviceImpl::SetTextStyles(
 }
 
 void MWinDeviceImpl::SetTextSelection(
-	uint32_t				inStart,
-	uint32_t				inLength,
-	MColor				inSelectionColor)
+	uint32_t inStart,
+	uint32_t inLength,
+	MColor inSelectionColor)
 {
 	mSelectionColor = inSelectionColor;
 	mSelectionStart = mTextIndex[inStart];
@@ -1070,9 +1061,9 @@ void MWinDeviceImpl::SetTextSelection(
 }
 
 void MWinDeviceImpl::IndexToPosition(
-	uint32_t				inIndex,
-	bool				inTrailing,
-	int32_t&				outPosition)
+	uint32_t inIndex,
+	bool inTrailing,
+	int32_t &outPosition)
 {
 	// Translate text character offset to point x,y.
 	DWRITE_HIT_TEST_METRICS caretMetrics;
@@ -1092,8 +1083,8 @@ void MWinDeviceImpl::IndexToPosition(
 }
 
 bool MWinDeviceImpl::PositionToIndex(
-	int32_t				inPosition,
-	uint32_t&				outIndex)
+	int32_t inPosition,
+	uint32_t &outIndex)
 {
 	if (not mTextLayout)
 		outIndex = 0;
@@ -1106,10 +1097,10 @@ bool MWinDeviceImpl::PositionToIndex(
 		float y = GetAscent();
 
 		mTextLayout->HitTestPoint(x, y, &isTrailingHit, &isInside, &caretMetrics);
-		
+
 		if (isTrailingHit)
 			++caretMetrics.textPosition;
-		
+
 		// remap the wchar_t index into our UTF-8 string
 		outIndex = MapBack(caretMetrics.textPosition);
 	}
@@ -1126,8 +1117,8 @@ float MWinDeviceImpl::GetTextWidth()
 }
 
 void MWinDeviceImpl::RenderText(
-	float				inX,
-	float				inY)
+	float inX,
+	float inY)
 {
 	if (mTextLayout)
 	{
@@ -1135,7 +1126,7 @@ void MWinDeviceImpl::RenderText(
 		mTextLayout->GetMetrics(&metrics);
 
 		MRect r(inX + metrics.left, inY + metrics.top, metrics.width, metrics.height);
-		if (not (mClipping.empty() or mClipping.top().Intersects(r)))
+		if (not(mClipping.empty() or mClipping.top().Intersects(r)))
 			return;
 
 		if (mSelectionLength > 0)
@@ -1145,19 +1136,19 @@ void MWinDeviceImpl::RenderText(
 				D2D1::ColorF(mSelectionColor.red / 255.f, mSelectionColor.green / 255.f, mSelectionColor.blue / 255.f),
 				&selectionColorBrush));
 
-			DWRITE_TEXT_RANGE caretRange = { mSelectionStart, mSelectionLength };
+			DWRITE_TEXT_RANGE caretRange = {mSelectionStart, mSelectionLength};
 			UINT32_t actualHitTestCount = 0;
 
 			// Determine actual number of hit-test ranges
 			mTextLayout->HitTestTextRange(caretRange.startPosition, caretRange.length,
-				inX, inY, NULL, 0, &actualHitTestCount);
+			                              inX, inY, NULL, 0, &actualHitTestCount);
 
 			// Allocate enough room to return all hit-test metrics.
 			std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
 
 			mTextLayout->HitTestTextRange(caretRange.startPosition, caretRange.length,
-				inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
-				&actualHitTestCount);
+			                              inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
+			                              &actualHitTestCount);
 
 			// Draw the selection ranges behind the text.
 			if (actualHitTestCount > 0)
@@ -1169,24 +1160,23 @@ void MWinDeviceImpl::RenderText(
 
 				for (size_t i = 0; i < actualHitTestCount; ++i)
 				{
-					const DWRITE_HIT_TEST_METRICS& htm = hitTestMetrics[i];
+					const DWRITE_HIT_TEST_METRICS &htm = hitTestMetrics[i];
 					D2D1_RECT_F highlightRect = {
 						htm.left,
 						htm.top,
 						(htm.left + htm.width),
-						(htm.top  + htm.height)
-					};
-			
+						(htm.top + htm.height)};
+
 					mRenderTarget->FillRectangle(highlightRect, selectionColorBrush);
 				}
 			}
 		}
-		
+
 		if (mDrawWhiteSpace)
 		{
 			vector<DWRITE_CLUSTER_METRICS> clusters(mText.size() + 1);
 			uint32_t count;
-			
+
 			HRESULT err = mTextLayout->GetClusterMetrics(&clusters[0], clusters.size(), &count);
 			if (err == E_NOT_SUFFICIENT_BUFFER)
 			{
@@ -1194,7 +1184,7 @@ void MWinDeviceImpl::RenderText(
 				clusters.insert(clusters.end(), clusters.size() - count, v);
 				err = mTextLayout->GetClusterMetrics(&clusters[0], clusters.size(), &count);
 			}
-			
+
 			if (SUCCEEDED(err))
 			{
 				float x = inX;
@@ -1212,37 +1202,37 @@ void MWinDeviceImpl::RenderText(
 				{
 					if (cluster.isWhitespace)
 					{
-						const wchar_t* s;
+						const wchar_t *s;
 						switch (mText[offset])
 						{
-							case ' ':	s = L"."; break;
-							case '\t':	s = L"\xbb"; break;
+							case ' ': s = L"."; break;
+							case '\t': s = L"\xbb"; break;
 							case '\n':
-							case '\r':	s = L"\xac"; break;
-							default:	s = L"?"; break;
+							case '\r': s = L"\xac"; break;
+							default: s = L"?"; break;
 						}
-						
+
 						mRenderTarget->DrawTextW(s, 1, mTextFormat,
-							D2D1::RectF(x, inY, x + cluster.width, inY + metrics.height), brush);
+						                         D2D1::RectF(x, inY, x + cluster.width, inY + metrics.height), brush);
 					}
-					
+
 					x += cluster.width;
 					offset += cluster.length;
 				}
 			}
 		}
 
-//		MTextRenderer renderer(GetD2D1Factory(), mRenderTarget);
-//		mTextLayout->Draw(nullptr, &renderer, inX, inY);
+		//		MTextRenderer renderer(GetD2D1Factory(), mRenderTarget);
+		//		mTextLayout->Draw(nullptr, &renderer, inX, inY);
 
 		mRenderTarget->DrawTextLayout(D2D1::Point2F(inX, inY), mTextLayout, mForeBrush);
 	}
 }
 
 void MWinDeviceImpl::DrawCaret(
-	float				inX,
-	float				inY,
-	uint32_t				inOffset)
+	float inX,
+	float inY,
+	uint32_t inOffset)
 {
 	// Translate text character offset to point x,y.
 	DWRITE_HIT_TEST_METRICS caretMetrics = {};
@@ -1273,17 +1263,16 @@ void MWinDeviceImpl::DrawCaret(
 
 	mRenderTarget->FillRectangle(
 		D2D1::RectF(inX + caretX - caretThickness / 2, inY + caretY,
-					inX + caretX + caretThickness / 2, floor(inY + caretY + caretMetrics.height)
-		),
+	                inX + caretX + caretThickness / 2, floor(inY + caretY + caretMetrics.height)),
 		mForeBrush);
 }
 
 void MWinDeviceImpl::RenderTextBackground(
-	float				inX,
-	float				inY,
-	uint32_t				inStart,
-	uint32_t				inLength,
-	MColor				inColor)
+	float inX,
+	float inY,
+	uint32_t inStart,
+	uint32_t inLength,
+	MColor inColor)
 {
 	if (mTextLayout)
 	{
@@ -1291,14 +1280,14 @@ void MWinDeviceImpl::RenderTextBackground(
 		mTextLayout->GetMetrics(&metrics);
 
 		MRect r(inX + metrics.left, inY + metrics.top, metrics.width, metrics.height);
-		if (not (mClipping.empty() or mClipping.top().Intersects(r)))
+		if (not(mClipping.empty() or mClipping.top().Intersects(r)))
 			return;
 
 		ComPtr<ID2D1SolidColorBrush> colorBrush;
 		THROW_IF_HRESULT_ERROR(mRenderTarget->CreateSolidColorBrush(
 			D2D1::ColorF(inColor.red / 255.f, inColor.green / 255.f, inColor.blue / 255.f),
 			&colorBrush));
-		
+
 		DWRITE_TEXT_RANGE range;
 		range.startPosition = mTextIndex[inStart];
 		range.length = mTextIndex[inStart + inLength] - range.startPosition;
@@ -1307,14 +1296,14 @@ void MWinDeviceImpl::RenderTextBackground(
 
 		// Determine actual number of hit-test ranges
 		mTextLayout->HitTestTextRange(range.startPosition, range.length,
-			inX, inY, NULL, 0, &actualHitTestCount);
+		                              inX, inY, NULL, 0, &actualHitTestCount);
 
 		// Allocate enough room to return all hit-test metrics.
 		std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
 
 		mTextLayout->HitTestTextRange(range.startPosition, range.length,
-			inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
-			&actualHitTestCount);
+		                              inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
+		                              &actualHitTestCount);
 
 		// Draw the selection ranges behind the text.
 		if (actualHitTestCount > 0)
@@ -1326,14 +1315,13 @@ void MWinDeviceImpl::RenderTextBackground(
 
 			for (size_t i = 0; i < actualHitTestCount; ++i)
 			{
-				const DWRITE_HIT_TEST_METRICS& htm = hitTestMetrics[i];
+				const DWRITE_HIT_TEST_METRICS &htm = hitTestMetrics[i];
 				D2D1_RECT_F highlightRect = {
 					htm.left,
 					htm.top,
 					(htm.left + htm.width),
-					(htm.top  + htm.height)
-				};
-		
+					(htm.top + htm.height)};
+
 				mRenderTarget->FillRectangle(highlightRect, colorBrush);
 			}
 		}
@@ -1341,24 +1329,23 @@ void MWinDeviceImpl::RenderTextBackground(
 }
 
 void MWinDeviceImpl::SetScale(
-	float				inScaleX,
-	float				inScaleY,
-	float				inCenterX,
-	float				inCenterY)
+	float inScaleX,
+	float inScaleY,
+	float inCenterX,
+	float inCenterY)
 {
 	mRenderTarget->SetTransform(
 		D2D1::Matrix3x2F::Scale(
 			D2D1::Size(inScaleX, inScaleY),
-			D2D1::Point2F(inCenterX, inCenterY))
-		);
+			D2D1::Point2F(inCenterX, inCenterY)));
 }
 
 void MWinDeviceImpl::BreakLines(
-	uint32_t				inWidth,
-	vector<uint32_t>&		outBreaks)
+	uint32_t inWidth,
+	vector<uint32_t> &outBreaks)
 {
 	mTextLayout->SetMaxWidth(static_cast<float>(inWidth));
-	
+
 	uint32_t lineCount = 0;
 	mTextLayout->GetLineMetrics(nullptr, 0, &lineCount);
 	if (lineCount > 0)
@@ -1366,9 +1353,9 @@ void MWinDeviceImpl::BreakLines(
 		vector<DWRITE_LINE_METRICS> lineMetrics(lineCount);
 		THROW_IF_HRESULT_ERROR(
 			mTextLayout->GetLineMetrics(&lineMetrics[0], lineCount, &lineCount));
-		
+
 		uint32_t offset = 0;
-		for (DWRITE_LINE_METRICS& m : lineMetrics)
+		for (DWRITE_LINE_METRICS &m : lineMetrics)
 		{
 			offset += m.length;
 			outBreaks.push_back(MapBack(offset));
@@ -1377,7 +1364,7 @@ void MWinDeviceImpl::BreakLines(
 }
 
 uint32_t MWinDeviceImpl::MapBack(
-	uint32_t				inOffset)
+	uint32_t inOffset)
 {
 	vector<uint16_t>::iterator ix =
 		find(mTextIndex.begin(), mTextIndex.end(), inOffset);
@@ -1394,15 +1381,15 @@ uint32_t MWinDeviceImpl::MapBack(
 
 // --------------------------------------------------------------------
 
-MDeviceImpl* MDeviceImpl::Create()
+MDeviceImpl *MDeviceImpl::Create()
 {
 	return new MWinDeviceImpl();
 }
 
-MDeviceImpl* MDeviceImpl::Create(
-	MView*				inView,
-	MRect				inRect,
-	bool				inCreateOffscreen)
+MDeviceImpl *MDeviceImpl::Create(
+	MView *inView,
+	MRect inRect,
+	bool inCreateOffscreen)
 {
 	return new MWinDeviceImpl(inView, inRect, inCreateOffscreen);
 }
@@ -1412,13 +1399,13 @@ MDeviceImpl* MDeviceImpl::Create(
 //#include <AeroStyle.xml>
 
 void MDevice::GetSysSelectionColor(
-	MColor&				outColor)
+	MColor &outColor)
 {
 	// just like Visual Studio does, we take a 2/3 mix of
 	// the system highlight color and white. This way we
 	// can still use the syntax highlighted colors and don't
 	// have to fall back to some recalculated colors.
-	
+
 	COLORREF clr = ::GetSysColor(COLOR_HIGHLIGHT);
 	if (clr != 0)
 	{
@@ -1435,7 +1422,7 @@ void MDevice::GetSysSelectionColor(
 		if (green > 255)
 			green = 255;
 		outColor.green = green;
-		
+
 		clr >>= 8;
 
 		uint32_t blue = (clr & 0x000000FF);
@@ -1448,7 +1435,8 @@ void MDevice::GetSysSelectionColor(
 
 // --------------------------------------------------------------------
 
-template <class T> inline void SafeRelease(T **ppT)
+template <class T>
+inline void SafeRelease(T **ppT)
 {
 	if (*ppT)
 	{
@@ -1457,12 +1445,11 @@ template <class T> inline void SafeRelease(T **ppT)
 	}
 }
 
-
 void MDevice::ListFonts(
-	bool			inFixedWidthOnly,
-	vector<string>&	outFonts)
+	bool inFixedWidthOnly,
+	vector<string> &outFonts)
 {
-	IDWriteFactory* pDWriteFactory = MWinDeviceImpl::GetDWFactory();
+	IDWriteFactory *pDWriteFactory = MWinDeviceImpl::GetDWFactory();
 
 	ComPtr<IDWriteFontCollection> pFontCollection;
 
@@ -1476,7 +1463,7 @@ void MDevice::ListFonts(
 	{
 		familyCount = pFontCollection->GetFontFamilyCount();
 	}
-	
+
 	for (UINT32_t i = 0; i < familyCount; ++i)
 	{
 		ComPtr<IDWriteFontFamily> pFontFamily;
@@ -1488,7 +1475,7 @@ void MDevice::ListFonts(
 		}
 
 		ComPtr<IDWriteLocalizedStrings> pFamilyNames;
-		
+
 		// Get a list of localized strings for the family name.
 		if (SUCCEEDED(hr))
 		{
@@ -1497,7 +1484,7 @@ void MDevice::ListFonts(
 
 		UINT32_t index = 0;
 		BOOL exists = false;
-		
+
 		wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
 
 		if (SUCCEEDED(hr))
@@ -1515,7 +1502,7 @@ void MDevice::ListFonts(
 				hr = pFamilyNames->FindLocaleName(L"en-us", &index, &exists);
 			}
 		}
-		
+
 		// If the specified locale doesn't exist, select the first on the list.
 		if (!exists)
 			index = 0;
@@ -1529,7 +1516,7 @@ void MDevice::ListFonts(
 		}
 
 		// Allocate a string big enough to hold the name.
-		vector<wchar_t> name(length+1);
+		vector<wchar_t> name(length + 1);
 
 		// Get the family name.
 		if (SUCCEEDED(hr))
@@ -1553,24 +1540,27 @@ void MDevice::ListFonts(
 					float w2 = dev.GetTextWidth();
 					if (w1 != w2)
 						continue;
-				} catch (...) {}
+				}
+				catch (...)
+				{
+				}
 			}
-			
+
 			outFonts.push_back(fontName);
 		}
 	}
 }
 
 void MWinDeviceImpl::SetDrawWhiteSpace(
-	bool		inDrawWhiteSpace,
-	MColor		inWhiteSpaceColor)
+	bool inDrawWhiteSpace,
+	MColor inWhiteSpaceColor)
 {
 	mDrawWhiteSpace = inDrawWhiteSpace;
 	mWhitespaceColor = inWhiteSpaceColor;
 }
 
 void MWinDeviceImpl::SetReplaceUnknownCharacters(
-	bool		inReplaceUnknownCharacters)
+	bool inReplaceUnknownCharacters)
 {
 	mReplaceUnknownCharacters = inReplaceUnknownCharacters;
 }
@@ -1578,11 +1568,11 @@ void MWinDeviceImpl::SetReplaceUnknownCharacters(
 // Theme support
 
 void MWinDeviceImpl::DrawListItemBackground(
-	MRect				inBounds,
-	MListItemState		inState)
+	MRect inBounds,
+	MListItemState inState)
 {
 	Save();
-	
+
 	MColor backColor = GetBackColor();
 	MColor selectColor = kWhite;
 
@@ -1593,38 +1583,37 @@ void MWinDeviceImpl::DrawListItemBackground(
 	}
 
 	EraseRect(inBounds);
-	
+
 	CreateAndUsePattern(MColor(0.5f, 0.5f, 0.5f), selectColor, 1, 0);
-	
+
 	float x = float(inBounds.x);
 	float y = float(inBounds.y + inBounds.height);
-	
-	StrokeLine(x, y, x + inBounds.width, y, 1);
-	
-	Restore();
 
+	StrokeLine(x, y, x + inBounds.width, y, 1);
+
+	Restore();
 
 	//if (inState == eLIS_None)
 	//	EraseRect(inBounds);
 	//else
 	//{
 	//	ComPtr<ID2D1GdiInteropRenderTarget> gdiRT;
-	//	
+	//
 	//	HRESULT hr = mRenderTarget->QueryInterface(
-	//		__uuidof(ID2D1GdiInteropRenderTarget), (void**)&gdiRT);	
+	//		__uuidof(ID2D1GdiInteropRenderTarget), (void**)&gdiRT);
 	//
 	//	HDC dc;
 	//	if (SUCCEEDED(hr))
 	//		hr = gdiRT->GetDC(D2D1_DC_INITIALIZE_MODE_COPY, &dc);
-	//    
+	//
 	//	if (SUCCEEDED(hr))
 	//	{
 	//		RECT r = { inBounds.x, inBounds.y, inBounds.x + inBounds.width,
-	//			inBounds.y + inBounds.height 
+	//			inBounds.y + inBounds.height
 	//		};
 	//
 	//		HWND w = static_cast<MWinWindowImpl*>(mView->GetWindow()->GetImpl())->GetHandle();
-	//		
+	//
 	//		HTHEME theme = ::OpenThemeData(w, VSCLASS_LISTVIEWSTYLE);
 	//		if (theme != nullptr)
 	//		{
@@ -1632,7 +1621,7 @@ void MWinDeviceImpl::DrawListItemBackground(
 	//				(int)inState, &r, nullptr);
 	//			::CloseThemeData(theme);
 	//		}
-	//		
+	//
 	//		gdiRT->ReleaseDC(&r);
 	//	}
 	//}
@@ -1640,7 +1629,7 @@ void MWinDeviceImpl::DrawListItemBackground(
 
 // --------------------------------------------------------------------
 
-MWinGeometryImpl::MWinGeometryImpl(MWinDeviceImpl& inDevice, MGeometryFillMode inMode)
+MWinGeometryImpl::MWinGeometryImpl(MWinDeviceImpl &inDevice, MGeometryFillMode inMode)
 {
 	MWinDeviceImpl::GetD2D1Factory()->CreatePathGeometry(&mPath);
 	if (mPath)
@@ -1663,11 +1652,11 @@ void MWinGeometryImpl::Begin(float inX, float inY, MGeometryBegin inBegin)
 {
 	if (not mSink)
 		THROW(("no sink"));
-	
-    if (inBegin == eGeometryBeginFilled)
-    	mSink->BeginFigure(D2D1::Point2F(inX, inY), D2D1_FIGURE_BEGIN_FILLED);
-    else
-    	mSink->BeginFigure(D2D1::Point2F(inX, inY), D2D1_FIGURE_BEGIN_HOLLOW);
+
+	if (inBegin == eGeometryBeginFilled)
+		mSink->BeginFigure(D2D1::Point2F(inX, inY), D2D1_FIGURE_BEGIN_FILLED);
+	else
+		mSink->BeginFigure(D2D1::Point2F(inX, inY), D2D1_FIGURE_BEGIN_HOLLOW);
 }
 
 void MWinGeometryImpl::LineTo(float inX, float inY)
@@ -1686,8 +1675,7 @@ void MWinGeometryImpl::CurveTo(float inX1, float inY1, float inX2, float inY2, f
 		D2D1::BezierSegment(
 			D2D1::Point2F(inX1, inY1),
 			D2D1::Point2F(inX2, inY2),
-			D2D1::Point2F(inX3, inY3)
-		));
+			D2D1::Point2F(inX3, inY3)));
 }
 
 void MWinGeometryImpl::End(bool inClose)
@@ -1698,15 +1686,19 @@ void MWinGeometryImpl::End(bool inClose)
 		mSink->EndFigure(D2D1_FIGURE_END_OPEN);
 }
 
-MGeometryImpl* MGeometryImpl::Create(MDevice& inDevice, MGeometryFillMode inMode)
+MGeometryImpl *MGeometryImpl::Create(MDevice &inDevice, MGeometryFillMode inMode)
 {
-	return new MWinGeometryImpl(*static_cast<MWinDeviceImpl*>(inDevice.GetImpl()), inMode);
+	return new MWinGeometryImpl(*static_cast<MWinDeviceImpl *>(inDevice.GetImpl()), inMode);
 }
 
 // PNG support
 
-MBitmap::MBitmap(const void* inPNG, uint32_t inLength)
-	: mData(nullptr), mWidth(0), mHeight(0), mStride(0), mUseAlpha(true)
+MBitmap::MBitmap(const void *inPNG, uint32_t inLength)
+	: mData(nullptr)
+	, mWidth(0)
+	, mHeight(0)
+	, mStride(0)
+	, mUseAlpha(true)
 {
 	ComPtr<IWICImagingFactory> factory;
 	if (::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)) == S_OK)
@@ -1715,19 +1707,19 @@ MBitmap::MBitmap(const void* inPNG, uint32_t inLength)
 		ComPtr<IWICBitmapDecoder> decoder;
 		ComPtr<IWICBitmapFrameDecode> frame;
 		ComPtr<IWICBitmapSource> bitmap;
-	
+
 		if (factory->CreateStream(&stream) == S_OK and
-			stream->InitializeFromMemory(reinterpret_cast<BYTE*>(const_cast<void*>(inPNG)), inLength) == S_OK and
-			factory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder) == S_OK and
-			decoder->GetFrame(0, &frame) == S_OK and
-			::WICConvertBitmapSource(GUID_WICPixelFormat32bppPBGRA, frame, &bitmap) == S_OK)
+		    stream->InitializeFromMemory(reinterpret_cast<BYTE *>(const_cast<void *>(inPNG)), inLength) == S_OK and
+		    factory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder) == S_OK and
+		    decoder->GetFrame(0, &frame) == S_OK and
+		    ::WICConvertBitmapSource(GUID_WICPixelFormat32bppPBGRA, frame, &bitmap) == S_OK)
 		{
 			bitmap->GetSize(&mWidth, &mHeight);
 
 			mStride = mWidth * sizeof(uint32_t);
-			
+
 			mData = new uint32_t[mWidth * mHeight];
-			bitmap->CopyPixels(nullptr, mStride, mWidth * mHeight * sizeof(uint32_t), (BYTE*)mData);
+			bitmap->CopyPixels(nullptr, mStride, mWidth * mHeight * sizeof(uint32_t), (BYTE *)mData);
 		}
 	}
 }

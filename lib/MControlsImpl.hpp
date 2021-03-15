@@ -35,7 +35,7 @@ public:
 	virtual void	FrameResized()								{}
 	virtual void	MarginsChanged()							{}
 	// virtual void	Draw(MRect inBounds)						{}
-	virtual void	Draw(cairo_t* inCairo)						{}
+	virtual void	Draw()						{}
 	virtual void	Click(int32_t inX, int32_t inY)					{}
 	virtual void	ActivateSelf()								{}
 	virtual void	DeactivateSelf()							{}

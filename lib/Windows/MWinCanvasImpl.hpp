@@ -5,77 +5,74 @@
 
 #pragma once
 
-#include <cassert>
 #include "comptr.hpp"
+#include <cassert>
 
 #include <filesystem>
 
-#include "MWinProcMixin.hpp"
 #include "MCanvasImpl.hpp"
+#include "MWinProcMixin.hpp"
 
-typedef ComPtr<ID2D1RenderTarget>		ID2D1RenderTargetPtr;
-typedef ComPtr<ID2D1HwndRenderTarget>	ID2D1HwndRenderTargetPtr;
-typedef ComPtr<IDropTarget>				MIDropTargetPtr;
+typedef ComPtr<ID2D1RenderTarget> ID2D1RenderTargetPtr;
+typedef ComPtr<ID2D1HwndRenderTarget> ID2D1HwndRenderTargetPtr;
+typedef ComPtr<IDropTarget> MIDropTargetPtr;
 
 class MWinCanvasImpl : public MCanvasImpl, public MWinProcMixin
 {
   public:
-					MWinCanvasImpl(MCanvas* inCanvas);
+	MWinCanvasImpl(MCanvas *inCanvas);
 
-	virtual 		~MWinCanvasImpl();
-	
-	ID2D1RenderTargetPtr
-					GetRenderTarget();
+	virtual ~MWinCanvasImpl();
 
-	virtual void	MoveFrame(int32_t inXDelta, int32_t inYDelta);
+	ID2D1RenderTargetPtr GetRenderTarget();
 
-	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
+	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
 
-	virtual void	AddedToWindow();
+	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
-	virtual void	AcceptDragAndDrop(bool inFiles, bool inText);
-	virtual void	StartDrag();
+	virtual void AddedToWindow();
 
-	virtual void	SetFocus();
-	virtual void	ReleaseFocus();
-	virtual bool	IsFocus() const;
+	virtual void AcceptDragAndDrop(bool inFiles, bool inText);
+	virtual void StartDrag();
 
-	virtual void	TrackMouse(bool inTrackMove, bool inTrackExit);
+	virtual void SetFocus();
+	virtual void ReleaseFocus();
+	virtual bool IsFocus() const;
 
-	virtual MWinProcMixin* GetWinProcMixin()	{ return this;  }
+	virtual void TrackMouse(bool inTrackMove, bool inTrackExit);
+
+	virtual MWinProcMixin *GetWinProcMixin() { return this; }
 
   protected:
+	virtual void CreateParams(DWORD &outStyle, DWORD &outExStyle,
+	                          std::wstring &outClassName, HMENU &outMenu);
+	virtual void RegisterParams(UINT &outStyle, int &outWndExtra, HCURSOR &outCursor,
+	                            HICON &outIcon, HICON &outSmallIcon, HBRUSH &outBackground);
 
-	virtual void	CreateParams(DWORD& outStyle, DWORD& outExStyle,
-						std::wstring& outClassName, HMENU& outMenu);
-	virtual void	RegisterParams(UINT& outStyle, int& outWndExtra, HCURSOR& outCursor,
-						HICON& outIcon, HICON& outSmallIcon, HBRUSH& outBackground);
+	virtual bool WMDestroy(HWND inHWnd, UINT inUMsg, WPARAM inWParam,
+	                       LPARAM inLParam, LRESULT &outResult);
 
-	virtual bool	WMDestroy(HWND inHWnd, UINT inUMsg, WPARAM inWParam,
-						LPARAM inLParam, LRESULT& outResult);
+	virtual bool WMPaint(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
+	virtual bool WMEraseBkgnd(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
+	virtual bool WMSize(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
+	virtual bool WMWindowPosChanged(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
 
-	virtual bool	WMPaint(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	WMEraseBkgnd(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	WMSize(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	WMWindowPosChanged(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
+	virtual bool WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
+	virtual bool WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
+	virtual bool WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
+	virtual bool WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
 
-	virtual bool	WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
+	virtual bool WMSetCursor(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
 
-	virtual bool	WMSetCursor(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-
-	void			MapXY(int32_t& ioX, int32_t& ioY);
+	void MapXY(int32_t &ioX, int32_t &ioY);
 
   private:
-
 	ID2D1HwndRenderTargetPtr
-					mRenderTarget;
+		mRenderTarget;
 
-	double			mLastClickTime;
-	uint32_t			mClickCount;
-	HMONITOR		mMonitor;
-	
-	MIDropTargetPtr	mDropTarget;
+	double mLastClickTime;
+	uint32_t mClickCount;
+	HMONITOR mMonitor;
+
+	MIDropTargetPtr mDropTarget;
 };

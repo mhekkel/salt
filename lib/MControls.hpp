@@ -67,7 +67,7 @@ class MControl : public MControlBase
 	virtual void	SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw(cairo_t* inCairo);
+	virtual void	Draw();
 
 	virtual bool	IsFocus() const;
 	virtual void	SetFocus();

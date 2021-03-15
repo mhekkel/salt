@@ -15,38 +15,28 @@ class MCanvasImpl;
 class MCanvas : public MControl<MCanvasImpl>
 {
   public:
-	typedef MCanvasImpl		MImpl;
+	typedef MCanvasImpl MImpl;
 
-					MCanvas(const std::string& inID, MRect inBounds, bool inAcceptDropFiles, bool inAcceptDropText);
-	virtual			~MCanvas();
+	MCanvas(const std::string &inID, MRect inBounds, bool inAcceptDropFiles, bool inAcceptDropText);
+	virtual ~MCanvas();
 
-//	virtual void	MoveFrame(int32_t inXDelta, int32_t inYDelta);
-//
-//	virtual void	ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-	virtual void	AddedToWindow();
+	virtual void AddedToWindow();
 
-	virtual void	Invalidate();
+	virtual void Invalidate();
 
-	virtual void	DragEnter();
-	virtual bool	DragWithin(int32_t inX, int32_t inY);
-	virtual void	DragLeave();
-	virtual bool	Drop(bool inMove, int32_t inX, int32_t inY,
-						const std::string& inText);
-	virtual bool	Drop(int32_t inX, int32_t inY,
-						const std::filesystem::path& inFile);
+	virtual void DragEnter();
+	virtual bool DragWithin(int32_t inX, int32_t inY);
+	virtual void DragLeave();
+	virtual bool Drop(bool inMove, int32_t inX, int32_t inY,
+	                  const std::string &inText);
+	virtual bool Drop(int32_t inX, int32_t inY,
+	                  const std::filesystem::path &inFile);
 
-	virtual void	StartDrag();
-	virtual void	DragSendData(std::string& outData);
-	virtual void	DragDeleteData();
-
-//	virtual void	SetFocus();
-//	virtual void	ReleaseFocus();
-//	virtual bool	IsFocus() const;
-//
-//	virtual void	TrackMouse(bool inTrackMove, bool inTrackExit);
+	virtual void StartDrag();
+	virtual void DragSendData(std::string &outData);
+	virtual void DragDeleteData();
 
   protected:
-
-	bool			mAcceptDropFiles;
-	bool			mAcceptDropText;
+	bool mAcceptDropFiles;
+	bool mAcceptDropText;
 };

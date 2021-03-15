@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <stack>
 #include "MDeviceImpl.hpp"
+#include <stack>
 
 // --------------------------------------------------------------------
 
@@ -18,97 +18,96 @@
 class MGtkDeviceImpl : public MDeviceImpl
 {
   public:
-							MGtkDeviceImpl();
+	MGtkDeviceImpl();
 
-							MGtkDeviceImpl(PangoLayout* inLayout);
+	MGtkDeviceImpl(PangoLayout *inLayout);
 
-	virtual					~MGtkDeviceImpl();
+	virtual ~MGtkDeviceImpl();
 
-	virtual void			Save();
-	virtual void			Restore();
+	virtual void Save();
+	virtual void Restore();
 
-	virtual void			SetOrigin(int32_t inX, int32_t inY);
+	virtual void SetOrigin(int32_t inX, int32_t inY);
 
-	virtual void			SetFont(const std::string& inFont);
+	virtual void SetFont(const std::string &inFont);
 
-	virtual void			SetForeColor(MColor inColor);
+	virtual void SetForeColor(MColor inColor);
 
-	virtual MColor			GetForeColor() const;
+	virtual MColor GetForeColor() const;
 
-	virtual void			SetBackColor(MColor inColor);
+	virtual void SetBackColor(MColor inColor);
 
-	virtual MColor			GetBackColor() const;
-	
-	virtual void			ClipRect(MRect inRect);
+	virtual MColor GetBackColor() const;
 
-//	virtual void			ClipRegion(// MRegion inRegion);
+	virtual void ClipRect(MRect inRect);
 
-	virtual void			EraseRect(MRect inRect);
+	//	virtual void			ClipRegion(// MRegion inRegion);
 
-	virtual void			FillRect(MRect inRect);
+	virtual void EraseRect(MRect inRect);
 
-	virtual void			StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
+	virtual void FillRect(MRect inRect);
 
-	virtual void			FillEllipse(MRect inRect);
+	virtual void StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
 
-	virtual void			DrawImage(cairo_surface_t* inImage, float inX, float inY, float inShear);
-	
-	virtual void			CreateAndUsePattern(MColor inColor1, MColor inColor2);
-	
-	PangoFontMetrics*		GetMetrics();
+	virtual void FillEllipse(MRect inRect);
 
-	virtual float			GetAscent();
-	
-	virtual float			GetDescent();
-	
-	virtual float			GetLeading();
+	virtual void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
 
-	virtual float			GetXWidth();
-	
-	virtual void			DrawString(const std::string& inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
+	virtual void CreateAndUsePattern(MColor inColor1, MColor inColor2);
 
-	virtual uint32_t			GetStringWidth(const std::string& inText);
+	PangoFontMetrics *GetMetrics();
+
+	virtual float GetAscent();
+
+	virtual float GetDescent();
+
+	virtual float GetLeading();
+
+	virtual float GetXWidth();
+
+	virtual void DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
+
+	virtual uint32_t GetStringWidth(const std::string &inText);
 
 	// Text Layout options
-	
-	virtual void			SetText(const std::string& inText);
-	
-	virtual void			SetTabStops(float inTabWidth);
-	
-	virtual void			SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]);
-	virtual void			SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
-	virtual void			RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor);
 
-	virtual void			SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor);
-	
-	virtual void			IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t& outPosition);
+	virtual void SetText(const std::string &inText);
 
-	virtual bool			PositionToIndex(int32_t inPosition, uint32_t& outIndex);
-	
-	virtual float			GetTextWidth();
-	
-	virtual void			RenderText(float inX, float inY);
+	virtual void SetTabStops(float inTabWidth);
 
-	virtual void			DrawCaret(float inX, float inY, uint32_t inOffset);
-	
-	virtual void			BreakLines(uint32_t inWidth, std::vector<uint32_t>& outBreaks);
+	virtual void SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]);
+	virtual void SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
+	virtual void RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor);
 
-	virtual void			MakeTransparent(float inOpacity) {}
+	virtual void SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor);
 
-//	virtual GdkPixmap*		GetPixmap() const		{ return nullptr; }
+	virtual void IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t &outPosition);
 
-	virtual void			SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor) {}
+	virtual bool PositionToIndex(int32_t inPosition, uint32_t &outIndex);
+
+	virtual float GetTextWidth();
+
+	virtual void RenderText(float inX, float inY);
+
+	virtual void DrawCaret(float inX, float inY, uint32_t inOffset);
+
+	virtual void BreakLines(uint32_t inWidth, std::vector<uint32_t> &outBreaks);
+
+	virtual void MakeTransparent(float inOpacity) {}
+
+	//	virtual GdkPixmap*		GetPixmap() const		{ return nullptr; }
+
+	virtual void SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor) {}
 
   protected:
+	PangoItem *Itemize(const char *inText, PangoAttrList *inAttrs);
 
-	PangoItem*				Itemize(const char* inText, PangoAttrList* inAttrs);
+	void GetWhiteSpaceGlyphs(uint32_t &outSpace, uint32_t &outTab, uint32_t &outNL);
 
-	void					GetWhiteSpaceGlyphs(uint32_t& outSpace, uint32_t& outTab, uint32_t& outNL);
-
-	PangoLayout*			mPangoLayout;
-	PangoFontDescription*	mFont;
-	PangoFontMetrics*		mMetrics;
-	bool					mTextEndsWithNewLine;
-	uint32_t					mSpaceGlyph, mTabGlyph, mNewLineGlyph;
-	uint32_t					mPangoScale;
+	PangoLayout *mPangoLayout;
+	PangoFontDescription *mFont;
+	PangoFontMetrics *mMetrics;
+	bool mTextEndsWithNewLine;
+	uint32_t mSpaceGlyph, mTabGlyph, mNewLineGlyph;
+	uint32_t mPangoScale;
 };
