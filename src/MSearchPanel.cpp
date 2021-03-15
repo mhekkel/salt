@@ -49,9 +49,9 @@ MImageButton::MImageButton(const std::string& inID, MRect inBounds, const char* 
 		throw runtime_error("resource not found");
 
 	MBitmap buttons(rsrc.data(), rsrc.size());
-	mCloseButtonBitmaps[0] = MBitmap(buttons, MRect( 0, 0, 16, 16));
-	mCloseButtonBitmaps[1] = MBitmap(buttons, MRect(16, 0, 16, 16));
-	mCloseButtonBitmaps[2] = MBitmap(buttons, MRect(32, 0, 16, 16));
+	mCloseButtonBitmaps[0] = MBitmap(buttons, MRect{  0, 0, 16, 16 });
+	mCloseButtonBitmaps[1] = MBitmap(buttons, MRect{ 16, 0, 16, 16 });
+	mCloseButtonBitmaps[2] = MBitmap(buttons, MRect{ 32, 0, 16, 16 });
 }
 
 void MImageButton::Draw()

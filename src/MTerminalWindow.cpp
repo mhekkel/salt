@@ -206,9 +206,9 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 
 	mKeyDropper.reset(new pinch::exec_channel(mConnection, command, [this, comment](const string &, int status) {
 		if (status == 0)
-			DisplayAlert(this, "installed-public-key", comment, this->mServer);
+			DisplayAlert(this, "installed-public-key", { comment, this->mServer });
 		else
-			DisplayAlert(this, "failed-to-install-public-key", comment, this->mServer);
+			DisplayAlert(this, "failed-to-install-public-key", { comment, this->mServer });
 	}));
 
 	mKeyDropper->open();
@@ -429,7 +429,7 @@ bool MTerminalWindow::AllowClose(bool inLogOff)
 	if (mTerminalView->IsOpen())
 	{
 		Select();
-		result = DisplayAlert(this, "close-session-alert") == 1;
+		result = DisplayAlert(this, "close-session-alert", {}) == 1;
 	}
 
 	return result;

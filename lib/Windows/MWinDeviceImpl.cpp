@@ -718,7 +718,7 @@ void MWinDeviceImpl::LookupFont(const wstring &inFamily)
 			if (not exists)
 				index = 0;
 
-			UINT32_t length = 0;
+			UINT32 length = 0;
 			THROW_IF_HRESULT_ERROR(pFamilyNames->GetStringLength(index, &length));
 
 			vector<wchar_t> name(length + 1);
@@ -1137,7 +1137,7 @@ void MWinDeviceImpl::RenderText(
 				&selectionColorBrush));
 
 			DWRITE_TEXT_RANGE caretRange = {mSelectionStart, mSelectionLength};
-			UINT32_t actualHitTestCount = 0;
+			UINT32 actualHitTestCount = 0;
 
 			// Determine actual number of hit-test ranges
 			mTextLayout->HitTestTextRange(caretRange.startPosition, caretRange.length,
@@ -1147,7 +1147,7 @@ void MWinDeviceImpl::RenderText(
 			std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
 
 			mTextLayout->HitTestTextRange(caretRange.startPosition, caretRange.length,
-			                              inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
+			                              inX, inY, &hitTestMetrics[0], static_cast<UINT32>(hitTestMetrics.size()),
 			                              &actualHitTestCount);
 
 			// Draw the selection ranges behind the text.
@@ -1292,7 +1292,7 @@ void MWinDeviceImpl::RenderTextBackground(
 		range.startPosition = mTextIndex[inStart];
 		range.length = mTextIndex[inStart + inLength] - range.startPosition;
 
-		UINT32_t actualHitTestCount = 0;
+		UINT32 actualHitTestCount = 0;
 
 		// Determine actual number of hit-test ranges
 		mTextLayout->HitTestTextRange(range.startPosition, range.length,
@@ -1302,7 +1302,7 @@ void MWinDeviceImpl::RenderTextBackground(
 		std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
 
 		mTextLayout->HitTestTextRange(range.startPosition, range.length,
-		                              inX, inY, &hitTestMetrics[0], static_cast<UINT32_t>(hitTestMetrics.size()),
+		                              inX, inY, &hitTestMetrics[0], static_cast<UINT32>(hitTestMetrics.size()),
 		                              &actualHitTestCount);
 
 		// Draw the selection ranges behind the text.
@@ -1386,20 +1386,16 @@ MDeviceImpl *MDeviceImpl::Create()
 	return new MWinDeviceImpl();
 }
 
-MDeviceImpl *MDeviceImpl::Create(
-	MView *inView,
-	MRect inRect,
-	bool inCreateOffscreen)
+MDeviceImpl *MDeviceImpl::Create(MView *inView, MRect inRect)
 {
-	return new MWinDeviceImpl(inView, inRect, inCreateOffscreen);
+	return new MWinDeviceImpl(inView, inRect);
 }
 
 // --------------------------------------------------------------------
 
 //#include <AeroStyle.xml>
 
-void MDevice::GetSysSelectionColor(
-	MColor &outColor)
+void MDevice::GetSysSelectionColor(MColor &outColor)
 {
 	// just like Visual Studio does, we take a 2/3 mix of
 	// the system highlight color and white. This way we
@@ -1445,9 +1441,7 @@ inline void SafeRelease(T **ppT)
 	}
 }
 
-void MDevice::ListFonts(
-	bool inFixedWidthOnly,
-	vector<string> &outFonts)
+void MDevice::ListFonts(bool inFixedWidthOnly, vector<string> &outFonts)
 {
 	IDWriteFactory *pDWriteFactory = MWinDeviceImpl::GetDWFactory();
 
@@ -1456,7 +1450,7 @@ void MDevice::ListFonts(
 	// Get the system font collection.
 	HRESULT hr = pDWriteFactory->GetSystemFontCollection(&pFontCollection);
 
-	UINT32_t familyCount = 0;
+	UINT32 familyCount = 0;
 
 	// Get the number of font families in the collection.
 	if (SUCCEEDED(hr))
@@ -1464,7 +1458,7 @@ void MDevice::ListFonts(
 		familyCount = pFontCollection->GetFontFamilyCount();
 	}
 
-	for (UINT32_t i = 0; i < familyCount; ++i)
+	for (UINT32 i = 0; i < familyCount; ++i)
 	{
 		ComPtr<IDWriteFontFamily> pFontFamily;
 
@@ -1482,7 +1476,7 @@ void MDevice::ListFonts(
 			hr = pFontFamily->GetFamilyNames(&pFamilyNames);
 		}
 
-		UINT32_t index = 0;
+		UINT32 index = 0;
 		BOOL exists = false;
 
 		wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
@@ -1507,7 +1501,7 @@ void MDevice::ListFonts(
 		if (!exists)
 			index = 0;
 
-		UINT32_t length = 0;
+		UINT32 length = 0;
 
 		// Get the string length.
 		if (SUCCEEDED(hr))
@@ -1551,25 +1545,20 @@ void MDevice::ListFonts(
 	}
 }
 
-void MWinDeviceImpl::SetDrawWhiteSpace(
-	bool inDrawWhiteSpace,
-	MColor inWhiteSpaceColor)
+void MWinDeviceImpl::SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor)
 {
 	mDrawWhiteSpace = inDrawWhiteSpace;
 	mWhitespaceColor = inWhiteSpaceColor;
 }
 
-void MWinDeviceImpl::SetReplaceUnknownCharacters(
-	bool inReplaceUnknownCharacters)
+void MWinDeviceImpl::SetReplaceUnknownCharacters(bool inReplaceUnknownCharacters)
 {
 	mReplaceUnknownCharacters = inReplaceUnknownCharacters;
 }
 
 // Theme support
 
-void MWinDeviceImpl::DrawListItemBackground(
-	MRect inBounds,
-	MListItemState inState)
+void MWinDeviceImpl::DrawListItemBackground(MRect inBounds, MListItemState inState)
 {
 	Save();
 

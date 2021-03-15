@@ -902,7 +902,7 @@ void NormalizePath(string& ioPath)
 	string path(ioPath);	
 	stack<unsigned long> dirs;
 	int r = 0;
-	unsigned long i = 0;
+	std::string::size_type i = 0;
 	
 	dirs.push(0);
 
@@ -944,7 +944,7 @@ void NormalizePath(string& ioPath)
 			continue;
 		}
 
-		unsigned long d = path.find('/', i + 1);
+		auto d = path.find('/', i + 1);
 
 		if (d == string::npos)
 			break;

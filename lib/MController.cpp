@@ -196,7 +196,7 @@ bool MController::TryCloseDocument(
 				name = mWindow->GetTitle();
 			
 #pragma message("FOUT!!! save changes alert?")
-			switch (DisplayAlert(mWindow, "save-changes-alert", name))
+			switch (DisplayAlert(mWindow, "save-changes-alert", { name }))
 			{
 				case kAskSaveChanges_Save:
 					if (SaveDocument())
@@ -254,7 +254,7 @@ void MController::TryDiscardChanges()
 	if (mDocument == nullptr)
 		return;
 
-	if (DisplayAlert(mWindow, "discard-changes-alert", mDocument->GetWindowTitle()) == kDiscardChanges_Discard)
+	if (DisplayAlert(mWindow, "discard-changes-alert", { mDocument->GetWindowTitle() }) == kDiscardChanges_Discard)
 		RevertDocument();
 }
 

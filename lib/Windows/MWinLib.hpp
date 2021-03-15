@@ -9,14 +9,14 @@
 
 #undef INT8_t_MIN
 #undef INT16_t_MIN
-#undef INT32_t_MIN
+#undef INT32_MIN
 #undef INT64_t_MIN
 #undef INT8_t_MAX
 #undef UINT8_t_MAX
 #undef INT16_t_MAX
 #undef UINT16_t_MAX
-#undef INT32_t_MAX
-#undef UINT32_t_MAX
+#undef INT32_MAX
+#undef UINT32_MAX
 #undef INT64_t_MAX
 #undef UINT64_t_MAX
 

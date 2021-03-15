@@ -23,7 +23,7 @@ public:
 
     ComPtr(T* lComPtr = nullptr) : m_ComPtr(lComPtr)
     {
-        static_assert(std::tr1::is_base_of<IUnknown, T>::value, "T needs to be IUnknown based");
+        static_assert(std::is_base_of_v<IUnknown, T>, "T needs to be IUnknown based");
         if (m_ComPtr)
         {
             m_ComPtr->AddRef();
@@ -32,7 +32,7 @@ public:
 
     ComPtr(const ComPtr<T>& lComPtrObj)
     {
-        static_assert(std::tr1::is_base_of<IUnknown, T>::value, "T needs to be IUnknown based");
+        static_assert(std::is_base_of_v<IUnknown, T>, "T needs to be IUnknown based");
         m_ComPtr = lComPtrObj.m_ComPtr;
 
         if (m_ComPtr)

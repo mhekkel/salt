@@ -359,7 +359,7 @@ void MSaltApp::OpenRecent(const string &inRecent)
 
 void MSaltApp::DoAbout()
 {
-	DisplayAlert(nullptr, "about-alert", GetApplicationVersion(), PACKAGE_VERSION);
+	DisplayAlert(nullptr, "about-alert", { GetApplicationVersion(), PACKAGE_VERSION });
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
@@ -368,7 +368,7 @@ bool MSaltApp::AllowQuit(bool inLogOff)
 		inLogOff or
 		mQuitPending or
 		(mConnectionPool.has_open_channels() == false and MTerminalWindow::IsAnyTerminalOpen() == false) or
-		DisplayAlert(nullptr, "close-all-sessions-alert") == 1;
+		DisplayAlert(nullptr, "close-all-sessions-alert", {}) == 1;
 
 	return mQuitPending;
 }
@@ -438,7 +438,7 @@ bool MSaltApp::ValidateHost(MWindow *window, const string &inHost, const string 
 	MKnownHostsList::iterator i = find(mKnownHosts.begin(), mKnownHosts.end(), host);
 	if (i == mKnownHosts.end())
 	{
-		switch (DisplayAlert(window, "unknown-host-alert", inHost, fingerprint))
+		switch (DisplayAlert(window, "unknown-host-alert", { inHost, fingerprint }))
 		{
 			// Add
 		case 1:
@@ -458,7 +458,7 @@ bool MSaltApp::ValidateHost(MWindow *window, const string &inHost, const string 
 	}
 	else if (value != i->key)
 	{
-		if (DisplayAlert(window, "host-key-changed-alert", inHost, fingerprint) != 2)
+		if (DisplayAlert(window, "host-key-changed-alert", { inHost, fingerprint }) != 2)
 			throw runtime_error("User cancelled");
 
 		i->key = value;

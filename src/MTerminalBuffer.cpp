@@ -997,8 +997,6 @@ bool MTerminalBuffer::FindPrevious(int32_t& ioLine, int32_t& ioColumn, const str
 	}
 	else if (inWrapAround and (ioLine < lineCount or ioColumn < static_cast<int32_t>(mWidth)))
 	{
-#warning("deep recursion found here...")
-
 		int32_t line = lineCount - mBuffer.size() - 1, column = mWidth - 1;
 		result = FindPrevious(line, column, inWhat, inIgnoreCase, false);
 		if (result and (line < ioLine or (line == ioLine and column + static_cast<int32_t>(what.size()) <= ioColumn)))

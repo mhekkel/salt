@@ -7,6 +7,8 @@
 
 #include "MWindow.hpp"
 
+#undef CreateDialog
+
 class MMenuBar;
 
 class MWindowImpl

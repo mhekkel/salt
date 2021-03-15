@@ -5,47 +5,47 @@
 
 #pragma once
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 struct MColor
 {
   public:
-	uint8_t		red;
-	uint8_t		green;
-	uint8_t		blue;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
 
-				MColor();
-				MColor(const MColor& inOther);
-				//MColor(// const GdkColor& inColor);
-				MColor(const char* inHex);
-				MColor(const std::string& inHex);
-				MColor(uint8_t inRed, uint8_t inGreen, uint8_t inBlue);
-				MColor(float inRed, float inGreen, float inBlue);
-	MColor&		operator=(const MColor& inOther);
+	MColor();
+	MColor(const MColor &inOther);
+	//MColor(// const GdkColor& inColor);
+	MColor(const char *inHex);
+	MColor(const std::string &inHex);
+	MColor(uint8_t inRed, uint8_t inGreen, uint8_t inBlue);
+	MColor(float inRed, float inGreen, float inBlue);
+	MColor &operator=(const MColor &inOther);
 
-	MColor		Disable(const MColor& inBackColor) const;
-	MColor		Disable(const MColor& inBackColor, float inScale) const;
-	MColor		Distinct(const MColor& inBackColor) const;
-	
+	MColor Disable(const MColor &inBackColor) const;
+	MColor Disable(const MColor &inBackColor, float inScale) const;
+	MColor Distinct(const MColor &inBackColor) const;
+
 	// bleach out a color (toward white, 0 <= factor <= 1)
-	MColor		Bleach(float inBleachFactor) const;	
-				//operator GdkColor() const;
+	MColor Bleach(float inBleachFactor) const;
+	//operator GdkColor() const;
 
-	bool		operator==(const MColor& rhs) const
-				{
-					return red == rhs.red and green == rhs.green and blue == rhs.blue;
-				}
+	bool operator==(const MColor &rhs) const
+	{
+		return red == rhs.red and green == rhs.green and blue == rhs.blue;
+	}
 
-	bool		operator!=(const MColor& rhs) const
-				{
-					return red != rhs.red or green != rhs.green or blue != rhs.blue;
-				}
+	bool operator!=(const MColor &rhs) const
+	{
+		return red != rhs.red or green != rhs.green or blue != rhs.blue;
+	}
 
-	std::string	hex() const;
-	void		hex(const std::string& inHex);
+	std::string hex() const;
+	void hex(const std::string &inHex);
 
-	std::string	str() const;
+	std::string str() const;
 };
 
 extern const MColor
@@ -57,8 +57,7 @@ extern const MColor
 	kSelectionColor,
 	kDialogBackgroundColor;
 
-std::ostream& operator<<(std::ostream& os, const MColor& inColor);
+std::ostream &operator<<(std::ostream &os, const MColor &inColor);
 
-void rgb2hsv(float r, float g, float b, float& h, float& s, float& v);
-void hsv2rgb(float h, float s, float v, float& r, float& g, float& b);
-
+void rgb2hsv(float r, float g, float b, float &h, float &s, float &v);
+void hsv2rgb(float h, float s, float v, float &r, float &g, float &b);

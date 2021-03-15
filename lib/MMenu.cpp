@@ -26,6 +26,8 @@
 #include "MPreferences.hpp"
 #include "MApplication.hpp"
 
+#undef AppendMenu
+
 using namespace std;
 namespace xml = zeep::xml;
 namespace io = boost::iostreams;

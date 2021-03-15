@@ -7,6 +7,7 @@
 
 #include <string>
 #include <map>
+#include <functional>
 
 class MHandler;
 

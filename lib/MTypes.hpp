@@ -17,32 +17,20 @@ struct MRect
 	int32_t width, height;
 
 	MRect();
-
 	MRect(const MRect &inRHS);
-
 	MRect(int32_t inX, int32_t inY, int32_t inWidth, int32_t inHeight);
-
-	MRect(float inX, float inY, float inWidth, float inHeight);
-
 	bool Intersects(const MRect &inRHS) const;
-
 	bool ContainsPoint(int32_t inX, int32_t inY) const;
-
 	void PinPoint(int32_t &ioX, int32_t &ioY) const;
-
 	void InsetBy(int32_t inDeltaX, int32_t inDeltaY);
-
 	bool empty() const;
 	operator bool() const;
-
 	// Intersection
 	MRect operator&(const MRect &inRegion);
 	MRect &operator&=(const MRect &inRegion);
-
 	// Union
 	MRect operator|(const MRect &inRegion);
 	MRect &operator|=(const MRect &inRegion);
-
 	bool operator==(const MRect &inRect) const;
 	bool operator!=(const MRect &inRect) const;
 };
@@ -54,26 +42,19 @@ public:
 	MRegion(const MRect &inRect);
 	MRegion(const MRegion &inRegion);
 	~MRegion();
-
 	MRegion &operator=(const MRegion &inRegion);
-
 	// Intersection
 	MRegion operator&(const MRegion &inRegion) const;
 	MRegion operator&(const MRect &inRect) const;
-
 	MRegion &operator&=(const MRegion &inRegion);
 	MRegion &operator&=(const MRect &inRect);
-
 	// Union
 	MRegion operator|(const MRegion &inRegion) const;
 	MRegion operator|(const MRect &inRect) const;
-
 	MRegion &operator|=(const MRegion &inRegion);
 	MRegion &operator|=(const MRect &inRect);
-
 	// test for empty region
 	operator bool() const;
-
 	void OffsetBy(int32_t inX, int32_t inY);
 	bool ContainsPoint(int32_t inX, int32_t inY) const;
 	MRect GetBounds() const;
@@ -177,7 +158,6 @@ enum MKeyCode
 	kF18KeyCode = 0x0112,
 	kF19KeyCode = 0x0113,
 	kF20KeyCode = 0x0114,
-
 	// my own pseudo key codes
 	kEnterKeyCode = 0x0201,
 };
@@ -229,7 +209,7 @@ inline MRect::MRect(const MRect &inRHS)
 //{
 //}
 
-inline MRect::MRect(int32_t inX, int32_t inY, int32_t inWidth, int32_t inHeight)
+inline MRect::MRect(long inX, long inY, long inWidth, long inHeight)
 	: x(inX), y(inY), width(inWidth), height(inHeight)
 {
 }

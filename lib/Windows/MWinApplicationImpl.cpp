@@ -7,6 +7,7 @@
 
 #include "MUtils.hpp"
 
+#include "MApplication.hpp"
 #include "MWinApplicationImpl.hpp"
 #include "MWinUtils.hpp"
 #include "MWinWindowImpl.hpp"

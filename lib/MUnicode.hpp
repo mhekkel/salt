@@ -186,7 +186,7 @@ class MEncoder
 	void				SetText(const std::string& inText);
 	void				SetText(const std::wstring& inText);
 	
-	uint32_t				GetBufferSize() const				{ return mBuffer.size(); }
+	std::size_t				GetBufferSize() const				{ return mBuffer.size(); }
 	const void*			Peek() const						{ return &mBuffer[0]; }
 	
 	template<class Iterator>

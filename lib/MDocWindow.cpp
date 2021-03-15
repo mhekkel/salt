@@ -13,6 +13,8 @@
 #include "MStrings.hpp"
 #include "MApplication.hpp"
 
+#undef GetNextWindow
+
 using namespace std;
 
 // ------------------------------------------------------------------

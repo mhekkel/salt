@@ -11,6 +11,7 @@
 #include "MUtils.hpp"
 #include "MWinUtils.hpp"
 #include "MError.hpp"
+#include "MApplication.hpp"
 #include "MWinApplicationImpl.hpp"
 
 #pragma comment(lib, "Version.lib")

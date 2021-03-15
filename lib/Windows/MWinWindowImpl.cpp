@@ -226,6 +226,8 @@ LRESULT MWinWindowImpl::WinProc(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARA
 
 void MWinWindowImpl::Create(MRect inBounds, const wstring& inTitle)
 {
+	using namespace std::placeholders;
+
 	AddHandler(WM_CREATE,			std::bind(&MWinWindowImpl::WMCreate, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_CLOSE,			std::bind(&MWinWindowImpl::WMClose, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_ACTIVATE,			std::bind(&MWinWindowImpl::WMActivate, this, _1, _2, _3, _4, _5));
@@ -287,11 +289,11 @@ void MWinWindowImpl::Create(MRect inBounds, const wstring& inTitle)
 	RECT clientArea;
 	::GetClientRect(GetHandle(), &clientArea);
 
-	mWindow->SetFrame(MRect(
+	mWindow->SetFrame(MRect{
 		clientArea.left,
 		clientArea.top,
 		clientArea.right - clientArea.left,
-		clientArea.bottom - clientArea.top));
+		clientArea.bottom - clientArea.top});
 
 	if (mMenubar != nullptr)
 		mMenubar->SetTarget(mWindow);
@@ -1623,8 +1625,8 @@ void MWindow::GetMainScreenBounds(
 	RECT bounds;
 
 	if (::SystemParametersInfo(SPI_GETWORKAREA, 0, (LPVOID)&bounds, 0))
-		outBounds = MRect(bounds.left, bounds.top,
-			bounds.right - bounds.left, bounds.bottom - bounds.top);
+		outBounds = MRect{bounds.left, bounds.top,
+			bounds.right - bounds.left, bounds.bottom - bounds.top};
 	else
 	{
 		/* Get the root DC */

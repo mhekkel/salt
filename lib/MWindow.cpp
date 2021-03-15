@@ -21,6 +21,8 @@
 #include "mrsrc.hpp"
 #include "MUtils.hpp"
 
+#undef GetNextWindow
+
 using namespace std;
 using namespace zeep;
 namespace io = boost::iostreams;

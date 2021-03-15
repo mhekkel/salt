@@ -57,7 +57,7 @@ class MWinDeviceImpl : public MDeviceImpl
 	virtual ~MWinDeviceImpl();
 	virtual void Save();
 	virtual void Restore();
-	virtual MRect GetBounds() const { return MRect(0, 0, 100, 100); }
+	virtual MRect GetBounds() const { return { 0, 0, 100, 100 }; }
 
 	virtual void SetFont(const std::string &inFont);
 	virtual void SetForeColor(MColor inColor);

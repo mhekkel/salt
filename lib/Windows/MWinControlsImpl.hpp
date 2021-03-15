@@ -406,28 +406,34 @@ class MWinListBoxImpl : public MWinControlImpl<MListBox>
 	std::vector<std::string> mItems;
 };
 
-class MWinListViewImpl : public MWinControlImpl<MListView>
+// class MWinListViewImpl : public MWinControlImpl<MListView>
+// {
+//   public:
+// 					MWinListViewImpl(MListView* inListView);
+
+// 	virtual void	AddItem(const std::string& inLabel);
+
+// 	virtual void	CreateParams(DWORD& outStyle, DWORD& outExStyle,
+// 						std::wstring& outClassName, HMENU& outMenu);
+// 	virtual void	CreateHandle(MWinProcMixin* inParent, MRect inBounds,
+// 						const std::wstring& inTitle);
+
+// 	virtual void	AddedToWindow();
+
+//   private:
+
+// 	virtual bool	LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
+// 	virtual bool	LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
+
+// 	std::vector<std::string> mItems;
+// };
+
+class MWinBoxControlImpl : public MWinControlImpl<MBoxControl>
 {
   public:
-					MWinListViewImpl(MListView* inListView);
-
-	virtual void	AddItem(const std::string& inLabel);
+					MWinBoxControlImpl(MBoxControl* inControl);
 
 	virtual void	CreateParams(DWORD& outStyle, DWORD& outExStyle,
 						std::wstring& outClassName, HMENU& outMenu);
-	virtual void	CreateHandle(MWinProcMixin* inParent, MRect inBounds,
-						const std::wstring& inTitle);
-
-	virtual void	AddedToWindow();
-
-  private:
-
-	virtual bool	LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-	virtual bool	LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult);
-
-	std::vector<std::string> mItems;
 };
 
-
-
-#endif

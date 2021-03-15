@@ -52,7 +52,7 @@ class MDocument : public MHandler
 	// the MVC interface
 	void				AddController(MController* inController);
 	void				RemoveController(MController* inController);
-	uint32_t				CountControllers() const			{ return mControllers.size(); }
+	std::size_t				CountControllers() const			{ return mControllers.size(); }
 	virtual MController*
 						GetFirstController() const;
 	MControllerList		GetControllers() const				{ return mControllers; }

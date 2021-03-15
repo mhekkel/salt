@@ -48,7 +48,7 @@ int32_t DisplayAlert(
 	// build an alert
 	xml::element* root = doc.find_first("/alert");
 	
-	if (root->qname() != "alert")
+	if (root->name() != "alert")
 		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
 
 	// OK, setup a standard Task dialog
@@ -79,13 +79,13 @@ int32_t DisplayAlert(
 	uint32_t cancelID = 0;
 	const uint32_t kButtenNrOffset = 0x01000;
 
-	for (xml::element* item: *root)
+	for (auto &item: *root)
 	{
-		if (item->qname() == "content")
+		if (item.name() == "content")
 		{
 			// replace parameters
 			char s[] = "^0";
-			string text = localise(inResourceName, item->content());
+			string text = localise(inResourceName, item.get_content());
 	
 			for (string a: inArguments)
 			{
@@ -97,11 +97,11 @@ int32_t DisplayAlert(
 
 			content = c2w(text);
 		}
-		else if (item->qname() == "instruction")
+		else if (item.name() == "instruction")
 		{
 			// replace parameters
 			char s[] = "^0";
-			string text = localise(inResourceName, item->content());
+			string text = localise(inResourceName, item.get_content());
 	
 			for (string a: inArguments)
 			{
@@ -111,14 +111,14 @@ int32_t DisplayAlert(
 
 			instruction = c2w(text);
 		}
-		else if (item->qname() == "buttons")
+		else if (item.name() == "buttons")
 		{
-			for (xml::element* button: *item)
+			for (auto &button: item)
 			{
-				if (button->qname() == "button")
+				if (button.name() == "button")
 				{
-					string label = localise(inResourceName, button->get_attribute("title"));
-					uint32_t cmd = atoi(button->get_attribute("cmd").c_str());
+					string label = localise(inResourceName, button.get_attribute("title"));
+					uint32_t cmd = atoi(button.get_attribute("cmd").c_str());
 
 					assert(cmd < 10);
 					cmd += kButtenNrOffset;
@@ -137,7 +137,7 @@ int32_t DisplayAlert(
 						buttons.push_back(button);
 					}
 
-					if (button->get_attribute("default") == "true")
+					if (button.get_attribute("default") == "true")
 						config.nDefaultButton = cmd;
 				}
 			}

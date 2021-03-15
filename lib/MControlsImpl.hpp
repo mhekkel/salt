@@ -294,17 +294,17 @@ public:
 					Create(MListBox* inListBox);
 };
 
-class MListViewImpl : public MControlImpl<MListView>
-{
-public:
-					MListViewImpl(MListView* inListView)
-						: MControlImpl<MListView>(inListView)				{}
+// class MListViewImpl : public MControlImpl<MListView>
+// {
+// public:
+// 					MListViewImpl(MListView* inListView)
+// 						: MControlImpl<MListView>(inListView)				{}
 
-	virtual void	AddItem(const std::string& inText) = 0;
+// 	virtual void	AddItem(const std::string& inText) = 0;
 
-	static MListViewImpl*
-					Create(MListView* inListView);
-};
+// 	static MListViewImpl*
+// 					Create(MListView* inListView);
+// };
 
 #ifndef _MSC_VER
 // --------------------------------------------------------------------

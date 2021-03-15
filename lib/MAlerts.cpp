@@ -9,15 +9,15 @@
 
 void DisplayError(const std::exception &inErr)
 {
-	DisplayAlert(nullptr, "error-alert", inErr.what());
+	DisplayAlert(nullptr, "error-alert", { inErr.what() });
 }
 
 void DisplayError(const boost::system::error_code &ec)
 {
-	DisplayAlert(nullptr, "error-alert", ec.message());
+	DisplayAlert(nullptr, "error-alert", { ec.message() });
 }
 
 void DisplayError(const std::string &inErr)
 {
-	DisplayAlert(nullptr, "error-alert", inErr);
+	DisplayAlert(nullptr, "error-alert", { inErr });
 }

@@ -24,7 +24,7 @@ namespace
 	
 UINT
 	sCFSTR_FILEDESCRIPTOR = ::RegisterClipboardFormat(CFSTR_FILEDESCRIPTOR),
-	sCFSTR_JapiCanvas = ::RegisterClipboardFormat(L"MWinCanvasImplPtr");
+	sCFSTR_MWinCanvasImpl = ::RegisterClipboardFormat(L"MWinCanvasImplPtr");
 
 class MDropTarget : public IDropTarget
 {
@@ -80,7 +80,7 @@ HRESULT __stdcall MDropTarget::DragEnter(
 	FORMATETC
 		fmt_text = { CF_UNICODETEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL },
 		fmt_file = { CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL },
-		fmt_canv = { sCFSTR_JapiCanvas, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		fmt_canv = { sCFSTR_MWinCanvasImpl, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 //		fmt_file = { sCFSTR_FILEDESCRIPTOR, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 
 	HRESULT result = S_FALSE;
@@ -181,7 +181,7 @@ HRESULT __stdcall MDropTarget::Drop(IDataObject *pDataObj, DWORD grfKeyState, PO
 	FORMATETC
 		fmt_text = { CF_UNICODETEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL },
 		fmt_file = { CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL },
-		fmt_canv = { sCFSTR_JapiCanvas, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		fmt_canv = { sCFSTR_MWinCanvasImpl, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 
 	HRESULT result = S_FALSE;
 
@@ -346,7 +346,7 @@ HRESULT __stdcall MDropSource::GetData(FORMATETC *pformatetc, STGMEDIUM *pmedium
 				result = S_OK;
 			}
 		}
-		else if (pformatetc->cfFormat == sCFSTR_JapiCanvas)
+		else if (pformatetc->cfFormat == sCFSTR_MWinCanvasImpl)
 		{
 			pmedium->tymed = TYMED_HGLOBAL;
 			pmedium->pUnkForRelease = nullptr;
@@ -402,7 +402,7 @@ HRESULT __stdcall MDropSource::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC *
 	{
 		const FORMATETC fmt[] = {
 			{ CF_UNICODETEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL },
-			{ sCFSTR_JapiCanvas, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL }
+			{ sCFSTR_MWinCanvasImpl, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL }
 		};
 		result = ::SHCreateStdEnumFmtEtc(2, fmt, ppenumFormatEtc);
 	}
@@ -450,6 +450,8 @@ MWinCanvasImpl::MWinCanvasImpl(
 	, mLastClickTime(0)
 	, mMonitor(nullptr)
 {
+	using namespace std::placeholders;
+
 	AddHandler(WM_PAINT,			std::bind(&MWinCanvasImpl::WMPaint, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_DISPLAYCHANGE,	std::bind(&MWinCanvasImpl::WMPaint, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_ERASEBKGND,		std::bind(&MWinCanvasImpl::WMEraseBkgnd, this, _1, _2, _3, _4, _5));
@@ -655,8 +657,12 @@ bool MWinCanvasImpl::WMPaint(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM i
 	RECT lUpdateRect;
 	if (::GetUpdateRect(inHWnd, &lUpdateRect, FALSE) == TRUE)
 	{
-		MRect update(lUpdateRect.left, lUpdateRect.top,
-			lUpdateRect.right - lUpdateRect.left, lUpdateRect.bottom - lUpdateRect.top);
+		MRect update{
+			static_cast<int32_t>(lUpdateRect.left),
+			static_cast<int32_t>(lUpdateRect.top),
+			static_cast<int32_t>(lUpdateRect.right - lUpdateRect.left),
+			static_cast<int32_t>(lUpdateRect.bottom - lUpdateRect.top)
+		};
 
 		//mControl->ConvertFromWindow(update.x, update.y);
 		int32_t sx, sy;

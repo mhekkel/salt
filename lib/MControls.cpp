@@ -349,19 +349,18 @@ void MListBox::SetValue(int32_t inValue)
 	mImpl->SetValue(inValue);
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MListView::MListView(const string& inID, MRect inBounds)
-	: MControl<MListViewImpl>(inID, inBounds, MListViewImpl::Create(this))
-{
-}
+// MListView::MListView(const string& inID, MRect inBounds)
+// 	: MControl<MListViewImpl>(inID, inBounds, MListViewImpl::Create(this))
+// {
+// }
 
-void MListView::AddItem(const string& inLabel)
-{
-	mImpl->AddItem(inLabel);
-}
+// void MListView::AddItem(const string& inLabel)
+// {
+// 	mImpl->AddItem(inLabel);
+// }
 
-#ifndef _MSC_VER
 // --------------------------------------------------------------------
 // Gtk specific controls
 
@@ -371,5 +370,3 @@ MBoxControl::MBoxControl(const std::string& inID, MRect inBounds, bool inHorizon
 		inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding))
 {
 }
-
-#endif

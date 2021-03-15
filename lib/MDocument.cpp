@@ -255,7 +255,7 @@ void MDocument::SetModified(bool inModified)
 
 void MDocument::CheckIfModifiedOnDisk(MWindow* inDocWindow)
 {
-	if (mFile.IsModifiedOnDisk() and DisplayAlert(inDocWindow, "reload-modified-file", mFile.GetPath()) == 2)
+	if (mFile.IsModifiedOnDisk() and DisplayAlert(inDocWindow, "reload-modified-file", { mFile.GetPath().string() }) == 2)
 		RevertDocument();
 	//else
 	//	mFile.ResetFileInfo();
@@ -380,6 +380,6 @@ void MDocument::IOError(const std::string& inError)
 bool MDocument::IOAskOverwriteNewer()
 {
 	fs::path path = mFile.GetPath();
-	return DisplayAlert(nullptr, "ask-overwrite-newer", path.filename()) == 2;
+	return DisplayAlert(nullptr, "ask-overwrite-newer", { path.filename().string() }) == 2;
 }
 

@@ -204,8 +204,9 @@ void MPreferencesDialog::Apply()
 			ba::trim(a);
 			if (allowed.count(a) == 0)
 			{
-				DisplayAlert(this, "algo-unsupported", alg.desc, a);
+				DisplayAlert(this, "algo-unsupported", { alg.desc, a });
 				ok = false;
+				break;
 			}
 		}
 		

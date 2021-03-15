@@ -614,11 +614,11 @@ void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inR
 
 MRect MTerminalView::GetCharacterBounds(uint32_t inLine, uint32_t inColumn)
 {
-	return MRect(
+	return {
 		kBorderWidth + static_cast<int32_t>(ceil(inColumn * mCharWidth)),
 		kBorderWidth + inLine * mLineHeight,
 		static_cast<int32_t>(ceil(mCharWidth)),
-		mLineHeight);
+		mLineHeight};
 }
 
 bool MTerminalView::GetCharacterForPosition(int32_t inX, int32_t inY, int32_t &outLine, int32_t &outColumn)
@@ -2485,7 +2485,7 @@ MRect MTerminalView::GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows)
 {
 	uint32_t w, h;
 	GetTerminalMetrics(inColumns, inRows, Preferences::GetBoolean("show-status-line", false), w, h);
-	return MRect(0, 0, w, h);
+	return { 0, 0, w, h };
 }
 
 void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
@@ -2910,7 +2910,7 @@ void MTerminalView::Emulate()
 		{
 			Invalidate();
 			GetWindow()->UpdateNow();
-			usleep(10000);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 #endif
 		// process bytes. We try to keep this code UTF-8 savvy

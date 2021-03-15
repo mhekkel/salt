@@ -277,6 +277,8 @@ void MWinButtonImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
 void MWinButtonImpl::CreateHandle(MWinProcMixin* inParent,
 	MRect inBounds, const wstring& inTitle)
 {
+	using namespace std::placeholders;
+
 	MWinControlImpl::CreateHandle(inParent, inBounds, inTitle);
 	
 	if (inParent != nullptr and mFlags & eBF_Split)
@@ -396,6 +398,8 @@ MWinExpanderImpl::MWinExpanderImpl(MExpander* inExpander, const string& inLabel)
 	, mLastExit(0)
 	, mDC(nullptr)
 {
+	using namespace std::placeholders;
+
 	AddHandler(WM_PAINT,			std::bind(&MWinExpanderImpl::WMPaint, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_ACTIVATE,			std::bind(&MWinExpanderImpl::WMActivate, this, _1, _2, _3, _4, _5));
 	AddHandler(WM_LBUTTONDOWN,		std::bind(&MWinExpanderImpl::WMMouseDown, this, _1, _2, _3, _4, _5));
@@ -809,6 +813,8 @@ void MWinStatusbarImpl::CreateParams(
 void MWinStatusbarImpl::CreateHandle(MWinProcMixin* inParent,
 	MRect inBounds, const wstring& inTitle)
 {
+	using namespace std::placeholders;
+
 	MWinControlImpl::CreateHandle(inParent, inBounds, inTitle);
 	
 	if (inParent != nullptr)
@@ -1444,6 +1450,8 @@ MWinListHeaderImpl::MWinListHeaderImpl(MListHeader* inListHeader)
 void MWinListHeaderImpl::CreateHandle(MWinProcMixin* inParent, MRect inBounds,
 	const wstring& inTitle)
 {
+	using namespace std::placeholders;
+
 	MWinControlImpl::CreateHandle(inParent, inBounds, inTitle);
 
 	if (inParent != nullptr)
@@ -1857,92 +1865,94 @@ MListBoxImpl* MListBoxImpl::Create(MListBox* inListBox)
 	return new MWinListBoxImpl(inListBox);
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MWinListViewImpl::MWinListViewImpl(MListView* inListView)
-	: MWinControlImpl(inListView, "")
-{
-}
+// MWinListViewImpl::MWinListViewImpl(MListView* inListView)
+// 	: MWinControlImpl(inListView, "")
+// {
+// }
 
-void MWinListViewImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
-	wstring& outClassName, HMENU& outMenu)
-{
-	MWinControlImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
+// void MWinListViewImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
+// 	wstring& outClassName, HMENU& outMenu)
+// {
+// 	MWinControlImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
 
-	outStyle = WS_CHILD | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER;
-	outExStyle |= WS_EX_STATICEDGE;
+// 	outStyle = WS_CHILD | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER;
+// 	outExStyle |= WS_EX_STATICEDGE;
 	
-	outClassName = WC_LISTVIEW;
-}
+// 	outClassName = WC_LISTVIEW;
+// }
 
-void MWinListViewImpl::CreateHandle(MWinProcMixin* inParent, MRect inBounds, const wstring& inTitle)
-{
-	MWinControlImpl::CreateHandle(inParent, inBounds, inTitle);
+// void MWinListViewImpl::CreateHandle(MWinProcMixin* inParent, MRect inBounds, const wstring& inTitle)
+// {
+// 	using namespace std::placeholders;
+
+// 	MWinControlImpl::CreateHandle(inParent, inBounds, inTitle);
 	
-	// add a single column
-    LVCOLUMN lvc = {};
+// 	// add a single column
+//     LVCOLUMN lvc = {};
 
-    lvc.mask = LVCF_FMT | LVCF_SUBITEM;
-	lvc.cx = inBounds.width - 10;
-	lvc.fmt = LVCFMT_LEFT;
-	::SendMessage(GetHandle(), LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
+//     lvc.mask = LVCF_FMT | LVCF_SUBITEM;
+// 	lvc.cx = inBounds.width - 10;
+// 	lvc.fmt = LVCFMT_LEFT;
+// 	::SendMessage(GetHandle(), LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
 
-	if (inParent != nullptr)
-	{
-		inParent->AddNotify(LVN_ITEMACTIVATE, GetHandle(),
-			std::bind(&MWinListViewImpl::LVMItemActivate, this, _1, _2, _3));
-		inParent->AddNotify(LVN_GETDISPINFO, GetHandle(),
-			std::bind(&MWinListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
-	}
-}
+// 	if (inParent != nullptr)
+// 	{
+// 		inParent->AddNotify(LVN_ITEMACTIVATE, GetHandle(),
+// 			std::bind(&MWinListViewImpl::LVMItemActivate, this, _1, _2, _3));
+// 		inParent->AddNotify(LVN_GETDISPINFO, GetHandle(),
+// 			std::bind(&MWinListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
+// 	}
+// }
 
-void MWinListViewImpl::AddedToWindow()
-{
-	MWinControlImpl::AddedToWindow();
+// void MWinListViewImpl::AddedToWindow()
+// {
+// 	MWinControlImpl::AddedToWindow();
 	
-	for (string& item: mItems)
-		AddItem(item);
+// 	for (string& item: mItems)
+// 		AddItem(item);
 	
-	mItems.clear();
-}
+// 	mItems.clear();
+// }
 
-void MWinListViewImpl::AddItem(const string& inText)
-{
-	if (GetHandle() != nullptr)
-		mItems.push_back(inText);
-	else
-	{
-		wstring text(c2w(inText));
+// void MWinListViewImpl::AddItem(const string& inText)
+// {
+// 	if (GetHandle() != nullptr)
+// 		mItems.push_back(inText);
+// 	else
+// 	{
+// 		wstring text(c2w(inText));
 
-		LVITEM item = {};
+// 		LVITEM item = {};
 		
-		item.mask = LVIF_TEXT | LVIF_STATE;
-		item.pszText = const_cast<wchar_t*>(text.c_str());
-		item.iItem = ::SendMessage(GetHandle(), LVM_GETITEMCOUNT, 0, 0);
+// 		item.mask = LVIF_TEXT | LVIF_STATE;
+// 		item.pszText = const_cast<wchar_t*>(text.c_str());
+// 		item.iItem = ::SendMessage(GetHandle(), LVM_GETITEMCOUNT, 0, 0);
 		
-		::SendMessage(GetHandle(), LVM_INSERTITEM, 0, (LPARAM)&item);
-	}
-}
+// 		::SendMessage(GetHandle(), LVM_INSERTITEM, 0, (LPARAM)&item);
+// 	}
+// }
 
-bool MWinListViewImpl::LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-{
-	NMITEMACTIVATE* nmItemActivate = reinterpret_cast<NMITEMACTIVATE*>(inLParam);
+// bool MWinListViewImpl::LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// {
+// 	NMITEMACTIVATE* nmItemActivate = reinterpret_cast<NMITEMACTIVATE*>(inLParam);
 	
-	mControl->eValueChanged(mControl->GetID(), nmItemActivate->iItem);
+// 	mControl->eValueChanged(mControl->GetID(), nmItemActivate->iItem);
 	
-	return true;
-}
+// 	return true;
+// }
 
-bool MWinListViewImpl::LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-{
-	NMLVDISPINFO* plvdi = reinterpret_cast<NMLVDISPINFO*>(inLParam);
+// bool MWinListViewImpl::LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// {
+// 	NMLVDISPINFO* plvdi = reinterpret_cast<NMLVDISPINFO*>(inLParam);
 	
 	
-	return true;
-}
+// 	return true;
+// }
 
-MListViewImpl* MListViewImpl::Create(MListView* inListView)
-{
-	return new MWinListViewImpl(inListView);
-}
+// MListViewImpl* MListViewImpl::Create(MListView* inListView)
+// {
+// 	return new MWinListViewImpl(inListView);
+// }
 

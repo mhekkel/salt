@@ -5,85 +5,89 @@
 
 #include "MWinLib.hpp"
 
+#include <regex>
+
 #include <boost/program_options.hpp>
 
-#include <windows.h>
 #include <ddeml.h>
+#include <windows.h>
 
-#include "MWinApplicationImpl.hpp"
-#include "MError.hpp"
-#include "MWinUtils.hpp"
-#include "MDocument.hpp"
-#include "MDocClosedNotifier.hpp"
+#include "MApplication.hpp"
 #include "MCommands.hpp"
+#include "MDocClosedNotifier.hpp"
+#include "MDocument.hpp"
+#include "MError.hpp"
+#include "MWinApplicationImpl.hpp"
+#include "MWinUtils.hpp"
 
 using namespace std;
 namespace po = boost::program_options;
 
 class MWinDocClosedNotifierImpl : public MDocClosedNotifierImpl
 {
-public:
-							MWinDocClosedNotifierImpl(HCONV inConv)
-								: mConv(inConv) {}
+  public:
+	MWinDocClosedNotifierImpl(HCONV inConv)
+		: mConv(inConv)
+	{
+	}
 
-							~MWinDocClosedNotifierImpl()
-							{
-								eDocClosed(mConv);
-							}
+	~MWinDocClosedNotifierImpl()
+	{
+		eDocClosed(mConv);
+	}
 
-	MEventOut<void(HCONV)>	eDocClosed;
+	MEventOut<void(HCONV)> eDocClosed;
 
-	virtual bool			ReadSome(string& outText)		{ return false; }
+	virtual bool ReadSome(string &outText) { return false; }
 
-private:
-	HCONV					mConv;
+  private:
+	HCONV mConv;
 };
 
 class MDDEImpl
 {
-public:
-						MDDEImpl(uint32_t inInst);
-						~MDDEImpl();
+  public:
+	MDDEImpl(uint32_t inInst);
+	~MDDEImpl();
 
-	static uint32_t		Init();
+	static uint32_t Init();
 
-	bool				IsServer() const;
-	void				Send(HCONV inConversation, const wstring& inCommand);
-	void				Open(const string& inFile);
-	void				New();
-	void				Wait();
+	bool IsServer() const;
+	void Send(HCONV inConversation, const wstring &inCommand);
+	void Open(const string &inFile);
+	void New();
+	void Wait();
 
-protected:
-
+  protected:
 	MEventIn<void(HCONV)>
-						eDocClosed;
+		eDocClosed;
 
-	void				DocClosed(HCONV inConversation);
+	void DocClosed(HCONV inConversation);
 
-	HDDEDATA			Callback(UINT uType, UINT uFmt, HCONV hconv,
-							HSZ hsz1, HSZ hsz2, HDDEDATA hdata,
-							ULONG_PTR dwData1, ULONG_PTR dwData2);
+	HDDEDATA Callback(UINT uType, UINT uFmt, HCONV hconv,
+	                  HSZ hsz1, HSZ hsz2, HDDEDATA hdata,
+	                  ULONG_PTR dwData1, ULONG_PTR dwData2);
 
 	static HDDEDATA CALLBACK
-						DdeCallback(UINT uType, UINT uFmt, HCONV hconv,
-							HSZ hsz1, HSZ hsz2, HDDEDATA hdata,
-							ULONG_PTR dwData1, ULONG_PTR dwData2)
-						{
-							HDDEDATA result = DDE_FNOTPROCESSED;
-							if (sInstance != nullptr)
-								 result = sInstance->Callback(uType, uFmt, hconv, hsz1, hsz2, hdata, dwData1, dwData2);
-							return result;
-						}
+	DdeCallback(UINT uType, UINT uFmt, HCONV hconv,
+	            HSZ hsz1, HSZ hsz2, HDDEDATA hdata,
+	            ULONG_PTR dwData1, ULONG_PTR dwData2)
+	{
+		HDDEDATA result = DDE_FNOTPROCESSED;
+		if (sInstance != nullptr)
+			result = sInstance->Callback(uType, uFmt, hconv, hsz1, hsz2, hdata, dwData1, dwData2);
+		return result;
+	}
 
-	static MDDEImpl*	sInstance;
-	uint32_t				mInst;
-	HSZ					mServer, mTopic;
-	HCONV				mConv;				// 0 for server, defined for client
-	set<HCONV>			mConversations;		// only for servers
-	bool				mIsServer;
+	static MDDEImpl *sInstance;
+	uint32_t mInst;
+	HSZ mServer, mTopic;
+	HCONV mConv;               // 0 for server, defined for client
+	set<HCONV> mConversations; // only for servers
+	bool mIsServer;
 };
 
-MDDEImpl* MDDEImpl::sInstance;
+MDDEImpl *MDDEImpl::sInstance;
 
 MDDEImpl::MDDEImpl(uint32_t inInst)
 	: eDocClosed(this, &MDDEImpl::DocClosed)
@@ -112,7 +116,7 @@ MDDEImpl::~MDDEImpl()
 
 	::DdeFreeStringHandle(mInst, mServer);
 	::DdeFreeStringHandle(mInst, mTopic);
-//	::DdeUninitialize(mInst);
+	//	::DdeUninitialize(mInst);
 }
 
 uint32_t MDDEImpl::Init()
@@ -129,7 +133,7 @@ bool MDDEImpl::IsServer() const
 	return mIsServer;
 }
 
-void MDDEImpl::Send(HCONV inConversation, const wstring& inCommand)
+void MDDEImpl::Send(HCONV inConversation, const wstring &inCommand)
 {
 	DWORD err = 0;
 	HDDEDATA result = ::DdeClientTransaction(
@@ -139,7 +143,7 @@ void MDDEImpl::Send(HCONV inConversation, const wstring& inCommand)
 }
 
 HDDEDATA MDDEImpl::Callback(UINT uType, UINT uFmt, HCONV hconv,
-	HSZ hsz1, HSZ hsz2, HDDEDATA hdata, ULONG_PTR dwData1, ULONG_PTR dwData2)
+                            HSZ hsz1, HSZ hsz2, HDDEDATA hdata, ULONG_PTR dwData1, ULONG_PTR dwData2)
 {
 	HDDEDATA result = DMLERR_NO_ERROR;
 	switch (uType)
@@ -147,11 +151,11 @@ HDDEDATA MDDEImpl::Callback(UINT uType, UINT uFmt, HCONV hconv,
 		case XTYP_CONNECT:
 			result = (HDDEDATA)mTopic;
 			break;
-		
+
 		case XTYP_CONNECT_CONFIRM:
 			mConversations.insert(hconv);
 			break;
-		
+
 		case XTYP_DISCONNECT:
 			if (hconv == mConv)
 				mConv = 0;
@@ -162,15 +166,15 @@ HDDEDATA MDDEImpl::Callback(UINT uType, UINT uFmt, HCONV hconv,
 		case XTYP_EXECUTE:
 		{
 			DWORD len;
-			wchar_t* cmd = reinterpret_cast<wchar_t*>(::DdeAccessData(hdata, &len));
+			wchar_t *cmd = reinterpret_cast<wchar_t *>(::DdeAccessData(hdata, &len));
 			len /= sizeof(wchar_t);
 
 			if (cmd != nullptr)
 			{
 				wstring text(cmd, len);
-				static boost::wregex rx(L"\\[(open|new)(\\(\"(.+?)\"(,\\s*(\\d+))?\\))?\\]");
+				static std::regex rx(L"\\[(open|new)(\\(\"(.+?)\"(,\\s*(\\d+))?\\))?\\]");
 
-				boost::wsmatch match;
+				std::smatch match;
 				if (std::regex_match(text, match, rx))
 				{
 					//MDocument* doc = nullptr;
@@ -179,11 +183,11 @@ HDDEDATA MDDEImpl::Callback(UINT uType, UINT uFmt, HCONV hconv,
 					if (match.str(1) == L"open")
 					{
 						string file(w2c(match.str(3)));
-						//doc = 
-							gApp->Open(file);
+						//doc =
+						gApp->Open(file);
 					}
 					else if (match.str(1) == L"new")
-						//doc = 
+						//doc =
 						gApp->DoNew();
 
 					//if (doc != nullptr)
@@ -219,10 +223,10 @@ void MDDEImpl::DocClosed(HCONV inConversation)
 	}
 }
 
-void MDDEImpl::Open(const string& inFile)
+void MDDEImpl::Open(const string &inFile)
 {
 	MFile file(inFile);
-	
+
 	Send(mConv, (boost::wformat(L"[open(\"%1%\")]") % c2w(file.GetURL())).str());
 }
 
@@ -237,14 +241,14 @@ void MDDEImpl::Wait()
 	{
 		MSG message;
 
-		int result = ::GetMessageW (&message, NULL, 0, 0);
+		int result = ::GetMessageW(&message, NULL, 0, 0);
 		if (result <= 0)
 		{
 			if (result < 0)
 				result = message.wParam;
 			break;
 		}
-		
+
 		::TranslateMessage(&message);
 		::DispatchMessageW(&message);
 	}
@@ -252,9 +256,9 @@ void MDDEImpl::Wait()
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpszCmdLine, int nCmdShow)
 {
-//#if DEBUG
-//	atexit(memReportMemLeaks);
-//#endif
+	//#if DEBUG
+	//	atexit(memReportMemLeaks);
+	//#endif
 
 	int result = 0;
 
@@ -266,7 +270,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpszCmdLine, int n
 	if (inst != 0)
 	{
 		MDDEImpl dde(inst);
-		
+
 		if (dde.IsServer())
 			app->Initialise();
 
@@ -274,7 +278,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpszCmdLine, int n
 			dde.New();
 		else
 		{
-			for (string arg: args)
+			for (string arg : args)
 				dde.Open(arg);
 		}
 

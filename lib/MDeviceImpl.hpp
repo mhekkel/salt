@@ -39,7 +39,7 @@ class MDeviceImpl
 	virtual void Restore() {}
 
 	virtual bool IsPrinting(int32_t &outPage) const { return false; }
-	virtual MRect GetBounds() const { return MRect(0, 0, 100, 100); }
+	virtual MRect GetBounds() const { return { 0, 0, 100, 100 }; }
 	virtual void SetOrigin(int32_t inX, int32_t inY) {}
 
 	virtual void SetFont(const std::string &inFont) {}
@@ -100,6 +100,5 @@ class MDeviceImpl
 	virtual void DrawListItemBackground(MRect inBounds, MListItemState inState) {}
 
 	static MDeviceImpl *Create();
-	// static MDeviceImpl*		Create(MView* inView, MRect inRect, bool inCreateOffscreen);
 	static MDeviceImpl *Create(MView *inView);
 };

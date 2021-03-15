@@ -285,11 +285,11 @@ void MFallBackAnimationManagerImpl::Run()
 	}
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MAnimationManagerImpl* MAnimationManagerImpl::Create(MAnimationManager* inManager)
-{
-//	return new MGtkAnimationManagerImpl(inManager);
-	return new MWinAnimationManagerImpl(inManager);
-}
+// MAnimationManagerImpl* MAnimationManagerImpl::Create(MAnimationManager* inManager)
+// {
+// //	return new MGtkAnimationManagerImpl(inManager);
+// 	return new MWinAnimationManagerImpl(inManager);
+// }
 

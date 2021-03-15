@@ -601,29 +601,29 @@ MView* MWinDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int3
 	return result;
 }
 
-MView* MWinDialogImpl::CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY)
-{
-	string id = inTemplate->get_attribute("id");
+// MView* MWinDialogImpl::CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY)
+// {
+// 	string id = inTemplate->get_attribute("id");
 
-	MRect r(inX, inY, 0, 0);
-	MListView* result = new MListView(id, r);
+// 	MRect r(inX, inY, 0, 0);
+// 	MListView* result = new MListView(id, r);
 	
-	for (xml::element* listitem: inTemplate->find("./listitem"))
-	{
-		string text = l(listitem->content());
-		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
-		if (r.width < textWidth)
-			r.width = textWidth;
-		result->AddItem(text);
-	}
+// 	for (xml::element* listitem: inTemplate->find("./listitem"))
+// 	{
+// 		string text = l(listitem->content());
+// 		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
+// 		if (r.width < textWidth)
+// 			r.width = textWidth;
+// 		result->AddItem(text);
+// 	}
 	
-	r.width += static_cast<int32_t>(mDLUX * 6);
-	result->SetFrame(r);
+// 	r.width += static_cast<int32_t>(mDLUX * 6);
+// 	result->SetFrame(r);
 
-	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
+// 	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
 
-	return result;
-}
+// 	return result;
+// }
 
 MView* MWinDialogImpl::CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY)
 {
@@ -654,11 +654,11 @@ MView* MWinDialogImpl::CreateVBox(xml::element* inTemplate, int32_t inX, int32_t
 	if (not inTemplate->get_attribute("spacing").empty())
 		spacing = std::stoul(inTemplate->get_attribute("spacing"));
 
-	MRect r(inX, inY, 0, 0);
+	MRect r{inX, inY, 0, 0};
 	MView* result = new MVBox(id, r, static_cast<int32_t>(spacing * mDLUY));
 	
-	for (xml::element* b: inTemplate->children<xml::element>())
-		result->AddChild(CreateControls(b, 0, 0));
+	for (auto &b: *inTemplate)
+		result->AddChild(CreateControls(&b, 0, 0));
 	
 	return result;
 }
@@ -674,8 +674,8 @@ MView* MWinDialogImpl::CreateHBox(xml::element* inTemplate, int32_t inX, int32_t
 	MRect r(inX, inY, 0, 0);
 	MView* result = new MHBox(id, r, static_cast<int32_t>(spacing * mDLUX));
 	
-	for (xml::element* b: inTemplate->children<xml::element>())
-		result->AddChild(CreateControls(b, 0, 0));
+	for (auto &b: *inTemplate)
+		result->AddChild(CreateControls(&b, 0, 0));
 	
 	return result;
 }

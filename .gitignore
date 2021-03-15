@@ -13,3 +13,6 @@ msvc/Release
 msvc/x64
 .vs/
 msvc/salt.vcxproj.user
+msvc/MLib/Debug
+msvc/MWinLib/Debug
+
