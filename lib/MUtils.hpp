@@ -192,8 +192,6 @@ void GetModifierState(uint32_t& outModifiers, bool inAsync);
 bool IsModifierDown(int inModifierMask);
 void HexDump(const void* inBuffer, uint32_t inLength, std::ostream& outStream);
 //GdkPixbuf* CreateDot(// MColor inColor, // uint32_t inSize);
-void decode_base64(const std::string& inString, std::vector<uint8_t>& outBinary);
-void decode_base32(const std::string& inString, std::vector<uint8_t>& outBinary);
 void OpenURI(const std::string& inURI);
 std::string GetUserLocaleName();
 std::string GetApplicationVersion();

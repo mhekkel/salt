@@ -1,6 +1,5 @@
 bugs:
 
-? - CRASH bij het sluiten van een venster voor er een connectie is opgebouwd.
 - Geen Focus op checkbox in Search Panel
 
 [14-11-2013 16:26:46] Marc van Driel: Als ik salt en een verbinding open heb en verhuis van locatie met de laptop is de verbinding dood natuurlijk. Maar Salt is zooo intelligent dat het vraagt om een login voor het herstel van de verbinding. Echter, het opent steeds een nieuw login scherm. Als je niet oppast heb je er zo 20 of meer open staan...

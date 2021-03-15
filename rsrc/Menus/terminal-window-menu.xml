@@ -41,8 +41,8 @@
 		<item label="Find Previous" cmd="FndP" />
 		<item label="-"/>
 		<item label="Preferences" cmd='pref' />
-<!--		<item label="-"/>-->
-<!--		<item label="Debug Update" cmd='dbug' />-->
+		<!-- <item label="-"/> -->
+		<!-- <item label="Debug Update" cmd='dbug' /> -->
 	</menu>
 	<menu id='termmenu' label="Terminal">
 		<item label="Reset" cmd='rset'/>

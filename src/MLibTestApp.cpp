@@ -191,12 +191,12 @@ void MLibTestApp::DoQuit()
 //
 //	for_each(windows.begin(), windows.end(), [](MWindow* w) { w->Close(); });
 //
-//	// poll the io_service until all windows are closed
-//	mIOService.reset();
+//	// poll the io_context until all windows are closed
+//	mIOContext.reset();
 //		
 //	for (;;)
 //	{
-//		size_t n = mIOService.poll_one();
+//		size_t n = mIOContext.poll_one();
 //		if (n == 0 or MWindow::GetFirstWindow() == nullptr)
 //			break;
 //	}

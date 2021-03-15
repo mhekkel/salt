@@ -220,17 +220,16 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 class MPtyTerminalWindow : public MTerminalWindow
 {
 public:
-	MPtyTerminalWindow(boost::asio::io_service &inIOService);
+	MPtyTerminalWindow();
 
 	MTerminalWindow *Clone()
 	{
-		// return new MPtyTerminalWindow(mChannel->GetIOService());
-		return new MPtyTerminalWindow(static_cast<MSaltApp *>(gApp)->GetIOService());
+		return new MPtyTerminalWindow();
 	}
 };
 
-MPtyTerminalWindow::MPtyTerminalWindow(boost::asio::io_service &inIOService)
-	: MTerminalWindow(MTerminalChannel::Create(inIOService), "")
+MPtyTerminalWindow::MPtyTerminalWindow()
+	: MTerminalWindow(MTerminalChannel::Create(), "")
 {
 	SetTitle("Salt - terminal");
 }
@@ -441,9 +440,7 @@ void MTerminalWindow::Close()
 	mAnimationManager->Stop();
 	mTerminalView->Destroy();
 
-	mChannel->GetIOService().post([this]() {
-		this->MWindow::Close();
-	});
+	MWindow::Close();
 }
 
 bool MTerminalWindow::UpdateCommandStatus(
@@ -555,9 +552,9 @@ bool MTerminalWindow::ProcessCommand(
 // ------------------------------------------------------------------
 //
 
-MTerminalWindow *MTerminalWindow::Create(boost::asio::io_service &inIOService)
+MTerminalWindow *MTerminalWindow::Create()
 {
-	return new MPtyTerminalWindow(inIOService);
+	return new MPtyTerminalWindow();
 }
 
 MTerminalWindow *MTerminalWindow::Create(const string &inUser, const string &inHost, uint16_t inPort,

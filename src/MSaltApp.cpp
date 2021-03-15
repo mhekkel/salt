@@ -19,6 +19,7 @@
 #include "MAcceleratorTable.hpp"
 #include "MMenu.hpp"
 #include "MSaltApp.hpp"
+#include "MApplicationImpl.hpp"
 #include "MTerminalWindow.hpp"
 #include "MConnectDialog.hpp"
 #include "MPreferences.hpp"
@@ -32,7 +33,7 @@
 #include "MAddTOTPHashDialog.hpp"
 
 #if defined(_MSC_VER)
-#pragma comment(lib, "libassh")
+#pragma comment(lib, "libpinch")
 #pragma comment(lib, "libz")
 #endif
 
@@ -55,9 +56,8 @@ namespace
 
 // --------------------------------------------------------------------
 
-MSaltApp::MSaltApp(
-	MApplicationImpl *inImpl)
-	: MApplication(inImpl), mConnectionPool(mIOService)
+MSaltApp::MSaltApp(MApplicationImpl *inImpl)
+	: MApplication(inImpl), mConnectionPool(inImpl->mIOContext)
 {
 	MAcceleratorTable &at = MAcceleratorTable::Instance();
 
@@ -91,7 +91,6 @@ void MSaltApp::Initialise()
 		pinch::ssh_agent::instance().expose_pageant(true);
 
 	// recent menu
-
 	vector<string> recent;
 	Preferences::GetArray("recent-sessions", recent);
 	for (const string &r : recent)
@@ -99,8 +98,8 @@ void MSaltApp::Initialise()
 		if (std::regex_match(r, kRecentRE))
 			mRecent.push_back(r);
 	}
-	// known hosts
 
+	// known hosts
 	vector<string> knownHosts;
 	Preferences::GetArray("known-hosts", knownHosts);
 
@@ -140,19 +139,14 @@ void MSaltApp::SaveGlobals()
 	MApplication::SaveGlobals();
 }
 
-MApplication *MApplication::Create(
-	MApplicationImpl *inImpl)
+MApplication *MApplication::Create(MApplicationImpl *inImpl)
 {
 	return new MSaltApp(inImpl);
 }
 
 // --------------------------------------------------------------------
 
-bool MSaltApp::ProcessCommand(
-	uint32_t inCommand,
-	const MMenu *inMenu,
-	uint32_t inItemIndex,
-	uint32_t inModifiers)
+bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool result = true;
 
@@ -213,12 +207,7 @@ bool MSaltApp::ProcessCommand(
 	return result;
 }
 
-bool MSaltApp::UpdateCommandStatus(
-	uint32_t inCommand,
-	MMenu *inMenu,
-	uint32_t inItemIndex,
-	bool &outEnabled,
-	bool &outChecked)
+bool MSaltApp::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 {
 	bool result = true;
 
@@ -295,8 +284,7 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 	}
 }
 
-void MSaltApp::UpdatePublicKeyMenu(
-	MMenu *inMenu)
+void MSaltApp::UpdatePublicKeyMenu(MMenu *inMenu)
 {
 	inMenu->RemoveItems(0, inMenu->CountItems());
 
@@ -305,8 +293,7 @@ void MSaltApp::UpdatePublicKeyMenu(
 		inMenu->AppendItem(key->get_comment(), cmd_DropPublicKey);
 }
 
-void MSaltApp::UpdateTOTPMenu(
-	MMenu *inMenu)
+void MSaltApp::UpdateTOTPMenu(MMenu *inMenu)
 {
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 
@@ -393,33 +380,20 @@ void MSaltApp::DoQuit()
 
 	mConnectionPool.disconnect_all();
 
-	// closing windows happens asynchronously
-	list<MWindow *> windows;
-	MWindow *w = MWindow::GetFirstWindow();
-	while (w != nullptr)
-	{
+	vector<MWindow *> windows;
+
+	for (MWindow *w = MWindow::GetFirstWindow(); w != nullptr; w = w->GetNextWindow())
 		windows.push_back(w);
-		w = w->GetNextWindow();
-	}
 
-	for_each(windows.begin(), windows.end(), [](MWindow *w) { w->Close(); });
-
-	// poll the io_service until all windows are closed
-	mIOService.reset();
-
-	for (;;)
-	{
-		size_t n = mIOService.poll_one();
-		if (n == 0 or MWindow::GetFirstWindow() == nullptr)
-			break;
-	}
+	for (auto w: windows)
+		w->Close();
 
 	MApplication::DoQuit();
 }
 
 void MSaltApp::DoNew()
 {
-	MWindow *w = MTerminalWindow::Create(mIOService);
+	MWindow *w = MTerminalWindow::Create();
 	w->Select();
 }
 
@@ -441,38 +415,7 @@ void MSaltApp::Open(const string &inFile)
 	}
 }
 
-void MSaltApp::Pulse()
-{
-	MApplication::Pulse();
-
-	try
-	{
-		// poll for data for as long as 0.25 seconds
-		double stop = GetLocalTime() + 0.25;
-		mIOService.reset();
-
-		for (;;)
-		{
-			size_t n = mIOService.poll_one();
-			if (n == 0)
-				break;
-
-#if BOOST_VERSION >= 104700
-			if (mIOService.stopped())
-				break;
-#endif
-
-			if (GetLocalTime() > stop)
-				break;
-		}
-	}
-	catch (exception &e)
-	{
-		DisplayError(e);
-	}
-}
-
-bool MSaltApp::ValidateHost(MWindow* window, const string &inHost, const string &inAlgorithm, const vector<uint8_t> &inHostKey)
+bool MSaltApp::ValidateHost(MWindow *window, const string &inHost, const string &inAlgorithm, const vector<uint8_t> &inHostKey)
 {
 	bool result = true;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
