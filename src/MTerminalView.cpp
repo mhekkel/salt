@@ -1294,11 +1294,6 @@ void MTerminalView::Idle(double inTime)
 	//		mStatusbar->SetStatusText(3, desc, false);
 	//	}
 
-PRINT(("trace %g, %d %s %s", inTime,
-	__LINE__,
-	(update or mBuffer->IsDirty() ? "dirty" : "clean"),
-	(mInputBuffer.empty() ? "empty" : "full")));
-
 	if (update or mBuffer->IsDirty())
 		Invalidate();
 

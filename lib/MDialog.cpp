@@ -14,18 +14,26 @@
 
 #include <sstream>
 
-#include "MDialog.hpp"
-#include "MWindowImpl.hpp"
-#include "MPreferences.hpp"
-#include "MError.hpp"
 #include "MControls.hpp"
+#include "MDialog.hpp"
+#include "MError.hpp"
+#include "MPreferences.hpp"
+#include "MWindowImpl.hpp"
 
 using namespace std;
 
 MDialog *MDialog::sFirst;
 
 MDialog::MDialog(const string &inDialogResource)
-	: MWindow(MWindowImpl::CreateDialog(inDialogResource, this)), eButtonClicked(this, &MDialog::ButtonClicked), eCheckboxClicked(this, &MDialog::CheckboxChanged), eRadiobuttonClicked(this, &MDialog::RadiobuttonChanged), eTextChanged(this, &MDialog::TextChanged), eValueChanged(this, &MDialog::ValueChanged), eColorChanged(this, &MDialog::ColorChanged), mParentWindow(nullptr), mNext(nullptr)
+	: MWindow(MWindowImpl::CreateDialog(inDialogResource, this))
+	, eButtonClicked(this, &MDialog::ButtonClicked)
+	, eCheckboxClicked(this, &MDialog::CheckboxChanged)
+	, eRadiobuttonClicked(this, &MDialog::RadiobuttonChanged)
+	, eTextChanged(this, &MDialog::TextChanged)
+	, eValueChanged(this, &MDialog::ValueChanged)
+	, eColorChanged(this, &MDialog::ColorChanged)
+	, mParentWindow(nullptr)
+	, mNext(nullptr)
 {
 	GetImpl()->Finish();
 
@@ -54,9 +62,6 @@ MDialog::~MDialog()
 
 void MDialog::Show(MWindow *inParent)
 {
-	if (inParent)
-		GetImpl()->SetTransientFor(inParent);
-
 	MRect r, b;
 	GetWindowPosition(r);
 
@@ -73,6 +78,9 @@ void MDialog::Show(MWindow *inParent)
 	r.y = b.y + (b.height - r.height) / 3;
 
 	SetWindowPosition(r);
+
+	if (inParent)
+		GetImpl()->SetTransientFor(inParent);
 
 	MWindow::Show();
 	MWindow::Select();

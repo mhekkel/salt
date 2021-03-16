@@ -10,8 +10,8 @@
 
 #include <pinch/connection_pool.hpp>
 
-#include "MTypes.hpp"
 #include "MApplication.hpp"
+#include "MTypes.hpp"
 
 extern const char kAppName[], kVersionString[];
 
@@ -41,7 +41,7 @@ class MWindow;
 
 class MSaltApp : public MApplication
 {
-public:
+  public:
 	MSaltApp(MApplicationImpl *inImpl);
 
 	~MSaltApp();
@@ -57,10 +57,10 @@ public:
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
 
-	bool ValidateHost(MWindow* window, const std::string &inHost,
-					  const std::string &inAlg, const pinch::blob &inHostKey);
+	pinch::host_key_reply ValidateHost(const std::string &inHost,
+		const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
 
-private:
+  private:
 	virtual void DoAbout();
 
 	virtual bool AllowQuit(bool inLogOff);
@@ -75,21 +75,6 @@ private:
 	virtual void Initialise();
 	virtual void SaveGlobals();
 
-	struct MKnownHost
-	{
-		std::string host;
-		std::string alg;
-		std::string key;
-
-		bool operator==(const MKnownHost &rhs) const
-		{
-			return host == rhs.host and alg == rhs.alg;
-		}
-	};
-
-	typedef std::list<MKnownHost> MKnownHostsList;
-
 	std::deque<std::string> mRecent;
 	pinch::connection_pool mConnectionPool;
-	MKnownHostsList mKnownHosts;
 };

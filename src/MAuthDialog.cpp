@@ -14,16 +14,38 @@
 
 #include <pinch/channel.hpp>
 
-#include "MAuthDialog.hpp"
 #include "MAlerts.hpp"
+#include "MAuthDialog.hpp"
 #include "MStrings.hpp"
 
-using namespace std;
+MAuthDialog::MAuthDialog(const std::string &inTitle, MWindow *inParent)
+	: MDialog("auth-dialog")
+	, mParent(inParent)
+{
+	SetTitle(inTitle);
 
-MAuthDialog::MAuthDialog(const std::string &inTitle, pinch::auth_state_type state,
-						 const std::string &name, const std::string &inInstruction,
-						 const std::vector<pinch::prompt> &prompts, MWindow *inParent)
-	: MDialog("auth-dialog"), ePulse(this, &MAuthDialog::Pulse), mSentCredentials(false), mState(state)
+	SetText("instruction", _("Please provide password"));
+
+	SetVisible("label-1", true);
+	SetVisible("edit-1", true);
+
+	SetText("label-1", _("Password"));
+
+	SetPasswordChar("edit-1");
+
+	for (int id = 2; id <= 5; ++id)
+	{
+		SetVisible("label-" + std::to_string(id), false);
+		SetVisible("edit-" + std::to_string(id), false);
+	}
+
+	SetFocus("edit-1");
+}
+
+MAuthDialog::MAuthDialog(const std::string &inTitle,
+	const std::string &name, const std::string &inInstruction,
+	const std::vector<pinch::prompt> &prompts, MWindow *inParent)
+	: MDialog("auth-dialog")
 	, mParent(inParent)
 {
 	mFields = prompts.size();
@@ -57,62 +79,35 @@ MAuthDialog::MAuthDialog(const std::string &inTitle, pinch::auth_state_type stat
 
 MAuthDialog::~MAuthDialog()
 {
-	if (not mSentCredentials)
-		CancelClicked();
 }
 
 bool MAuthDialog::OKClicked()
 {
-	vector<string> args;
-
-	for (int32_t id = 1; id <= mFields; ++id)
-		args.push_back(GetText("edit-" + std::to_string(id)));
-
-	eAuthInfo(mState, args);
-	mSentCredentials = true;
-
-	return true;
-}
-
-bool MAuthDialog::CancelClicked()
-{
-	vector<string> args;
-
-	eAuthInfo(mState, args);
-	mSentCredentials = true;
+	if (mPasswordHandler)
+		mPasswordHandler(GetText("edit-1"));
+	else if (mCredentialsHandler)
+	{
+		std::vector<std::string> args;
+		for (int32_t id = 1; id <= mFields; ++id)
+			args.push_back(GetText("edit-" + std::to_string(id)));
+		mCredentialsHandler(args);
+	}
 
 	return true;
 }
 
-void MAuthDialog::Pulse(
-	double inTime)
+std::function<bool(std::string &)> MAuthDialog::RequestSimplePassword(
+	const std::string &inDialogTitle, const std::string &inInstruction, MWindow *inParent)
 {
-	//	SetNodeVisible('caps',
-	//		ModifierKeyDown(kAlphaLock) && (std::fmod(inTime, 1.0) <= 0.5));
-}
-
-function<bool(string &)> MAuthDialog::RequestSimplePassword(
-	const string &inDialogTitle, const string &inInstruction, MWindow *inParent)
-{
-	return [inDialogTitle, inInstruction, inParent](string &outPassword) {
+	return [inDialogTitle, inInstruction, inParent](std::string &outPassword) {
 		bool result = false;
 
 		try
 		{
-			vector<pinch::prompt> prompts(1);
-
-			prompts[0].str = _("Password");
-			prompts[0].echo = false;
-
-			MAuthDialog *dlog = new MAuthDialog(inDialogTitle, pinch::auth_state_type::password, "", inInstruction, prompts, inParent);
-
-			MEventIn<void(pinch::auth_state_type, vector<string> &)> pwevent(
-				[&outPassword](pinch::auth_state_type, vector<string> &pws) { outPassword = pws[0]; });
-			AddRoute(dlog->eAuthInfo, pwevent);
-
+			MAuthDialog *dlog = new MAuthDialog(inDialogTitle, inParent, [&outPassword](const std::string &pw) { outPassword = pw; });
 			result = dlog->ShowModal(inParent);
 		}
-		catch (exception &e)
+		catch (std::exception &e)
 		{
 			DisplayError(e);
 		}

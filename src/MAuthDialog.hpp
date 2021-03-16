@@ -10,39 +10,55 @@
 
 #pragma once
 
+#include <pinch/connection.hpp>
+
 #include "MDialog.hpp"
 
 class MAuthDialog : public MDialog
 {
-public:
-	MAuthDialog(const std::string &inTitle, pinch::auth_state_type state,
-				const std::string &name, const std::string &inInstruction,
-				const std::vector<pinch::prompt> &prompts, MWindow* inParent);
+  public:
+
+	template<typename Handler>
+	MAuthDialog(const std::string &inTitle, MWindow *inParent, Handler&& handler)
+		: MAuthDialog(inTitle, inParent)
+	{
+		mPasswordHandler = std::move(handler);
+	}
+
+	template<typename Handler>
+	MAuthDialog(const std::string &inTitle,
+		const std::string &name, const std::string &inInstruction,
+		const std::vector<pinch::prompt> &prompts, MWindow *inParent, Handler&& handler)
+		: MAuthDialog(inTitle, name, inInstruction, prompts, inParent)
+	{
+		mCredentialsHandler = std::move(handler);
+	}
 
 	virtual ~MAuthDialog();
 
-	MEventOut<void(pinch::auth_state_type, std::vector<std::string> &)> eAuthInfo;
+	static std::function<bool(std::string &)> RequestSimplePassword(
+		const std::string &inDialogTitle,
+		const std::string &inInstruction,
+		MWindow *inParent);
 
-	static std::function<bool(std::string &)>
-	RequestSimplePassword(const std::string &inDialogTitle,
-						  const std::string &inInstruction,
-						  MWindow *inParent);
+  protected:
 
-protected:
+	MAuthDialog(const std::string &inTitle, MWindow *inParent);
+
+	MAuthDialog(const std::string &inTitle,
+		const std::string &name, const std::string &inInstruction,
+		const std::vector<pinch::prompt> &prompts, MWindow *inParent);
+
 	virtual bool OKClicked();
-	virtual bool CancelClicked();
-
-	MEventIn<void(double)> ePulse;
-
-	void Pulse(double inSystemTime);
 
 	bool RequestSimplePassword(const std::string &inDialogTitle,
-							   const std::string &inInstruction,
-							   MWindow *inParent,
-							   std::string &outPassword);
+		const std::string &inInstruction,
+		MWindow *inParent,
+		std::string &outPassword);
 
-	int32_t mFields;
-	bool mSentCredentials;
-	pinch::auth_state_type mState;
-	MWindow* mParent;
+	int32_t mFields = 1;
+	MWindow *mParent;
+
+	std::function<void(std::string)> mPasswordHandler;
+	std::function<void(std::vector<std::string>)> mCredentialsHandler;
 };

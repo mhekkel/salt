@@ -7,20 +7,20 @@
 
 #include <zeep/crypto.hpp>
 
-#include "MTerminalWindow.hpp"
-#include "MControls.hpp"
-#include "MTerminalView.hpp"
-#include "MSaltApp.hpp"
-#include "MPreferences.hpp"
-#include "MMenu.hpp"
-#include "MAuthDialog.hpp"
-#include "MStrings.hpp"
-#include "MPortForwardingDialog.hpp"
-#include "MSearchPanel.hpp"
-#include "MAnimation.hpp"
 #include "MAlerts.hpp"
-#include "MTerminalChannel.hpp"
+#include "MAnimation.hpp"
+#include "MAuthDialog.hpp"
+#include "MControls.hpp"
 #include "MError.hpp"
+#include "MMenu.hpp"
+#include "MPortForwardingDialog.hpp"
+#include "MPreferences.hpp"
+#include "MSaltApp.hpp"
+#include "MSearchPanel.hpp"
+#include "MStrings.hpp"
+#include "MTerminalChannel.hpp"
+#include "MTerminalView.hpp"
+#include "MTerminalWindow.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;
@@ -30,9 +30,9 @@ namespace ba = boost::algorithm;
 
 class MSshTerminalWindow : public MTerminalWindow
 {
-public:
+  public:
 	MSshTerminalWindow(const string &inUser, const string &inHost, uint16_t inPort,
-					   const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
+		const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
 	MTerminalWindow *Clone()
 	{
@@ -42,13 +42,10 @@ public:
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
-protected:
-
-	void KeyboardInteractive(pinch::auth_state_type state, const string &name, const string &instruction,
-		const std::string& lang, const vector<pinch::prompt> &prompts);
-
-	void ReceivedPassword(pinch::auth_state_type state, vector<string> &inPassword);
-	MEventIn<void(pinch::auth_state_type,vector<string> &)> eRecvPassword;
+  protected:
+	std::string Password();
+	std::vector<std::string> Credentials(const string &name, const string &instruction,
+		const std::string &lang, const vector<pinch::prompt> &prompts);
 
 	void DropPublicKey(pinch::ssh_private_key inKey);
 
@@ -61,16 +58,22 @@ protected:
 };
 
 MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHost, uint16_t inPort,
-									   const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
-	: MTerminalWindow(
-		  MTerminalChannel::Create(inConnection),
-		  inSSHCommand),
-	  eRecvPassword(this, &MSshTerminalWindow::ReceivedPassword), mConnection(inConnection), mUser(inUser), mServer(inHost), mPort(inPort), mSSHCommand(inSSHCommand)
+	const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
+	: MTerminalWindow(MTerminalChannel::Create(inConnection), inSSHCommand)
+	, mConnection(inConnection)
+	, mUser(inUser)
+	, mServer(inHost)
+	, mPort(inPort)
+	, mSSHCommand(inSSHCommand)
 {
 	using namespace std::placeholders;
 
-	mConnection->set_validate_callback(std::bind(&MSaltApp::ValidateHost, static_cast<MSaltApp *>(gApp), this, _1, _2, _3));
-	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::KeyboardInteractive, this, _1, _2, _3, _4, _5));
+	MAppExecutor my_executor{&gApp->get_context()};
+
+	using namespace std::placeholders;
+
+	mConnection->set_provide_password_callback(std::bind(&MSshTerminalWindow::Password, this), my_executor);
+	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4), my_executor);
 
 	stringstream title;
 	title << mUser << '@' << mServer;
@@ -79,112 +82,105 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 	SetTitle(title.str());
 }
 
-bool MSshTerminalWindow::UpdateCommandStatus(
-	uint32_t inCommand,
-	MMenu *inMenu,
-	uint32_t inItemIndex,
-	bool &outEnabled,
-	bool &outChecked)
+bool MSshTerminalWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 {
 	bool result = true;
 
 	switch (inCommand)
 	{
-	case cmd_DropPublicKey:
-		outEnabled = true;
-		break;
+		case cmd_DropPublicKey:
+			outEnabled = true;
+			break;
 
-	case cmd_ForwardPort:
-	case cmd_ProxySOCKS:
-	case cmd_ProxyHTTP:
-	case cmd_Rekey:
-		outEnabled = mConnection->is_connected();
-		break;
+		case cmd_ForwardPort:
+		case cmd_ProxySOCKS:
+		case cmd_ProxyHTTP:
+		case cmd_Rekey:
+			outEnabled = mConnection->is_connected();
+			break;
 
-	default:
-		result = MTerminalWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-		break;
+		default:
+			result = MTerminalWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+			break;
 	}
 
 	return result;
 }
 
-bool MSshTerminalWindow::ProcessCommand(
-	uint32_t inCommand,
-	const MMenu *inMenu,
-	uint32_t inItemIndex,
-	uint32_t inModifiers)
+bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool result = true;
 
 	switch (inCommand)
 	{
-	case cmd_DropPublicKey:
-	{
-		pinch::ssh_agent &agent(pinch::ssh_agent::instance());
-
-		if (inItemIndex < agent.size())
+		case cmd_DropPublicKey:
 		{
-			uint32_t n = inItemIndex;
-			for (auto key = agent.begin(); key != agent.end(); ++key)
+			pinch::ssh_agent &agent(pinch::ssh_agent::instance());
+
+			if (inItemIndex < agent.size())
 			{
-				if (n-- > 0)
-					continue;
+				uint32_t n = inItemIndex;
+				for (auto key = agent.begin(); key != agent.end(); ++key)
+				{
+					if (n-- > 0)
+						continue;
 
-				if (key->get_comment() == inMenu->GetItemLabel(inItemIndex))
-					DropPublicKey(*key);
+					if (key->get_comment() == inMenu->GetItemLabel(inItemIndex))
+						DropPublicKey(*key);
 
-				break;
+					break;
+				}
 			}
+			break;
 		}
-		break;
-	}
 
-	case cmd_Rekey:
-		mConnection->rekey();
-		break;
+		case cmd_Rekey:
+			mConnection->rekey();
+			break;
 
-	case cmd_ForwardPort:
-		new MPortForwardingDialog(this, mConnection);
-		break;
+		case cmd_ForwardPort:
+			new MPortForwardingDialog(this, mConnection);
+			break;
 
-	case cmd_ProxySOCKS:
-		new MSOCKS5ProxyDialog(this, mConnection);
-		break;
+		case cmd_ProxySOCKS:
+			new MSOCKS5ProxyDialog(this, mConnection);
+			break;
 
-	case cmd_ProxyHTTP:
-		new MHTTPProxyDialog(this, mConnection);
-		break;
+		case cmd_ProxyHTTP:
+			new MHTTPProxyDialog(this, mConnection);
+			break;
 
-	default:
-		result = MTerminalWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-		break;
+		default:
+			result = MTerminalWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+			break;
 	}
 
 	return result;
 }
 
-void MSshTerminalWindow::KeyboardInteractive(
-	pinch::auth_state_type state, const string &name, const string &instruction,
-	const std::string& lang, const vector<pinch::prompt> &prompts)
+std::string MSshTerminalWindow::Password()
 {
-	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
-		state, name,
-		instruction.empty() ? FormatString("Please enter the requested info for account ^0", mUser) : instruction,
-		prompts, this));
+	std::string result;
 
-	AddRoute(dlog->eAuthInfo, eRecvPassword);
-
-	dlog->Show(this);
+	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string& pw) { result = pw; }));
+	bool ok = dlog->ShowModal(this);
 	dlog.release();
+	
+	return ok ? result : "";
 }
 
-void MSshTerminalWindow::ReceivedPassword(pinch::auth_state_type state, std::vector<std::string> &inPassword)
+std::vector<std::string> MSshTerminalWindow::Credentials(const string &name, const string &instruction,
+	const std::string &lang, const vector<pinch::prompt> &prompts)
 {
-	if (inPassword.empty())
-		mConnection->disconnect();
-	else
-		mConnection->send_credentials(state, inPassword);
+	std::vector<std::string> result;
+
+	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
+		name, instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
+		prompts, this, [&result](const std::vector<std::string>& r) { result = r; }));
+	bool ok = dlog->ShowModal(this);
+	dlog.release();
+	
+	return ok ? result : std::vector<std::string>{};
 }
 
 void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
@@ -206,9 +202,9 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 
 	mKeyDropper.reset(new pinch::exec_channel(mConnection, command, [this, comment](const string &, int status) {
 		if (status == 0)
-			DisplayAlert(this, "installed-public-key", { comment, this->mServer });
+			DisplayAlert(this, "installed-public-key", {comment, this->mServer});
 		else
-			DisplayAlert(this, "failed-to-install-public-key", { comment, this->mServer });
+			DisplayAlert(this, "failed-to-install-public-key", {comment, this->mServer});
 	}));
 
 	mKeyDropper->open();
@@ -219,7 +215,7 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 
 class MPtyTerminalWindow : public MTerminalWindow
 {
-public:
+  public:
 	MPtyTerminalWindow();
 
 	MTerminalWindow *Clone()
@@ -241,9 +237,13 @@ MTerminalWindow *MTerminalWindow::sFirst = nullptr;
 
 MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const string &inCommand)
 	: MWindow("Terminal", GetPrefferedBounds(),
-			  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate /* | kMCustomNonClient */),
-			  "terminal-window-menu"),
-	  eAnimate(this, &MTerminalWindow::Animate), mChannel(inTerminalChannel), mNext(nullptr), mAnimationManager(new MAnimationManager()), mAnimationVariable(mAnimationManager->CreateVariable(0, 0, kSearchPanelHeight))
+		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate /* | kMCustomNonClient */),
+		  "terminal-window-menu")
+	, eAnimate(this, &MTerminalWindow::Animate)
+	, mChannel(inTerminalChannel)
+	, mNext(nullptr)
+	, mAnimationManager(new MAnimationManager())
+	, mAnimationVariable(mAnimationManager->CreateVariable(0, 0, kSearchPanelHeight))
 {
 	// animations
 	AddRoute(eAnimate, mAnimationManager->eAnimate);
@@ -454,23 +454,23 @@ bool MTerminalWindow::UpdateCommandStatus(
 
 	switch (inCommand)
 	{
-	case cmd_Disconnect:
-		outEnabled = mChannel != nullptr && mChannel->CanDisconnect();
-		break;
+		case cmd_Disconnect:
+			outEnabled = mChannel != nullptr && mChannel->CanDisconnect();
+			break;
 
-	case cmd_NextTerminal:
-	case cmd_PrevTerminal:
-		outEnabled = sFirst != this or mNext != nullptr;
-		break;
+		case cmd_NextTerminal:
+		case cmd_PrevTerminal:
+			outEnabled = sFirst != this or mNext != nullptr;
+			break;
 
-	case cmd_Find:
-	case cmd_CloneTerminal:
-		outEnabled = true;
-		break;
+		case cmd_Find:
+		case cmd_CloneTerminal:
+			outEnabled = true;
+			break;
 
-	default:
-		result = MWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-		break;
+		default:
+			result = MWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+			break;
 	}
 
 	return result;
@@ -486,64 +486,64 @@ bool MTerminalWindow::ProcessCommand(
 
 	switch (inCommand)
 	{
-	case cmd_Disconnect:
-		mChannel->Disconnect(inModifiers & kControlKey);
-		break;
+		case cmd_Disconnect:
+			mChannel->Disconnect(inModifiers & kControlKey);
+			break;
 
-	case cmd_CloneTerminal:
-	{
-		MTerminalWindow *clone = Clone();
-		clone->Select();
-		break;
-	}
-
-		//case cmd_Explore:
-		//{
-		//	MExploreBrowserWindow* explorer = new MExploreBrowserWindow(mConnection);
-		//	explorer->Select();
-		//	break;
-		//}
-
-	case cmd_NextTerminal:
-		if (mNext != nullptr)
-			mNext->Select();
-		else if (sFirst != this)
-			sFirst->Select();
-		break;
-
-	case cmd_PrevTerminal:
-		if (sFirst == this)
+		case cmd_CloneTerminal:
 		{
-			MTerminalWindow *w = sFirst;
-			while (w->mNext != nullptr)
-				w = w->mNext;
-			if (w != this)
-				w->Select();
+			MTerminalWindow *clone = Clone();
+			clone->Select();
+			break;
 		}
-		else
-		{
-			MTerminalWindow *w = sFirst;
-			while (w != nullptr and w->mNext != this)
-				w = w->mNext;
-			if (w != nullptr and w != this)
-				w->Select();
-		}
-		break;
 
-	case cmd_Find:
-		if (mSearchPanel->IsVisible())
+			//case cmd_Explore:
+			//{
+			//	MExploreBrowserWindow* explorer = new MExploreBrowserWindow(mConnection);
+			//	explorer->Select();
+			//	break;
+			//}
+
+		case cmd_NextTerminal:
+			if (mNext != nullptr)
+				mNext->Select();
+			else if (sFirst != this)
+				sFirst->Select();
+			break;
+
+		case cmd_PrevTerminal:
+			if (sFirst == this)
+			{
+				MTerminalWindow *w = sFirst;
+				while (w->mNext != nullptr)
+					w = w->mNext;
+				if (w != this)
+					w->Select();
+			}
+			else
+			{
+				MTerminalWindow *w = sFirst;
+				while (w != nullptr and w->mNext != this)
+					w = w->mNext;
+				if (w != nullptr and w != this)
+					w->Select();
+			}
+			break;
+
+		case cmd_Find:
+			if (mSearchPanel->IsVisible())
+				HideSearchPanel();
+			else
+				ShowSearchPanel();
+			break;
+
+		case cmd_HideSearchPanel:
 			HideSearchPanel();
-		else
-			ShowSearchPanel();
-		break;
+			break;
 
-	case cmd_HideSearchPanel:
-		HideSearchPanel();
-		break;
-
-	default:
-		result = MWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-		break;
+		default:
+			result = MWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+			break;
 	}
 
 	return result;
@@ -558,7 +558,7 @@ MTerminalWindow *MTerminalWindow::Create()
 }
 
 MTerminalWindow *MTerminalWindow::Create(const string &inUser, const string &inHost, uint16_t inPort,
-										 const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
+	const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
 {
 	return new MSshTerminalWindow(inUser, inHost, inPort, inSSHCommand, inConnection);
 }

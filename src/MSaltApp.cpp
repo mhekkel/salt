@@ -3,13 +3,13 @@
 
 #include "MSalt.hpp"
 
-#include <regex>
 #include <filesystem>
 #include <fstream>
+#include <regex>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/algorithm/string.hpp>
 // #include <boost/algorithm/string/regex.hpp>
 
 #include <pinch/ssh_agent.hpp>
@@ -17,20 +17,20 @@
 #include <zeep/crypto.hpp>
 
 #include "MAcceleratorTable.hpp"
-#include "MMenu.hpp"
-#include "MSaltApp.hpp"
 #include "MApplicationImpl.hpp"
-#include "MTerminalWindow.hpp"
 #include "MConnectDialog.hpp"
+#include "MMenu.hpp"
 #include "MPreferences.hpp"
 #include "MPreferencesDialog.hpp"
+#include "MSaltApp.hpp"
+#include "MTerminalWindow.hpp"
 // #include "MSaltVersion.hpp"
-#include "MPreferences.hpp"
-#include "MUtils.hpp"
+#include "MAddTOTPHashDialog.hpp"
 #include "MAlerts.hpp"
 #include "MError.hpp"
+#include "MPreferences.hpp"
+#include "MUtils.hpp"
 #include "mrsrc.hpp"
-#include "MAddTOTPHashDialog.hpp"
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "libpinch")
@@ -50,14 +50,15 @@ namespace
 #define HOST "([-[:alnum:].]+)"
 #define PORT "(?::(\\d+))?"
 
-	std::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)"
-						 ")?(?: >> (.+))?$");
-}
+std::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)"
+					 ")?(?: >> (.+))?$");
+} // namespace
 
 // --------------------------------------------------------------------
 
 MSaltApp::MSaltApp(MApplicationImpl *inImpl)
-	: MApplication(inImpl), mConnectionPool(inImpl->mIOContext)
+	: MApplication(inImpl)
+	, mConnectionPool(inImpl->mIOContext)
 {
 	MAcceleratorTable &at = MAcceleratorTable::Instance();
 
@@ -100,6 +101,15 @@ void MSaltApp::Initialise()
 	}
 
 	// known hosts
+	auto &known_hosts = pinch::known_hosts::instance();
+
+	if (fs::exists(gPrefsDir / "known_hosts"))
+	{
+		std::ifstream host_file(gPrefsDir / "known_hosts");
+		if (host_file.is_open())
+			known_hosts.load_host_file(host_file);
+	}
+
 	vector<string> knownHosts;
 	Preferences::GetArray("known-hosts", knownHosts);
 
@@ -109,21 +119,24 @@ void MSaltApp::Initialise()
 	{
 		std::smatch m;
 		if (std::regex_match(known, m, rx))
-		{
-			MKnownHost host = {m[1].str(), m[2].str(), m[3].str()};
-			mKnownHosts.push_back(host);
-		}
+			known_hosts.add_host_key(m[1].str(), m[2].str(), m[3].str());
 	}
+
+	MAppExecutor my_executor{mImpl->mExContext};
+
+	using namespace std::placeholders;
+
+	known_hosts.register_handler(std::bind(&MSaltApp::ValidateHost, this, _1, _2, _3, _4), my_executor);
 
 	// set preferred algorithms
 	mConnectionPool.set_algorithm(pinch::algorithm::encryption, pinch::direction::both,
-								  Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
+		Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
 	mConnectionPool.set_algorithm(pinch::algorithm::verification, pinch::direction::both,
-								  Preferences::GetString("mac", pinch::kMacAlgorithms));
+		Preferences::GetString("mac", pinch::kMacAlgorithms));
 	mConnectionPool.set_algorithm(pinch::algorithm::compression, pinch::direction::both,
-								  Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
+		Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
 	mConnectionPool.set_algorithm(pinch::algorithm::keyexchange, pinch::direction::both,
-								  Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
+		Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
 }
 
 void MSaltApp::SaveGlobals()
@@ -131,10 +144,12 @@ void MSaltApp::SaveGlobals()
 	vector<string> recent(mRecent.begin(), mRecent.end());
 	Preferences::SetArray("recent-sessions", recent);
 
-	vector<string> knownHosts;
-	for (auto known : mKnownHosts)
-		knownHosts.push_back(known.host + ' ' + known.alg + ' ' + known.key);
-	Preferences::SetArray("known-hosts", knownHosts);
+	// save new format of known hosts
+	std::ofstream known_host_file(gPrefsDir / "known_hosts");
+	if (known_host_file.is_open())
+		pinch::known_hosts::instance().save_host_file(known_host_file);
+
+	Preferences::SetArray("known-hosts", {});
 
 	MApplication::SaveGlobals();
 }
@@ -152,56 +167,56 @@ bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t 
 
 	switch (inCommand)
 	{
-	case cmd_Connect:
-	{
-		MDialog *d = new MConnectDialog();
-		d->Select();
-		break;
-	}
+		case cmd_Connect:
+		{
+			MDialog *d = new MConnectDialog();
+			d->Select();
+			break;
+		}
 
-	case cmd_About:
-		DoAbout();
-		break;
+		case cmd_About:
+			DoAbout();
+			break;
 
-	case cmd_OpenRecentSession:
-		if (inItemIndex - 2 < mRecent.size())
-			OpenRecent(*(mRecent.begin() + inItemIndex - 2));
-		break;
+		case cmd_OpenRecentSession:
+			if (inItemIndex - 2 < mRecent.size())
+				OpenRecent(*(mRecent.begin() + inItemIndex - 2));
+			break;
 
-	case cmd_ClearRecentSessions:
-		mRecent.clear();
-		break;
+		case cmd_ClearRecentSessions:
+			mRecent.clear();
+			break;
 
-	case cmd_SelectWindowFromMenu:
-	{
-		MTerminalWindow *term = MTerminalWindow::GetFirstTerminal();
-		while (inItemIndex-- > 3 and term != nullptr)
-			term = term->GetNextTerminal();
-		if (term != nullptr)
-			term->Select();
-		break;
-	}
+		case cmd_SelectWindowFromMenu:
+		{
+			MTerminalWindow *term = MTerminalWindow::GetFirstTerminal();
+			while (inItemIndex-- > 3 and term != nullptr)
+				term = term->GetNextTerminal();
+			if (term != nullptr)
+				term->Select();
+			break;
+		}
 
-	case cmd_Preferences:
-		MPreferencesDialog::Instance().Select();
-		break;
+		case cmd_Preferences:
+			MPreferencesDialog::Instance().Select();
+			break;
 
-	case cmd_AddNewTOTPHash:
-	{
-		MDialog *d = new MAddTOTPHashDialog();
-		d->Select();
-		break;
-	}
+		case cmd_AddNewTOTPHash:
+		{
+			MDialog *d = new MAddTOTPHashDialog();
+			d->Select();
+			break;
+		}
 
-		//#if DEBUG
-		//		case 'test':
-		//			new MTestWindow();
-		//			break;
-		//#endif
+			//#if DEBUG
+			//		case 'test':
+			//			new MTestWindow();
+			//			break;
+			//#endif
 
-	default:
-		result = MApplication::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-		break;
+		default:
+			result = MApplication::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+			break;
 	}
 
 	return result;
@@ -213,23 +228,23 @@ bool MSaltApp::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t i
 
 	switch (inCommand)
 	{
-	case cmd_Connect:
-	case cmd_Preferences:
-	case cmd_About:
-	case cmd_Find:
-	case cmd_OpenRecentSession:
-	case 'test':
-	case cmd_AddNewTOTPHash:
-		outEnabled = true;
-		break;
+		case cmd_Connect:
+		case cmd_Preferences:
+		case cmd_About:
+		case cmd_Find:
+		case cmd_OpenRecentSession:
+		case 'test':
+		case cmd_AddNewTOTPHash:
+			outEnabled = true;
+			break;
 
-	case cmd_ClearRecentSessions:
-		outEnabled = not mRecent.empty();
-		break;
+		case cmd_ClearRecentSessions:
+			outEnabled = not mRecent.empty();
+			break;
 
-	default:
-		result = MApplication::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-		break;
+		default:
+			result = MApplication::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+			break;
 	}
 
 	return result;
@@ -279,7 +294,7 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 		{
 			inMenu->AppendItem(m[1].str() + "@"s + m[2].str() +
 								   (m[3].matched ? (":"s + m[3].str()) : ""),
-							   cmd_OpenRecentSession);
+				cmd_OpenRecentSession);
 		}
 	}
 }
@@ -359,7 +374,7 @@ void MSaltApp::OpenRecent(const string &inRecent)
 
 void MSaltApp::DoAbout()
 {
-	DisplayAlert(nullptr, "about-alert", { GetApplicationVersion(), PACKAGE_VERSION });
+	DisplayAlert(nullptr, "about-alert", {GetApplicationVersion(), PACKAGE_VERSION});
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
@@ -385,7 +400,7 @@ void MSaltApp::DoQuit()
 	for (MWindow *w = MWindow::GetFirstWindow(); w != nullptr; w = w->GetNextWindow())
 		windows.push_back(w);
 
-	for (auto w: windows)
+	for (auto w : windows)
 		w->Close();
 
 	MApplication::DoQuit();
@@ -415,9 +430,10 @@ void MSaltApp::Open(const string &inFile)
 	}
 }
 
-bool MSaltApp::ValidateHost(MWindow *window, const string &inHost, const string &inAlgorithm, const vector<uint8_t> &inHostKey)
+pinch::host_key_reply MSaltApp::ValidateHost(const string &inHost, const string &inAlgorithm,
+	const vector<uint8_t> &inHostKey, pinch::host_key_state inState)
 {
-	bool result = true;
+	pinch::host_key_reply result = pinch::host_key_reply::reject;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
 
 	std::string value = zeep::encode_base64(hsv);
@@ -434,37 +450,28 @@ bool MSaltApp::ValidateHost(MWindow *window, const string &inHost, const string 
 		fingerprint += kHexChars[b & 0x0f];
 	}
 
-	MKnownHost host = {inHost, inAlgorithm, value};
-	MKnownHostsList::iterator i = find(mKnownHosts.begin(), mKnownHosts.end(), host);
-	if (i == mKnownHosts.end())
+	if (inState == pinch::host_key_state::keys_differ)
 	{
-		switch (DisplayAlert(window, "unknown-host-alert", { inHost, fingerprint }))
+		if (DisplayAlert(nullptr, "host-key-changed-alert", { inHost, fingerprint }) == 2)
+			result = pinch::host_key_reply::trusted;
+	}
+	else
+	{
+		switch (DisplayAlert(nullptr, "unknown-host-alert", {inHost, fingerprint}))
 		{
-			// Add
-		case 1:
-			mKnownHosts.push_back(host);
-			//				mUpdated = true;
-			break;
+			case 1:	// Add
+				result = pinch::host_key_reply::trusted;
+				break;
 
-			// Cancel
-		case 2:
-			result = false;
-			break;
+			case 2:	// Cancel
+				result = pinch::host_key_reply::reject;
+				break;
 
-			// Once
-		case 3:
-			break;
+			case 3: // Once
+				result = pinch::host_key_reply::trust_once;
+				break;
 		}
 	}
-	else if (value != i->key)
-	{
-		if (DisplayAlert(window, "host-key-changed-alert", { inHost, fingerprint }) != 2)
-			throw runtime_error("User cancelled");
-
-		i->key = value;
-		//		mUpdated = true;
-	}
-
 	return result;
 }
 
