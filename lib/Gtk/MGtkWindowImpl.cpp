@@ -311,7 +311,7 @@ bool ActivateWindow(Display* display, Window window)
 
 void MGtkWindowImpl::Select()
 {
-	PRINT(("Select Window"));
+	PRINT(("Select Window (%p)", std::this_thread::get_id()));
 
 #warning("fixme")
 	ActivateWindow(gdk_x11_display_get_xdisplay(gdk_display_get_default()),

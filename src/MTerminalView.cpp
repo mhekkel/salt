@@ -6,34 +6,34 @@
 #include <cmath>
 #include <map>
 
-#include <boost/format.hpp>
-#include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/asio.hpp>
+#include <boost/format.hpp>
 #include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include <zeep/crypto.hpp>
 
-#include "MTerminalView.hpp"
-#include "MDevice.hpp"
-#include "MControls.hpp"
-#include "MWindow.hpp"
-#include "MUtils.hpp"
-#include "MCommands.hpp"
-#include "MClipboard.hpp"
-#include "MSound.hpp"
+#include "MAnimation.hpp"
 #include "MApplication.hpp"
+#include "MCSICommands.hpp"
+#include "MClipboard.hpp"
+#include "MCommands.hpp"
+#include "MControls.hpp"
+#include "MDevice.hpp"
+#include "MError.hpp"
 #include "MPreferences.hpp"
 #include "MPreferencesDialog.hpp"
 #include "MSaltApp.hpp"
-#include "MTerminalBuffer.hpp"
-#include "MVT220CharSets.hpp"
-#include "MStrings.hpp"
 #include "MSearchPanel.hpp"
-#include "MAnimation.hpp"
-#include "MCSICommands.hpp"
-#include "MError.hpp"
+#include "MSound.hpp"
+#include "MStrings.hpp"
+#include "MTerminalBuffer.hpp"
+#include "MTerminalView.hpp"
+#include "MUtils.hpp"
+#include "MVT220CharSets.hpp"
+#include "MWindow.hpp"
 
 #include "MTerminalColours.hpp"
 
@@ -46,130 +46,130 @@ namespace io = boost::iostreams;
 namespace
 {
 
-	// our commands
-	const uint32_t
-		cmd_DebugUpdate = 'dbug',
-		cmd_ResetAndClear = 'rstc',
-		cmd_EncodingUTF8 = 'enU8',
+// our commands
+const uint32_t
+	cmd_DebugUpdate = 'dbug',
+	cmd_ResetAndClear = 'rstc',
+	cmd_EncodingUTF8 = 'enU8',
 
-		// cmd_AllowColor		= 'tClr',
-		// cmd_AllowTitle		= 'tTtl',
+	// cmd_AllowColor		= 'tClr',
+	// cmd_AllowTitle		= 'tTtl',
 
-		cmd_MetaSendsEscape = 'tEsc',
-		cmd_BackSpaceIsDel = 'tBsD',
-		cmd_DeleteIsDel = 'tDlD',
-		cmd_OldFnKeys = 'tOlF',
-		cmd_VT220Keyboard = 'tVTk',
+	cmd_MetaSendsEscape = 'tEsc',
+	cmd_BackSpaceIsDel = 'tBsD',
+	cmd_DeleteIsDel = 'tDlD',
+	cmd_OldFnKeys = 'tOlF',
+	cmd_VT220Keyboard = 'tVTk',
 
-		cmd_SendSTOP = 'STOP',
-		cmd_SendCONT = 'CONT',
-		cmd_SendINT = 'INT ',
-		cmd_SendHUP = 'HUP ',
-		cmd_SendTERM = 'TERM',
-		cmd_SendKILL = 'KILL';
+	cmd_SendSTOP = 'STOP',
+	cmd_SendCONT = 'CONT',
+	cmd_SendINT = 'INT ',
+	cmd_SendHUP = 'HUP ',
+	cmd_SendTERM = 'TERM',
+	cmd_SendKILL = 'KILL';
 
-	// This is what we report as terminal type:
-	// 62	VT200 family
-	// 1	132 columns
-	// 2	printer port
-	// 6	selective erase
-	// 8	user-defined keys
-	// 9	national replacement character-sets
+// This is what we report as terminal type:
+// 62	VT200 family
+// 1	132 columns
+// 2	printer port
+// 6	selective erase
+// 8	user-defined keys
+// 9	national replacement character-sets
 
-	const char
-		//	kVT220Attributes[] = "\033[?62;1;2;6;8;9c";
-		kVT420Attributes[] = "\033[?64;1;2;6;8;9c";
-	//	kVT520Attributes[] = "\033[?65;1;2;6;8;9c";
+const char
+	//	kVT220Attributes[] = "\033[?62;1;2;6;8;9c";
+	kVT420Attributes[] = "\033[?64;1;2;6;8;9c";
+//	kVT520Attributes[] = "\033[?65;1;2;6;8;9c";
 
-	const string
-		kCSI("\033["),
-		kSS3("\033O"),
-		kDCS("\033P");
+const string
+	kCSI("\033["),
+	kSS3("\033O"),
+	kDCS("\033P");
 
-	uint32_t
-		kBorderWidth = 4;
+uint32_t
+	kBorderWidth = 4;
 
-	double
-		kSmoothScrollDelay = 0.083333;
+double
+	kSmoothScrollDelay = 0.083333;
 
-	//enum {
-	//	kTextColor,
-	//	kBackColor,
-	//	kBoldColor,
-	//
-	//	kColorCount
-	//};
-	//
-	MColor
-		sSelectionColor;
+//enum {
+//	kTextColor,
+//	kBackColor,
+//	kBoldColor,
+//
+//	kColorCount
+//};
+//
+MColor
+	sSelectionColor;
 
-	string
-		kControlBreakMessage("Hello, world!");
+string
+	kControlBreakMessage("Hello, world!");
 
-	enum MCtrlChr : uint8_t
-	{
-		NUL = 0x00,
-		DLE = 0x10,
-		SP = 0x20,
-		DCS = 0x90,
-		SOH = 0x01,
-		DC1 = 0x11,
-		PU1 = 0x91,
-		STX = 0x02,
-		DC2 = 0x12,
-		PU2 = 0x92,
-		ETX = 0x03,
-		DC3 = 0x13,
-		STS = 0x93,
-		EOT = 0x04,
-		DC4 = 0x14,
-		IND = 0x84,
-		CCH = 0x94,
-		ENQ = 0x05,
-		NAK = 0x15,
-		NEL = 0x85,
-		MW = 0x95,
-		ACK = 0x06,
-		SYN = 0x16,
-		SSA = 0x86,
-		SPA = 0x96,
-		BEL = 0x07,
-		ETB = 0x17,
-		ESA = 0x87,
-		EPA = 0x97,
-		BS = 0x08,
-		CAN = 0x18,
-		HTS = 0x88,
-		HT = 0x09,
-		EM = 0x19,
-		HTJ = 0x89,
-		LF = 0x0a,
-		SUB = 0x1a,
-		VTS = 0x8a,
-		VT = 0x0b,
-		ESC = 0x1b,
-		PLD = 0x8b,
-		CSI = 0x9b,
-		FF = 0x0c,
-		FS = 0x1c,
-		PLU = 0x8c,
-		ST = 0x9c,
-		CR = 0x0d,
-		GS = 0x1d,
-		RI = 0x8d,
-		OSC = 0x9d,
-		SO = 0x0e,
-		RS = 0x1e,
-		SS2 = 0x8e,
-		PM = 0x9e,
-		SI = 0x0f,
-		US = 0x1f,
-		DEL = 0x7f,
-		SS3 = 0x8f,
-		APC = 0x9f
-	};
+enum MCtrlChr : uint8_t
+{
+	NUL = 0x00,
+	DLE = 0x10,
+	SP = 0x20,
+	DCS = 0x90,
+	SOH = 0x01,
+	DC1 = 0x11,
+	PU1 = 0x91,
+	STX = 0x02,
+	DC2 = 0x12,
+	PU2 = 0x92,
+	ETX = 0x03,
+	DC3 = 0x13,
+	STS = 0x93,
+	EOT = 0x04,
+	DC4 = 0x14,
+	IND = 0x84,
+	CCH = 0x94,
+	ENQ = 0x05,
+	NAK = 0x15,
+	NEL = 0x85,
+	MW = 0x95,
+	ACK = 0x06,
+	SYN = 0x16,
+	SSA = 0x86,
+	SPA = 0x96,
+	BEL = 0x07,
+	ETB = 0x17,
+	ESA = 0x87,
+	EPA = 0x97,
+	BS = 0x08,
+	CAN = 0x18,
+	HTS = 0x88,
+	HT = 0x09,
+	EM = 0x19,
+	HTJ = 0x89,
+	LF = 0x0a,
+	SUB = 0x1a,
+	VTS = 0x8a,
+	VT = 0x0b,
+	ESC = 0x1b,
+	PLD = 0x8b,
+	CSI = 0x9b,
+	FF = 0x0c,
+	FS = 0x1c,
+	PLU = 0x8c,
+	ST = 0x9c,
+	CR = 0x0d,
+	GS = 0x1d,
+	RI = 0x8d,
+	OSC = 0x9d,
+	SO = 0x0e,
+	RS = 0x1e,
+	SS2 = 0x8e,
+	PM = 0x9e,
+	SI = 0x0f,
+	US = 0x1f,
+	DEL = 0x7f,
+	SS3 = 0x8f,
+	APC = 0x9f
+};
 
-}
+} // namespace
 
 // --------------------------------------------------------------------
 // We even support the weird 'Device Control Strings', programmable function keys
@@ -213,9 +213,36 @@ string MTerminalView::sSelectBuffer;
 list<MTerminalView *> MTerminalView::sTerminalList;
 
 MTerminalView::MTerminalView(const string &inID, MRect inBounds,
-							 MStatusbar *inStatusbar, MScrollbar *inScrollbar, MSearchPanel *inSearchPanel,
-							 MTerminalChannel *inTerminalChannel, const string &inSSHCommand)
-	: MCanvas(inID, inBounds, false, false), eScroll(this, &MTerminalView::Scroll), eSearch(this, &MTerminalView::FindNext), ePreferencesChanged(this, &MTerminalView::PreferencesChanged), ePreviewColor(this, &MTerminalView::PreviewColor), eStatusPartClicked(this, &MTerminalView::StatusPartClicked), mStatusInfo(0), mStatusbar(inStatusbar), mScrollbar(inScrollbar), mSearchPanel(inSearchPanel), mTerminalChannel(inTerminalChannel), mSSHCommand(inSSHCommand), mTerminalWidth(80), mTerminalHeight(24), mScreenBuffer(mTerminalWidth, mTerminalHeight, true), mAlternateBuffer(mTerminalWidth, mTerminalHeight, false), mStatusLineBuffer(mTerminalWidth, 1, false), mBuffer(&mScreenBuffer), eIdle(this, &MTerminalView::Idle), mPFK(nullptr), mNewPFK(nullptr), mEscState(eESC_NONE), eAnimate(this, &MTerminalView::Animate), mDECSASD(false), mDECSSDT(0), mAnimationManager(new MAnimationManager()), mGraphicalBeep(nullptr), mDisabledFactor(mAnimationManager->CreateVariable(1, 0, 1))
+	MStatusbar *inStatusbar, MScrollbar *inScrollbar, MSearchPanel *inSearchPanel,
+	MTerminalChannel *inTerminalChannel, const string &inSSHCommand)
+	: MCanvas(inID, inBounds, false, false)
+	, eScroll(this, &MTerminalView::Scroll)
+	, eSearch(this, &MTerminalView::FindNext)
+	, ePreferencesChanged(this, &MTerminalView::PreferencesChanged)
+	, ePreviewColor(this, &MTerminalView::PreviewColor)
+	, eStatusPartClicked(this, &MTerminalView::StatusPartClicked)
+	, mStatusInfo(0)
+	, mStatusbar(inStatusbar)
+	, mScrollbar(inScrollbar)
+	, mSearchPanel(inSearchPanel)
+	, mTerminalChannel(inTerminalChannel)
+	, mSSHCommand(inSSHCommand)
+	, mTerminalWidth(80)
+	, mTerminalHeight(24)
+	, mScreenBuffer(mTerminalWidth, mTerminalHeight, true)
+	, mAlternateBuffer(mTerminalWidth, mTerminalHeight, false)
+	, mStatusLineBuffer(mTerminalWidth, 1, false)
+	, mBuffer(&mScreenBuffer)
+	, eIdle(this, &MTerminalView::Idle)
+	, mPFK(nullptr)
+	, mNewPFK(nullptr)
+	, mEscState(eESC_NONE)
+	, eAnimate(this, &MTerminalView::Animate)
+	, mDECSASD(false)
+	, mDECSSDT(0)
+	, mAnimationManager(new MAnimationManager())
+	, mGraphicalBeep(nullptr)
+	, mDisabledFactor(mAnimationManager->CreateVariable(1, 0, 1))
 {
 	mTerminalChannel->SetMessageCallback(
 		[this](const std::string &msg, const std::string &lang) { this->HandleMessage(msg, lang); });
@@ -283,13 +310,15 @@ MTerminalView *MTerminalView::GetFrontTerminal()
 
 void MTerminalView::Open()
 {
+	PRINT(("Opening terminal view in %p", std::this_thread::get_id()));
+
 	mStatusbar->SetStatusText(0, _("Trying to connect"), false);
 
 	MRect bounds;
 	GetBounds(bounds);
 
 	mTerminalChannel->SetTerminalSize(mTerminalWidth, mTerminalHeight,
-									  bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
+		bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
 
 	// set some environment variables
 	vector<string> env;
@@ -584,7 +613,7 @@ void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inR
 
 	if (mTerminalChannel->IsOpen())
 		mTerminalChannel->SetTerminalSize(mTerminalWidth, mTerminalHeight,
-										  bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
+			bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
 
 	AdjustScrollbar(anchor);
 
@@ -701,43 +730,43 @@ void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, u
 	{
 		switch (inClickCount)
 		{
-		case 1:
-			mMouseClick = eWaitClick;
-			mMouseBlockSelect = inModifiers & kControlKey;
-			mLastMouseDown = GetLocalTime();
-			mLastMouseX = inX;
-			mLastMouseY = inY;
-			break;
+			case 1:
+				mMouseClick = eWaitClick;
+				mMouseBlockSelect = inModifiers & kControlKey;
+				mLastMouseDown = GetLocalTime();
+				mLastMouseX = inX;
+				mLastMouseY = inY;
+				break;
 
-		case 2:
-		{
-			mMouseClick = eDoubleClick;
-			mMouseBlockSelect = false;
+			case 2:
+			{
+				mMouseClick = eDoubleClick;
+				mMouseBlockSelect = false;
 
-			int32_t line, column;
-			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-			mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+				int32_t line, column;
+				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
 
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
-			Invalidate();
-			break;
-		}
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+				Invalidate();
+				break;
+			}
 
-		default:
-		{
-			mMouseClick = eTripleClick;
-			mMouseBlockSelect = false;
+			default:
+			{
+				mMouseClick = eTripleClick;
+				mMouseBlockSelect = false;
 
-			int32_t line, column;
-			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-			mMinSelLine = mMaxSelLine = line;
-			mMinSelCol = 0;
-			mMaxSelCol = mTerminalWidth;
+				int32_t line, column;
+				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+				mMinSelLine = mMaxSelLine = line;
+				mMinSelCol = 0;
+				mMaxSelCol = mTerminalWidth;
 
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
-			Invalidate();
-			break;
-		}
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+				Invalidate();
+				break;
+			}
 		}
 	}
 }
@@ -778,41 +807,41 @@ void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 
 	switch (mMouseClick)
 	{
-	case eSingleClick:
-		if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
-			mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-		else if (line > mMaxSelLine or (line == mMaxSelLine and column > mMaxSelCol))
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
-		else
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-		break;
+		case eSingleClick:
+			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
+				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+			else if (line > mMaxSelLine or (line == mMaxSelLine and column > mMaxSelCol))
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
+			else
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+			break;
 
-	case eDoubleClick:
-	{
-		int32_t wl1, wc1, wl2, wc2;
-		mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
+		case eDoubleClick:
+		{
+			int32_t wl1, wc1, wl2, wc2;
+			mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
 
-		if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
-			mBuffer->SetSelection(wl1, wc1, mMaxSelLine, mMaxSelCol);
-		else if (wl2 > mMaxSelLine or (wl2 == mMaxSelLine and wc2 > mMaxSelCol))
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, wl2, wc2);
-		else
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
-		break;
-	}
+			if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
+				mBuffer->SetSelection(wl1, wc1, mMaxSelLine, mMaxSelCol);
+			else if (wl2 > mMaxSelLine or (wl2 == mMaxSelLine and wc2 > mMaxSelCol))
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, wl2, wc2);
+			else
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+			break;
+		}
 
-	case eTripleClick:
-	{
-		if (line < mMinSelLine)
-			mBuffer->SetSelection(line, mMinSelCol, mMaxSelLine, mMaxSelCol);
-		else if (line > mMaxSelLine)
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, mMaxSelCol);
-		else
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
-		break;
-	}
+		case eTripleClick:
+		{
+			if (line < mMinSelLine)
+				mBuffer->SetSelection(line, mMinSelCol, mMaxSelLine, mMaxSelCol);
+			else if (line > mMaxSelLine)
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, mMaxSelCol);
+			else
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+			break;
+		}
 
-	default:;
+		default:;
 	}
 
 	Invalidate();
@@ -1095,34 +1124,34 @@ void MTerminalView::Draw()
 
 			switch (textColorIx)
 			{
-			case eNormalBack:
-				textC = mTerminalColors[eBack];
-				break;
-			case eNormalText:
-				textC = mTerminalColors[eText];
-				break;
-			case eNormalBold:
-				textC = mTerminalColors[eBold];
-				break;
-			default:
-				textC = k256AnsiColors[textColorIx];
-				break;
+				case eNormalBack:
+					textC = mTerminalColors[eBack];
+					break;
+				case eNormalText:
+					textC = mTerminalColors[eText];
+					break;
+				case eNormalBold:
+					textC = mTerminalColors[eBold];
+					break;
+				default:
+					textC = k256AnsiColors[textColorIx];
+					break;
 			}
 
 			switch (backColorIx)
 			{
-			case eNormalBack:
-				backC = mTerminalColors[eBack];
-				break;
-			case eNormalText:
-				backC = mTerminalColors[eText];
-				break;
-			case eNormalBold:
-				backC = mTerminalColors[eBold];
-				break;
-			default:
-				backC = k256AnsiColors[backColorIx];
-				break;
+				case eNormalBack:
+					backC = mTerminalColors[eBack];
+					break;
+				case eNormalText:
+					backC = mTerminalColors[eText];
+					break;
+				case eNormalBold:
+					backC = mTerminalColors[eBold];
+					break;
+				default:
+					backC = k256AnsiColors[backColorIx];
+					break;
 			}
 
 			if (c >= sc1 and c < sc2) // 'selected!'
@@ -1199,7 +1228,7 @@ void MTerminalView::Draw()
 				continue;
 
 			dev.RenderTextBackground(x, y, backColorOffset[b],
-									 backColorOffset[b + 1] - backColorOffset[b], colors[backColorIndex[b]]);
+				backColorOffset[b + 1] - backColorOffset[b], colors[backColorIndex[b]]);
 		}
 
 		dev.RenderText(x, ty);
@@ -1247,7 +1276,7 @@ void MTerminalView::Idle(double inTime)
 
 	if (not mInputBuffer.empty() and
 		(mNextSmoothScroll == 0 or
-		 (abs(mNextSmoothScroll) <= GetLocalTime())))
+			(abs(mNextSmoothScroll) <= GetLocalTime())))
 	{
 		mScrollForwardCount = 0;
 		int32_t topLine = GetTopLine();
@@ -1315,35 +1344,35 @@ string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
 	{
 		switch (inKeyCode)
 		{
-		case '2':
-		case ' ':
-			text = NUL;
-			break;
-		case '3':
-			text = ESC;
-			break;
-		case '4':
-			text = FS;
-			break;
-		case '5':
-			text = GS;
-			break;
-		case '6':
-			text = RS;
-			break;
-		case '7':
-			text = US;
-			break;
-		case '8':
-			text = DEL;
-			break;
-		default:
-			// check to see if this is a decent control key
-			if (inKeyCode >= '@' and inKeyCode < '`')
-				text = char(inKeyCode - '@');
-			else if (inKeyCode == kCancelKeyCode)
-				text = kControlBreakMessage;
-			break;
+			case '2':
+			case ' ':
+				text = NUL;
+				break;
+			case '3':
+				text = ESC;
+				break;
+			case '4':
+				text = FS;
+				break;
+			case '5':
+				text = GS;
+				break;
+			case '6':
+				text = RS;
+				break;
+			case '7':
+				text = US;
+				break;
+			case '8':
+				text = DEL;
+				break;
+			default:
+				// check to see if this is a decent control key
+				if (inKeyCode >= '@' and inKeyCode < '`')
+					text = char(inKeyCode - '@');
+				else if (inKeyCode == kCancelKeyCode)
+					text = kControlBreakMessage;
+				break;
 		}
 	}
 
@@ -1356,76 +1385,76 @@ string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers)
 
 	switch (inKeyCode)
 	{
-	case kUpArrowKeyCode:
-		text = "\033A";
-		break;
-	case kDownArrowKeyCode:
-		text = "\033B";
-		break;
-	case kRightArrowKeyCode:
-		text = "\033C";
-		break;
-	case kLeftArrowKeyCode:
-		text = "\033D";
-		break;
+		case kUpArrowKeyCode:
+			text = "\033A";
+			break;
+		case kDownArrowKeyCode:
+			text = "\033B";
+			break;
+		case kRightArrowKeyCode:
+			text = "\033C";
+			break;
+		case kLeftArrowKeyCode:
+			text = "\033D";
+			break;
 	}
 
 	if (text.empty() and inModifiers & kNumPad)
 	{
 		switch (inKeyCode)
 		{
-		case kNumlockKeyCode:
-			text = "\033P";
-			break;
-		case kDivideKeyCode:
-			text = "\033Q";
-			break;
-		case kMultiplyKeyCode:
-			text = "\033R";
-			break;
-		case kSubtractKeyCode:
-			if (inModifiers & kOptionKey)
-			{
-				inModifiers &= ~kOptionKey;
-				text = mDECNMK ? "\033?m" : "-";
-			}
-			else
-				text = "\033S";
-			break;
-		case kEnterKeyCode:
-			if (mDECNMK)
-				text = "\033?M";
-			else if (mLNM)
-				text = "\r\n";
-			else
-				text = "\r";
-			break;
-		default:
-			if (mDECNMK)
-			{
-				switch (inKeyCode)
+			case kNumlockKeyCode:
+				text = "\033P";
+				break;
+			case kDivideKeyCode:
+				text = "\033Q";
+				break;
+			case kMultiplyKeyCode:
+				text = "\033R";
+				break;
+			case kSubtractKeyCode:
+				if (inModifiers & kOptionKey)
 				{
-				case '+':
-				case ',':
-					text = "\033?l";
-					break;
-				case '.':
-					text = "\033?n";
-					break;
-				default:
-					if (inKeyCode >= '0' and inKeyCode <= '9')
-					{
-						text = "\033?p";
-						text[2] += (inKeyCode - '0');
-					}
-					break;
+					inModifiers &= ~kOptionKey;
+					text = mDECNMK ? "\033?m" : "-";
 				}
-			}
-			else if ((inKeyCode >= '0' and inKeyCode <= '9') or inKeyCode == '-' or inKeyCode == '.')
-				text = char(inKeyCode);
-			else if (inKeyCode == '+' or inKeyCode == ',')
-				text = ',';
-			break;
+				else
+					text = "\033S";
+				break;
+			case kEnterKeyCode:
+				if (mDECNMK)
+					text = "\033?M";
+				else if (mLNM)
+					text = "\r\n";
+				else
+					text = "\r";
+				break;
+			default:
+				if (mDECNMK)
+				{
+					switch (inKeyCode)
+					{
+						case '+':
+						case ',':
+							text = "\033?l";
+							break;
+						case '.':
+							text = "\033?n";
+							break;
+						default:
+							if (inKeyCode >= '0' and inKeyCode <= '9')
+							{
+								text = "\033?p";
+								text[2] += (inKeyCode - '0');
+							}
+							break;
+					}
+				}
+				else if ((inKeyCode >= '0' and inKeyCode <= '9') or inKeyCode == '-' or inKeyCode == '.')
+					text = char(inKeyCode);
+				else if (inKeyCode == '+' or inKeyCode == ',')
+					text = ',';
+				break;
 		}
 	}
 
@@ -1441,82 +1470,82 @@ string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
 
 	switch (inKeyCode)
 	{
-	case kUpArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + "A";
-		break;
-	case kDownArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + "B";
-		break;
-	case kRightArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + "C";
-		break;
-	case kLeftArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + "D";
-		break;
+		case kUpArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + "A";
+			break;
+		case kDownArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + "B";
+			break;
+		case kRightArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + "C";
+			break;
+		case kLeftArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + "D";
+			break;
 
-	case kHomeKeyCode:
-		text = "\033[1~";
-		break;
-	case kEndKeyCode:
-		text = "\033[4~";
-		break;
-	case kInsertKeyCode:
-		text = "\033[2~";
-		break;
-	case kDeleteKeyCode:
-		text = "\033[3~";
-		break;
-	case kPageUpKeyCode:
-		text = "\033[5~";
-		break;
-	case kPageDownKeyCode:
-		text = "\033[6~";
-		break;
+		case kHomeKeyCode:
+			text = "\033[1~";
+			break;
+		case kEndKeyCode:
+			text = "\033[4~";
+			break;
+		case kInsertKeyCode:
+			text = "\033[2~";
+			break;
+		case kDeleteKeyCode:
+			text = "\033[3~";
+			break;
+		case kPageUpKeyCode:
+			text = "\033[5~";
+			break;
+		case kPageDownKeyCode:
+			text = "\033[6~";
+			break;
 	}
 
 	if (text.empty() and inModifiers & kNumPad)
 	{
 		switch (inKeyCode)
 		{
-		case kNumlockKeyCode:
-			text = kSS3 + 'P';
-			break;
-		case kDivideKeyCode:
-			text = kSS3 + 'Q';
-			break;
-		case kMultiplyKeyCode:
-			text = kSS3 + 'R';
-			break;
-		case kSubtractKeyCode:
-			if (inModifiers & kOptionKey)
-			{
-				inModifiers &= ~kOptionKey;
-				text = mDECNMK ? "\033Om" : "-";
-			}
-			else
-				text = kSS3 + 'S';
-			break;
-		case kEnterKeyCode:
-			if (mDECNMK)
-				text = "\033OM";
-			else
-				text = mLNM ? "\r\n" : "\r";
-			break;
-		case ',':
-			text = mDECNMK ? "\033Ol" : ",";
-			break;
-		case '+':
-			text = mDECNMK ? "\033Ol" : ",";
-			break;
-		case '.':
-			text = mDECNMK ? "\033On" : ".";
-			break;
-		default:
-			if (mDECNMK)
-				text = kSS3 + char(inKeyCode - '0' + 'p');
-			else
-				text = char(inKeyCode);
-			break;
+			case kNumlockKeyCode:
+				text = kSS3 + 'P';
+				break;
+			case kDivideKeyCode:
+				text = kSS3 + 'Q';
+				break;
+			case kMultiplyKeyCode:
+				text = kSS3 + 'R';
+				break;
+			case kSubtractKeyCode:
+				if (inModifiers & kOptionKey)
+				{
+					inModifiers &= ~kOptionKey;
+					text = mDECNMK ? "\033Om" : "-";
+				}
+				else
+					text = kSS3 + 'S';
+				break;
+			case kEnterKeyCode:
+				if (mDECNMK)
+					text = "\033OM";
+				else
+					text = mLNM ? "\r\n" : "\r";
+				break;
+			case ',':
+				text = mDECNMK ? "\033Ol" : ",";
+				break;
+			case '+':
+				text = mDECNMK ? "\033Ol" : ",";
+				break;
+			case '.':
+				text = mDECNMK ? "\033On" : ".";
+				break;
+			default:
+				if (mDECNMK)
+					text = kSS3 + char(inKeyCode - '0' + 'p');
+				else
+					text = char(inKeyCode);
+				break;
 		}
 	}
 
@@ -1528,84 +1557,84 @@ string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
 		{
 			switch (inKeyCode)
 			{
-			case kF1KeyCode:
-				text = kCSI + "11" + suffix;
-				break;
-			case kF2KeyCode:
-				text = kCSI + "12" + suffix;
-				break;
-			case kF3KeyCode:
-				text = kCSI + "13" + suffix;
-				break;
-			case kF4KeyCode:
-				text = kCSI + "14" + suffix;
-				break;
-			case kF5KeyCode:
-				text = kCSI + "15" + suffix;
-				break;
-			case kF6KeyCode:
-				text = kCSI + "17" + suffix;
-				break;
-			case kF7KeyCode:
-				text = kCSI + "18" + suffix;
-				break;
-			case kF8KeyCode:
-				text = kCSI + "19" + suffix;
-				break;
-			case kF9KeyCode:
-				text = kCSI + "20" + suffix;
-				break;
-			case kF10KeyCode:
-				text = kCSI + "21" + suffix;
-				break;
-			case kF11KeyCode:
-				text = kCSI + "23" + suffix;
-				break;
-			case kF12KeyCode:
-				text = kCSI + "24" + suffix;
-				break;
+				case kF1KeyCode:
+					text = kCSI + "11" + suffix;
+					break;
+				case kF2KeyCode:
+					text = kCSI + "12" + suffix;
+					break;
+				case kF3KeyCode:
+					text = kCSI + "13" + suffix;
+					break;
+				case kF4KeyCode:
+					text = kCSI + "14" + suffix;
+					break;
+				case kF5KeyCode:
+					text = kCSI + "15" + suffix;
+					break;
+				case kF6KeyCode:
+					text = kCSI + "17" + suffix;
+					break;
+				case kF7KeyCode:
+					text = kCSI + "18" + suffix;
+					break;
+				case kF8KeyCode:
+					text = kCSI + "19" + suffix;
+					break;
+				case kF9KeyCode:
+					text = kCSI + "20" + suffix;
+					break;
+				case kF10KeyCode:
+					text = kCSI + "21" + suffix;
+					break;
+				case kF11KeyCode:
+					text = kCSI + "23" + suffix;
+					break;
+				case kF12KeyCode:
+					text = kCSI + "24" + suffix;
+					break;
 			}
 		}
 		else
 		{
 			switch (inKeyCode)
 			{
-			case kF1KeyCode:
-				text = kCSI + "23" + suffix;
-				break;
-			case kF2KeyCode:
-				text = kCSI + "24" + suffix;
-				break;
-			case kF3KeyCode:
-				text = kCSI + "25" + suffix;
-				break;
-			case kF4KeyCode:
-				text = kCSI + "26" + suffix;
-				break;
-			case kF5KeyCode:
-				text = kCSI + "28" + suffix;
-				break;
-			case kF6KeyCode:
-				text = kCSI + "29" + suffix;
-				break;
-			case kF7KeyCode:
-				text = kCSI + "31" + suffix;
-				break;
-			case kF8KeyCode:
-				text = kCSI + "32" + suffix;
-				break;
-			case kF9KeyCode:
-				text = kCSI + "33" + suffix;
-				break;
-			case kF10KeyCode:
-				text = kCSI + "34" + suffix;
-				break;
-			case kF11KeyCode:
-				text = kCSI + "35" + suffix;
-				break;
-			case kF12KeyCode:
-				text = kCSI + "36" + suffix;
-				break;
+				case kF1KeyCode:
+					text = kCSI + "23" + suffix;
+					break;
+				case kF2KeyCode:
+					text = kCSI + "24" + suffix;
+					break;
+				case kF3KeyCode:
+					text = kCSI + "25" + suffix;
+					break;
+				case kF4KeyCode:
+					text = kCSI + "26" + suffix;
+					break;
+				case kF5KeyCode:
+					text = kCSI + "28" + suffix;
+					break;
+				case kF6KeyCode:
+					text = kCSI + "29" + suffix;
+					break;
+				case kF7KeyCode:
+					text = kCSI + "31" + suffix;
+					break;
+				case kF8KeyCode:
+					text = kCSI + "32" + suffix;
+					break;
+				case kF9KeyCode:
+					text = kCSI + "33" + suffix;
+					break;
+				case kF10KeyCode:
+					text = kCSI + "34" + suffix;
+					break;
+				case kF11KeyCode:
+					text = kCSI + "35" + suffix;
+					break;
+				case kF12KeyCode:
+					text = kCSI + "36" + suffix;
+					break;
 			}
 
 			if (not text.empty())
@@ -1633,74 +1662,74 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 
 	switch (inKeyCode)
 	{
-	case kUpArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + modS3 + "A";
-		break;
-	case kDownArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + modS3 + "B";
-		break;
-	case kRightArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + modS3 + "C";
-		break;
-	case kLeftArrowKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + modS3 + "D";
-		break;
-	case kHomeKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + modS3 + "H";
-		break;
-	case kEndKeyCode:
-		text = (mDECCKM ? kSS3 : kCSI) + modS3 + "F";
-		break;
+		case kUpArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + modS3 + "A";
+			break;
+		case kDownArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + modS3 + "B";
+			break;
+		case kRightArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + modS3 + "C";
+			break;
+		case kLeftArrowKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + modS3 + "D";
+			break;
+		case kHomeKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + modS3 + "H";
+			break;
+		case kEndKeyCode:
+			text = (mDECCKM ? kSS3 : kCSI) + modS3 + "F";
+			break;
 
-	case kInsertKeyCode:
-		text = kCSI + '2' + modS2 + "~";
-		break;
-	case kDeleteKeyCode:
-		text = kCSI + '3' + modS2 + "~";
-		break;
-	case kPageUpKeyCode:
-		text = kCSI + '5' + modS2 + "~";
-		break;
-	case kPageDownKeyCode:
-		text = kCSI + '6' + modS2 + "~";
-		break;
+		case kInsertKeyCode:
+			text = kCSI + '2' + modS2 + "~";
+			break;
+		case kDeleteKeyCode:
+			text = kCSI + '3' + modS2 + "~";
+			break;
+		case kPageUpKeyCode:
+			text = kCSI + '5' + modS2 + "~";
+			break;
+		case kPageDownKeyCode:
+			text = kCSI + '6' + modS2 + "~";
+			break;
 
-	case kF1KeyCode:
-		text = kSS3 + modS3 + "P";
-		break;
-	case kF2KeyCode:
-		text = kSS3 + modS3 + "Q";
-		break;
-	case kF3KeyCode:
-		text = kSS3 + modS3 + "R";
-		break;
-	case kF4KeyCode:
-		text = kSS3 + modS3 + "S";
-		break;
-	case kF5KeyCode:
-		text = kCSI + "15" + modS2 + "~";
-		break;
-	case kF6KeyCode:
-		text = kCSI + "17" + modS2 + "~";
-		break;
-	case kF7KeyCode:
-		text = kCSI + "18" + modS2 + "~";
-		break;
-	case kF8KeyCode:
-		text = kCSI + "19" + modS2 + "~";
-		break;
-	case kF9KeyCode:
-		text = kCSI + "20" + modS2 + "~";
-		break;
-	case kF10KeyCode:
-		text = kCSI + "21" + modS2 + "~";
-		break;
-	case kF11KeyCode:
-		text = kCSI + "23" + modS2 + "~";
-		break;
-	case kF12KeyCode:
-		text = kCSI + "24" + modS2 + "~";
-		break;
+		case kF1KeyCode:
+			text = kSS3 + modS3 + "P";
+			break;
+		case kF2KeyCode:
+			text = kSS3 + modS3 + "Q";
+			break;
+		case kF3KeyCode:
+			text = kSS3 + modS3 + "R";
+			break;
+		case kF4KeyCode:
+			text = kSS3 + modS3 + "S";
+			break;
+		case kF5KeyCode:
+			text = kCSI + "15" + modS2 + "~";
+			break;
+		case kF6KeyCode:
+			text = kCSI + "17" + modS2 + "~";
+			break;
+		case kF7KeyCode:
+			text = kCSI + "18" + modS2 + "~";
+			break;
+		case kF8KeyCode:
+			text = kCSI + "19" + modS2 + "~";
+			break;
+		case kF9KeyCode:
+			text = kCSI + "20" + modS2 + "~";
+			break;
+		case kF10KeyCode:
+			text = kCSI + "21" + modS2 + "~";
+			break;
+		case kF11KeyCode:
+			text = kCSI + "23" + modS2 + "~";
+			break;
+		case kF12KeyCode:
+			text = kCSI + "24" + modS2 + "~";
+			break;
 	}
 
 	// override special case
@@ -1726,79 +1755,79 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 		{
 			switch (inKeyCode)
 			{
-			case kMultiplyKeyCode:
-				text = kSS3 + 'j';
-				break;
-			case '+':
-				text = kSS3 + 'k';
-				break;
-			case ',':
-				text = kSS3 + 'l';
-				break;
-			case kSubtractKeyCode:
-				text = kSS3 + 'm';
-				break;
-			case '.':
-				text = kCSI + "3~";
-				break;
-			case kDivideKeyCode:
-				text = kSS3 + 'o';
-				break;
-			case '0':
-				text = kCSI + "2~";
-				break;
-			case '1':
-				text = kSS3 + 'F';
-				break;
-			case '2':
-				text = kCSI + 'B';
-				break;
-			case '3':
-				text = kCSI + "6~";
-				break;
-			case '4':
-				text = kCSI + 'D';
-				break;
-			case '5':
-				text = kCSI + 'E';
-				break;
-			case '6':
-				text = kCSI + 'C';
-				break;
-			case '7':
-				text = kSS3 + 'H';
-				break;
-			case '8':
-				text = kCSI + 'A';
-				break;
-			case '9':
-				text = kCSI + "5~";
-				break;
-			case kEnterKeyCode:
-				text = kSS3 + 'M';
-				break;
+				case kMultiplyKeyCode:
+					text = kSS3 + 'j';
+					break;
+				case '+':
+					text = kSS3 + 'k';
+					break;
+				case ',':
+					text = kSS3 + 'l';
+					break;
+				case kSubtractKeyCode:
+					text = kSS3 + 'm';
+					break;
+				case '.':
+					text = kCSI + "3~";
+					break;
+				case kDivideKeyCode:
+					text = kSS3 + 'o';
+					break;
+				case '0':
+					text = kCSI + "2~";
+					break;
+				case '1':
+					text = kSS3 + 'F';
+					break;
+				case '2':
+					text = kCSI + 'B';
+					break;
+				case '3':
+					text = kCSI + "6~";
+					break;
+				case '4':
+					text = kCSI + 'D';
+					break;
+				case '5':
+					text = kCSI + 'E';
+					break;
+				case '6':
+					text = kCSI + 'C';
+					break;
+				case '7':
+					text = kSS3 + 'H';
+					break;
+				case '8':
+					text = kCSI + 'A';
+					break;
+				case '9':
+					text = kCSI + "5~";
+					break;
+				case kEnterKeyCode:
+					text = kSS3 + 'M';
+					break;
 			}
 		}
 		else
 		{
 			switch (inKeyCode)
 			{
-			case kMultiplyKeyCode:
-				text = '*';
-				break;
-			case kSubtractKeyCode:
-				text = '-';
-				break;
-			case kDivideKeyCode:
-				text = '/';
-				break;
-			case kEnterKeyCode:
-				text = mLNM ? "\r\n" : "\r";
-				break;
-			default:
-				if (inKeyCode >= '0' and inKeyCode <= '9')
-					text = char(inKeyCode);
-				break;
+				case kMultiplyKeyCode:
+					text = '*';
+					break;
+				case kSubtractKeyCode:
+					text = '-';
+					break;
+				case kDivideKeyCode:
+					text = '/';
+					break;
+				case kEnterKeyCode:
+					text = mLNM ? "\r\n" : "\r";
+					break;
+				default:
+					if (inKeyCode >= '0' and inKeyCode <= '9')
+						text = char(inKeyCode);
+					break;
 			}
 		}
 	}
@@ -1826,7 +1855,7 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 }
 
 bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
-								  bool inRepeat)
+	bool inRepeat)
 {
 	PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
 
@@ -1851,22 +1880,22 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 			// mimic xterm behaviour
 			switch (inKeyCode)
 			{
-			case kHomeKeyCode:
-				Scroll(kScrollToStart);
-				handled = true;
-				break;
-			case kEndKeyCode:
-				Scroll(kScrollToEnd);
-				handled = true;
-				break;
-			case kPageUpKeyCode:
-				Scroll(kScrollPageUp);
-				handled = true;
-				break;
-			case kPageDownKeyCode:
-				Scroll(kScrollPageDown);
-				handled = true;
-				break;
+				case kHomeKeyCode:
+					Scroll(kScrollToStart);
+					handled = true;
+					break;
+				case kEndKeyCode:
+					Scroll(kScrollToEnd);
+					handled = true;
+					break;
+				case kPageUpKeyCode:
+					Scroll(kScrollPageUp);
+					handled = true;
+					break;
+				case kPageDownKeyCode:
+					Scroll(kScrollPageDown);
+					handled = true;
+					break;
 			}
 		}
 		else if ((inModifiers & (kControlKey | kOptionKey | kShiftKey)) == (kControlKey | kShiftKey))
@@ -1874,14 +1903,14 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 			// mimic xterm behaviour
 			switch (inKeyCode)
 			{
-			case kUpArrowKeyCode:
-				Scroll(kScrollLineUp);
-				handled = true;
-				break;
-			case kDownArrowKeyCode:
-				Scroll(kScrollLineDown);
-				handled = true;
-				break;
+				case kUpArrowKeyCode:
+					Scroll(kScrollLineUp);
+					handled = true;
+					break;
+				case kDownArrowKeyCode:
+					Scroll(kScrollLineDown);
+					handled = true;
+					break;
 			}
 		}
 
@@ -2012,95 +2041,95 @@ bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint3
 	bool handled = true;
 	switch (inCommand)
 	{
-	case cmd_EnterTOTP:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
+		case cmd_EnterTOTP:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
 
-	case cmd_Copy:
-		outEnabled = not mBuffer->IsSelectionEmpty();
-		break;
+		case cmd_Copy:
+			outEnabled = not mBuffer->IsSelectionEmpty();
+			break;
 
-	case cmd_Paste:
-		outEnabled = MClipboard::Instance().HasData();
-		break;
+		case cmd_Paste:
+			outEnabled = MClipboard::Instance().HasData();
+			break;
 
-	case cmd_SelectAll:
-		outEnabled = true;
-		break;
+		case cmd_SelectAll:
+			outEnabled = true;
+			break;
 
-	case cmd_FindNext:
-	case cmd_FindPrev:
-		outEnabled = true;
-		break;
+		case cmd_FindNext:
+		case cmd_FindPrev:
+			outEnabled = true;
+			break;
 
 #if DEBUG
-	case cmd_DebugUpdate:
-		outEnabled = true;
-		outChecked = mDebugUpdate;
-		break;
+		case cmd_DebugUpdate:
+			outEnabled = true;
+			outChecked = mDebugUpdate;
+			break;
 #endif
 
-	case cmd_NextTerminal:
-	case cmd_PrevTerminal:
-		outEnabled = true;
-		break;
+		case cmd_NextTerminal:
+		case cmd_PrevTerminal:
+			outEnabled = true;
+			break;
 
-	case cmd_Reset:
-	case cmd_ResetAndClear:
-		outEnabled = true;
-		break;
+		case cmd_Reset:
+		case cmd_ResetAndClear:
+			outEnabled = true;
+			break;
 
-	case cmd_EncodingUTF8:
-		outEnabled = true;
-		outChecked = mEncoding == kEncodingUTF8;
-		break;
+		case cmd_EncodingUTF8:
+			outEnabled = true;
+			outChecked = mEncoding == kEncodingUTF8;
+			break;
 
-	case cmd_BackSpaceIsDel:
-		outEnabled = true;
-		outChecked = not mDECBKM;
-		break;
+		case cmd_BackSpaceIsDel:
+			outEnabled = true;
+			outChecked = not mDECBKM;
+			break;
 
-	case cmd_DeleteIsDel:
-		outEnabled = true;
-		outChecked = mDeleteIsDel;
-		break;
+		case cmd_DeleteIsDel:
+			outEnabled = true;
+			outChecked = mDeleteIsDel;
+			break;
 
-	case cmd_VT220Keyboard:
-		outEnabled = true;
-		outChecked = not mXTermKeys;
-		break;
+		case cmd_VT220Keyboard:
+			outEnabled = true;
+			outChecked = not mXTermKeys;
+			break;
 
-	case cmd_MetaSendsEscape:
-		outEnabled = mXTermKeys;
-		outChecked = mAltSendsEscape;
-		break;
+		case cmd_MetaSendsEscape:
+			outEnabled = mXTermKeys;
+			outChecked = mAltSendsEscape;
+			break;
 
-	case cmd_OldFnKeys:
-		outEnabled = mXTermKeys;
-		outChecked = mOldFnKeys;
-		break;
+		case cmd_OldFnKeys:
+			outEnabled = mXTermKeys;
+			outChecked = mOldFnKeys;
+			break;
 
-	case cmd_SendSTOP:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
-	case cmd_SendCONT:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
-	case cmd_SendINT:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
-	case cmd_SendHUP:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
-	case cmd_SendTERM:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
-	case cmd_SendKILL:
-		outEnabled = mTerminalChannel->IsOpen();
-		break;
+		case cmd_SendSTOP:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
+		case cmd_SendCONT:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
+		case cmd_SendINT:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
+		case cmd_SendHUP:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
+		case cmd_SendTERM:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
+		case cmd_SendKILL:
+			outEnabled = mTerminalChannel->IsOpen();
+			break;
 
-	default:
-		handled = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+		default:
+			handled = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
 	}
 	return handled;
 }
@@ -2110,109 +2139,109 @@ bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint
 	bool handled = true;
 	switch (inCommand)
 	{
-	case cmd_Copy:
-		MClipboard::Instance().SetData(mBuffer->GetSelectedText(),
-									   mBuffer->IsSelectionBlock());
-		break;
+		case cmd_Copy:
+			MClipboard::Instance().SetData(mBuffer->GetSelectedText(),
+				mBuffer->IsSelectionBlock());
+			break;
 
-	case cmd_Paste:
-	{
-		string text;
-		bool block;
-		MClipboard::Instance().GetData(text, block);
-		if (mLNM)
-			ba::replace_all(text, "\n", "\r\n");
-		else
-			ba::replace_all(text, "\n", "\r");
-		if (mTerminalChannel->IsOpen())
-			mTerminalChannel->SendData(text);
-		break;
-	}
+		case cmd_Paste:
+		{
+			string text;
+			bool block;
+			MClipboard::Instance().GetData(text, block);
+			if (mLNM)
+				ba::replace_all(text, "\n", "\r\n");
+			else
+				ba::replace_all(text, "\n", "\r");
+			if (mTerminalChannel->IsOpen())
+				mTerminalChannel->SendData(text);
+			break;
+		}
 
-	case cmd_EnterTOTP:
-		EnterTOTP(inItemIndex - 2);
-		break;
+		case cmd_EnterTOTP:
+			EnterTOTP(inItemIndex - 2);
+			break;
 
-	case cmd_SelectAll:
-		mBuffer->SelectAll();
-		Invalidate();
-		break;
+		case cmd_SelectAll:
+			mBuffer->SelectAll();
+			Invalidate();
+			break;
 
-	case cmd_FindNext:
-		FindNext(searchDown);
-		break;
+		case cmd_FindNext:
+			FindNext(searchDown);
+			break;
 
-	case cmd_FindPrev:
-		FindNext(searchUp);
-		break;
+		case cmd_FindPrev:
+			FindNext(searchUp);
+			break;
 
-	case cmd_Reset:
-	{
-		value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
-		Reset();
-		break;
-	}
+		case cmd_Reset:
+		{
+			value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
+			Reset();
+			break;
+		}
 
-	case cmd_ResetAndClear:
-		Reset();
-		mBuffer->Clear();
-		Invalidate();
-		break;
+		case cmd_ResetAndClear:
+			Reset();
+			mBuffer->Clear();
+			Invalidate();
+			break;
 
-	case cmd_EncodingUTF8:
-		if (mEncoding == kEncodingUTF8)
-			mEncoding = kEncodingISO88591;
-		else
-			mEncoding = kEncodingUTF8;
-		break;
+		case cmd_EncodingUTF8:
+			if (mEncoding == kEncodingUTF8)
+				mEncoding = kEncodingISO88591;
+			else
+				mEncoding = kEncodingUTF8;
+			break;
 
-	case cmd_MetaSendsEscape:
-		mAltSendsEscape = not mAltSendsEscape;
-		break;
+		case cmd_MetaSendsEscape:
+			mAltSendsEscape = not mAltSendsEscape;
+			break;
 
-	case cmd_BackSpaceIsDel:
-		mDECBKM = not mDECBKM;
-		break;
+		case cmd_BackSpaceIsDel:
+			mDECBKM = not mDECBKM;
+			break;
 
-	case cmd_DeleteIsDel:
-		mDeleteIsDel = not mDeleteIsDel;
-		break;
+		case cmd_DeleteIsDel:
+			mDeleteIsDel = not mDeleteIsDel;
+			break;
 
-	case cmd_OldFnKeys:
-		mOldFnKeys = not mOldFnKeys;
-		break;
+		case cmd_OldFnKeys:
+			mOldFnKeys = not mOldFnKeys;
+			break;
 
-	case cmd_VT220Keyboard:
-		mXTermKeys = not mXTermKeys;
-		break;
+		case cmd_VT220Keyboard:
+			mXTermKeys = not mXTermKeys;
+			break;
 
-	case cmd_SendSTOP:
-		mTerminalChannel->SendSignal("STOP");
-		break;
-	case cmd_SendCONT:
-		mTerminalChannel->SendSignal("CONT");
-		break;
-	case cmd_SendINT:
-		mTerminalChannel->SendSignal("INT");
-		break;
-	case cmd_SendHUP:
-		mTerminalChannel->SendSignal("HUP");
-		break;
-	case cmd_SendTERM:
-		mTerminalChannel->SendSignal("TERM");
-		break;
-	case cmd_SendKILL:
-		mTerminalChannel->SendSignal("KILL");
-		break;
+		case cmd_SendSTOP:
+			mTerminalChannel->SendSignal("STOP");
+			break;
+		case cmd_SendCONT:
+			mTerminalChannel->SendSignal("CONT");
+			break;
+		case cmd_SendINT:
+			mTerminalChannel->SendSignal("INT");
+			break;
+		case cmd_SendHUP:
+			mTerminalChannel->SendSignal("HUP");
+			break;
+		case cmd_SendTERM:
+			mTerminalChannel->SendSignal("TERM");
+			break;
+		case cmd_SendKILL:
+			mTerminalChannel->SendSignal("KILL");
+			break;
 
 #if DEBUG
-	case cmd_DebugUpdate:
-		mDebugUpdate = not mDebugUpdate;
-		break;
+		case cmd_DebugUpdate:
+			mDebugUpdate = not mDebugUpdate;
+			break;
 #endif
 
-	default:
-		handled = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+		default:
+			handled = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
 	}
 	return handled;
 }
@@ -2389,72 +2418,72 @@ void MTerminalView::Scroll(MScrollMessage inMessage)
 
 	switch (inMessage)
 	{
-	case kScrollLineDown:
-		if (value < max)
-			mScrollbar->SetValue(value + 1);
-		break;
+		case kScrollLineDown:
+			if (value < max)
+				mScrollbar->SetValue(value + 1);
+			break;
 
-	case kScrollLineUp:
-		if (value > min)
-			mScrollbar->SetValue(value - 1);
-		break;
+		case kScrollLineUp:
+			if (value > min)
+				mScrollbar->SetValue(value - 1);
+			break;
 
-	case kScrollPageDown:
-		value += mTerminalHeight;
-		if (value > max)
-			value = max;
-		mScrollbar->SetValue(value);
-		break;
+		case kScrollPageDown:
+			value += mTerminalHeight;
+			if (value > max)
+				value = max;
+			mScrollbar->SetValue(value);
+			break;
 
-	case kScrollPageUp:
-		value -= mTerminalHeight;
-		if (value < min)
-			value = min;
-		mScrollbar->SetValue(value);
-		break;
+		case kScrollPageUp:
+			value -= mTerminalHeight;
+			if (value < min)
+				value = min;
+			mScrollbar->SetValue(value);
+			break;
 
-	case kScrollToStart:
-		mScrollbar->SetValue(min);
-		break;
+		case kScrollToStart:
+			mScrollbar->SetValue(min);
+			break;
 
-	case kScrollToEnd:
-		mScrollbar->SetValue(max);
-		break;
+		case kScrollToEnd:
+			mScrollbar->SetValue(max);
+			break;
 
-	case kScrollToSelection:
-		if (not mBuffer->IsSelectionEmpty())
-		{
-			int32_t lb, le, cb, ce;
-			bool block;
-			mBuffer->GetSelection(lb, cb, le, ce, block);
-
-			bool forceCenter = false;
-
-			int32_t minLine = GetTopLine();
-			if (lb == minLine - 1 and lb < 0)
-				mScrollbar->SetValue(max + lb);
-			else if (lb < minLine)
-				forceCenter = true;
-
-			int32_t maxLine = minLine + mTerminalHeight;
-			if (lb == maxLine and lb < 0)
-				mScrollbar->SetValue(max + lb);
-			else if (lb > maxLine)
-				forceCenter = true;
-
-			if (forceCenter)
+		case kScrollToSelection:
+			if (not mBuffer->IsSelectionEmpty())
 			{
-				value = max + (lb - mTerminalHeight / 3);
-				if (value > max)
-					value = max;
-				if (value < min)
-					value = min;
-				mScrollbar->SetValue(value);
-			}
-		}
-		break;
+				int32_t lb, le, cb, ce;
+				bool block;
+				mBuffer->GetSelection(lb, cb, le, ce, block);
 
-	default:;
+				bool forceCenter = false;
+
+				int32_t minLine = GetTopLine();
+				if (lb == minLine - 1 and lb < 0)
+					mScrollbar->SetValue(max + lb);
+				else if (lb < minLine)
+					forceCenter = true;
+
+				int32_t maxLine = minLine + mTerminalHeight;
+				if (lb == maxLine and lb < 0)
+					mScrollbar->SetValue(max + lb);
+				else if (lb > maxLine)
+					forceCenter = true;
+
+				if (forceCenter)
+				{
+					value = max + (lb - mTerminalHeight / 3);
+					if (value > max)
+						value = max;
+					if (value < min)
+						value = min;
+					mScrollbar->SetValue(value);
+				}
+			}
+			break;
+
+		default:;
 	}
 
 	Invalidate();
@@ -2462,7 +2491,7 @@ void MTerminalView::Scroll(MScrollMessage inMessage)
 }
 
 void MTerminalView::GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
-									   uint32_t &outWidth, uint32_t &outHeight)
+	uint32_t &outWidth, uint32_t &outHeight)
 {
 	MDevice dev;
 	dev.SetFont(Preferences::GetString("font", Preferences::GetString("font", "Consolas 10")));
@@ -2480,7 +2509,7 @@ MRect MTerminalView::GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows)
 {
 	uint32_t w, h;
 	GetTerminalMetrics(inColumns, inRows, Preferences::GetBoolean("show-status-line", false), w, h);
-	return { 0, 0, w, h };
+	return {0, 0, w, h};
 }
 
 void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
@@ -2624,6 +2653,8 @@ void MTerminalView::Closed()
 
 void MTerminalView::HandleOpened(const boost::system::error_code &ec)
 {
+	PRINT(("Open callback in %p", std::this_thread::get_id()));
+
 	if (ec)
 	{
 		const string &msg = ec.message();
@@ -2651,8 +2682,6 @@ void MTerminalView::HandleReceived(const boost::system::error_code &ec, streambu
 	}
 	else
 	{
-PRINT(("trace %d, %p",  __LINE__, std::this_thread::get_id()));
-
 		istream in(&inData);
 		io::stream<io::back_insert_device<deque<char>>> out(mInputBuffer);
 
@@ -2736,107 +2765,107 @@ void MTerminalView::MoveCursor(MCursorMovement inDirection)
 
 	switch (inDirection)
 	{
-	case kMoveUp:
-		if (mCursor.y > mMarginTop or (mCursor.y < mMarginTop and mCursor.y > 0))
-			--mCursor.y;
-		break;
+		case kMoveUp:
+			if (mCursor.y > mMarginTop or (mCursor.y < mMarginTop and mCursor.y > 0))
+				--mCursor.y;
+			break;
 
-	case kMoveDown:
-		if (mCursor.y < mMarginBottom or (mCursor.y > mMarginBottom and mCursor.y < mTerminalHeight - 1))
-			++mCursor.y;
-		break;
+		case kMoveDown:
+			if (mCursor.y < mMarginBottom or (mCursor.y > mMarginBottom and mCursor.y < mTerminalHeight - 1))
+				++mCursor.y;
+			break;
 
-	case kMoveRight:
-		if (mCursor.x < mMarginRight or (mCursor.x > mMarginRight and mTerminalWidth - 1))
-			++mCursor.x;
-		break;
+		case kMoveRight:
+			if (mCursor.x < mMarginRight or (mCursor.x > mMarginRight and mTerminalWidth - 1))
+				++mCursor.x;
+			break;
 
-	case kMoveLeft:
-		if (mCursor.x >= mTerminalWidth - 1)
-			mCursor.x = mTerminalWidth - 1 - 1;
-		else if (mCursor.x > mMarginLeft or (mCursor.x < mMarginLeft and mCursor.x > 0))
-			--mCursor.x;
-		break;
+		case kMoveLeft:
+			if (mCursor.x >= mTerminalWidth - 1)
+				mCursor.x = mTerminalWidth - 1 - 1;
+			else if (mCursor.x > mMarginLeft or (mCursor.x < mMarginLeft and mCursor.x > 0))
+				--mCursor.x;
+			break;
 
-	case kMoveIND:
-		if (mCursor.y < mMarginBottom)
-			++mCursor.y;
-		else if (mCursor.y == mMarginBottom)
-			ScrollForward();
-		break;
+		case kMoveIND:
+			if (mCursor.y < mMarginBottom)
+				++mCursor.y;
+			else if (mCursor.y == mMarginBottom)
+				ScrollForward();
+			break;
 
-	// same as MoveUp
-	case kMoveRI:
-		if (mCursor.y > mMarginTop)
-			--mCursor.y;
-		else if (mCursor.y == mMarginTop)
-			ScrollBackward();
-		break;
+		// same as MoveUp
+		case kMoveRI:
+			if (mCursor.y > mMarginTop)
+				--mCursor.y;
+			else if (mCursor.y == mMarginTop)
+				ScrollBackward();
+			break;
 
-	case kMoveLF:
-		if (mCursor.y < mMarginBottom)
-			++mCursor.y;
-		else if (mCursor.y == mMarginBottom)
-			ScrollForward();
-		break;
+		case kMoveLF:
+			if (mCursor.y < mMarginBottom)
+				++mCursor.y;
+			else if (mCursor.y == mMarginBottom)
+				ScrollForward();
+			break;
 
-	case kMoveCR:
-		mCursor.x = mMarginLeft;
-		break;
+		case kMoveCR:
+			mCursor.x = mMarginLeft;
+			break;
 
-	case kMoveCRLF:
-		mCursor.x = mMarginLeft;
-		if (mCursor.y < mMarginBottom)
-			++mCursor.y;
-		else if (mCursor.y == mMarginBottom)
-			ScrollForward();
-		break;
+		case kMoveCRLF:
+			mCursor.x = mMarginLeft;
+			if (mCursor.y < mMarginBottom)
+				++mCursor.y;
+			else if (mCursor.y == mMarginBottom)
+				ScrollForward();
+			break;
 
-	case kMoveHT:
-		while (mCursor.x < mMarginRight)
-		{
-			++mCursor.x;
-			if (mTabStops[mCursor.x])
-				break;
-		}
-		break;
+		case kMoveHT:
+			while (mCursor.x < mMarginRight)
+			{
+				++mCursor.x;
+				if (mTabStops[mCursor.x])
+					break;
+			}
+			break;
 
-	case kMoveCBT:
-		while (mCursor.x > mMarginLeft)
-		{
-			--mCursor.x;
-			if (mTabStops[mCursor.x])
-				break;
-		}
-		break;
+		case kMoveCBT:
+			while (mCursor.x > mMarginLeft)
+			{
+				--mCursor.x;
+				if (mTabStops[mCursor.x])
+					break;
+			}
+			break;
 
-	case kMoveBI:
-		if (mCursor.x > mMarginLeft)
-			--mCursor.x;
-		else if (mCursor.x >= 0)
-			mBuffer->InsertCharacter(mCursor.y, mMarginLeft, mMarginRight);
-		break;
+		case kMoveBI:
+			if (mCursor.x > mMarginLeft)
+				--mCursor.x;
+			else if (mCursor.x >= 0)
+				mBuffer->InsertCharacter(mCursor.y, mMarginLeft, mMarginRight);
+			break;
 
-	case kMoveFI:
-		if (mCursor.x < mMarginRight - 1)
-			++mCursor.x;
-		else if (mCursor.x < mTerminalWidth)
-			mBuffer->DeleteCharacter(mCursor.y, mMarginLeft, mMarginRight);
-		break;
+		case kMoveFI:
+			if (mCursor.x < mMarginRight - 1)
+				++mCursor.x;
+			else if (mCursor.x < mTerminalWidth)
+				mBuffer->DeleteCharacter(mCursor.y, mMarginLeft, mMarginRight);
+			break;
 
-	case kMoveSL:
-		for (int32_t line = 0; line < mTerminalHeight; ++line)
-			mBuffer->DeleteCharacter(line, mMarginLeft, mMarginRight);
-		if (mCursor.x > 0)
-			--mCursor.x;
-		break;
+		case kMoveSL:
+			for (int32_t line = 0; line < mTerminalHeight; ++line)
+				mBuffer->DeleteCharacter(line, mMarginLeft, mMarginRight);
+			if (mCursor.x > 0)
+				--mCursor.x;
+			break;
 
-	case kMoveSR:
-		for (int32_t line = 0; line < mTerminalHeight - 1; ++line)
-			mBuffer->InsertCharacter(line, mMarginLeft, mMarginRight);
-		if (mCursor.x < mMarginRight)
-			++mCursor.x;
-		break;
+		case kMoveSR:
+			for (int32_t line = 0; line < mTerminalHeight - 1; ++line)
+				mBuffer->InsertCharacter(line, mMarginLeft, mMarginRight);
+			if (mCursor.x < mMarginRight)
+				++mCursor.x;
+			break;
 	}
 
 	if (x != mCursor.x or y != mCursor.y)
@@ -2929,141 +2958,141 @@ void MTerminalView::Emulate()
 			{
 				switch (mEscState)
 				{
-				case eDCS:
-					EscapeDCS(ch);
-					continue;
-				case eOSC:
-					EscapeOSC(ch);
-					continue;
-				default:
-					break;
+					case eDCS:
+						EscapeDCS(ch);
+						continue;
+					case eOSC:
+						EscapeOSC(ch);
+						continue;
+					default:
+						break;
 				}
 			}
 
 			switch (ch)
 			{
-			case ENQ:
-				mTerminalChannel->SendData(Preferences::GetString("answer-back", "salt\r"));
-				break;
+				case ENQ:
+					mTerminalChannel->SendData(Preferences::GetString("answer-back", "salt\r"));
+					break;
 
-			case BEL:
-				if (mEscState == eOSC)
-					EscapeOSC(ch);
-				else
-					Beep();
-				break;
+				case BEL:
+					if (mEscState == eOSC)
+						EscapeOSC(ch);
+					else
+						Beep();
+					break;
 
-			case BS:
-				MoveCursor(kMoveLeft);
-				break;
-			case HT:
-				MoveCursor(kMoveHT);
-				break;
-			case LF:
-			case VT:
-			case FF:
-				MoveCursor(mLNM ? kMoveCRLF : kMoveLF);
-				break;
-			case CR:
-				MoveCursor(kMoveCR);
-				break;
-			case SO:
-				mCursor.CSGL = 1;
-				break;
-			case SI:
-				mCursor.CSGL = 0;
-				break;
-			case SUB:
-				WriteChar(0x00bf /*¿*/); // fall through
-			case CAN:
-				mEscState = eESC_NONE;
-				break;
+				case BS:
+					MoveCursor(kMoveLeft);
+					break;
+				case HT:
+					MoveCursor(kMoveHT);
+					break;
+				case LF:
+				case VT:
+				case FF:
+					MoveCursor(mLNM ? kMoveCRLF : kMoveLF);
+					break;
+				case CR:
+					MoveCursor(kMoveCR);
+					break;
+				case SO:
+					mCursor.CSGL = 1;
+					break;
+				case SI:
+					mCursor.CSGL = 0;
+					break;
+				case SUB:
+					WriteChar(0x00bf /*¿*/); // fall through
+				case CAN:
+					mEscState = eESC_NONE;
+					break;
 
-			case ESC:
-				// If we're processing an escape string and then receive an escape
-				// this can either mean the beginning of a new escape string cancelling
-				// the previous, or it may be the start of a ST or BEL sequence.
-				// The latter can only occur when 8 bit controls are in use.
+				case ESC:
+					// If we're processing an escape string and then receive an escape
+					// this can either mean the beginning of a new escape string cancelling
+					// the previous, or it may be the start of a ST or BEL sequence.
+					// The latter can only occur when 8 bit controls are in use.
 
-				if (mDECSCL >= 2 and mS8C1T)
-					mEscState = eESC_SEEN;
-				else
-				{
+					if (mDECSCL >= 2 and mS8C1T)
+						mEscState = eESC_SEEN;
+					else
+					{
+						switch (mEscState)
+						{
+							case eDCS:
+								mEscState = eDCS_ESC;
+								break;
+							case eOSC:
+								mEscState = eOSC_ESC;
+								break;
+							case ePM:
+								mEscState = ePM_ESC;
+								break;
+							case eAPC:
+								mEscState = eAPC_ESC;
+								break;
+							default:
+								mEscState = eESC_SEEN;
+								break;
+						}
+					}
+					break;
+
+				case IND:
+					MoveCursor(kMoveIND);
+					break;
+				case NEL:
+					MoveCursor(kMoveCRLF);
+					break;
+				case HTS:
+					SetTabstop();
+					break;
+				case RI:
+					MoveCursor(kMoveRI);
+					break;
+				case SS2:
+					mCursor.SS = 2;
+					break;
+				case SS3:
+					mCursor.SS = 3;
+					break;
+				case DCS:
+					mPFKKeyNr = 0;
+					mEscState = eDCS;
+					break;
+				case OSC:
+					mEscState = eOSC;
+					break;
+				case CSI:
+					mEscState = eCSI;
+					break;
+				case PM:
+					mEscState = ePM;
+					break;
+
+				case ST:
 					switch (mEscState)
 					{
-					case eDCS:
-						mEscState = eDCS_ESC;
-						break;
-					case eOSC:
-						mEscState = eOSC_ESC;
-						break;
-					case ePM:
-						mEscState = ePM_ESC;
-						break;
-					case eAPC:
-						mEscState = eAPC_ESC;
-						break;
-					default:
-						mEscState = eESC_SEEN;
-						break;
+						case eDCS:
+							EscapeDCS(ch);
+							break;
+						case eOSC:
+							EscapeOSC(ch);
+							break;
+						case ePM:
+							mEscState = eESC_NONE;
+							break;
+						case eAPC:
+							mEscState = eESC_NONE;
+							break;
+						default:
+							break;
 					}
-				}
-				break;
+					break;
 
-			case IND:
-				MoveCursor(kMoveIND);
-				break;
-			case NEL:
-				MoveCursor(kMoveCRLF);
-				break;
-			case HTS:
-				SetTabstop();
-				break;
-			case RI:
-				MoveCursor(kMoveRI);
-				break;
-			case SS2:
-				mCursor.SS = 2;
-				break;
-			case SS3:
-				mCursor.SS = 3;
-				break;
-			case DCS:
-				mPFKKeyNr = 0;
-				mEscState = eDCS;
-				break;
-			case OSC:
-				mEscState = eOSC;
-				break;
-			case CSI:
-				mEscState = eCSI;
-				break;
-			case PM:
-				mEscState = ePM;
-				break;
-
-			case ST:
-				switch (mEscState)
-				{
-				case eDCS:
-					EscapeDCS(ch);
+				default: /* ignore */
 					break;
-				case eOSC:
-					EscapeOSC(ch);
-					break;
-				case ePM:
-					mEscState = eESC_NONE;
-					break;
-				case eAPC:
-					mEscState = eESC_NONE;
-					break;
-				default:
-					break;
-				}
-				break;
-
-			default: /* ignore */
-				break;
 			}
 
 			continue;
@@ -3094,50 +3123,50 @@ void MTerminalView::Emulate()
 			// OK, so we're in the middle of an escape string
 			switch (mEscState)
 			{
-			case eESC_SEEN:
-				if (mDECANM)
-					EscapeStart(ch);
-				else
-					EscapeVT52(ch);
-				break;
+				case eESC_SEEN:
+					if (mDECANM)
+						EscapeStart(ch);
+					else
+						EscapeVT52(ch);
+					break;
 
-			case eCSI:
-				EscapeCSI(ch);
-				break;
-			case eOSC:
-				EscapeOSC(ch);
-				break;
-			case eDCS:
-				EscapeDCS(ch);
-				break;
-			case ePM: /* ignore */
-				break;
-			case eAPC: /* ignore */
-				break;
+				case eCSI:
+					EscapeCSI(ch);
+					break;
+				case eOSC:
+					EscapeOSC(ch);
+					break;
+				case eDCS:
+					EscapeDCS(ch);
+					break;
+				case ePM: /* ignore */
+					break;
+				case eAPC: /* ignore */
+					break;
 
-			case eSELECT_CHAR_SET:
-				SelectCharSet(ch);
-				break;
-			case eSELECT_CTRL_TRANSM:
-				SelectControlTransmission(ch);
-				break;
-			case eSELECT_DOUBLE:
-				SelectDouble(ch);
-				break;
+				case eSELECT_CHAR_SET:
+					SelectCharSet(ch);
+					break;
+				case eSELECT_CTRL_TRANSM:
+					SelectControlTransmission(ch);
+					break;
+				case eSELECT_DOUBLE:
+					SelectDouble(ch);
+					break;
 
-			// special VT52 handling
-			case eVT52_LINE:
-				mArgs.push_back(ch - US);
-				mEscState = eVT52_COLUMN;
-				break;
+				// special VT52 handling
+				case eVT52_LINE:
+					mArgs.push_back(ch - US);
+					mEscState = eVT52_COLUMN;
+					break;
 
-			case eVT52_COLUMN:
-				MoveCursorTo((ch - US) - 1, mArgs[0] - 1);
-				mEscState = eESC_NONE;
-				break;
+				case eVT52_COLUMN:
+					MoveCursorTo((ch - US) - 1, mArgs[0] - 1);
+					mEscState = eESC_NONE;
+					break;
 
-			default:
-				assert(false); // now what?
+				default:
+					assert(false); // now what?
 			}
 
 			continue; // ignore anything else, we're in an escape string
@@ -3158,7 +3187,7 @@ void MTerminalView::Emulate()
 			uc = mCursor.charSetG[set][ch - 32];
 		}
 		else // GR
-		{	 // no ascii, see if NRC is in use
+		{    // no ascii, see if NRC is in use
 			if (mDECNRCM)
 			{
 				int set = mCursor.CSGR;
@@ -3247,57 +3276,57 @@ void MTerminalView::EscapeVT52(uint8_t inChar)
 
 	switch (inChar)
 	{
-	case '<':
-		mDECANM = true;
-		mDECSCL = 1;
-		break;
-	case 'A':
-		MoveCursor(kMoveUp);
-		break;
-	case 'B':
-		MoveCursor(kMoveDown);
-		break;
-	case 'C':
-		MoveCursor(kMoveRight);
-		break;
-	case 'D':
-		MoveCursor(kMoveLeft);
-		break;
-	case 'H':
-		MoveCursorTo(0, 0);
-		break;
-	case 'Y':
-		mEscState = eVT52_LINE;
-		break;
-	case 'I':
-		MoveCursor(kMoveRI);
-		break;
-	case '=':
-		mDECNMK = true;
-		break;
-	case '>':
-		mDECNMK = false;
-		break;
-	case 'F':
-		mCursor.CSGL = 1;
-		break;
-	case 'G':
-		mCursor.CSGL = 0;
-		break;
-	case 'K':
-		EraseInLine(0);
-		break;
-	case 'J':
-		EraseInDisplay(0);
-		break;
-	case 'W':
-	case 'X':
-	case 'V':
-	case ']':  /* ignore */
-		break; // printing controls
-	case 'Z':
-		SendCommand("\033/Z");
-		break;
+		case '<':
+			mDECANM = true;
+			mDECSCL = 1;
+			break;
+		case 'A':
+			MoveCursor(kMoveUp);
+			break;
+		case 'B':
+			MoveCursor(kMoveDown);
+			break;
+		case 'C':
+			MoveCursor(kMoveRight);
+			break;
+		case 'D':
+			MoveCursor(kMoveLeft);
+			break;
+		case 'H':
+			MoveCursorTo(0, 0);
+			break;
+		case 'Y':
+			mEscState = eVT52_LINE;
+			break;
+		case 'I':
+			MoveCursor(kMoveRI);
+			break;
+		case '=':
+			mDECNMK = true;
+			break;
+		case '>':
+			mDECNMK = false;
+			break;
+		case 'F':
+			mCursor.CSGL = 1;
+			break;
+		case 'G':
+			mCursor.CSGL = 0;
+			break;
+		case 'K':
+			EraseInLine(0);
+			break;
+		case 'J':
+			EraseInDisplay(0);
+			break;
+		case 'W':
+		case 'X':
+		case 'V':
+		case ']':  /* ignore */
+			break; // printing controls
+		case 'Z':
+			SendCommand("\033/Z");
+			break;
 	}
 }
 
@@ -3309,153 +3338,153 @@ void MTerminalView::EscapeStart(uint8_t inChar)
 
 	switch (inChar)
 	{
-	// VT100 escape codes
-	case '<':
-		mDECANM = true;
-		break;
-	case '=':
-		mDECNMK = true; /* DECKNAM */
-		break;
-	case '>':
-		mDECNMK = false; /* DECKPNM */
-		break;
-	case 'D':
-		MoveCursor(kMoveIND);
-		break;
-	case 'E':
-		MoveCursor(kMoveCRLF);
-		break;
-	case 'H':
-		SetTabstop();
-		break;
-	case 'M':
-		MoveCursor(kMoveRI);
-		break;
-	case 'N':
-		mCursor.SS = 2;
-		break;
-	case 'O':
-		mCursor.SS = 3;
-		break;
-	case '7':
-		SaveCursor();
-		break;
-	case '8':
-		RestoreCursor();
-		break;
-	case '(':
-		mArgs.push_back(0);
-		mArgs.push_back(94);
-		mEscState = eSELECT_CHAR_SET;
-		break;
-	case ')':
-		mArgs.push_back(1);
-		mArgs.push_back(94);
-		mEscState = eSELECT_CHAR_SET;
-		break;
-	case '#':
-		mEscState = eSELECT_DOUBLE;
-		break;
-	case '[':
-		mEscState = eCSI;
-		break;
-	case 'Z':
-		SendCommand(kVT420Attributes);
-		break;
-	case 'c':
-		Reset();
-		break;
-	case '_':
-		mEscState = eAPC;
-		break;
+		// VT100 escape codes
+		case '<':
+			mDECANM = true;
+			break;
+		case '=':
+			mDECNMK = true; /* DECKNAM */
+			break;
+		case '>':
+			mDECNMK = false; /* DECKPNM */
+			break;
+		case 'D':
+			MoveCursor(kMoveIND);
+			break;
+		case 'E':
+			MoveCursor(kMoveCRLF);
+			break;
+		case 'H':
+			SetTabstop();
+			break;
+		case 'M':
+			MoveCursor(kMoveRI);
+			break;
+		case 'N':
+			mCursor.SS = 2;
+			break;
+		case 'O':
+			mCursor.SS = 3;
+			break;
+		case '7':
+			SaveCursor();
+			break;
+		case '8':
+			RestoreCursor();
+			break;
+		case '(':
+			mArgs.push_back(0);
+			mArgs.push_back(94);
+			mEscState = eSELECT_CHAR_SET;
+			break;
+		case ')':
+			mArgs.push_back(1);
+			mArgs.push_back(94);
+			mEscState = eSELECT_CHAR_SET;
+			break;
+		case '#':
+			mEscState = eSELECT_DOUBLE;
+			break;
+		case '[':
+			mEscState = eCSI;
+			break;
+		case 'Z':
+			SendCommand(kVT420Attributes);
+			break;
+		case 'c':
+			Reset();
+			break;
+		case '_':
+			mEscState = eAPC;
+			break;
 
-	// VT220 escape codes
-	case 'P':
-		mPFKKeyNr = 0;
-		mEscState = eDCS;
-		break;
-	case '*':
-		mArgs.push_back(2);
-		mArgs.push_back(94);
-		mEscState = eSELECT_CHAR_SET;
-		break;
-	case '+':
-		mArgs.push_back(3);
-		mArgs.push_back(94);
-		mEscState = eSELECT_CHAR_SET;
-		break;
-	case '~':
-		mCursor.CSGR = 1;
-		break;
-	case 'n':
-		mCursor.CSGL = 2;
-		break;
-	case '}':
-		mCursor.CSGR = 2;
-		break;
-	case 'o':
-		mCursor.CSGL = 3;
-		break;
-	case '|':
-		mCursor.CSGR = 3;
-		break;
-	case ' ':
-		mEscState = eSELECT_CTRL_TRANSM;
-		break;
+		// VT220 escape codes
+		case 'P':
+			mPFKKeyNr = 0;
+			mEscState = eDCS;
+			break;
+		case '*':
+			mArgs.push_back(2);
+			mArgs.push_back(94);
+			mEscState = eSELECT_CHAR_SET;
+			break;
+		case '+':
+			mArgs.push_back(3);
+			mArgs.push_back(94);
+			mEscState = eSELECT_CHAR_SET;
+			break;
+		case '~':
+			mCursor.CSGR = 1;
+			break;
+		case 'n':
+			mCursor.CSGL = 2;
+			break;
+		case '}':
+			mCursor.CSGR = 2;
+			break;
+		case 'o':
+			mCursor.CSGL = 3;
+			break;
+		case '|':
+			mCursor.CSGR = 3;
+			break;
+		case ' ':
+			mEscState = eSELECT_CTRL_TRANSM;
+			break;
 
-	// VT320 escape codes
-	case '6':
-		MoveCursor(kMoveBI);
-		break;
-	case '9':
-		MoveCursor(kMoveFI);
-		break;
+		// VT320 escape codes
+		case '6':
+			MoveCursor(kMoveBI);
+			break;
+		case '9':
+			MoveCursor(kMoveFI);
+			break;
 
-	case '-':
-		mArgs.push_back(1);
-		mArgs.push_back(96);
-		mEscState = eSELECT_CHAR_SET;
-		break;
-	case '.':
-		mArgs.push_back(2);
-		mArgs.push_back(96);
-		mEscState = eSELECT_CHAR_SET;
-		break;
-	case '/':
-		mArgs.push_back(3);
-		mArgs.push_back(96);
-		mEscState = eSELECT_CHAR_SET;
-		break;
+		case '-':
+			mArgs.push_back(1);
+			mArgs.push_back(96);
+			mEscState = eSELECT_CHAR_SET;
+			break;
+		case '.':
+			mArgs.push_back(2);
+			mArgs.push_back(96);
+			mEscState = eSELECT_CHAR_SET;
+			break;
+		case '/':
+			mArgs.push_back(3);
+			mArgs.push_back(96);
+			mEscState = eSELECT_CHAR_SET;
+			break;
 
-	// xterm support
-	case ']':
-		mEscState = eOSC;
-		break;
-	case '%':
-		mArgs.push_back(4);
-		mArgs.push_back(94);
-		mEscState = eSELECT_CHAR_SET;
-		break;
+		// xterm support
+		case ']':
+			mEscState = eOSC;
+			break;
+		case '%':
+			mArgs.push_back(4);
+			mArgs.push_back(94);
+			mEscState = eSELECT_CHAR_SET;
+			break;
 
-	case 'V':
-		mCursor.style.SetFlag(kProtected);
-		break;
-	case 'W':
-		mCursor.style.ClearFlag(kProtected);
-		break;
+		case 'V':
+			mCursor.style.SetFlag(kProtected);
+			break;
+		case 'W':
+			mCursor.style.ClearFlag(kProtected);
+			break;
 
-	// unimplemented for now
-	case 'l': /* Memory Lock */
-		break;
-	case 'm': /* Memory Unlock */
-		break;
-	case '^': /* privacy message */
-		break;
-	case 'X': /* Start of string */
-		break;
+		// unimplemented for now
+		case 'l': /* Memory Lock */
+			break;
+		case 'm': /* Memory Unlock */
+			break;
+		case '^': /* privacy message */
+			break;
+		case 'X': /* Start of string */
+			break;
 
-	default: /* ignore */
-		break;
+		default: /* ignore */
+			break;
 	}
 }
 
@@ -3489,7 +3518,7 @@ void MTerminalView::EscapeCSI(uint8_t inChar)
 		mEscState = eESC_NONE;
 		mCSICmd = mCSICmd << 8 | uint8_t(inChar);
 
-		PRINT(("CSI: %s (%s)", mCtrlSeq.c_str(), Cmd2Name(mCSICmd)));
+		// PRINT(("CSI: %s (%s)", mCtrlSeq.c_str(), Cmd2Name(mCSICmd)));
 
 		MCSICmd cmd = static_cast<MCSICmd>(mCSICmd);
 
@@ -3508,505 +3537,505 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 
 	switch (inCmd)
 	{
-	// CBT -- Cursor Backward Tabulation
-	case eCBT:
-		while (n-- > 0)
-			MoveCursor(kMoveCBT);
-		break;
-	// CHA -- Cursor Horizontal Absolute
-	case eCHA:
-		MoveCursorTo(GetParam(0, 1) - 1, mCursor.y);
-		break;
-	// CHT -- Cursor Horizontal Forward Tab
-	case eCHT:
-		while (n-- > 0)
-			MoveCursor(kMoveHT);
-		break;
-	// CNL -- Cursor Next Line
-	case eCNL:
-		while (n-- > 0)
-		{
-			MoveCursor(kMoveCRLF);
-		}
-		break;
-	// CPL -- Cursor Previous Line
-	case eCPL:
-		while (n-- > 0)
-		{
-			MoveCursor(kMoveCR);
-			MoveCursor(kMoveUp);
-		}
-		break;
-	// CUB -- Cursor Backward
-	case eCUB:
-		while (n-- > 0)
-			MoveCursor(kMoveLeft);
-		break;
-	// CUD -- Cursor Down
-	case eCUD:
-		while (n-- > 0)
-			MoveCursor(kMoveDown);
-		break;
-	// CUF -- Cursor Forward
-	case eCUF:
-		while (n-- > 0)
-			MoveCursor(kMoveRight);
-		break;
-	// CUP -- Cursor Position
-	case eCUP:
-		MoveCursorTo(GetParam(1, 1) - 1, GetParam(0, 1) - 1);
-		break;
-	// CUU -- Cursor Up
-	case eCUU:
-		while (n-- > 0)
-			MoveCursor(kMoveUp);
-		break;
-	// DA1 -- Response to Device Attributes
-	case eDA1:
-		SendCommand(kVT420Attributes);
-		break;
-	// DA2 -- Secondary Device Attributes
-	case eDA2:
-		SendCommand("\033[>64;278;1c"); /* compatible with xterm version 278? `*/
-		break;
-	// DA3 -- Tertiary Device Attributes
-	case eDA3:
-		SendCommand("\033P!|00000000\033\\");
-		break;
-
-	// DCH -- Delete Character
-	case eDCH:
-		if (not CursorIsInMargins())
-			break;
-		while (n-- > 0)
-			mBuffer->DeleteCharacter(mCursor.y, mCursor.x, mMarginRight + 1);
-		break;
-
-	// DECCOLM -- Set columns per page
-	case eDECCOLM:
-	{
-		int w = GetParam(0, 0);
-		if (w == 0)
-			w = 80;
-		if (w > 10 and w < 1000) // sensible values please
-			ResizeTerminal(w, mTerminalHeight, true);
-		mDECVSSM = false;
-		mMarginLeft = 0;
-		mMarginRight = mTerminalWidth - 1;
-		// TODO clear status line if host writable
-		break;
-	}
-
-	// DL -- Delete Line(s)
-	case eDL:
-		if (not CursorIsInMargins())
-			break;
-		while (n-- > 0)
-			mBuffer->ScrollForward(mCursor.y, mMarginBottom, mMarginLeft, mMarginRight);
-		break;
-
-	// DSR1 -- Device Status Report ANSI
-	case eDSR1:
-		switch (mArgs[0])
-		{
-		case 5:
-			SendCommand("\033[0n");
-			break; // terminal OK
-		case 6:
-			SendCommand(boost::format("\033[%d;%dR") % (mCursor.y + 1) % (mCursor.x + 1));
-			break;
-		case 15:
-			SendCommand("\033[?13n");
-			break; // we have no printer
-		case 25:
-			SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
-			break;
-#pragma message("Find out the keyboard layout")
-		case 26:
-			SendCommand("\033[?27;0n");
-			break; // report an unknown keyboard for now
-		}
-		break;
-	// DSR2 -- Device Status Report DEC
-	case eDSR2:
-		switch (GetParam(0, 0))
-		{
-		case 6:
-			SendCommand(boost::format("\033[?%d;%d;1R") % (mCursor.y + 1) % (mCursor.x + 1));
-			break;
-		case 15:
-			SendCommand("\033[?11n");
-			break;
-		case 25:
-			SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
-			break;
-		case 26:
-			SendCommand("\033[?27;1n");
-			break; // report a US keyboard for now
-		case 53:
-			SendCommand("\033[?50n");
-			break; // No locator
-		}
-		break;
-	// ED -- Erase in Display
-	case eED:
-		EraseInDisplay(GetParam(0, 0), false);
-		break;
-	// EL -- Erase in Line
-	case eEL:
-		EraseInLine(GetParam(0, 0), false);
-		break;
-	// HPA -- Horizontal Position Absolute
-	case eHPA:
-		MoveCursorTo(GetParam(0, 1) - 1, mCursor.y);
-		break;
-	// HPR -- Horizontal Position Relative
-	case eHPR:
-		while (n-- > 0)
-			MoveCursor(kMoveRight);
-		break;
-	// HVP -- Horizontal/Vertical Position
-	case eHVP:
-		MoveCursorTo(GetParam(1, 1) - 1, GetParam(0, 1) - 1);
-		break;
-	// IL -- Insert Line
-	case eIL:
-		if (not CursorIsInMargins())
-			break;
-		while (n-- > 0)
-			mBuffer->ScrollBackward(mCursor.y, mMarginBottom, mMarginLeft, mMarginRight);
-		break;
-		//	case eMC:
-		//		break;
-		// NP -- Next Page
-	case eNP: /* unimplemented */
-		break;
-	// PP -- Preceding Page
-	case ePP: /* unimplemented */
-		break;
-	// PPA -- Page Position Absolute
-	case ePPA: /* unimplemented */
-		break;
-	// PPB -- Page Position Backwards
-	case ePPB: /* unimplemented */
-		break;
-	// PPR -- Page Position Relative
-	case ePPR: /* unimplemented */
-		break;
-	// SCORC -- Restore Saved Cursor Position (SCO Console)
-	case eSCORC:
-		RestoreCursor();
-		break;
-	//case eSCOSC:
-	//	break;
-	// SD -- Pan Up
-	case eSD:
-		while (n-- > 0)
-			ScrollBackward();
-		break;
-	// SGR -- Select Graphic Rendition
-	case eSGR:
-		for (size_t i = 0; i < mArgs.size(); ++i)
-		{
-			auto a = mArgs[i];
-
-			switch (a)
-			{
-			case 0:
-				mCursor.style = MStyle();
-				mBuffer->SetColors(kXTermColorNone, kXTermColorNone);
-				break;
-			case 1:
-				mCursor.style.SetFlag(kStyleBold);
-				break;
-			case 4:
-				mCursor.style.SetFlag(kStyleUnderline);
-				break;
-			case 5:
-				mCursor.style.SetFlag(kStyleBlink);
-				break;
-			case 7:
-				mCursor.style.SetFlag(kStyleInverse);
-				break;
-			case 8:
-				mCursor.style.SetFlag(kStyleInvisible);
-				break;
-			case 22:
-				mCursor.style.ClearFlag(kStyleBold);
-				break;
-			case 24:
-				mCursor.style.ClearFlag(kStyleUnderline);
-				break;
-			case 25:
-				mCursor.style.ClearFlag(kStyleBlink);
-				break;
-			case 27:
-				mCursor.style.ClearFlag(kStyleInverse);
-				break;
-
-			// vt300
-			case 28:
-				mCursor.style.ClearFlag(kStyleInvisible);
-				break;
-
-			// xterm colors
-			case 30:
-				mCursor.style.SetForeColor(kXTermColorBlack);
-				break;
-			case 31:
-				mCursor.style.SetForeColor(kXTermColorRed);
-				break;
-			case 32:
-				mCursor.style.SetForeColor(kXTermColorGreen);
-				break;
-			case 33:
-				mCursor.style.SetForeColor(kXTermColorYellow);
-				break;
-			case 34:
-				mCursor.style.SetForeColor(kXTermColorBlue);
-				break;
-			case 35:
-				mCursor.style.SetForeColor(kXTermColorMagenta);
-				break;
-			case 36:
-				mCursor.style.SetForeColor(kXTermColorCyan);
-				break;
-			case 37:
-				mCursor.style.SetForeColor(kXTermColorWhite);
-				break;
-			case 39:
-				mCursor.style.SetForeColor(kXTermColorNone);
-				break;
-
-			case 40:
-				mCursor.style.SetBackColor(kXTermColorBlack);
-				break;
-			case 41:
-				mCursor.style.SetBackColor(kXTermColorRed);
-				break;
-			case 42:
-				mCursor.style.SetBackColor(kXTermColorGreen);
-				break;
-			case 43:
-				mCursor.style.SetBackColor(kXTermColorYellow);
-				break;
-			case 44:
-				mCursor.style.SetBackColor(kXTermColorBlue);
-				break;
-			case 45:
-				mCursor.style.SetBackColor(kXTermColorMagenta);
-				break;
-			case 46:
-				mCursor.style.SetBackColor(kXTermColorCyan);
-				break;
-			case 47:
-				mCursor.style.SetBackColor(kXTermColorWhite);
-				break;
-			case 49:
-				mCursor.style.SetBackColor(kXTermColorNone);
-				break;
-
-			case 90:
-				mCursor.style.SetForeColor(kXTermColorBrightBlack);
-				break;
-			case 91:
-				mCursor.style.SetForeColor(kXTermColorBrightRed);
-				break;
-			case 92:
-				mCursor.style.SetForeColor(kXTermColorBrightGreen);
-				break;
-			case 93:
-				mCursor.style.SetForeColor(kXTermColorBrightYellow);
-				break;
-			case 94:
-				mCursor.style.SetForeColor(kXTermColorBrightBlue);
-				break;
-			case 95:
-				mCursor.style.SetForeColor(kXTermColorBrightMagenta);
-				break;
-			case 96:
-				mCursor.style.SetForeColor(kXTermColorBrightCyan);
-				break;
-			case 97:
-				mCursor.style.SetForeColor(kXTermColorBrightWhite);
-				break;
-
-			case 100:
-				mCursor.style.SetBackColor(kXTermColorBrightBlack);
-				break;
-			case 101:
-				mCursor.style.SetBackColor(kXTermColorBrightRed);
-				break;
-			case 102:
-				mCursor.style.SetBackColor(kXTermColorBrightGreen);
-				break;
-			case 103:
-				mCursor.style.SetBackColor(kXTermColorBrightYellow);
-				break;
-			case 104:
-				mCursor.style.SetBackColor(kXTermColorBrightBlue);
-				break;
-			case 105:
-				mCursor.style.SetBackColor(kXTermColorBrightMagenta);
-				break;
-			case 106:
-				mCursor.style.SetBackColor(kXTermColorBrightCyan);
-				break;
-			case 107:
-				mCursor.style.SetBackColor(kXTermColorBrightWhite);
-				break;
-
-			// color support
-			case 38:
-			case 48:
-			{
-				switch (mArgs[++i])
-				{
-				case 5:
-				{
-					uint8_t colorIndex = static_cast<uint8_t>(mArgs[++i]);
-					if (a == 38)
-						mCursor.style.SetForeColor((MXTermColor)colorIndex);
-					else
-						mCursor.style.SetBackColor((MXTermColor)colorIndex);
-					break;
-				}
-				}
-
-				break;
-			}
-			}
-
-			if ((a >= 30 and a <= 49) or (a >= 90 and a <= 107))
-				mBuffer->SetColors(mCursor.style.GetForeColor(), mCursor.style.GetBackColor());
-		}
-		break;
-	// SU -- Pan Down
-	case eSU:
-		while (n-- > 0)
-			ScrollForward();
-		break;
-	// TBC -- Clear Tabs
-	case eTBC:
-		switch (GetParam(0, 0))
-		{
-		case 0:
-			if (mCursor.x < mTerminalWidth)
-				mTabStops[mCursor.x] = false;
-			break;
-		case 3:
-			fill(mTabStops.begin(), mTabStops.end(), false);
-			break;
-		}
-		break;
-	// VPA -- Vertical Line Position Absolute
-	case eVPA:
-		MoveCursorTo(mCursor.x, GetParam(0, 1) - 1);
-		break;
-	// VPR -- Vertical Position Relative
-	case eVPR:
-		MoveCursorTo(mCursor.x, mCursor.y + GetParam(0, 1));
-		break;
-
-	// SM_ANSI -- Set Mode ANSI
-	case eSM_ANSI:
-		for (uint32_t a : mArgs)
-			SetResetMode(a, true, true);
-		break;
-	// RM_ANSI -- Reset Mode ANSI
-	case eRM_ANSI:
-		for (uint32_t a : mArgs)
-			SetResetMode(a, true, false);
-		break;
-	// SM_DEC -- Set Mode DEC
-	case eSM_DEC:
-		for (uint32_t a : mArgs)
-			SetResetMode(a, false, true);
-		break;
-	// RM_DEC -- Reset Mode DEC
-	case eRM_DEC:
-		for (uint32_t a : mArgs)
-			SetResetMode(a, false, false);
-		break;
-	// SAVEMODE -- Save DEC Private Mode Values
-	case eSAVEMODE:
-		for (int a : mArgs)
-			mSavedPrivateMode[a] = GetMode(a, false);
-		break;
-	// RESTMODE -- Restore DEC Private Mode Values
-	case eRESTMODE:
-		for (int a : mArgs)
-			SetResetMode(a, false, mSavedPrivateMode[a]);
-		break;
-	// DECREQTPARM -- no comment
-	case eDECREQTPARM:
-		SendCommand((boost::format("\033[%d;1;1;128;128;1;0x") % (mArgs[0] + 2)).str());
-		break;
-	// XTERMEMK -- Reset XTerm modify keys
-	case eXTERMEMK:
-		//				switch (GetParam(0, 0))
-		//				{
-		//					case 1:	mModifyCursorKeys = GetParam(1, 0); break;
-		//					case 1:	mModifyFunctionKeys = GetParam(1, 0); break;
-		//					case 1:	mModifyOtherKeys = GetParam(1, 0); break;
-		//				}
-		break;
-	// XTERMDMK -- Set XTerm modify keys
-	case eXTERMDMK:
-		//				switch (GetParam(0, 0))
-		//				{
-		//					case 1:	mModifyCursorKeys = -1; break;
-		//					case 1:	mModifyFunctionKeys = -1; break;
-		//					case 1:	mModifyOtherKeys = -1; break;
-		//				}
-		break;
-
-	// REP -- Repeat preceding character
-	case eREP:
-		if (mLastChar != 0)
-		{
+		// CBT -- Cursor Backward Tabulation
+		case eCBT:
 			while (n-- > 0)
-				WriteChar(mLastChar);
-		}
-		break;
-
-	// SL -- Shift Left
-	case eSL:
-		while (n-- > 0)
-			MoveCursor(kMoveSL);
-		break;
-	// SR -- Shift Right
-	case eSR:
-		while (n-- > 0)
-			MoveCursor(kMoveSR);
-		break;
-
-	// DECSCL -- Select Conformance Level
-	case eDECSCL:
-		if (mArgs[0] >= 61 and mArgs[0] <= 65)
-		{
-			mDECSCL = mArgs[0] - 60;
-
-			if (mDECSCL <= 1)
-				mS8C1T = false;
-			else
+				MoveCursor(kMoveCBT);
+			break;
+		// CHA -- Cursor Horizontal Absolute
+		case eCHA:
+			MoveCursorTo(GetParam(0, 1) - 1, mCursor.y);
+			break;
+		// CHT -- Cursor Horizontal Forward Tab
+		case eCHT:
+			while (n-- > 0)
+				MoveCursor(kMoveHT);
+			break;
+		// CNL -- Cursor Next Line
+		case eCNL:
+			while (n-- > 0)
 			{
-				if (mArgs.size() == 1 or mArgs[1] == 0 or mArgs[1] == 2)
-					mS8C1T = true;
-				else if (mArgs[1] == 1)
-					mS8C1T = false;
+				MoveCursor(kMoveCRLF);
 			}
+			break;
+		// CPL -- Cursor Previous Line
+		case eCPL:
+			while (n-- > 0)
+			{
+				MoveCursor(kMoveCR);
+				MoveCursor(kMoveUp);
+			}
+			break;
+		// CUB -- Cursor Backward
+		case eCUB:
+			while (n-- > 0)
+				MoveCursor(kMoveLeft);
+			break;
+		// CUD -- Cursor Down
+		case eCUD:
+			while (n-- > 0)
+				MoveCursor(kMoveDown);
+			break;
+		// CUF -- Cursor Forward
+		case eCUF:
+			while (n-- > 0)
+				MoveCursor(kMoveRight);
+			break;
+		// CUP -- Cursor Position
+		case eCUP:
+			MoveCursorTo(GetParam(1, 1) - 1, GetParam(0, 1) - 1);
+			break;
+		// CUU -- Cursor Up
+		case eCUU:
+			while (n-- > 0)
+				MoveCursor(kMoveUp);
+			break;
+		// DA1 -- Response to Device Attributes
+		case eDA1:
+			SendCommand(kVT420Attributes);
+			break;
+		// DA2 -- Secondary Device Attributes
+		case eDA2:
+			SendCommand("\033[>64;278;1c"); /* compatible with xterm version 278? `*/
+			break;
+		// DA3 -- Tertiary Device Attributes
+		case eDA3:
+			SendCommand("\033P!|00000000\033\\");
+			break;
+
+		// DCH -- Delete Character
+		case eDCH:
+			if (not CursorIsInMargins())
+				break;
+			while (n-- > 0)
+				mBuffer->DeleteCharacter(mCursor.y, mCursor.x, mMarginRight + 1);
+			break;
+
+		// DECCOLM -- Set columns per page
+		case eDECCOLM:
+		{
+			int w = GetParam(0, 0);
+			if (w == 0)
+				w = 80;
+			if (w > 10 and w < 1000) // sensible values please
+				ResizeTerminal(w, mTerminalHeight, true);
+			mDECVSSM = false;
+			mMarginLeft = 0;
+			mMarginRight = mTerminalWidth - 1;
+			// TODO clear status line if host writable
+			break;
 		}
-		break;
 
-	case eDECELR:
-		PRINT(("DECELR iets met de muis doen?"));
-		// hmmmm
-		break;
+		// DL -- Delete Line(s)
+		case eDL:
+			if (not CursorIsInMargins())
+				break;
+			while (n-- > 0)
+				mBuffer->ScrollForward(mCursor.y, mMarginBottom, mMarginLeft, mMarginRight);
+			break;
 
-	default:
-		PRINT(("Unhandled CSI level 1 command: >> %4.4s <<", &inCmd));
-		break;
+		// DSR1 -- Device Status Report ANSI
+		case eDSR1:
+			switch (mArgs[0])
+			{
+				case 5:
+					SendCommand("\033[0n");
+					break; // terminal OK
+				case 6:
+					SendCommand(boost::format("\033[%d;%dR") % (mCursor.y + 1) % (mCursor.x + 1));
+					break;
+				case 15:
+					SendCommand("\033[?13n");
+					break; // we have no printer
+				case 25:
+					SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
+					break;
+#pragma message("Find out the keyboard layout")
+				case 26:
+					SendCommand("\033[?27;0n");
+					break; // report an unknown keyboard for now
+			}
+			break;
+		// DSR2 -- Device Status Report DEC
+		case eDSR2:
+			switch (GetParam(0, 0))
+			{
+				case 6:
+					SendCommand(boost::format("\033[?%d;%d;1R") % (mCursor.y + 1) % (mCursor.x + 1));
+					break;
+				case 15:
+					SendCommand("\033[?11n");
+					break;
+				case 25:
+					SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
+					break;
+				case 26:
+					SendCommand("\033[?27;1n");
+					break; // report a US keyboard for now
+				case 53:
+					SendCommand("\033[?50n");
+					break; // No locator
+			}
+			break;
+		// ED -- Erase in Display
+		case eED:
+			EraseInDisplay(GetParam(0, 0), false);
+			break;
+		// EL -- Erase in Line
+		case eEL:
+			EraseInLine(GetParam(0, 0), false);
+			break;
+		// HPA -- Horizontal Position Absolute
+		case eHPA:
+			MoveCursorTo(GetParam(0, 1) - 1, mCursor.y);
+			break;
+		// HPR -- Horizontal Position Relative
+		case eHPR:
+			while (n-- > 0)
+				MoveCursor(kMoveRight);
+			break;
+		// HVP -- Horizontal/Vertical Position
+		case eHVP:
+			MoveCursorTo(GetParam(1, 1) - 1, GetParam(0, 1) - 1);
+			break;
+		// IL -- Insert Line
+		case eIL:
+			if (not CursorIsInMargins())
+				break;
+			while (n-- > 0)
+				mBuffer->ScrollBackward(mCursor.y, mMarginBottom, mMarginLeft, mMarginRight);
+			break;
+			//	case eMC:
+			//		break;
+			// NP -- Next Page
+		case eNP: /* unimplemented */
+			break;
+		// PP -- Preceding Page
+		case ePP: /* unimplemented */
+			break;
+		// PPA -- Page Position Absolute
+		case ePPA: /* unimplemented */
+			break;
+		// PPB -- Page Position Backwards
+		case ePPB: /* unimplemented */
+			break;
+		// PPR -- Page Position Relative
+		case ePPR: /* unimplemented */
+			break;
+		// SCORC -- Restore Saved Cursor Position (SCO Console)
+		case eSCORC:
+			RestoreCursor();
+			break;
+		//case eSCOSC:
+		//	break;
+		// SD -- Pan Up
+		case eSD:
+			while (n-- > 0)
+				ScrollBackward();
+			break;
+		// SGR -- Select Graphic Rendition
+		case eSGR:
+			for (size_t i = 0; i < mArgs.size(); ++i)
+			{
+				auto a = mArgs[i];
+
+				switch (a)
+				{
+					case 0:
+						mCursor.style = MStyle();
+						mBuffer->SetColors(kXTermColorNone, kXTermColorNone);
+						break;
+					case 1:
+						mCursor.style.SetFlag(kStyleBold);
+						break;
+					case 4:
+						mCursor.style.SetFlag(kStyleUnderline);
+						break;
+					case 5:
+						mCursor.style.SetFlag(kStyleBlink);
+						break;
+					case 7:
+						mCursor.style.SetFlag(kStyleInverse);
+						break;
+					case 8:
+						mCursor.style.SetFlag(kStyleInvisible);
+						break;
+					case 22:
+						mCursor.style.ClearFlag(kStyleBold);
+						break;
+					case 24:
+						mCursor.style.ClearFlag(kStyleUnderline);
+						break;
+					case 25:
+						mCursor.style.ClearFlag(kStyleBlink);
+						break;
+					case 27:
+						mCursor.style.ClearFlag(kStyleInverse);
+						break;
+
+					// vt300
+					case 28:
+						mCursor.style.ClearFlag(kStyleInvisible);
+						break;
+
+					// xterm colors
+					case 30:
+						mCursor.style.SetForeColor(kXTermColorBlack);
+						break;
+					case 31:
+						mCursor.style.SetForeColor(kXTermColorRed);
+						break;
+					case 32:
+						mCursor.style.SetForeColor(kXTermColorGreen);
+						break;
+					case 33:
+						mCursor.style.SetForeColor(kXTermColorYellow);
+						break;
+					case 34:
+						mCursor.style.SetForeColor(kXTermColorBlue);
+						break;
+					case 35:
+						mCursor.style.SetForeColor(kXTermColorMagenta);
+						break;
+					case 36:
+						mCursor.style.SetForeColor(kXTermColorCyan);
+						break;
+					case 37:
+						mCursor.style.SetForeColor(kXTermColorWhite);
+						break;
+					case 39:
+						mCursor.style.SetForeColor(kXTermColorNone);
+						break;
+
+					case 40:
+						mCursor.style.SetBackColor(kXTermColorBlack);
+						break;
+					case 41:
+						mCursor.style.SetBackColor(kXTermColorRed);
+						break;
+					case 42:
+						mCursor.style.SetBackColor(kXTermColorGreen);
+						break;
+					case 43:
+						mCursor.style.SetBackColor(kXTermColorYellow);
+						break;
+					case 44:
+						mCursor.style.SetBackColor(kXTermColorBlue);
+						break;
+					case 45:
+						mCursor.style.SetBackColor(kXTermColorMagenta);
+						break;
+					case 46:
+						mCursor.style.SetBackColor(kXTermColorCyan);
+						break;
+					case 47:
+						mCursor.style.SetBackColor(kXTermColorWhite);
+						break;
+					case 49:
+						mCursor.style.SetBackColor(kXTermColorNone);
+						break;
+
+					case 90:
+						mCursor.style.SetForeColor(kXTermColorBrightBlack);
+						break;
+					case 91:
+						mCursor.style.SetForeColor(kXTermColorBrightRed);
+						break;
+					case 92:
+						mCursor.style.SetForeColor(kXTermColorBrightGreen);
+						break;
+					case 93:
+						mCursor.style.SetForeColor(kXTermColorBrightYellow);
+						break;
+					case 94:
+						mCursor.style.SetForeColor(kXTermColorBrightBlue);
+						break;
+					case 95:
+						mCursor.style.SetForeColor(kXTermColorBrightMagenta);
+						break;
+					case 96:
+						mCursor.style.SetForeColor(kXTermColorBrightCyan);
+						break;
+					case 97:
+						mCursor.style.SetForeColor(kXTermColorBrightWhite);
+						break;
+
+					case 100:
+						mCursor.style.SetBackColor(kXTermColorBrightBlack);
+						break;
+					case 101:
+						mCursor.style.SetBackColor(kXTermColorBrightRed);
+						break;
+					case 102:
+						mCursor.style.SetBackColor(kXTermColorBrightGreen);
+						break;
+					case 103:
+						mCursor.style.SetBackColor(kXTermColorBrightYellow);
+						break;
+					case 104:
+						mCursor.style.SetBackColor(kXTermColorBrightBlue);
+						break;
+					case 105:
+						mCursor.style.SetBackColor(kXTermColorBrightMagenta);
+						break;
+					case 106:
+						mCursor.style.SetBackColor(kXTermColorBrightCyan);
+						break;
+					case 107:
+						mCursor.style.SetBackColor(kXTermColorBrightWhite);
+						break;
+
+					// color support
+					case 38:
+					case 48:
+					{
+						switch (mArgs[++i])
+						{
+							case 5:
+							{
+								uint8_t colorIndex = static_cast<uint8_t>(mArgs[++i]);
+								if (a == 38)
+									mCursor.style.SetForeColor((MXTermColor)colorIndex);
+								else
+									mCursor.style.SetBackColor((MXTermColor)colorIndex);
+								break;
+							}
+						}
+
+						break;
+					}
+				}
+
+				if ((a >= 30 and a <= 49) or (a >= 90 and a <= 107))
+					mBuffer->SetColors(mCursor.style.GetForeColor(), mCursor.style.GetBackColor());
+			}
+			break;
+		// SU -- Pan Down
+		case eSU:
+			while (n-- > 0)
+				ScrollForward();
+			break;
+		// TBC -- Clear Tabs
+		case eTBC:
+			switch (GetParam(0, 0))
+			{
+				case 0:
+					if (mCursor.x < mTerminalWidth)
+						mTabStops[mCursor.x] = false;
+					break;
+				case 3:
+					fill(mTabStops.begin(), mTabStops.end(), false);
+					break;
+			}
+			break;
+		// VPA -- Vertical Line Position Absolute
+		case eVPA:
+			MoveCursorTo(mCursor.x, GetParam(0, 1) - 1);
+			break;
+		// VPR -- Vertical Position Relative
+		case eVPR:
+			MoveCursorTo(mCursor.x, mCursor.y + GetParam(0, 1));
+			break;
+
+		// SM_ANSI -- Set Mode ANSI
+		case eSM_ANSI:
+			for (uint32_t a : mArgs)
+				SetResetMode(a, true, true);
+			break;
+		// RM_ANSI -- Reset Mode ANSI
+		case eRM_ANSI:
+			for (uint32_t a : mArgs)
+				SetResetMode(a, true, false);
+			break;
+		// SM_DEC -- Set Mode DEC
+		case eSM_DEC:
+			for (uint32_t a : mArgs)
+				SetResetMode(a, false, true);
+			break;
+		// RM_DEC -- Reset Mode DEC
+		case eRM_DEC:
+			for (uint32_t a : mArgs)
+				SetResetMode(a, false, false);
+			break;
+		// SAVEMODE -- Save DEC Private Mode Values
+		case eSAVEMODE:
+			for (int a : mArgs)
+				mSavedPrivateMode[a] = GetMode(a, false);
+			break;
+		// RESTMODE -- Restore DEC Private Mode Values
+		case eRESTMODE:
+			for (int a : mArgs)
+				SetResetMode(a, false, mSavedPrivateMode[a]);
+			break;
+		// DECREQTPARM -- no comment
+		case eDECREQTPARM:
+			SendCommand((boost::format("\033[%d;1;1;128;128;1;0x") % (mArgs[0] + 2)).str());
+			break;
+		// XTERMEMK -- Reset XTerm modify keys
+		case eXTERMEMK:
+			//				switch (GetParam(0, 0))
+			//				{
+			//					case 1:	mModifyCursorKeys = GetParam(1, 0); break;
+			//					case 1:	mModifyFunctionKeys = GetParam(1, 0); break;
+			//					case 1:	mModifyOtherKeys = GetParam(1, 0); break;
+			//				}
+			break;
+		// XTERMDMK -- Set XTerm modify keys
+		case eXTERMDMK:
+			//				switch (GetParam(0, 0))
+			//				{
+			//					case 1:	mModifyCursorKeys = -1; break;
+			//					case 1:	mModifyFunctionKeys = -1; break;
+			//					case 1:	mModifyOtherKeys = -1; break;
+			//				}
+			break;
+
+		// REP -- Repeat preceding character
+		case eREP:
+			if (mLastChar != 0)
+			{
+				while (n-- > 0)
+					WriteChar(mLastChar);
+			}
+			break;
+
+		// SL -- Shift Left
+		case eSL:
+			while (n-- > 0)
+				MoveCursor(kMoveSL);
+			break;
+		// SR -- Shift Right
+		case eSR:
+			while (n-- > 0)
+				MoveCursor(kMoveSR);
+			break;
+
+		// DECSCL -- Select Conformance Level
+		case eDECSCL:
+			if (mArgs[0] >= 61 and mArgs[0] <= 65)
+			{
+				mDECSCL = mArgs[0] - 60;
+
+				if (mDECSCL <= 1)
+					mS8C1T = false;
+				else
+				{
+					if (mArgs.size() == 1 or mArgs[1] == 0 or mArgs[1] == 2)
+						mS8C1T = true;
+					else if (mArgs[1] == 1)
+						mS8C1T = false;
+				}
+			}
+			break;
+
+		case eDECELR:
+			PRINT(("DECELR iets met de muis doen?"));
+			// hmmmm
+			break;
+
+		default:
+			PRINT(("Unhandled CSI level 1 command: >> %4.4s <<", &inCmd));
+			break;
 	}
 }
 
@@ -4018,458 +4047,458 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 
 	switch (inCmd)
 	{
-	// ECH -- Erase character
-	case eECH:
-		mBuffer->EraseCharacter(mCursor.y, mCursor.x, n);
-		break;
-
-	// ICH -- Insert character
-	case eICH:
-		if (not CursorIsInMargins())
+		// ECH -- Erase character
+		case eECH:
+			mBuffer->EraseCharacter(mCursor.y, mCursor.x, n);
 			break;
-		while (n-- > 0)
-			mBuffer->InsertCharacter(mCursor.y, mCursor.x, mMarginRight + 1);
-		break;
 
-	// DECDC -- Delete column
-	case eDECDC:
-		if (not CursorIsInMargins())
+		// ICH -- Insert character
+		case eICH:
+			if (not CursorIsInMargins())
+				break;
+			while (n-- > 0)
+				mBuffer->InsertCharacter(mCursor.y, mCursor.x, mMarginRight + 1);
 			break;
-		while (n-- > 0)
+
+		// DECDC -- Delete column
+		case eDECDC:
+			if (not CursorIsInMargins())
+				break;
+			while (n-- > 0)
+			{
+				for (int line = mMarginTop; line <= mMarginBottom; ++line)
+					mBuffer->DeleteCharacter(line, mCursor.x, mMarginRight + 1);
+			}
+			break;
+
+		// DECIC -- Insert column
+		case eDECIC:
+			if (not CursorIsInMargins())
+				break;
+			while (n-- > 0)
+			{
+				for (int line = mMarginTop; line <= mMarginBottom; ++line)
+					mBuffer->InsertCharacter(line, mCursor.x, mMarginRight + 1);
+			}
+			break;
+
+		// DECCARA -- Change attributes in rectangular area
+		case eDECCARA:
 		{
-			for (int line = mMarginTop; line <= mMarginBottom; ++line)
-				mBuffer->DeleteCharacter(line, mCursor.x, mMarginRight + 1);
+			int32_t t, l, b, r;
+			GetRectParam(0, t, l, b, r);
+
+			for (int a : mArgs)
+			{
+				mBuffer->ForeachInRectangle(t, l, b, r, [a](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					switch (a)
+					{
+						case 0:
+							inChar = MStyle();
+							break;
+						case 1:
+							inChar |= kStyleBold;
+							break;
+						case 4:
+							inChar |= kStyleUnderline;
+							break;
+						case 5:
+							inChar |= kStyleBlink;
+							break;
+						case 7:
+							inChar |= kStyleInverse;
+							break;
+						case 21:
+							inChar &= ~kStyleBold;
+							break;
+						case 24:
+							inChar &= ~kStyleUnderline;
+							break;
+						case 25:
+							inChar &= ~kStyleBlink;
+							break;
+						case 27:
+							inChar &= ~kStyleInverse;
+							break;
+					}
+				});
+			}
+			break;
 		}
-		break;
 
-	// DECIC -- Insert column
-	case eDECIC:
-		if (not CursorIsInMargins())
+		// DECCRA -- Copy rectangular area
+		case eDECCRA:
+		{
+			int ps = GetParam(4, 1);
+			int pd = GetParam(7, 1);
+			if (ps != 1 or pd != 1)
+				break;
+
+			int32_t t, l, b, r;
+			GetRectParam(0, t, l, b, r);
+
+			int32_t w = r - l, h = b - t;
+			int32_t dt = GetParam(5, 1) - 1;
+			if (mCursor.DECOM)
+				dt += mMarginTop;
+			int32_t dl = GetParam(6, 1) - 1;
+			if (mCursor.DECOM)
+				dl += mMarginLeft;
+
+			if (dt + h > mTerminalHeight)
+			{
+				h = mTerminalHeight - dt;
+				b = t + h;
+			}
+
+			if (dl + w > mTerminalWidth)
+			{
+				w = mTerminalWidth - dl;
+				r = l + w;
+			}
+
+			if (w == 0 or h == 0)
+				break;
+
+			vector<MChar> buffer(mTerminalWidth * mTerminalHeight);
+			uint32_t i = 0;
+			mBuffer->ForeachInRectangle(t, l, b, r,
+				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					buffer[i++] = inChar;
+				});
+
+			assert(i <= buffer.size());
+			i = 0;
+
+			mBuffer->ForeachInRectangle(dt, dl, dt + h, dl + w,
+				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					inChar = buffer[i++];
+				});
 			break;
-		while (n-- > 0)
-		{
-			for (int line = mMarginTop; line <= mMarginBottom; ++line)
-				mBuffer->InsertCharacter(line, mCursor.x, mMarginRight + 1);
 		}
-		break;
 
-	// DECCARA -- Change attributes in rectangular area
-	case eDECCARA:
-	{
-		int32_t t, l, b, r;
-		GetRectParam(0, t, l, b, r);
+		// DECELF -- Enable local functions
+		case eDECELF: /* unimplemented */
+			break;
 
-		for (int a : mArgs)
+		// DECERA -- Erase rectangular area
+		case eDECERA:
 		{
-			mBuffer->ForeachInRectangle(t, l, b, r, [a](MChar &inChar, int32_t inLine, int32_t inColumn) {
-				switch (a)
+			int32_t t, l, b, r;
+			GetRectParam(0, t, l, b, r);
+
+			MChar ch(' ', mCursor.style);
+			mBuffer->ForeachInRectangle(t, l, b, r,
+				[ch](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					inChar = ch;
+				});
+			break;
+		}
+		// DECFRA -- Fill rectangular area
+		case eDECFRA:
+		{
+			int32_t t, l, b, r;
+			GetRectParam(1, t, l, b, r);
+
+			MChar ch(GetParam(0, ' '), mCursor.style);
+			mBuffer->ForeachInRectangle(t, l, b, r,
+				[ch](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					inChar = ch;
+				});
+			break;
+		}
+
+		// DECINVM -- Invoke stored macro
+		case eDECINVM: /* unimplemented */
+			break;
+		// DECLFKC -- Local function key control
+		case eDECLFKC: /* unimplemented */
+			break;
+		// DECMSR -- Macro Space Report
+		case eDECMSR: /* unimplemented */
+			break;
+
+		// DECRARA -- Reverse attributes in rectangular area
+		case eDECRARA:
+		{
+			int32_t t, l, b, r;
+			GetRectParam(0, t, l, b, r);
+
+			for (uint32_t ai = 4; ai < mArgs.size(); ++ai)
+			{
+				uint32_t flag;
+				switch (mArgs[ai])
 				{
-				case 0:
-					inChar = MStyle();
-					break;
-				case 1:
-					inChar |= kStyleBold;
-					break;
-				case 4:
-					inChar |= kStyleUnderline;
-					break;
-				case 5:
-					inChar |= kStyleBlink;
-					break;
-				case 7:
-					inChar |= kStyleInverse;
-					break;
-				case 21:
-					inChar &= ~kStyleBold;
-					break;
-				case 24:
-					inChar &= ~kStyleUnderline;
-					break;
-				case 25:
-					inChar &= ~kStyleBlink;
-					break;
-				case 27:
-					inChar &= ~kStyleInverse;
+					case 0:
+						flag = kStyleBold | kStyleUnderline | kStyleBlink | kStyleInverse;
+						break;
+					case 1:
+						flag = kStyleBold;
+						break;
+					case 4:
+						flag = kStyleUnderline;
+						break;
+					case 5:
+						flag = kStyleBlink;
+						break;
+					case 7:
+						flag = kStyleInverse;
+						break;
+				}
+
+				mBuffer->ForeachInRectangle(t, l, b, r,
+					[flag](MChar &inChar, int32_t inLine, int32_t inColumn) {
+						inChar.ReverseFlag(MCharStyle(flag));
+					});
+			}
+			break;
+		}
+
+		// DECRPM -- Report mode
+		case eDECRPM: /* unimplemented */
+			break;
+		// DECRQCRA -- Request checksum of rectangular area
+		case eDECRQCRA: /* unimplemented */
+			break;
+		// DECRQDE -- Request displayed extent
+		case eDECRQDE:
+			SendCommand(boost::format("\033[%d;%d;1;1;1\"w") % mTerminalHeight % mTerminalWidth);
+			break;
+
+		// DECRQMANSI -- Request mode ANSI
+		case eDECRQMANSI:
+		{
+			int p = GetParam(0, 0);
+			SendCommand(boost::format("\033[%d;%d$y") % p % (GetMode(p, true) ? 1 : 2));
+			break;
+		}
+		// DECRQMDEC -- Request mode DEC Private
+		case eDECRQMDEC:
+		{
+			int p = GetParam(0, 0);
+			SendCommand(boost::format("\033[?%d;%d$y") % p % (GetMode(p, false) ? 1 : 2));
+			break;
+		}
+		// DECRQPSR -- Request presentation state
+		case eDECRQPSR:
+			switch (GetParam(0, 0))
+			{
+				case 1: /* DECCIR */
+				{
+					MStyle st = mCursor.style;
+					SendCommand(boost::format("\033P1$u%d;%d;%d;%c;%c;%c;%d;%d;%c;%c%c%c%c\033\\") % (mCursor.y + 1) % (mCursor.x + 1) % 1 % char(0x40 + (st & kStyleInverse ? 8 : 0) + (st & kStyleBlink ? 4 : 0) + (st & kStyleUnderline ? 2 : 0) + (st & kStyleBold ? 1 : 0)) % char(0x40 + (st & kUnerasable ? 1 : 0)) % char(0x40 + (mCursor.DECAWM ? 8 : 0) + (mCursor.SS == 3 ? 4 : 0) + (mCursor.SS == 2 ? 2 : 0) + (mCursor.DECOM ? 1 : 0)) % mCursor.CSGL % mCursor.CSGR % char(0x5f) // pffft, not sure about this one... FIXME
+								% mCursor.charSetGSel[0] % mCursor.charSetGSel[1] % mCursor.charSetGSel[2] % mCursor.charSetGSel[3]);
 					break;
 				}
-			});
-		}
-		break;
-	}
-
-	// DECCRA -- Copy rectangular area
-	case eDECCRA:
-	{
-		int ps = GetParam(4, 1);
-		int pd = GetParam(7, 1);
-		if (ps != 1 or pd != 1)
-			break;
-
-		int32_t t, l, b, r;
-		GetRectParam(0, t, l, b, r);
-
-		int32_t w = r - l, h = b - t;
-		int32_t dt = GetParam(5, 1) - 1;
-		if (mCursor.DECOM)
-			dt += mMarginTop;
-		int32_t dl = GetParam(6, 1) - 1;
-		if (mCursor.DECOM)
-			dl += mMarginLeft;
-
-		if (dt + h > mTerminalHeight)
-		{
-			h = mTerminalHeight - dt;
-			b = t + h;
-		}
-
-		if (dl + w > mTerminalWidth)
-		{
-			w = mTerminalWidth - dl;
-			r = l + w;
-		}
-
-		if (w == 0 or h == 0)
-			break;
-
-		vector<MChar> buffer(mTerminalWidth * mTerminalHeight);
-		uint32_t i = 0;
-		mBuffer->ForeachInRectangle(t, l, b, r,
-									[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn) {
-										buffer[i++] = inChar;
-									});
-
-		assert(i <= buffer.size());
-		i = 0;
-
-		mBuffer->ForeachInRectangle(dt, dl, dt + h, dl + w,
-									[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn) {
-										inChar = buffer[i++];
-									});
-		break;
-	}
-
-	// DECELF -- Enable local functions
-	case eDECELF: /* unimplemented */
-		break;
-
-	// DECERA -- Erase rectangular area
-	case eDECERA:
-	{
-		int32_t t, l, b, r;
-		GetRectParam(0, t, l, b, r);
-
-		MChar ch(' ', mCursor.style);
-		mBuffer->ForeachInRectangle(t, l, b, r,
-									[ch](MChar &inChar, int32_t inLine, int32_t inColumn) {
-										inChar = ch;
-									});
-		break;
-	}
-	// DECFRA -- Fill rectangular area
-	case eDECFRA:
-	{
-		int32_t t, l, b, r;
-		GetRectParam(1, t, l, b, r);
-
-		MChar ch(GetParam(0, ' '), mCursor.style);
-		mBuffer->ForeachInRectangle(t, l, b, r,
-									[ch](MChar &inChar, int32_t inLine, int32_t inColumn) {
-										inChar = ch;
-									});
-		break;
-	}
-
-	// DECINVM -- Invoke stored macro
-	case eDECINVM: /* unimplemented */
-		break;
-	// DECLFKC -- Local function key control
-	case eDECLFKC: /* unimplemented */
-		break;
-	// DECMSR -- Macro Space Report
-	case eDECMSR: /* unimplemented */
-		break;
-
-	// DECRARA -- Reverse attributes in rectangular area
-	case eDECRARA:
-	{
-		int32_t t, l, b, r;
-		GetRectParam(0, t, l, b, r);
-
-		for (uint32_t ai = 4; ai < mArgs.size(); ++ai)
-		{
-			uint32_t flag;
-			switch (mArgs[ai])
-			{
-			case 0:
-				flag = kStyleBold | kStyleUnderline | kStyleBlink | kStyleInverse;
-				break;
-			case 1:
-				flag = kStyleBold;
-				break;
-			case 4:
-				flag = kStyleUnderline;
-				break;
-			case 5:
-				flag = kStyleBlink;
-				break;
-			case 7:
-				flag = kStyleInverse;
-				break;
+				case 2: /* DECTABSR */
+				{
+					vector<string> ts;
+					for (int i = 0; i < mTerminalWidth; ++i)
+						if (mTabStops[i])
+							ts.push_back(std::to_string(i + 1));
+					SendCommand(kDCS + "2$u" + ba::join(ts, "/") + "\033\\");
+					break;
+				}
 			}
+			break;
+		// DECRQUPSS -- Request User-Preferred Supplemental Set
+		case eDECRQUPSS:
+			SendCommand("\033P0!u%5\033\\");
+			break;
+		// DECSACE -- Select attribute change extent
+		case eDECSACE:
+			mDECSACE = (GetParam(0, 1) == 2);
+			break;
+		// DECSASD -- Select active status display
+		case eDECSASD:
+			if (GetParam(0, 0))
+			{
+				if (not mDECSASD)
+				{
+					mSavedSL = mCursor;
+					ResetCursor();
+					mDECSASD = true;
+				}
+			}
+			else
+			{
+				if (mDECSASD)
+				{
+					mCursor = mSavedSL;
+					mDECSASD = false;
+				}
+			}
+			break;
+		// DECSCA -- Select character attribute
+		case eDECSCA:
+			switch (GetParam(0, 0))
+			{
+				case 0:
+				case 2:
+					mCursor.style.ClearFlag(kUnerasable);
+					break;
+				case 1:
+					mCursor.style.SetFlag(kUnerasable);
+					break;
+			}
+			break;
+
+		// DECSED -- Selective erase in display
+		case eDECSED:
+			EraseInDisplay(GetParam(0, 0), true);
+			break;
+			break;
+		// DECSEL -- Selective erase in line
+		case eDECSEL:
+			EraseInLine(GetParam(0, 0), true);
+			break;
+		// DECSERA -- Selective erase rectangular area
+		case eDECSERA:
+		{
+			int32_t t, l, b, r;
+			GetRectParam(0, t, l, b, r);
 
 			mBuffer->ForeachInRectangle(t, l, b, r,
-										[flag](MChar &inChar, int32_t inLine, int32_t inColumn) {
-											inChar.ReverseFlag(MCharStyle(flag));
-										});
-		}
-		break;
-	}
-
-	// DECRPM -- Report mode
-	case eDECRPM: /* unimplemented */
-		break;
-	// DECRQCRA -- Request checksum of rectangular area
-	case eDECRQCRA: /* unimplemented */
-		break;
-	// DECRQDE -- Request displayed extent
-	case eDECRQDE:
-		SendCommand(boost::format("\033[%d;%d;1;1;1\"w") % mTerminalHeight % mTerminalWidth);
-		break;
-
-	// DECRQMANSI -- Request mode ANSI
-	case eDECRQMANSI:
-	{
-		int p = GetParam(0, 0);
-		SendCommand(boost::format("\033[%d;%d$y") % p % (GetMode(p, true) ? 1 : 2));
-		break;
-	}
-	// DECRQMDEC -- Request mode DEC Private
-	case eDECRQMDEC:
-	{
-		int p = GetParam(0, 0);
-		SendCommand(boost::format("\033[?%d;%d$y") % p % (GetMode(p, false) ? 1 : 2));
-		break;
-	}
-	// DECRQPSR -- Request presentation state
-	case eDECRQPSR:
-		switch (GetParam(0, 0))
-		{
-		case 1: /* DECCIR */
-		{
-			MStyle st = mCursor.style;
-			SendCommand(boost::format("\033P1$u%d;%d;%d;%c;%c;%c;%d;%d;%c;%c%c%c%c\033\\") % (mCursor.y + 1) % (mCursor.x + 1) % 1 % char(0x40 + (st & kStyleInverse ? 8 : 0) + (st & kStyleBlink ? 4 : 0) + (st & kStyleUnderline ? 2 : 0) + (st & kStyleBold ? 1 : 0)) % char(0x40 + (st & kUnerasable ? 1 : 0)) % char(0x40 + (mCursor.DECAWM ? 8 : 0) + (mCursor.SS == 3 ? 4 : 0) + (mCursor.SS == 2 ? 2 : 0) + (mCursor.DECOM ? 1 : 0)) % mCursor.CSGL % mCursor.CSGR % char(0x5f) // pffft, not sure about this one... FIXME
-						% mCursor.charSetGSel[0] % mCursor.charSetGSel[1] % mCursor.charSetGSel[2] % mCursor.charSetGSel[3]);
+				[](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					if (not(inChar & kUnerasable))
+						inChar = ' ';
+				});
 			break;
 		}
-		case 2: /* DECTABSR */
+		// DECSLPP -- Set Lines Per Page
+		case eDECSLPP:
 		{
-			vector<string> ts;
-			for (int i = 0; i < mTerminalWidth; ++i)
-				if (mTabStops[i])
-					ts.push_back(std::to_string(i + 1));
-			SendCommand(kDCS + "2$u" + ba::join(ts, "/") + "\033\\");
-			break;
-		}
-		}
-		break;
-	// DECRQUPSS -- Request User-Preferred Supplemental Set
-	case eDECRQUPSS:
-		SendCommand("\033P0!u%5\033\\");
-		break;
-	// DECSACE -- Select attribute change extent
-	case eDECSACE:
-		mDECSACE = (GetParam(0, 1) == 2);
-		break;
-	// DECSASD -- Select active status display
-	case eDECSASD:
-		if (GetParam(0, 0))
-		{
-			if (not mDECSASD)
+			MRect r;
+
+			switch (GetParam(0, 0))
 			{
-				mSavedSL = mCursor;
-				ResetCursor();
-				mDECSASD = true;
+				case 11:
+					SendCommand("\033[1t");
+					break;
+				case 13:
+					GetWindow()->GetWindowPosition(r);
+					SendCommand(boost::format("\033[3;%d;%dt") % r.x % r.y);
+					break;
+				case 14:
+					GetWindow()->GetBounds(r);
+					SendCommand(boost::format("\033[4;%d;%dt") % r.width % r.height);
+					break;
+				case 18:
+					SendCommand(boost::format("\033[8;%d;%dt") % mTerminalWidth % mTerminalHeight);
+					break;
+				case 20:
+					SendCommand("\033]L\033\\");
+					break;
+				case 21:
+					SendCommand(string("\033]l") + GetWindow()->GetTitle() + "\033\\");
+					break;
+				default:
+				{
+					int h = GetParam(1, 24);
+					if (h >= 4 and h < 240)
+						ResizeTerminal(mTerminalWidth, h, true);
+					break;
+				}
 			}
+			break;
 		}
-		else
-		{
-			if (mDECSASD)
+		// DECSLRM -- Set left and right margins
+		case eDECSLRM:
+			//			if (mArgs.size() == 1 and mArgs[0] == 0)
+			//				SaveCursor();
+			//			else
+			if (mDECVSSM)
 			{
-				mCursor = mSavedSL;
-				mDECSASD = false;
+				int32_t left = GetParam(0, 1);
+				if (left < 1)
+					left = 1;
+				int32_t right = GetParam(1, mTerminalWidth);
+				if (right > mTerminalWidth)
+					right = mTerminalWidth;
+				if (right < left + 1)
+					right = left + 1;
+
+				mMarginLeft = left - 1;
+				mMarginRight = right - 1;
+				MoveCursorTo(0, 0);
 			}
-		}
-		break;
-	// DECSCA -- Select character attribute
-	case eDECSCA:
-		switch (GetParam(0, 0))
+			break;
+		// DECSMKR -- Select modifier key reporting
+		case eDECSMKR: /* unimplemented */
+			break;
+		// DECSNLS -- Select number of lines per screen
+		case eDECSNLS:
+			if (n >= 24 and n < 250)
+				ResizeTerminal(mTerminalWidth, n, true);
+			break;
+		// DECSR -- Secure reset
+		case eDECSR: /* unimplemented */
+			break;
+		// DECSSDT -- Select status display type
+		case eDECSSDT:
+			mDECSSDT = GetParam(0, 1);
+			ResizeTerminal(mTerminalWidth, mTerminalHeight, true);
+			break;
+		// DECSTBM -- Set Top and Bottom Margin
+		case eDECSTBM:
 		{
-		case 0:
-		case 2:
-			mCursor.style.ClearFlag(kUnerasable);
-			break;
-		case 1:
-			mCursor.style.SetFlag(kUnerasable);
-			break;
-		}
-		break;
+			int32_t top = GetParam(0, 1);
+			if (top < 1)
+				top = 1;
+			int32_t bottom = GetParam(1, mTerminalHeight);
+			if (bottom > mTerminalHeight)
+				bottom = mTerminalHeight;
+			if (bottom < top + 1)
+				bottom = top + 1;
 
-	// DECSED -- Selective erase in display
-	case eDECSED:
-		EraseInDisplay(GetParam(0, 0), true);
-		break;
-		break;
-	// DECSEL -- Selective erase in line
-	case eDECSEL:
-		EraseInLine(GetParam(0, 0), true);
-		break;
-	// DECSERA -- Selective erase rectangular area
-	case eDECSERA:
-	{
-		int32_t t, l, b, r;
-		GetRectParam(0, t, l, b, r);
+			mMarginTop = top - 1;
+			mMarginBottom = bottom - 1;
 
-		mBuffer->ForeachInRectangle(t, l, b, r,
-									[](MChar &inChar, int32_t inLine, int32_t inColumn) {
-										if (not(inChar & kUnerasable))
-											inChar = ' ';
-									});
-		break;
-	}
-	// DECSLPP -- Set Lines Per Page
-	case eDECSLPP:
-	{
-		MRect r;
-
-		switch (GetParam(0, 0))
-		{
-		case 11:
-			SendCommand("\033[1t");
-			break;
-		case 13:
-			GetWindow()->GetWindowPosition(r);
-			SendCommand(boost::format("\033[3;%d;%dt") % r.x % r.y);
-			break;
-		case 14:
-			GetWindow()->GetBounds(r);
-			SendCommand(boost::format("\033[4;%d;%dt") % r.width % r.height);
-			break;
-		case 18:
-			SendCommand(boost::format("\033[8;%d;%dt") % mTerminalWidth % mTerminalHeight);
-			break;
-		case 20:
-			SendCommand("\033]L\033\\");
-			break;
-		case 21:
-			SendCommand(string("\033]l") + GetWindow()->GetTitle() + "\033\\");
-			break;
-		default:
-		{
-			int h = GetParam(1, 24);
-			if (h >= 4 and h < 240)
-				ResizeTerminal(mTerminalWidth, h, true);
-			break;
-		}
-		}
-		break;
-	}
-	// DECSLRM -- Set left and right margins
-	case eDECSLRM:
-		//			if (mArgs.size() == 1 and mArgs[0] == 0)
-		//				SaveCursor();
-		//			else
-		if (mDECVSSM)
-		{
-			int32_t left = GetParam(0, 1);
-			if (left < 1)
-				left = 1;
-			int32_t right = GetParam(1, mTerminalWidth);
-			if (right > mTerminalWidth)
-				right = mTerminalWidth;
-			if (right < left + 1)
-				right = left + 1;
-
-			mMarginLeft = left - 1;
-			mMarginRight = right - 1;
 			MoveCursorTo(0, 0);
+			break;
 		}
-		break;
-	// DECSMKR -- Select modifier key reporting
-	case eDECSMKR: /* unimplemented */
-		break;
-	// DECSNLS -- Select number of lines per screen
-	case eDECSNLS:
-		if (n >= 24 and n < 250)
-			ResizeTerminal(mTerminalWidth, n, true);
-		break;
-	// DECSR -- Secure reset
-	case eDECSR: /* unimplemented */
-		break;
-	// DECSSDT -- Select status display type
-	case eDECSSDT:
-		mDECSSDT = GetParam(0, 1);
-		ResizeTerminal(mTerminalWidth, mTerminalHeight, true);
-		break;
-	// DECSTBM -- Set Top and Bottom Margin
-	case eDECSTBM:
-	{
-		int32_t top = GetParam(0, 1);
-		if (top < 1)
-			top = 1;
-		int32_t bottom = GetParam(1, mTerminalHeight);
-		if (bottom > mTerminalHeight)
-			bottom = mTerminalHeight;
-		if (bottom < top + 1)
-			bottom = top + 1;
+		// DECSTR -- Soft terminal reset
+		case eDECSTR:
+			SoftReset();
+			break;
 
-		mMarginTop = top - 1;
-		mMarginBottom = bottom - 1;
-
-		MoveCursorTo(0, 0);
-		break;
-	}
-	// DECSTR -- Soft terminal reset
-	case eDECSTR:
-		SoftReset();
-		break;
-
-	/*
+		/*
 			XTerm / DEC VT520
 		*/
 
-	// DECSCUSR -- Set Cursor Style
-	case eDECSCUSR:
-		switch (GetParam(0, 1))
-		{
-		case 1:
-			mCursor.block = true;
-			mCursor.blink = true;
+		// DECSCUSR -- Set Cursor Style
+		case eDECSCUSR:
+			switch (GetParam(0, 1))
+			{
+				case 1:
+					mCursor.block = true;
+					mCursor.blink = true;
+					break;
+				case 2:
+					mCursor.block = true;
+					mCursor.blink = false;
+					break;
+				case 3:
+					mCursor.block = false;
+					mCursor.blink = true;
+					break;
+				case 4:
+					mCursor.block = false;
+					mCursor.blink = false;
+					break;
+			}
+			Invalidate();
 			break;
-		case 2:
-			mCursor.block = true;
-			mCursor.blink = false;
+		// DECSWBV -- Set Warning Bell Volume
+		case eDECSWBV: /* unimplemented */
 			break;
-		case 3:
-			mCursor.block = false;
-			mCursor.blink = true;
+		// DECSMBV -- Set Margin Bell Volume
+		case eDECSMBV: /* unimplemented */
 			break;
-		case 4:
-			mCursor.block = false;
-			mCursor.blink = false;
-			break;
-		}
-		Invalidate();
-		break;
-	// DECSWBV -- Set Warning Bell Volume
-	case eDECSWBV: /* unimplemented */
-		break;
-	// DECSMBV -- Set Margin Bell Volume
-	case eDECSMBV: /* unimplemented */
-		break;
 
-	default:
-		ProcessCSILevel1(inCmd);
-		break;
+		default:
+			ProcessCSILevel1(inCmd);
+			break;
 	}
 }
 
@@ -4484,12 +4513,12 @@ void MTerminalView::SelectCharSet(uint8_t inChar)
 	{
 		switch (inChar)
 		{
-		case '@':
-			mEncoding = kEncodingISO88591;
-			break;
-		case 'G':
-			mEncoding = kEncodingUTF8;
-			break;
+			case '@':
+				mEncoding = kEncodingISO88591;
+				break;
+			case 'G':
+				mEncoding = kEncodingUTF8;
+				break;
 		}
 	}
 	else
@@ -4506,63 +4535,63 @@ void MTerminalView::SelectCharSet(uint8_t inChar)
 		{
 			switch (inChar)
 			{
-			case 'A':
-				mCursor.charSetG[charset] = kISOLatin1Supplemental;
-				break;
+				case 'A':
+					mCursor.charSetG[charset] = kISOLatin1Supplemental;
+					break;
 			}
 		}
 		else
 		{
 			switch (inChar)
 			{
-			case 'A':
-				mCursor.charSetG[charset] = kUKCharSet;
-				break;
-			case 'B':
-				mCursor.charSetG[charset] = kUSCharSet;
-				break;
-			case '4':
-				mCursor.charSetG[charset] = kNLCharSet;
-				break;
-			case 'C':
-			case '5':
-				mCursor.charSetG[charset] = kFICharSet;
-				break;
-			case 'R':
-				mCursor.charSetG[charset] = kFRCharSet;
-				break;
-			case 'Q':
-				mCursor.charSetG[charset] = kCACharSet;
-				break;
-			case 'K':
-				mCursor.charSetG[charset] = kDECharSet;
-				break;
-			case 'Y':
-				mCursor.charSetG[charset] = kITCharSet;
-				break;
-			case 'E':
-			case '6':
-				mCursor.charSetG[charset] = kDKCharSet;
-				break;
-			case 'Z':
-				mCursor.charSetG[charset] = kSPCharSet;
-				break;
-			case 'H':
-			case '7':
-				mCursor.charSetG[charset] = kSECharSet;
-				break;
-			case '=':
-				mCursor.charSetG[charset] = kCHCharSet;
-				break;
-			case '0':
-				mCursor.charSetG[charset] = kLineCharSet;
-				break;
-			case '1':
-				mCursor.charSetG[charset] = kUSCharSet;
-				break;
-			case '2':
-				mCursor.charSetG[charset] = kLineCharSet;
-				break;
+				case 'A':
+					mCursor.charSetG[charset] = kUKCharSet;
+					break;
+				case 'B':
+					mCursor.charSetG[charset] = kUSCharSet;
+					break;
+				case '4':
+					mCursor.charSetG[charset] = kNLCharSet;
+					break;
+				case 'C':
+				case '5':
+					mCursor.charSetG[charset] = kFICharSet;
+					break;
+				case 'R':
+					mCursor.charSetG[charset] = kFRCharSet;
+					break;
+				case 'Q':
+					mCursor.charSetG[charset] = kCACharSet;
+					break;
+				case 'K':
+					mCursor.charSetG[charset] = kDECharSet;
+					break;
+				case 'Y':
+					mCursor.charSetG[charset] = kITCharSet;
+					break;
+				case 'E':
+				case '6':
+					mCursor.charSetG[charset] = kDKCharSet;
+					break;
+				case 'Z':
+					mCursor.charSetG[charset] = kSPCharSet;
+					break;
+				case 'H':
+				case '7':
+					mCursor.charSetG[charset] = kSECharSet;
+					break;
+				case '=':
+					mCursor.charSetG[charset] = kCHCharSet;
+					break;
+				case '0':
+					mCursor.charSetG[charset] = kLineCharSet;
+					break;
+				case '1':
+					mCursor.charSetG[charset] = kUSCharSet;
+					break;
+				case '2':
+					mCursor.charSetG[charset] = kLineCharSet;
+					break;
 			}
 		}
 	}
@@ -4572,24 +4601,24 @@ void MTerminalView::SelectControlTransmission(uint8_t inCode)
 {
 	switch (inCode)
 	{
-	case 'F':
-		mS8C1T = false;
-		break;
-	case 'G':
-		if (mDECSCL >= 2)
-			mS8C1T = true;
-		break;
+		case 'F':
+			mS8C1T = false;
+			break;
+		case 'G':
+			if (mDECSCL >= 2)
+				mS8C1T = true;
+			break;
 
-	// unimplemented
-	case 'N': /* ANSI conformance level 3 */
-		mCursor.charSetG[0] = kUSCharSet;
-		mCursor.CSGL = 0;
-		// fall through
-	case 'L': /* ANSI conformance level 1 */
-	case 'M': /* ANSI conformance level 2 */
-		mCursor.charSetG[1] = kISOLatin1Supplemental;
-		mCursor.CSGR = 1;
-		break;
+		// unimplemented
+		case 'N': /* ANSI conformance level 3 */
+			mCursor.charSetG[0] = kUSCharSet;
+			mCursor.CSGL = 0;
+			// fall through
+		case 'L': /* ANSI conformance level 1 */
+		case 'M': /* ANSI conformance level 2 */
+			mCursor.charSetG[1] = kISOLatin1Supplemental;
+			mCursor.CSGR = 1;
+			break;
 	}
 
 	mEscState = eESC_NONE;
@@ -4601,21 +4630,21 @@ void MTerminalView::SelectDouble(uint8_t inDoubleMode)
 
 	switch (inDoubleMode)
 	{
-	case '3':
-		mBuffer->SetLineDoubleHeight(mCursor.y, true);
-		break;
-	case '4':
-		mBuffer->SetLineDoubleHeight(mCursor.y, false);
-		break;
-	case '5':
-		mBuffer->SetLineSingleWidth(mCursor.y);
-		break;
-	case '6':
-		mBuffer->SetLineDoubleWidth(mCursor.y);
-		break;
-	case '8':
-		mBuffer->FillWithE();
-		break;
+		case '3':
+			mBuffer->SetLineDoubleHeight(mCursor.y, true);
+			break;
+		case '4':
+			mBuffer->SetLineDoubleHeight(mCursor.y, false);
+			break;
+		case '5':
+			mBuffer->SetLineSingleWidth(mCursor.y);
+			break;
+		case '6':
+			mBuffer->SetLineDoubleWidth(mCursor.y);
+			break;
+		case '8':
+			mBuffer->FillWithE();
+			break;
 	}
 }
 
@@ -4749,179 +4778,179 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 
 	switch (mState)
 	{
-	case 0:
-		switch (inChar)
-		{
-		case '0':
-			delete mNewPFK;
-			mNewPFK = new MPFK;
-			mNewPFK->clear = mNewPFK->locked = true;
-			mState = 10;
-			break;
-
-		case '1':
-			delete mNewPFK;
-			mNewPFK = new MPFK;
-			mNewPFK->clear = false;
-			mNewPFK->locked = true;
-			mState = 10;
-			break;
-
-		case ';':
-			delete mNewPFK;
-			mNewPFK = new MPFK;
-			mNewPFK->clear = mNewPFK->locked = true;
-			mState = 11;
-			break;
-
-		case '$':
-			mState = 20;
-			break;
-		case '+':
-			mState = 30;
-			break;
-		default:
-			mState = 100; /* unrecognized */
-			break;
-		}
-		break;
-
-		// ';'
-
-	case 10:
-		if (inChar == ';')
-			mState = 11;
-		else
-			mState = 100;
-		break;
-
-	case 11:
-		switch (inChar)
-		{
-		case '0':
-			mState = 12;
-			break;
-		case '1':
-			mNewPFK->locked = false;
-			mState = 12;
-			break;
-		case '|':
-			mState = 13;
-			break;
-		default:
-			mState = 100;
-			break;
-		}
-		break;
-
-	case 12:
-		if (inChar == '|')
-			mState = 13;
-		else
-			mState = 100;
-		break;
-
-	case 13:
-		if (inChar >= '0' and inChar <= '9')
-			mPFKKeyNr = mPFKKeyNr * 10 + (inChar - '0');
-		else if (inChar == '/')
-			mState = 14;
-		else
-			mState = 100;
-		break;
-
-	case 14:
-		if (inChar == ';')
-			mPFKKeyNr = 0;
-		else if (isxdigit(inChar))
-		{
-			uint32_t keyCode;
-			switch (mPFKKeyNr)
+		case 0:
+			switch (inChar)
 			{
-			case eF1:
-				keyCode = kF1KeyCode;
-				break;
-			case eF2:
-				keyCode = kF2KeyCode;
-				break;
-			case eF3:
-				keyCode = kF3KeyCode;
-				break;
-			case eF4:
-				keyCode = kF4KeyCode;
-				break;
-			case eF5:
-				keyCode = kF5KeyCode;
-				break;
-			case eF6:
-				keyCode = kF6KeyCode;
-				break;
-			case eF7:
-				keyCode = kF7KeyCode;
-				break;
-			case eF8:
-				keyCode = kF8KeyCode;
-				break;
-			case eF9:
-				keyCode = kF9KeyCode;
-				break;
-			case eF10:
-				keyCode = kF10KeyCode;
-				break;
-			case eF11:
-				keyCode = kF11KeyCode;
-				break;
-			case eF12:
-				keyCode = kF12KeyCode;
-				break;
-			case eF13:
-				keyCode = kF13KeyCode;
-				break;
-			case eF14:
-				keyCode = kF14KeyCode;
-				break;
-			case eF15:
-				keyCode = kF15KeyCode;
-				break;
-			case eF16:
-				keyCode = kF16KeyCode;
-				break;
-			case eF17:
-				keyCode = kF17KeyCode;
-				break;
-			case eF18:
-				keyCode = kF18KeyCode;
-				break;
-			case eF19:
-				keyCode = kF19KeyCode;
-				break;
-			case eF20:
-				keyCode = kF20KeyCode;
-				break;
+				case '0':
+					delete mNewPFK;
+					mNewPFK = new MPFK;
+					mNewPFK->clear = mNewPFK->locked = true;
+					mState = 10;
+					break;
+
+				case '1':
+					delete mNewPFK;
+					mNewPFK = new MPFK;
+					mNewPFK->clear = false;
+					mNewPFK->locked = true;
+					mState = 10;
+					break;
+
+				case ';':
+					delete mNewPFK;
+					mNewPFK = new MPFK;
+					mNewPFK->clear = mNewPFK->locked = true;
+					mState = 11;
+					break;
+
+				case '$':
+					mState = 20;
+					break;
+				case '+':
+					mState = 30;
+					break;
+				default:
+					mState = 100; /* unrecognized */
+					break;
 			}
-			mNewPFK->key[keyCode] += inChar;
-		}
-		else
-			mState = 100;
-		break;
+			break;
 
-		// $q DECSRQSS
+			// ';'
 
-	case 20:
-		if (inChar == 'q')
-			mState = 21;
-		else
-			mState = 100;
-		break;
+		case 10:
+			if (inChar == ';')
+				mState = 11;
+			else
+				mState = 100;
+			break;
 
-	case 21:
-		mDECRQSS = inChar;
-		mState = 22;
-		break;
+		case 11:
+			switch (inChar)
+			{
+				case '0':
+					mState = 12;
+					break;
+				case '1':
+					mNewPFK->locked = false;
+					mState = 12;
+					break;
+				case '|':
+					mState = 13;
+					break;
+				default:
+					mState = 100;
+					break;
+			}
+			break;
 
-	case 22:
-		mDECRQSS += inChar;
-		break;
+		case 12:
+			if (inChar == '|')
+				mState = 13;
+			else
+				mState = 100;
+			break;
+
+		case 13:
+			if (inChar >= '0' and inChar <= '9')
+				mPFKKeyNr = mPFKKeyNr * 10 + (inChar - '0');
+			else if (inChar == '/')
+				mState = 14;
+			else
+				mState = 100;
+			break;
+
+		case 14:
+			if (inChar == ';')
+				mPFKKeyNr = 0;
+			else if (isxdigit(inChar))
+			{
+				uint32_t keyCode;
+				switch (mPFKKeyNr)
+				{
+					case eF1:
+						keyCode = kF1KeyCode;
+						break;
+					case eF2:
+						keyCode = kF2KeyCode;
+						break;
+					case eF3:
+						keyCode = kF3KeyCode;
+						break;
+					case eF4:
+						keyCode = kF4KeyCode;
+						break;
+					case eF5:
+						keyCode = kF5KeyCode;
+						break;
+					case eF6:
+						keyCode = kF6KeyCode;
+						break;
+					case eF7:
+						keyCode = kF7KeyCode;
+						break;
+					case eF8:
+						keyCode = kF8KeyCode;
+						break;
+					case eF9:
+						keyCode = kF9KeyCode;
+						break;
+					case eF10:
+						keyCode = kF10KeyCode;
+						break;
+					case eF11:
+						keyCode = kF11KeyCode;
+						break;
+					case eF12:
+						keyCode = kF12KeyCode;
+						break;
+					case eF13:
+						keyCode = kF13KeyCode;
+						break;
+					case eF14:
+						keyCode = kF14KeyCode;
+						break;
+					case eF15:
+						keyCode = kF15KeyCode;
+						break;
+					case eF16:
+						keyCode = kF16KeyCode;
+						break;
+					case eF17:
+						keyCode = kF17KeyCode;
+						break;
+					case eF18:
+						keyCode = kF18KeyCode;
+						break;
+					case eF19:
+						keyCode = kF19KeyCode;
+						break;
+					case eF20:
+						keyCode = kF20KeyCode;
+						break;
+				}
+				mNewPFK->key[keyCode] += inChar;
+			}
+			else
+				mState = 100;
+			break;
+
+			// $q DECSRQSS
+
+		case 20:
+			if (inChar == 'q')
+				mState = 21;
+			else
+				mState = 100;
+			break;
+
+		case 21:
+			mDECRQSS = inChar;
+			mState = 22;
+			break;
+
+		case 22:
+			mDECRQSS += inChar;
+			break;
 	}
 
 	if (mEscState == eESC_NONE)
@@ -4940,92 +4969,92 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 
 		switch (mArgs[0])
 		{
-		case 0:
-		case 1:
-		case 2:
-			GetWindow()->SetTitle(mArgString);
-			break;
+			case 0:
+			case 1:
+			case 2:
+				GetWindow()->SetTitle(mArgString);
+				break;
 
-		case 10:
-			if (mArgString == "?")
-			{
-				string textColor = mTerminalColors[eText].hex();
+			case 10:
+				if (mArgString == "?")
+				{
+					string textColor = mTerminalColors[eText].hex();
 
-				SendCommand(
-					"\033]11;rgb:" +
-					textColor.substr(1, 2) + textColor.substr(1, 2) + '/' +
-					textColor.substr(3, 2) + textColor.substr(3, 2) + '/' +
-					textColor.substr(5, 2) + textColor.substr(5, 2) +
-					"\033\\");
+					SendCommand(
+						"\033]11;rgb:" +
+						textColor.substr(1, 2) + textColor.substr(1, 2) + '/' +
+						textColor.substr(3, 2) + textColor.substr(3, 2) + '/' +
+						textColor.substr(5, 2) + textColor.substr(5, 2) +
+						"\033\\");
 
-				PRINT(("Request for text colour"));
-			}
-			break;
+					PRINT(("Request for text colour"));
+				}
+				break;
 
-		case 11:
-			if (mArgString == "?")
-			{
-				string backColor = mTerminalColors[eBack].hex();
+			case 11:
+				if (mArgString == "?")
+				{
+					string backColor = mTerminalColors[eBack].hex();
 
-				SendCommand(
-					"\033]11;rgb:" +
-					backColor.substr(1, 2) + backColor.substr(1, 2) + '/' +
-					backColor.substr(3, 2) + backColor.substr(3, 2) + '/' +
-					backColor.substr(5, 2) + backColor.substr(5, 2) +
-					"\033\\");
+					SendCommand(
+						"\033]11;rgb:" +
+						backColor.substr(1, 2) + backColor.substr(1, 2) + '/' +
+						backColor.substr(3, 2) + backColor.substr(3, 2) + '/' +
+						backColor.substr(5, 2) + backColor.substr(5, 2) +
+						"\033\\");
 
-				PRINT(("Request for background colour"));
-			}
-			break;
+					PRINT(("Request for background colour"));
+				}
+				break;
 
-			/* unimplemented: veel */
+				/* unimplemented: veel */
 
-		default:
-			PRINT(("Ignored %d OSC option", mArgs[0]));
-			break;
+			default:
+				PRINT(("Ignored %d OSC option", mArgs[0]));
+				break;
 		}
 	}
 	else
 	{
 		switch (mState)
 		{
-		case 0: // start, expect a number, or ';'
-			mArgs.clear();
-			mArgs.push_back(0);
-			mArgString.clear();
-
-			if (inChar == ';')
-			{
+			case 0: // start, expect a number, or ';'
+				mArgs.clear();
 				mArgs.push_back(0);
-				mState = 2;
-			}
-			else if (inChar >= '0' and inChar <= '9')
-			{
-				mArgs[0] = inChar - '0';
-				mState = 1;
-			}
-			else
-			{
-				mArgString += inChar;
-				mState = 2;
-			}
-			break;
+				mArgString.clear();
 
-		case 1:
-			if (inChar >= '0' and inChar <= '9')
-				mArgs.back() = mArgs.back() * 10 + (inChar - '0');
-			else if (inChar == ';')
-				mArgs.push_back(0);
-			else // error
-			{
-				mArgString += inChar;
-				mState = 2;
-			}
-			break;
+				if (inChar == ';')
+				{
+					mArgs.push_back(0);
+					mState = 2;
+				}
+				else if (inChar >= '0' and inChar <= '9')
+				{
+					mArgs[0] = inChar - '0';
+					mState = 1;
+				}
+				else
+				{
+					mArgString += inChar;
+					mState = 2;
+				}
+				break;
 
-		case 2:
-			mArgString += inChar;
-			break;
+			case 1:
+				if (inChar >= '0' and inChar <= '9')
+					mArgs.back() = mArgs.back() * 10 + (inChar - '0');
+				else if (inChar == ';')
+					mArgs.push_back(0);
+				else // error
+				{
+					mArgString += inChar;
+					mState = 2;
+				}
+				break;
+
+			case 2:
+				mArgString += inChar;
+				break;
 		}
 	}
 }
@@ -5125,128 +5154,128 @@ void MTerminalView::SetResetMode(uint32_t inMode, bool inANSI, bool inSet)
 	{
 		switch (inMode)
 		{
-		case 2:
-			mKAM = inSet;
-			break;
-		case 4:
-			mIRM = inSet;
-			break;
-		case 12:
-			mSRM = inSet;
-			break;
-		case 20:
-			mLNM = inSet;
-			break;
-		default:
-			PRINT(("Ignored %s of option %d", inSet ? "set" : "reset", inMode));
-			break;
+			case 2:
+				mKAM = inSet;
+				break;
+			case 4:
+				mIRM = inSet;
+				break;
+			case 12:
+				mSRM = inSet;
+				break;
+			case 20:
+				mLNM = inSet;
+				break;
+			default:
+				PRINT(("Ignored %s of option %d", inSet ? "set" : "reset", inMode));
+				break;
 		}
 	}
 	else
 	{
 		switch (inMode)
 		{
-		case 1:
-			mDECCKM = inSet;
-			break;
-		case 2:
-			mDECANM = inSet;
-			break;
-		case 3:			  // DECCOLM
-			mDECSSDT = 0; // reset status line conforming to specification
-			ResizeTerminal(inSet ? 132 : 80, mTerminalHeight, true);
-			break;
-		case 4:
-			mDECSCLM = inSet;
-			break;
-		case 5:
-			mDECSCNM = inSet;
-			break;
-		case 6:
-			mCursor.DECOM = inSet;
-			if (inSet)
-				MoveCursorTo(0, 0);
-			break;
-		case 7:
-			mCursor.DECAWM = inSet;
-			break;
-		case 8:
-			mDECARM = inSet;
-			break;
-		case 12:
-			mCursor.blink = inSet;
-			break;
-		case 18:
-			mDECPFF = inSet;
-			break;
-		case 19:
-			mDECPEX = inSet;
-			break;
-		case 25:
-			mDECTCEM = inSet;
-			break;
-		case 42:
-			mDECNRCM = inSet;
-			break;
-		case 66:
-			mDECNMK = inSet;
-			break;
-		case 67:
-			mDECBKM = inSet;
-			break;
+			case 1:
+				mDECCKM = inSet;
+				break;
+			case 2:
+				mDECANM = inSet;
+				break;
+			case 3:           // DECCOLM
+				mDECSSDT = 0; // reset status line conforming to specification
+				ResizeTerminal(inSet ? 132 : 80, mTerminalHeight, true);
+				break;
+			case 4:
+				mDECSCLM = inSet;
+				break;
+			case 5:
+				mDECSCNM = inSet;
+				break;
+			case 6:
+				mCursor.DECOM = inSet;
+				if (inSet)
+					MoveCursorTo(0, 0);
+				break;
+			case 7:
+				mCursor.DECAWM = inSet;
+				break;
+			case 8:
+				mDECARM = inSet;
+				break;
+			case 12:
+				mCursor.blink = inSet;
+				break;
+			case 18:
+				mDECPFF = inSet;
+				break;
+			case 19:
+				mDECPEX = inSet;
+				break;
+			case 25:
+				mDECTCEM = inSet;
+				break;
+			case 42:
+				mDECNRCM = inSet;
+				break;
+			case 66:
+				mDECNMK = inSet;
+				break;
+			case 67:
+				mDECBKM = inSet;
+				break;
 
-		case 69:
-			mDECVSSM = inSet;
-			if (not mDECVSSM)
-			{
-				mMarginLeft = 0;
-				mMarginRight = mTerminalWidth - 1;
-			}
-			break;
+			case 69:
+				mDECVSSM = inSet;
+				if (not mDECVSSM)
+				{
+					mMarginLeft = 0;
+					mMarginRight = mTerminalWidth - 1;
+				}
+				break;
 
-		case 9:
-		case 1000:
-		case 1001:
-		case 1002:
-		case 1003:
-			PRINT(("%s mouse mode for %d", inSet ? "set" : "reset", inMode));
-			if (inSet)
-				mMouseMode = (MouseTrackingMode)inMode;
-			else
-				mMouseMode = eTrackMouseNone;
-			break;
+			case 9:
+			case 1000:
+			case 1001:
+			case 1002:
+			case 1003:
+				PRINT(("%s mouse mode for %d", inSet ? "set" : "reset", inMode));
+				if (inSet)
+					mMouseMode = (MouseTrackingMode)inMode;
+				else
+					mMouseMode = eTrackMouseNone;
+				break;
 
-		case 47: // alternate screen buffer support
-		case 1047:
-			if (inSet)
-				SwitchToAlternateScreen();
-			else
-				SwitchToRegularScreen();
-			break;
+			case 47: // alternate screen buffer support
+			case 1047:
+				if (inSet)
+					SwitchToAlternateScreen();
+				else
+					SwitchToRegularScreen();
+				break;
 
-		case 1048:
-			if (inSet)
-				SaveCursor();
-			else
-				RestoreCursor();
-			break;
+			case 1048:
+				if (inSet)
+					SaveCursor();
+				else
+					RestoreCursor();
+				break;
 
-		case 1049:
-			if (inSet)
-			{
-				SaveCursor();
-				SwitchToAlternateScreen();
-			}
-			else
-			{
-				SwitchToRegularScreen();
-				RestoreCursor();
-			}
-			break;
+			case 1049:
+				if (inSet)
+				{
+					SaveCursor();
+					SwitchToAlternateScreen();
+				}
+				else
+				{
+					SwitchToRegularScreen();
+					RestoreCursor();
+				}
+				break;
 
-		default:
-			PRINT(("Ignored %s of option %d", inSet ? "set" : "reset", inMode));
-			break;
+			default:
+				PRINT(("Ignored %s of option %d", inSet ? "set" : "reset", inMode));
+				break;
 		}
 	}
 }
@@ -5259,72 +5288,72 @@ bool MTerminalView::GetMode(uint32_t inMode, bool inANSI)
 	{
 		switch (inMode)
 		{
-		case 2:
-			result = mKAM;
-			break;
-		case 4:
-			result = mIRM;
-			break;
-		case 12:
-			result = mSRM;
-			break;
-		case 20:
-			result = mLNM;
-			break;
+			case 2:
+				result = mKAM;
+				break;
+			case 4:
+				result = mIRM;
+				break;
+			case 12:
+				result = mSRM;
+				break;
+			case 20:
+				result = mLNM;
+				break;
 		}
 	}
 	else
 	{
 		switch (inMode)
 		{
-		case 1:
-			result = mDECCKM;
-			break;
-		case 2:
-			result = mDECANM;
-			break;
-		case 3:
-			result = mTerminalWidth == 132;
-			break;
-		case 4:
-			result = mDECSCLM;
-			break;
-		case 5:
-			result = mDECSCNM;
-			break;
-		case 6:
-			result = mCursor.DECOM;
-			break;
-		case 7:
-			result = mCursor.DECAWM;
-			break;
-		case 8:
-			result = mDECARM;
-			break;
-		case 12:
-			result = mCursor.blink;
-			break;
-		case 18:
-			result = mDECPFF;
-			break;
-		case 19:
-			result = mDECPEX;
-			break;
-		case 25:
-			result = mDECTCEM;
-			break;
-		case 42:
-			result = mDECNRCM;
-			break;
-		case 66:
-			result = mDECNMK;
-			break;
-		case 67:
-			result = mDECBKM;
-			break;
-		case 69:
-			result = mDECVSSM;
-			break;
+			case 1:
+				result = mDECCKM;
+				break;
+			case 2:
+				result = mDECANM;
+				break;
+			case 3:
+				result = mTerminalWidth == 132;
+				break;
+			case 4:
+				result = mDECSCLM;
+				break;
+			case 5:
+				result = mDECSCNM;
+				break;
+			case 6:
+				result = mCursor.DECOM;
+				break;
+			case 7:
+				result = mCursor.DECAWM;
+				break;
+			case 8:
+				result = mDECARM;
+				break;
+			case 12:
+				result = mCursor.blink;
+				break;
+			case 18:
+				result = mDECPFF;
+				break;
+			case 19:
+				result = mDECPEX;
+				break;
+			case 25:
+				result = mDECTCEM;
+				break;
+			case 42:
+				result = mDECNRCM;
+				break;
+			case 66:
+				result = mDECNMK;
+				break;
+			case 67:
+				result = mDECBKM;
+				break;
+			case 69:
+				result = mDECVSSM;
+				break;
 		}
 	}
 

@@ -20,7 +20,7 @@
 /* #undef HAVE_CLOSEFROM */
 
 /* Define to 1 if CRYPTOPP is found */
-#define HAVE_CRYPTOPP 1
+/* #undef HAVE_CRYPTOPP */
 
 /* define if the compiler supports basic C++17 syntax */
 #define HAVE_CXX17 1

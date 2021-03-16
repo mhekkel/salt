@@ -122,12 +122,6 @@ void MSaltApp::Initialise()
 			known_hosts.add_host_key(m[1].str(), m[2].str(), m[3].str());
 	}
 
-	MAppExecutor my_executor{mImpl->mExContext};
-
-	using namespace std::placeholders;
-
-	known_hosts.register_handler(std::bind(&MSaltApp::ValidateHost, this, _1, _2, _3, _4), my_executor);
-
 	// set preferred algorithms
 	mConnectionPool.set_algorithm(pinch::algorithm::encryption, pinch::direction::both,
 		Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
@@ -428,51 +422,6 @@ void MSaltApp::Open(const string &inFile)
 		MWindow *w = MTerminalWindow::Create(host, user, port, command, connection);
 		w->Select();
 	}
-}
-
-pinch::host_key_reply MSaltApp::ValidateHost(const string &inHost, const string &inAlgorithm,
-	const vector<uint8_t> &inHostKey, pinch::host_key_state inState)
-{
-	pinch::host_key_reply result = pinch::host_key_reply::reject;
-	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
-
-	std::string value = zeep::encode_base64(hsv);
-	std::string H = zeep::md5(hsv);
-
-	string fingerprint;
-
-	for (auto b : H)
-	{
-		if (not fingerprint.empty())
-			fingerprint += ':';
-
-		fingerprint += kHexChars[(b >> 4) & 0x0f];
-		fingerprint += kHexChars[b & 0x0f];
-	}
-
-	if (inState == pinch::host_key_state::keys_differ)
-	{
-		if (DisplayAlert(nullptr, "host-key-changed-alert", { inHost, fingerprint }) == 2)
-			result = pinch::host_key_reply::trusted;
-	}
-	else
-	{
-		switch (DisplayAlert(nullptr, "unknown-host-alert", {inHost, fingerprint}))
-		{
-			case 1:	// Add
-				result = pinch::host_key_reply::trusted;
-				break;
-
-			case 2:	// Cancel
-				result = pinch::host_key_reply::reject;
-				break;
-
-			case 3: // Once
-				result = pinch::host_key_reply::trust_once;
-				break;
-		}
-	}
-	return result;
 }
 
 #if not defined(_MSC_VER)

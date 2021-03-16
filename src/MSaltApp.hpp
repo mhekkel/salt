@@ -57,9 +57,6 @@ class MSaltApp : public MApplication
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
 
-	pinch::host_key_reply ValidateHost(const std::string &inHost,
-		const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
-
   private:
 	virtual void DoAbout();
 
