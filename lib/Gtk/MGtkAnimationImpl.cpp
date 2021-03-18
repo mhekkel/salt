@@ -240,7 +240,7 @@ class MGtkAnimationManagerImpl : public MAnimationManagerImpl
 	condition_variable mCondition, mIdleCondition;
 	bool mDone;
 	thread mThread;
-	guint mIdleTag;
+	guint mIdleTag = 0;
 };
 
 void MGtkAnimationManagerImpl::Run()

@@ -107,7 +107,8 @@ struct Handler<Derived, Owner, Result(Arguments...)> : public HandlerBase<Result
 
 		try
 		{
-			result = (owner->*func)(args...);
+			if (owner and func)
+				result = (owner->*func)(args...);
 		}
 		catch (const std::exception &e)
 		{

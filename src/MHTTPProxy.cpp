@@ -45,38 +45,6 @@
 // namespace ba = boost::algorithm;
 // namespace fs = std::filesystem;
 
-
-
-
-struct MHTTPProxyImpl
-{
-
-};
-
-MHTTPProxy::MHTTPProxy()
-	: m_impl(nullptr)
-{
-}
-
-MHTTPProxy::~MHTTPProxy()
-{
-	delete m_impl;
-}
-
-MHTTPProxy& MHTTPProxy::instance()
-{
-	static std::unique_ptr<MHTTPProxy> s_instance(new MHTTPProxy);
-	return *s_instance;
-}
-
-void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
-		uint16_t inPort, bool require_authentication, log_level log)
-{
-
-}
-
-
-
 // 	void set_log_flags(uint32_t log_flags);
 
 // 	using zeep::http::server::log_request;
@@ -114,9 +82,6 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 	uint32_t m_log_flags;
 // 	// zeep::http::authentication_validation_base *m_proxy_authentication = nullptr;
 
-
-
-
 // using namespace boost::posix_time;
 
 // class proxy_connection;
@@ -139,10 +104,10 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 	}
 
 // 	void start();
-	
+
 // 	boost::asio::ip::tcp::socket& get_socket() { return m_socket; }
 // 	static uint32_t connection_count() { return s_connection_count; }
-	
+
 //   private:
 
 // 	enum reply_flag { rf_none, rf_part, rf_last_part, rf_unauth, rf_error, rf_connect };
@@ -449,7 +414,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		m_proxy->log_error(ec);
 // 		m_socket.close();
 // 	}
-// 	else 
+// 	else
 // 	{
 // 		shared_ptr<proxy_connection> self(shared_from_this());
 
@@ -489,7 +454,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // void proxy_connection::send_reply(zh::reply& reply, reply_flag rf)
 // {
 // 	string client;
-	
+
 // 	try		// asking for the remote endpoint address failed sometimes
 // 			// causing aborting exceptions, so I moved it here.
 // 	{
@@ -520,7 +485,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // {
 // 	if (sInstance)
 // 		sInstance->stop();
-	
+
 // 	sInstance.reset(new MHTTPProxy(inConnection, require_authentication, log));
 // 	sInstance->listen(inPort);
 // }
@@ -537,7 +502,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		});
 // 		set_authenticator(m_proxy_authentication, false);
 // 	}
-	
+
 // #if DEBUG
 // 	set_log_flags(e_log_request | e_log_debug);
 // #endif
@@ -576,7 +541,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // void MHTTPProxy::status(const zeep::http::request& request, const zh::scope& scope, zeep::http::reply& reply)
 // {
 // 	// put the http headers in the scope
-	
+
 // 	zh::scope sub(scope);
 // 	vector<zh::object> headers;
 // 	for (const zh::header& h : request.headers)
@@ -584,7 +549,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		zh::object header;
 // 		header["name"] = h.name;
 // 		header["value"] = h.value;
-// 		headers.push_back(header);	
+// 		headers.push_back(header);
 // 	}
 // 	sub.put("headers", headers);
 
@@ -606,7 +571,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 	stats.push_back(connectioncount);
 
 // 	sub.put("stats", stats);
-	
+
 // 	create_reply_from_template("status.html", sub, reply);
 // }
 
@@ -635,7 +600,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 	mrsrc::rsrc rsrc(string("templates/") + file);
 // 	if (not rsrc)
 // 		throw runtime_error("missing template");
-	
+
 // 	struct membuf : public std::streambuf
 // 	{
 // 		membuf(char* dict, size_t length)
@@ -689,7 +654,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 
 // 		string data(rsrc.data(), rsrc.size());
 // 		string mimetype = "text/plain";
-	
+
 // 		if (file.extension() == ".css")
 // 			mimetype = "text/css";
 // 		else if (file.extension() == ".js")
@@ -704,19 +669,19 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 			mimetype = "text/xml";
 // 		else if (file.extension() == ".xhtml")
 // 			mimetype = "application/xhtml+xml";
-	
+
 // 		reply.set_content(data, mimetype);
-	
+
 // 		local_date_time t(local_sec_clock::local_time(time_zone_ptr()));
 // 		local_time_facet* lf(new local_time_facet("%a, %d %b %Y %H:%M:%S GMT"));
-		
+
 // 		stringstream s;
 // 		s.imbue(std::locale(std::cout.getloc(), lf));
-		
+
 // 		ptime pt = from_time_t(std::filesystem::last_write_time(gExecutablePath));
 // 		local_date_time t2(pt, time_zone_ptr());
 // 		s << t2;
-	
+
 // 		reply.set_header("Last-Modified", s.str());
 // 	}
 // }
@@ -727,7 +692,7 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		*m_log << "Starting proxy service" << endl;
 
 // 	string address = "0.0.0.0";
-	
+
 // 	m_acceptor.reset(new boost::asio::ip::tcp::acceptor(m_connection->get_io_service()));
 // 	m_new_connection.reset(new proxy_connection(m_connection, shared_from_this()));
 
@@ -769,13 +734,13 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		{
 // 			string referer = request.get_header("Referer");
 // 			if (referer.empty()) referer = "-";
-		
+
 // 			string userAgent = request.get_header("User-Agent");
 // 			if (userAgent.empty()) userAgent = "-";
-		
+
 // 			using namespace boost::local_time;
 // 			local_date_time start_local(request.timestamp(), time_zone_ptr());
-	
+
 // 			*m_log << client << ' '
 // 				 << "-" << ' '
 // 				 << "-" << ' '
@@ -791,9 +756,9 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		if (m_log_flags & e_log_debug)
 // 		{
 // 			request.debug(*m_log);
-		
+
 // 			*m_log << endl;
-		
+
 // 			reply.debug(*m_log);
 
 // 			*m_log << endl;
@@ -826,4 +791,33 @@ void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 // 		*m_log << "ERROR: " << ec.message() << endl;
 // 	}
 // }
+
+// --------------------------------------------------------------------
+
+struct MHTTPProxyImpl
+{
+};
+
+// --------------------------------------------------------------------
+
+MHTTPProxy::MHTTPProxy()
+	: m_impl(nullptr)
+{
+}
+
+MHTTPProxy::~MHTTPProxy()
+{
+	delete m_impl;
+}
+
+MHTTPProxy &MHTTPProxy::instance()
+{
+	static std::unique_ptr<MHTTPProxy> s_instance(new MHTTPProxy);
+	return *s_instance;
+}
+
+void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
+	uint16_t inPort, bool require_authentication, log_level log)
+{
+}
 

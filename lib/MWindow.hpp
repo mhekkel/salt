@@ -75,9 +75,6 @@ class MWindow : public MView, public MHandler
 
 	virtual bool			ProcessCommand(uint32_t inCommand, const MMenu* inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
-	MEventOut<void(MWindow*)>
-							eWindowClosed;
-
 	virtual void			ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	virtual void			ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
