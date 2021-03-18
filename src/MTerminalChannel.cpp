@@ -157,7 +157,7 @@ bool MSshTerminalChannel::IsOpen() const
 
 void MSshTerminalChannel::Disconnect(bool disconnectProxy)
 {
-	mChannel->get_connection().disconnect();
+	mChannel->get_connection().close();
 }
 
 void MSshTerminalChannel::SendData(const string &inData)

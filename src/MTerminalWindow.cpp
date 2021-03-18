@@ -102,7 +102,7 @@ bool MSshTerminalWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, 
 		case cmd_ProxySOCKS:
 		case cmd_ProxyHTTP:
 		case cmd_Rekey:
-			outEnabled = mConnection->is_connected();
+			outEnabled = mConnection->is_open();
 			break;
 
 		default:
