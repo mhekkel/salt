@@ -8,18 +8,22 @@
 // #include <fstream>
 
 // #include <boost/algorithm/string.hpp>
-// #include <boost/date_time/posix_time/posix_time.hpp>
-// #include <boost/date_time/local_time/local_time.hpp>
+#include <boost/date_time/local_time/local_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 // #include <boost/asio/spawn.hpp>
 
-#include <pinch/channel.hpp>
+#include <pinch/port_forwarding.hpp>
 
-// // #include <zeep/http/webapp.hpp>
-// #include <zeep/http/message-parser.hpp>
-// #include <zeep/crypto.hpp>
+#include <zeep/crypto.hpp>
+#include <zeep/http/html-controller.hpp>
+#include <zeep/http/message-parser.hpp>
+#include <zeep/http/security.hpp>
+#include <zeep/http/server.hpp>
+#include <zeep/http/error-handler.hpp>
+#include <zeep/http/login-controller.hpp>
 
 #include "MHTTPProxy.hpp"
-// #include "MPreferences.hpp"
+#include "MPreferences.hpp"
 // #include "mrsrc.hpp"
 // #include "MApplication.hpp"
 
@@ -39,11 +43,10 @@
 // using namespace std;
 // using namespace pinch;
 
-// namespace ip = boost::asio::ip;
-// namespace zh = zeep::http;
-// namespace el = zeep::el;
+using tcp = boost::asio::ip::tcp;
+namespace zh = zeep::http;
 // namespace ba = boost::algorithm;
-// namespace fs = std::filesystem;
+namespace fs = std::filesystem;
 
 // 	void set_log_flags(uint32_t log_flags);
 
@@ -76,58 +79,91 @@
 // 	static std::shared_ptr<MHTTPProxy> sInstance;
 
 // 	std::shared_ptr<pinch::basic_connection> m_connection;
-// 	std::shared_ptr<proxy_connection> m_new_connection;
+// 	std::shared_ptr<proxy_controller> m_new_connection;
 // 	std::shared_ptr<std::ostream> m_log;
 // 	std::shared_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 // 	uint32_t m_log_flags;
 // 	// zeep::http::authentication_validation_base *m_proxy_authentication = nullptr;
 
-// using namespace boost::posix_time;
+using namespace boost::posix_time;
 
-// class proxy_connection;
+class proxy_controller;
 
-// // --------------------------------------------------------------------
+// --------------------------------------------------------------------
 
-// class proxy_connection : public enable_shared_from_this<proxy_connection>
-// {
-//   public:
-// 	proxy_connection(basic_connection* ssh_connection, shared_ptr<MHTTPProxy> proxy)
-// 		: m_proxy(proxy), m_socket(ssh_connection->get_io_service()), m_strand(ssh_connection->get_io_service())
-// 	{
-// 	}
+class MHTTPProxyImpl
+{
+  public:
+	MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnection, uint16_t inPort,
+		bool require_authentication, const std::string &user, const std::string &password, log_level log);
 
-// 	~proxy_connection()
-// 	{
-// 		if (m_channel)
-// 			m_channel->close();
-// 		--s_connection_count;
-// 	}
+	~MHTTPProxyImpl();
+
+  private:
+	zeep::http::simple_user_service m_user_service;
+
+	std::shared_ptr<pinch::basic_connection> m_connection;
+	std::unique_ptr<zeep::http::server> m_server;
+	std::thread m_io_thread;
+};
+
+// --------------------------------------------------------------------
+
+// --------------------------------------------------------------------
+
+class proxy_controller : public zeep::http::html_controller, public std::enable_shared_from_this<proxy_controller>
+{
+  public:
+	proxy_controller(std::shared_ptr<pinch::basic_connection> ssh_connection)
+		: m_connection(ssh_connection)
+	{
+		mount_get("admin", &proxy_controller::handle_admin);
+	}
+
+	~proxy_controller()
+	{
+		// if (m_channel)
+		// 	m_channel->close();
+		// --s_connection_count;
+	}
+
+	void handle_admin(const zeep::http::request& req, const zeep::http::scope& scope, zeep::http::reply& rep)
+    {
+        get_template_processor().create_reply_from_template("templates/status.html", scope, rep);
+    }
 
 // 	void start();
 
-// 	boost::asio::ip::tcp::socket& get_socket() { return m_socket; }
+// 	boost::asio::ip::tcp::socket &get_socket() { return m_socket; }
 // 	static uint32_t connection_count() { return s_connection_count; }
 
 //   private:
-
-// 	enum reply_flag { rf_none, rf_part, rf_last_part, rf_unauth, rf_error, rf_connect };
+// 	enum class reply_flag
+// 	{
+// 		none,
+// 		part,
+// 		last_part,
+// 		unauth,
+// 		error,
+// 		connect
+// 	};
 
 // 	void handle_connect();
 // 	void handle_request();
 
-// 	void handle_read_request(const boost::system::error_code& ec);
-// 	void handle_open_channel(const boost::system::error_code& ec, bool connect);
-// 	void handle_wrote_request(const boost::system::error_code& ec, shared_ptr<boost::asio::streambuf>);
-// 	void handle_read_reply_header(const boost::system::error_code& ec);
-// 	void handle_read_reply_content(const boost::system::error_code& ec);
-// 	void handle_wrote_reply(const boost::system::error_code& ec, shared_ptr<boost::asio::streambuf>, reply_flag rf);
+// 	void handle_read_request(const boost::system::error_code &ec);
+// 	void handle_open_channel(const boost::system::error_code &ec, bool connect);
+// 	void handle_wrote_request(const boost::system::error_code &ec, std::shared_ptr<boost::asio::streambuf>);
+// 	void handle_read_reply_header(const boost::system::error_code &ec);
+// 	void handle_read_reply_content(const boost::system::error_code &ec);
+// 	void handle_wrote_reply(const boost::system::error_code &ec, std::shared_ptr<boost::asio::streambuf>, reply_flag rf);
 
-// 	void handle_error(const boost::system::error_code& ec, zh::status_type err);
+// 	void handle_error(const boost::system::error_code &ec, zeep::http::status_type err);
 // 	void send_error_reply(zh::status_type err);
-// 	void send_reply(zh::reply& reply, reply_flag rf);
+// 	void send_reply(zh::reply &reply, reply_flag rf);
 
-// 	template<class SocketFrom, class SocketTo>
-// 	void connect_copy(SocketFrom& from, SocketTo& to, boost::asio::yield_context yield)
+// 	template <class SocketFrom, class SocketTo>
+// 	void connect_copy(SocketFrom &from, SocketTo &to, boost::asio::yield_context yield)
 // 	{
 // 		char data[1024];
 // 		boost::system::error_code ec;
@@ -140,88 +176,92 @@
 // 		}
 // 	}
 
-// 	shared_ptr<MHTTPProxy> m_proxy;
+// 	// std::shared_ptr<MHTTPProxy> m_proxy;
+	std::shared_ptr<pinch::basic_connection> m_connection;
 
 // 	boost::asio::streambuf m_request_buffer;
 // 	zh::request_parser m_request_parser;
-// 	zh::request m_request;
-// 	string m_request_line;
+// 	// zh::request m_request;
+// 	std::string m_request_line;
 
 // 	boost::asio::streambuf m_reply_buffer;
-// 	zh::reply m_reply;
+// 	// zh::reply m_reply;
 // 	zh::reply_parser m_reply_parser;
 
-// 	shared_ptr<forwarding_channel> m_channel;
-// 	boost::asio::ip::tcp::socket m_socket;
-// 	boost::asio::io_context::strand m_strand;
+// 	// std::shared_ptr<pinch::forwarding_channel> m_channel;
+// 	tcp::socket m_socket;
+// 	// boost::asio::io_context::strand m_strand;
 
 // 	static uint32_t s_connection_count;
-// };
+};
 
-// uint32_t proxy_connection::s_connection_count;
+// uint32_t proxy_controller::s_connection_count;
 
-// void proxy_connection::start()
+// void proxy_controller::start()
 // {
 // 	++s_connection_count;
 // 	boost::asio::async_read(m_socket, m_request_buffer, boost::asio::transfer_at_least(1),
-// 		std::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
+// 		std::bind(&proxy_controller::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
 // }
 
-// void proxy_connection::handle_read_request(const boost::system::error_code& ec)
+// void proxy_controller::handle_read_request(const boost::system::error_code &ec)
 // {
 // 	if (ec)
 // 	{
-// 		m_proxy->log_error(ec);
+// 		// m_proxy->log_error(ec);
 // 		m_socket.close();
 // 	}
 // 	else if (m_request_buffer.in_avail() == 0)
 // 	{
 // 		boost::asio::async_read(m_socket, m_request_buffer, boost::asio::transfer_at_least(1),
-// 			std::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_controller::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // 	else
 // 	{
 // 		try
 // 		{
-// 			boost::tribool result = m_request_parser.parse(m_request, m_request_buffer);
+// 			boost::tribool result = m_request_parser.parse(m_request_buffer);
 
-// 			if (not result)	// error in parser
+// 			if (not result) // error in parser
 // 				send_error_reply(zh::bad_request);
 // 			else if (result)
 // 			{
 // 				m_request_parser.reset();
 
-// 				// save the original request line before it is rewritten by the proxy for logging purposes
-// 				m_request_line = m_request.get_request_line();
+// 				auto request = m_request_parser.get_request();
 
-// 				if (m_request.method == zh::method_type::CONNECT)
+// 				// save the original request line before it is rewritten by the proxy for logging purposes
+// 				const auto &[major, minor] = request.get_version();
+// 				m_request_line = request.get_method() + request.get_uri() + "HTTP/" + std::to_string(major) + '.' + std::to_string(minor);
+
+// 				if (request.get_method() == "CONNECT")
 // 				{
-// 					m_proxy->validate(m_request);
+// 					// m_proxy->validate(request);
 // 					handle_connect();
 // 				}
-// 				else if (m_request.method == zh::method_type::OPTIONS or
-// 					m_request.method == zh::method_type::HEAD or
-// 					m_request.method == zh::method_type::POST or
-// 					m_request.method == zh::method_type::GET or
-// 					m_request.method == zh::method_type::PUT or
-// 					m_request.method == zh::method_type::DELETE or
-// 					m_request.method == zh::method_type::TRACE)
+// 				else if (request.get_method() == "OPTIONS" or
+// 						 request.get_method() == "HEAD" or
+// 						 request.get_method() == "POST" or
+// 						 request.get_method() == "GET" or
+// 						 request.get_method() == "PUT" or
+// 						 request.get_method() == "DELETE" or
+// 						 request.get_method() == "TRACE")
 // 				{
 // 					handle_request();
 // 				}
 // 				else
 // 				{
 // 					zh::reply reply;
-// 					m_proxy->create_error_reply(m_request, zh::method_not_allowed, "Invalid method in request", reply);
+// 					// m_proxy->create_error_reply(m_request, zh::method_not_allowed, "Invalid method in request", reply);
 // 					reply.set_header("Allow", "CONNECT, OPTIONS, HEAD, POST, GET, PUT, DELETE, TRACE");
-// 					send_reply(reply, rf_error);
+// 					send_reply(reply, reply_flag::error);
 // 				}
 // 			}
 // 			else
 // 				boost::asio::async_read(m_socket, m_request_buffer, boost::asio::transfer_at_least(1),
-// 					std::bind(&proxy_connection::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
+// 					std::bind(&proxy_controller::handle_read_request, shared_from_this(), boost::asio::placeholders::error));
 // 		}
-// 		catch (zh::authorization_stale_exception& e)
+// 		catch (zh::authorization_stale_exception &e)
 // 		{
 // 			zh::reply reply;
 // 			m_proxy->create_unauth_reply(m_request, true, kSaltProxyRealm, reply);
@@ -229,7 +269,7 @@
 
 // 			send_reply(reply, rf_unauth);
 // 		}
-// 		catch (zh::unauthorized_exception& e)
+// 		catch (zh::unauthorized_exception &e)
 // 		{
 // 			zh::reply reply;
 // 			m_proxy->create_unauth_reply(m_request, false, kSaltProxyRealm, reply);
@@ -237,11 +277,11 @@
 
 // 			send_reply(reply, rf_unauth);
 // 		}
-// 		catch (boost::system::system_error& e)
+// 		catch (boost::system::system_error &e)
 // 		{
 // 			handle_error(e.code(), zh::internal_server_error);
 // 		}
-// 		catch (exception& e)
+// 		catch (exception &e)
 // 		{
 // 			m_proxy->log_error(e);
 // 			m_socket.close();
@@ -249,9 +289,9 @@
 // 	}
 // }
 
-// void proxy_connection::handle_connect()
+// void proxy_controller::handle_connect(zh::request &req)
 // {
-// 	string host = m_request.uri;
+// 	std::string host = request.uri;
 // 	uint16_t port = 443;
 
 // 	string::size_type cp = host.find(':');
@@ -264,10 +304,10 @@
 // 	if (m_channel)
 // 		m_channel->close();
 // 	m_channel.reset(new forwarding_channel(m_proxy->get_connection(), host, port));
-// 	m_channel->async_open(std::bind(&proxy_connection::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, true));
+// 	m_channel->async_open(std::bind(&proxy_controller::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, true));
 // }
 
-// void proxy_connection::handle_request()
+// void proxy_controller::handle_request()
 // {
 // 	string host = m_request.get_header("Host");
 // 	uint16_t port = 80;
@@ -312,20 +352,20 @@
 
 // 			m_proxy->validate(m_request);
 
-// 			if (m_channel and m_channel->forwards_to(host, port))	// reuse the open channel
+// 			if (m_channel and m_channel->forwards_to(host, port)) // reuse the open channel
 // 				handle_open_channel(boost::system::error_code(), false);
 // 			else
 // 			{
 // 				if (m_channel)
 // 					m_channel->close();
 // 				m_channel.reset(new forwarding_channel(m_proxy->get_connection(), host, port));
-// 				m_channel->async_open(std::bind(&proxy_connection::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, false));
+// 				m_channel->async_open(std::bind(&proxy_controller::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, false));
 // 			}
 // 		}
 // 	}
 // }
 
-// void proxy_connection::handle_open_channel(const boost::system::error_code& ec, bool connect)
+// void proxy_controller::handle_open_channel(const boost::system::error_code &ec, bool connect)
 // {
 // 	if (ec)
 // 		handle_error(ec, zh::bad_gateway);
@@ -343,12 +383,11 @@
 // 		iostream out(buffer.get());
 // 		out << m_request;
 
-// 		boost::asio::async_write(*m_channel, *buffer, std::bind(&proxy_connection::handle_wrote_request, shared_from_this(),
-// 			boost::asio::placeholders::error, buffer));
+// 		boost::asio::async_write(*m_channel, *buffer, std::bind(&proxy_controller::handle_wrote_request, shared_from_this(), boost::asio::placeholders::error, buffer));
 // 	}
 // }
 
-// void proxy_connection::handle_wrote_request(const boost::system::error_code& ec, shared_ptr<boost::asio::streambuf>)
+// void proxy_controller::handle_wrote_request(const boost::system::error_code &ec, shared_ptr<boost::asio::streambuf>)
 // {
 // 	if (ec)
 // 		handle_error(ec, zh::bad_gateway);
@@ -357,18 +396,18 @@
 // 		m_reply_parser.reset();
 
 // 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 			std::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_controller::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // }
 
-// void proxy_connection::handle_read_reply_header(const boost::system::error_code& ec)
+// void proxy_controller::handle_read_reply_header(const boost::system::error_code &ec)
 // {
 // 	if (ec)
 // 		handle_error(ec, zh::bad_gateway);
 // 	else if (m_reply_buffer.in_avail() == 0)
 // 	{
 // 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 			std::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_controller::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // 	else
 // 	{
@@ -380,11 +419,11 @@
 // 			send_error_reply(zh::bad_gateway);
 // 		else
 // 			boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 				std::bind(&proxy_connection::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 				std::bind(&proxy_controller::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // }
 
-// void proxy_connection::handle_read_reply_content(const boost::system::error_code& ec)
+// void proxy_controller::handle_read_reply_content(const boost::system::error_code &ec)
 // {
 // 	if (ec)
 // 	{
@@ -394,7 +433,7 @@
 // 	else if (m_reply_buffer.in_avail() == 0)
 // 	{
 // 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
-// 			std::bind(&proxy_connection::handle_read_reply_content, shared_from_this(), boost::asio::placeholders::error));
+// 			std::bind(&proxy_controller::handle_read_reply_content, shared_from_this(), boost::asio::placeholders::error));
 // 	}
 // 	else
 // 	{
@@ -403,11 +442,11 @@
 // 		boost::tribool result = m_reply_parser.parse_content(m_reply, m_reply_buffer, *sink);
 
 // 		boost::asio::async_write(m_socket, *sink,
-// 			std::bind(&proxy_connection::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, sink, result ? rf_last_part : rf_part));
+// 			std::bind(&proxy_controller::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, sink, result ? rf_last_part : rf_part));
 // 	}
 // }
 
-// void proxy_connection::handle_wrote_reply(const boost::system::error_code& ec, shared_ptr<boost::asio::streambuf>, reply_flag rf)
+// void proxy_controller::handle_wrote_reply(const boost::system::error_code &ec, shared_ptr<boost::asio::streambuf>, reply_flag rf)
 // {
 // 	if (ec)
 // 	{
@@ -416,26 +455,26 @@
 // 	}
 // 	else
 // 	{
-// 		shared_ptr<proxy_connection> self(shared_from_this());
+// 		shared_ptr<proxy_controller> self(shared_from_this());
 
 // 		switch (rf)
 // 		{
-// 		case rf_part:
-// 			handle_read_reply_content(ec);
-// 			break;
-// 		case rf_connect:
-// 			boost::asio::spawn(m_strand, [self](boost::asio::yield_context yield) { self->connect_copy(self->m_socket, *self->m_channel, yield); });
-// 			boost::asio::spawn(m_strand, [self](boost::asio::yield_context yield) { self->connect_copy(*self->m_channel, self->m_socket, yield); });
-// 			break;
-// 		default:
-// 			if (m_request.keep_alive() and m_reply.keep_alive())
-// 				handle_read_request(ec);
-// 			break;
+// 			case rf_part:
+// 				handle_read_reply_content(ec);
+// 				break;
+// 			case rf_connect:
+// 				boost::asio::spawn(m_strand, [self](boost::asio::yield_context yield) { self->connect_copy(self->m_socket, *self->m_channel, yield); });
+// 				boost::asio::spawn(m_strand, [self](boost::asio::yield_context yield) { self->connect_copy(*self->m_channel, self->m_socket, yield); });
+// 				break;
+// 			default:
+// 				if (m_request.keep_alive() and m_reply.keep_alive())
+// 					handle_read_request(ec);
+// 				break;
 // 		}
 // 	}
 // }
 
-// void proxy_connection::handle_error(const boost::system::error_code& ec, zh::status_type err)
+// void proxy_controller::handle_error(const boost::system::error_code &ec, zh::status_type err)
 // {
 // 	m_proxy->log_error(ec);
 
@@ -444,19 +483,19 @@
 // 	send_reply(reply, rf_error);
 // }
 
-// void proxy_connection::send_error_reply(zh::status_type err)
+// void proxy_controller::send_error_reply(zh::status_type err)
 // {
 // 	zh::reply reply;
 // 	m_proxy->create_error_reply(m_request, err, "", reply);
 // 	send_reply(reply, rf_error);
 // }
 
-// void proxy_connection::send_reply(zh::reply& reply, reply_flag rf)
+// void proxy_controller::send_reply(zh::reply &reply, reply_flag rf)
 // {
 // 	string client;
 
-// 	try		// asking for the remote endpoint address failed sometimes
-// 			// causing aborting exceptions, so I moved it here.
+// 	try // asking for the remote endpoint address failed sometimes
+// 		// causing aborting exceptions, so I moved it here.
 // 	{
 // 		boost::asio::ip::address addr = m_socket.remote_endpoint().address();
 // 		client = std::to_string(addr);
@@ -473,10 +512,10 @@
 // 	out << reply;
 
 // 	(void)boost::asio::async_write(m_socket, *buffer,
-// 		std::bind(&proxy_connection::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, buffer, rf));
+// 		std::bind(&proxy_controller::handle_wrote_reply, shared_from_this(), boost::asio::placeholders::error, buffer, rf));
 // }
 
-// // --------------------------------------------------------------------
+// --------------------------------------------------------------------
 
 // shared_ptr<MHTTPProxy> MHTTPProxy::sInstance;
 // const string kSaltProxyRealm = "Salt HTTP Proxy";
@@ -567,7 +606,7 @@
 
 // 	zh::object connectioncount;
 // 	connectioncount["name"] = "Connection Count";
-// 	connectioncount["value"] = proxy_connection::connection_count();
+// 	connectioncount["value"] = proxy_controller::connection_count();
 // 	stats.push_back(connectioncount);
 
 // 	sub.put("stats", stats);
@@ -694,7 +733,7 @@
 // 	string address = "0.0.0.0";
 
 // 	m_acceptor.reset(new boost::asio::ip::tcp::acceptor(m_connection->get_io_service()));
-// 	m_new_connection.reset(new proxy_connection(m_connection, shared_from_this()));
+// 	m_new_connection.reset(new proxy_controller(m_connection, shared_from_this()));
 
 // 	boost::asio::ip::tcp::resolver resolver(m_connection->get_io_service());
 // 	boost::asio::ip::tcp::resolver::query query(address, std::to_string(port));
@@ -718,7 +757,7 @@
 // 	if (not ec)
 // 	{
 // 		m_new_connection->start();
-// 		m_new_connection.reset(new proxy_connection(m_connection, shared_from_this()));
+// 		m_new_connection.reset(new proxy_controller(m_connection, shared_from_this()));
 // 		m_acceptor->async_accept(m_new_connection->get_socket(),
 // 			std::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
 // 	}
@@ -794,9 +833,71 @@
 
 // --------------------------------------------------------------------
 
-struct MHTTPProxyImpl
+class http_proxy_error_handler : public zeep::http::error_handler
 {
+  public:
+	http_proxy_error_handler() : error_handler("not-found.html") {}
+
+	virtual bool create_error_reply(const zeep::http::request& req, std::exception_ptr eptr, zeep::http::reply& reply);
 };
+
+bool http_proxy_error_handler::create_error_reply(const zeep::http::request& req, std::exception_ptr eptr, zeep::http::reply& reply)
+{
+	bool result = false;
+
+	try
+	{
+		if (eptr)
+			std::rethrow_exception(eptr);
+	}
+	catch (const boost::system::error_code& ec)
+	{
+		result = zeep::http::error_handler::create_error_reply(req, zeep::http::internal_server_error, ec.message(), reply);
+	}
+	catch (const zeep::http::status_type& s)
+	{
+		if (s == zeep::http::not_found)
+			result = zeep::http::error_handler::create_error_reply(req, s, zeep::http::get_status_description(s), reply);
+	}
+
+	return result;
+}
+
+// --------------------------------------------------------------------
+
+MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnection, uint16_t inPort,
+	bool require_authentication, const std::string &user, const std::string &password, log_level log)
+	: m_user_service({ { user, password, { "PROXY_USER" } } })
+	, m_connection(inConnection)
+{
+	std::string secret = zeep::encode_base64(zeep::random_hash());
+	auto sc = new zeep::http::security_context(secret, m_user_service, not require_authentication);
+
+	sc->add_rule("/proxy", "PROXY_USER");
+	sc->add_rule("/", {});
+
+	m_server.reset(new zeep::http::server(sc, ""));
+
+	m_server->add_error_handler(new http_proxy_error_handler());
+
+	m_server->set_template_processor(new zeep::http::rsrc_based_html_template_processor(""));
+
+	m_server->add_controller(new zeep::http::login_controller());
+	m_server->add_controller(new proxy_controller(m_connection));
+
+	m_server->bind("localhost", inPort);
+
+	m_io_thread = std::thread([this]() { m_server->run(4); });
+}
+
+MHTTPProxyImpl::~MHTTPProxyImpl()
+{
+	if (m_server)
+		m_server->stop();
+	
+	if (m_io_thread.joinable())
+		m_io_thread.join();
+}
 
 // --------------------------------------------------------------------
 
@@ -819,5 +920,7 @@ MHTTPProxy &MHTTPProxy::instance()
 void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 	uint16_t inPort, bool require_authentication, log_level log)
 {
+	auto user = Preferences::GetString("http-proxy-user", "");
+	auto password = Preferences::GetString("http-proxy-password", "");
+	m_impl = new MHTTPProxyImpl(inConnection, inPort, require_authentication, user, password, log);
 }
-
