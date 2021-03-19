@@ -136,6 +136,7 @@ RESOURCES = \
 	close.png \
 	version.rc \
 	templates \
+	css \
 	salt.desktop \
 	Dialogs \
 	strings.xml.nl \

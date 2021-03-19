@@ -22,9 +22,6 @@
 /* Define to 1 if CRYPTOPP is found */
 /* #undef HAVE_CRYPTOPP */
 
-/* define if the compiler supports basic C++17 syntax */
-#define HAVE_CXX17 1
-
 /* Define if you have /dev/fd */
 /* #undef HAVE_DEV_FD */
 

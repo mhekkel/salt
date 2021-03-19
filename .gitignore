@@ -15,4 +15,4 @@ msvc/x64
 msvc/salt.vcxproj.user
 msvc/MLib/Debug
 msvc/MWinLib/Debug
-
+lib/MConfig.hpp.in~

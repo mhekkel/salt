@@ -1,5 +1,5 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:z="http://proxy.hekkelman.com/ml"
+	xmlns:z="http://www.hekkelman.com/libzeep/m2"
 	xml:lang="en" lang="en">
 <head>
     <title>Status</title>
@@ -9,11 +9,11 @@
     <meta name="generator" content="Japi" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
-	<link rel="stylesheet" type="text/css" href="style.css" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 <body>
 	<div id="main">
-		<p>Hello, ${username ? username : "world"}!</p>
+		<p>Hello, <span z:text="${username ? username : 'world'}"></span>!</p>
 	
 		<table cellspacing="0" cellpadding="0" class="list">
 			<caption>Proxy Statistics</caption>
@@ -22,12 +22,10 @@
 					<th>Name</th>
 					<th>Value</th>
 				</tr>
-				<z:iterate collection="stats" var="stat">
-					<tr>
-						<td>${stat.name}</td>
-						<td>${stat.value}</td>
-					</tr>
-				</z:iterate>
+				<tr z:each="stat: ${stats}">
+					<td z:text="${stat.name}"></td>
+					<td z:text="${stat.value}"></td>
+				</tr>
 			</tbody>
 		</table>
 	
@@ -38,12 +36,10 @@
 					<th>Name</th>
 					<th>Value</th>
 				</tr>
-				<z:iterate collection="headers" var="header">
-					<tr>
-						<td>${header.name}</td>
-						<td>${header.value}</td>
-					</tr>
-				</z:iterate>
+				<tr z:each="header: ${headers}">
+					<td z:text="${header.name}"></td>
+					<td z:text="${header.value}"></td>
+				</tr>
 			</tbody>
 		</table>
 	</div>
