@@ -6,8 +6,8 @@
 #include "MSalt.hpp"
 
 #include <boost/asio/awaitable.hpp>
-#include <boost/asio/detached.hpp>
 #include <boost/asio/co_spawn.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read_until.hpp>
@@ -23,39 +23,26 @@
 #include <pinch/port_forwarding.hpp>
 
 #include <zeep/crypto.hpp>
+#include <zeep/http/error-handler.hpp>
 #include <zeep/http/html-controller.hpp>
+#include <zeep/http/login-controller.hpp>
 #include <zeep/http/message-parser.hpp>
 #include <zeep/http/security.hpp>
 #include <zeep/http/server.hpp>
-#include <zeep/http/error-handler.hpp>
-#include <zeep/http/login-controller.hpp>
 
+#include "MApplication.hpp"
+#include "MError.hpp"
 #include "MHTTPProxy.hpp"
 #include "MPreferences.hpp"
-// #include "mrsrc.hpp"
-// #include "MApplication.hpp"
 
-// #if defined(_MSC_VER)
-
-// #define BOOST_LIB_NAME boost_coroutine
-
-// // tell the auto-link code to select a dll when required:
-// #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_WAVE_DYN_LINK)
-// #define BOOST_DYN_LINK
-// #endif
-
-// #include <boost/config/auto_link.hpp>
-
-// #endif
-
-// using namespace std;
-// using namespace pinch;
+// --------------------------------------------------------------------
 
 using tcp = boost::asio::ip::tcp;
 namespace zh = zeep::http;
-// namespace ba = boost::algorithm;
 namespace fs = std::filesystem;
 using json = zeep::json::element;
+
+// --------------------------------------------------------------------
 
 // 	void set_log_flags(uint32_t log_flags);
 
@@ -96,12 +83,12 @@ using json = zeep::json::element;
 
 using namespace boost::posix_time;
 
-using boost::asio::ip::tcp;
 using boost::asio::awaitable;
 using boost::asio::co_spawn;
 using boost::asio::detached;
 using boost::asio::redirect_error;
 using boost::asio::use_awaitable;
+using boost::asio::ip::tcp;
 
 class proxy_controller;
 
@@ -119,8 +106,7 @@ class MHTTPProxyImpl
 	zeep::http::simple_user_service m_user_service;
 
 	std::shared_ptr<pinch::basic_connection> m_connection;
-	std::unique_ptr<zeep::http::server> m_server;
-	std::thread m_io_thread;
+	std::unique_ptr<zeep::http::basic_server> m_server;
 };
 
 // --------------------------------------------------------------------
@@ -134,11 +120,6 @@ class proxy_client_channel_connect : public std::enable_shared_from_this<proxy_c
 		: m_socket(std::move(socket))
 		, m_channel(new pinch::forwarding_channel(connection, host, port))
 	{
-	}
-
-	~proxy_client_channel_connect()
-	{
-		std::cerr << "channel closed" << std::endl;
 	}
 
 	void start()
@@ -173,8 +154,7 @@ void proxy_client_channel_connect::handle_open(boost::system::error_code ec)
 	try // asking for the remote endpoint address failed sometimes
 		// causing aborting exceptions, so I moved it here.
 	{
-		boost::asio::ip::address addr = m_socket.remote_endpoint().address();
-		client = addr.to_string();
+		client = m_socket.remote_endpoint().address().to_string();
 	}
 	catch (...)
 	{
@@ -208,83 +188,6 @@ void proxy_client_channel_connect::handle_wrote_reply(boost::system::error_code 
 
 // --------------------------------------------------------------------
 
-// class proxy_client_channel
-// {
-//   public:
-// 	proxy_client_channel(tcp::socket&& socket, std::shared_ptr<pinch::connection> connection,
-// 		const std::string& host, uint16_t port)
-// 		: m_socket(std::move(socket))
-// 		, m_channel(new pinch::forwarding_channel(m_connection, host, port))
-	
-// 	{
-// 		// m_channel.reset(new pinch::forwarding_channel());
-// 		// m_channel->async_open(
-// 		// 	std::bind(&proxy_controller::handle_open_channel, shared_from_this(), boost::asio::placeholders::error, true));
-
-// 	}
-
-//   private:
-// 	tcp::socket m_socket;
-// 	std::shared_ptr<pinch::forwarding_channel> m_channel;
-
-// };
-/*
-struct async_proxy_connect_impl
-{
-	tcp::socket m_socket;
-	std::string m_host;
-	uint16_t m_port;
-	std::shared_ptr<pinch::forwarding_channel> m_channel;
-	zh::request m_request;
-	std::shared_ptr<boost::asio::streambuf> m_reply_buffer;
-
-	std::shared_ptr<boost::asio::streambuf> m_buffer = new boost::asio::streambuf();
-
-	enum { start, opening_channel, read, write } m_state = start;
-
-	template<typename Self>
-	void operator()(Self &self, boost::system::error_code ec = {}, std::size_t bytes_transferred = 0);
-
-};
-
-template<typename Self>
-void async_proxy_connect_impl::operator()(Self &self, boost::system::error_code ec, std::size_t bytes_transferred)
-{
-	if (not ec)
-	{
-		switch (m_state)
-		{
-			case start:
-				m_state = opening_channel;
-				m_channel->async_open(std::move(self));
-				return;
-			
-			case opening_channel:
-				// write the request to the server
-				iostream out(m_buffer.get());
-				out << m_request;
-
-				m_state = write;
-				boost::asio::async_write(*m_channel, *m_buffer, std::move(this));
-				return;
-			
-			case write:
-				m_state = read;
-				boost::asio::async_read(*m_channel, *m_reply_buffer, boost::asio::transfer_at_least(1), std::move(self));
-				return;
-
-
-
-
-		}
-	}
-
-	self.complete(ec);
-}
-*/
-
-// --------------------------------------------------------------------
-
 class proxy_controller : public zeep::http::html_controller, public std::enable_shared_from_this<proxy_controller>
 {
   public:
@@ -297,30 +200,24 @@ class proxy_controller : public zeep::http::html_controller, public std::enable_
 
 	~proxy_controller()
 	{
-		// if (m_channel)
-		// 	m_channel->close();
-		// --s_connection_count;
 	}
 
-
-	bool dispatch_request(tcp::socket& socket, zh::request& req, zh::reply& reply) override
+	bool dispatch_request(tcp::socket &socket, zh::request &req, zh::reply &reply) override
 	{
 		m_socket = &socket;
 		return zh::html_controller::dispatch_request(socket, req, reply);
 	}
 
-	void handle_status(const zeep::http::request& req, const zeep::http::scope& scope, zeep::http::reply& rep)
-    {
+	void handle_status(const zeep::http::request &req, const zeep::http::scope &scope, zeep::http::reply &rep)
+	{
 		// put the http headers in the scope
 
 		zh::scope sub(scope);
 		json headers;
-		for (const auto& h : req.get_headers())
+		for (const auto &h : req.get_headers())
 		{
-			headers.push_back({
-				{ "name", h.name },
-				{ "value", h.value }
-			});
+			headers.push_back({{"name", h.name},
+				{"value", h.value}});
 		}
 		sub.put("headers", headers);
 
@@ -343,57 +240,141 @@ class proxy_controller : public zeep::http::html_controller, public std::enable_
 
 		sub.put("stats", stats);
 
-        get_template_processor().create_reply_from_template("templates/status.html", sub, rep);
-    }
+		get_template_processor().create_reply_from_template("templates/status.html", sub, rep);
+	}
 
 	bool handle_request(zh::request &req, zh::reply &reply) override
 	{
+		bool result = true;
+
 		if (req.get_method() == "CONNECT")
 		{
-			handle_connect(req);
-			return true;
+			std::string host = req.get_uri();
+			uint16_t port = 443;
+
+			auto cp = host.find(':');
+			if (cp != std::string::npos)
+			{
+				port = std::stoi(host.substr(cp + 1));
+				host.erase(cp, std::string::npos);
+			}
+
+			auto p = std::make_shared<proxy_client_channel_connect>(std::move(*m_socket), m_connection, host, port);
+			p->start();
 		}
+		else if (req.get_host() == "proxy.hekkelman.net")
+			result = zh::html_controller::handle_request(req, reply);
+		else
+			co_spawn(m_connection->get_executor(), handle_proxy_requests(req, std::move(*m_socket)), detached);
 
-		if (req.get_host() == "proxy.hekkelman.net")
-			return zh::html_controller::handle_request(req, reply);
-
-		// if (req.get_method() == "OPTIONS" or
-		// 	req.get_method() == "HEAD" or
-		// 	req.get_method() == "POST" or
-		// 	req.get_method() == "GET" or
-		// 	req.get_method() == "PUT" or
-		// 	req.get_method() == "DELETE" or
-		// 	req.get_method() == "TRACE")
-		// {
-		// }
-
-		reply.set_status(zeep::http::status_type::bad_request);
-		reply.set_header("Allow", "CONNECT, OPTIONS, HEAD, POST, GET, PUT, DELETE, TRACE");
-		return true;
+		return result;
 	}
 
-	void handle_connect(zh::request &req)
+	awaitable<void> send_reply(tcp::socket &socket, const zh::reply &reply)
 	{
-		std::string host = req.get_uri();
-		uint16_t port = 443;
+		boost::asio::streambuf buffer;
+		std::ostream out(&buffer);
+		out << reply;
+		co_await boost::asio::async_write(socket, buffer, use_awaitable);
+	}
 
-		auto cp = host.find(':');
-		if (cp != std::string::npos)
+	awaitable<void> handle_proxy_requests(zh::request req, tcp::socket socket)
+	{
+		auto executor = co_await boost::asio::this_coro::executor;
+		for (;;)
 		{
-			port = std::stoi(host.substr(cp + 1));
-			host.erase(cp, std::string::npos);
-		}
+			PRINT(("Calling proxy request"));
+			std::regex re("^(?:http://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?(/.*)?");
+			std::smatch mr;
 
-		auto p = std::make_shared<proxy_client_channel_connect>(std::move(*m_socket), m_connection, host, port);
-		p->start();
+			std::string uri = req.get_uri();
+
+			PRINT(("uri: %s", uri.c_str()));
+
+			if (not std::regex_match(uri, mr, re))
+			{
+				send_reply(socket, zh::reply{zh::bad_request});
+			}
+			else
+			{
+				PRINT(("Valid uri: %s", uri.c_str()));
+
+				std::string host;
+				uint16_t port = 80;
+
+				if (host.empty())
+				{
+					if (mr[3].matched)
+						host = mr[3].str();
+					else
+						host = "localhost";
+
+					if (mr[4].matched)
+						port = std::stoi(mr[4]);
+				}
+				else
+				{
+					auto cp = host.find(':');
+					if (cp != std::string::npos)
+					{
+						port = std::stoi(host.substr(cp + 1));
+						host.erase(cp, std::string::npos);
+					}
+				}
+
+				// drop the username and password... is that OK?
+				req.set_uri(mr[5]);
+
+				// m_proxy->validate(m_request);
+
+				PRINT(("Connect channel: %s:%d", host.c_str(), port));
+
+				// if (not(m_channel and m_channel->forwards_to(host, port)))
+				// {
+					m_channel.reset(new pinch::forwarding_channel(m_connection, host, port));
+					co_await m_channel->async_open(use_awaitable);
+				// }
+
+				boost::asio::streambuf buffer;
+				std::ostream out(&buffer);
+				out << req;
+
+				PRINT(("writing request"));
+
+				co_await boost::asio::async_write(*m_channel, buffer, use_awaitable);
+
+				zeep::http::reply_parser parser;
+				boost::tribool r;
+
+				PRINT(("reading reply"));
+
+				do
+				{
+					auto buf = buffer.prepare(1024);
+					std::size_t n = co_await m_channel->async_read_some(buf, use_awaitable);
+					PRINT(("parsing reply"));
+					r = parser.parse(buffer);
+				} while (not(r or not r));
+
+				std::cerr << "got a reply!" << std::endl;
+
+				auto reply = parser.get_reply();
+
+				out.clear();
+				out << reply;
+				co_await boost::asio::async_write(socket, buffer, use_awaitable);
+
+				PRINT(("done"));
+				// 		boost::asio::async_write(*m_channel, *buffer, std::bind(&proxy_controller::handle_wrote_request, shared_from_this(), boost::asio::placeholders::error, buffer));
+			}
+		}
 	}
 
   private:
 	std::shared_ptr<pinch::basic_connection> m_connection;
-	tcp::socket* m_socket = nullptr;
+	tcp::socket *m_socket = nullptr;
+	std::shared_ptr<pinch::forwarding_channel> m_channel;
 };
-
-
 
 // 	void start();
 
@@ -663,7 +644,26 @@ class proxy_controller : public zeep::http::html_controller, public std::enable_
 
 // void proxy_controller::handle_read_reply_header(const boost::system::error_code &ec)
 // {
-// 	if (ec)
+// 	if (ec)// 	if (ec)
+// 		handle_error(ec, zh::bad_gateway);
+// 	else if (m_reply_buffer.in_avail() == 0)
+// 	{
+// 		boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
+// 			std::bind(&proxy_controller::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 	}
+// 	else
+// 	{
+// 		boost::tribool result = m_reply_parser.parse_header(m_reply, m_reply_buffer);
+
+// 		if (result)
+// 			send_reply(m_reply, m_reply_parser.parsing_content() ? rf_part : rf_last_part);
+// 		else if (not result)
+// 			send_error_reply(zh::bad_gateway);
+// 		else
+// 			boost::asio::async_read(*m_channel, m_reply_buffer, boost::asio::transfer_at_least(1),
+// 				std::bind(&proxy_controller::handle_read_reply_header, shared_from_this(), boost::asio::placeholders::error));
+// 	}
+
 // 		handle_error(ec, zh::bad_gateway);
 // 	else if (m_reply_buffer.in_avail() == 0)
 // 	{
@@ -1097,12 +1097,15 @@ class proxy_controller : public zeep::http::html_controller, public std::enable_
 class http_proxy_error_handler : public zeep::http::error_handler
 {
   public:
-	http_proxy_error_handler() : error_handler("not-found.html") {}
+	http_proxy_error_handler()
+		: error_handler("not-found.html")
+	{
+	}
 
-	virtual bool create_error_reply(const zeep::http::request& req, std::exception_ptr eptr, zeep::http::reply& reply);
+	virtual bool create_error_reply(const zeep::http::request &req, std::exception_ptr eptr, zeep::http::reply &reply);
 };
 
-bool http_proxy_error_handler::create_error_reply(const zeep::http::request& req, std::exception_ptr eptr, zeep::http::reply& reply)
+bool http_proxy_error_handler::create_error_reply(const zeep::http::request &req, std::exception_ptr eptr, zeep::http::reply &reply)
 {
 	bool result = false;
 
@@ -1111,11 +1114,11 @@ bool http_proxy_error_handler::create_error_reply(const zeep::http::request& req
 		if (eptr)
 			std::rethrow_exception(eptr);
 	}
-	catch (const boost::system::error_code& ec)
+	catch (const boost::system::error_code &ec)
 	{
 		result = zeep::http::error_handler::create_error_reply(req, zeep::http::internal_server_error, ec.message(), reply);
 	}
-	catch (const zeep::http::status_type& s)
+	catch (const zeep::http::status_type &s)
 	{
 		if (s == zeep::http::not_found)
 			result = zeep::http::error_handler::create_error_reply(req, s, zeep::http::get_status_description(s), reply);
@@ -1126,9 +1129,29 @@ bool http_proxy_error_handler::create_error_reply(const zeep::http::request& req
 
 // --------------------------------------------------------------------
 
+class MHTTPServer : public zeep::http::basic_server
+{
+  public:
+	MHTTPServer(boost::asio::io_context &io_context, zeep::http::security_context *sctxt)
+		: zeep::http::basic_server(sctxt)
+		, m_io_context(io_context)
+	{
+	}
+
+	boost::asio::io_context &get_io_context() override
+	{
+		return m_io_context;
+	}
+
+  private:
+	boost::asio::io_context &m_io_context;
+};
+
+// --------------------------------------------------------------------
+
 MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnection, uint16_t inPort,
 	bool require_authentication, const std::string &user, const std::string &password, log_level log)
-	: m_user_service({ { user, password, { "PROXY_USER" } } })
+	: m_user_service({{user, password, {"PROXY_USER"}}})
 	, m_connection(inConnection)
 {
 	std::string secret = zeep::encode_base64(zeep::random_hash());
@@ -1137,9 +1160,9 @@ MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnec
 	sc->add_rule("/status", "PROXY_USER");
 	sc->add_rule("/", {});
 
-	m_server.reset(new zeep::http::server(sc, ""));
+	m_server.reset(new MHTTPServer(gApp->get_io_context(), sc));
 
-	m_server->set_allowed_methods({ "GET", "POST", "PUT", "OPTIONS", "HEAD", "DELETE", "CONNECT" });
+	m_server->set_allowed_methods({"GET", "POST", "PUT", "OPTIONS", "HEAD", "DELETE", "CONNECT"});
 
 	m_server->add_error_handler(new http_proxy_error_handler());
 
@@ -1148,18 +1171,13 @@ MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnec
 	m_server->add_controller(new zeep::http::login_controller());
 	m_server->add_controller(new proxy_controller(m_connection));
 
-	m_server->bind("localhost", inPort);
-
-	m_io_thread = std::thread([this]() { m_server->run(1); });
+	m_server->bind("::", inPort);
 }
 
 MHTTPProxyImpl::~MHTTPProxyImpl()
 {
 	if (m_server)
 		m_server->stop();
-	
-	if (m_io_thread.joinable())
-		m_io_thread.join();
 }
 
 // --------------------------------------------------------------------

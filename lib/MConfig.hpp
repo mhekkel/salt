@@ -20,7 +20,7 @@
 /* #undef HAVE_CLOSEFROM */
 
 /* Define to 1 if CRYPTOPP is found */
-/* #undef HAVE_CRYPTOPP */
+#define HAVE_CRYPTOPP 1
 
 /* Define if you have /dev/fd */
 /* #undef HAVE_DEV_FD */
