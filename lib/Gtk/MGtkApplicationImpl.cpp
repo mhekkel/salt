@@ -137,7 +137,7 @@ void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
 				break;
 			}
 
-			g_main_context_invoke_full(context, G_PRIORITY_HIGH,
+			g_main_context_invoke_full(context, G_PRIORITY_DEFAULT,
 			                           &MGtkApplicationImpl::HandleAsyncCallback, ah,
 			                           (GDestroyNotify)&MGtkApplicationImpl::DeleteAsyncHandler);
 		}
