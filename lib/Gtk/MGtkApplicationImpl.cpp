@@ -77,6 +77,8 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 
 int MGtkApplicationImpl::RunEventLoop()
 {
+PRINT(("Main Thread ID = 0x%x", std::this_thread::get_id()));
+
 	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
 
 	// Start processing async tasks
