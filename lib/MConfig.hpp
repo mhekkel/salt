@@ -4,6 +4,9 @@
 /* define if the Boost library is available */
 #define HAVE_BOOST /**/
 
+/* define if the Boost::Coroutine library is available */
+#define HAVE_BOOST_COROUTINE /**/
+
 /* define if the Boost::Date_Time library is available */
 #define HAVE_BOOST_DATE_TIME /**/
 
@@ -12,6 +15,9 @@
 
 /* define if the Boost::PROGRAM_OPTIONS library is available */
 #define HAVE_BOOST_PROGRAM_OPTIONS /**/
+
+/* define if the Boost::Thread library is available */
+#define HAVE_BOOST_THREAD /**/
 
 /* Define to 1 if you have the `closedir' function. */
 #define HAVE_CLOSEDIR 1

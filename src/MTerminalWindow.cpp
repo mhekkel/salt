@@ -77,7 +77,7 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 
 	using namespace std::placeholders;
 
-	mConnection->set_provide_password_callback(std::bind(&MSshTerminalWindow::Password, this), my_executor);
+	mConnection->set_provide_password_callback(boost::asio::bind_executor(my_executor, std::bind(&MSshTerminalWindow::Password, this)));
 	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4), my_executor);
 	mConnection->set_accept_host_key_handler(std::bind(&MSshTerminalWindow::AcceptHostKey, this, _1, _2, _3, _4), my_executor);
 
@@ -166,6 +166,8 @@ bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu,
 
 std::string MSshTerminalWindow::Password()
 {
+PRINT(("Password callback Thread ID = 0x%x", std::this_thread::get_id()));
+
 	std::string result;
 
 	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string& pw) { result = pw; }));
