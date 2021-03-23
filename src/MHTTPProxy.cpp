@@ -5,10 +5,6 @@
 
 #include "MSalt.hpp"
 
-#include <cryptopp/base32.h>
-#include <cryptopp/hmac.h>
-#include <cryptopp/sha.h>
-
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/date_time/local_time/local_time.hpp>

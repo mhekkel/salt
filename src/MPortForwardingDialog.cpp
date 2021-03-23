@@ -52,7 +52,7 @@ bool MPortForwardingDialog::OKClicked()
 		if (m[2].matched)
 			connectPort = std::stoi(m[2]);
 
-		mConnection->forward_port("::", listenPort, m[1], connectPort);
+		mConnection->forward_port(listenPort, m[1], connectPort);
 
 		Preferences::SetString("port-forwarding-host", connect);
 		Preferences::SetString("port-forwarding-port", std::to_string(listenPort));
@@ -88,7 +88,7 @@ bool MSOCKS5ProxyDialog::OKClicked()
 	try
 	{
 		uint16_t listenPort = std::stoi(GetText("listen"));
-		mConnection->forward_socks5("::", listenPort);
+		mConnection->forward_socks5(listenPort);
 		Preferences::SetString("socks5-proxy-port", std::to_string(listenPort));
 		result = true;
 	}
