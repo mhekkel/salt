@@ -10,23 +10,23 @@ AC_INIT([salt], [salt_version], [m.hekkelman@nki.nl])
 
 dnl Switch to a decent C++ compiler, and check if it works.
 AC_LANG(C++)
-# AX_CXX_COMPILE_STDCXX_17([noext])
+AX_CXX_COMPILE_STDCXX_17([noext])
 
-AX_CHECK_COMPILE_FLAG([-std=c++20],
-	[
-		CXX="$CXX -std=c++20"
-	],
-	[AC_MSG_ERROR("Compiler does not support c++20")],
-	[])
+dnl AX_CHECK_COMPILE_FLAG([-std=c++20],
+dnl 	[
+dnl 		CXX="$CXX -std=c++20"
+dnl 	],
+dnl 	[AC_MSG_ERROR("Compiler does not support c++20")],
+dnl 	[])
+dnl 
+dnl AX_CHECK_COMPILE_FLAG([-fcoroutines],
+dnl 	[
+dnl 		CXXFLAGS="$CXXFLAGS -fcoroutines"
+dnl 	] , , [-Werror])
 
 AX_CHECK_COMPILE_FLAG([-fstandalone-debug],
 	[
 		CXXFLAGS="$CXXFLAGS -fstandalone-debug"
-	] , , [-Werror])
-
-AX_CHECK_COMPILE_FLAG([-fcoroutines],
-	[
-		CXXFLAGS="$CXXFLAGS -fcoroutines"
 	] , , [-Werror])
 
 AC_CONFIG_SRCDIR([src/MSaltApp.cpp])
