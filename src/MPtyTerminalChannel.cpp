@@ -3,40 +3,40 @@
 
 #include "MSalt.hpp"
 
-#include <sys/types.h>
+#include <pwd.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <signal.h>
-#include <pwd.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
+#include <pty.h>
 #include <pwd.h>
 #include <stdarg.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
-#include <pty.h>
 
 #include <fstream>
 
 #include <pinch/terminal_channel.hpp>
 
+#include "MError.hpp"
+#include "MPtyTerminalChannel.hpp"
+#include "MSaltApp.hpp"
 #include "MTerminalChannel.hpp"
 #include "MUtils.hpp"
-#include "MError.hpp"
-#include "MSaltApp.hpp"
-#include "MPtyTerminalChannel.hpp"
 
 using namespace std;
 
 // --------------------------------------------------------------------
 
-
 MPtyTerminalChannel::MPtyTerminalChannel()
-	: mPid(-1), mPty(gApp->get_io_context())
+	: mPid(-1)
+	, mPty(gApp->get_io_context())
 {
 }
 
@@ -46,7 +46,7 @@ MPtyTerminalChannel::~MPtyTerminalChannel()
 }
 
 void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-										  uint32_t inPixelWidth, uint32_t inPixelHeight)
+	uint32_t inPixelWidth, uint32_t inPixelHeight)
 {
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
@@ -61,9 +61,9 @@ void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 }
 
 void MPtyTerminalChannel::Open(const string &inTerminalType,
-							   bool inForwardAgent, bool inForwardX11,
-							   const string &inCommand, const vector<string> &env,
-							   const OpenCallback &inOpenCallback)
+	bool inForwardAgent, bool inForwardX11,
+	const string &inCommand, const vector<string> &env,
+	const OpenCallback &inOpenCallback)
 {
 	int ptyfd = -1, ttyfd = -1;
 
@@ -88,16 +88,16 @@ void MPtyTerminalChannel::Open(const string &inTerminalType,
 		mPid = fork();
 		switch (mPid)
 		{
-		case -1:
-			throw runtime_error(strerror(errno));
+			case -1:
+				throw runtime_error(strerror(errno));
 
-		case 0:
-			close(ptyfd);
-			Exec(inCommand, inTerminalType, ttyfd);
-			// does not return
+			case 0:
+				close(ptyfd);
+				Exec(inCommand, inTerminalType, ttyfd);
+				// does not return
 
-		default:
-			break;
+			default:
+				break;
 		}
 
 		close(ttyfd);

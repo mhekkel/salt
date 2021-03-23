@@ -296,8 +296,6 @@ MTerminalView::~MTerminalView()
 	delete mAnimationManager;
 	delete mGraphicalBeep;
 	delete mDisabledFactor;
-
-	mTerminalChannel->Release();
 }
 
 MTerminalView *MTerminalView::GetFrontTerminal()
@@ -337,6 +335,8 @@ void MTerminalView::Open()
 void MTerminalView::Close()
 {
 	mTerminalChannel->Close();
+	mTerminalChannel->Release();
+	mTerminalChannel = nullptr;
 }
 
 void MTerminalView::Destroy()

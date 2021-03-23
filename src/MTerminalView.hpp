@@ -52,7 +52,7 @@ class MTerminalView : public MCanvas
 	static MRect GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows);
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
-	bool IsOpen() const { return mTerminalChannel->IsOpen(); }
+	bool IsOpen() const { return mTerminalChannel != nullptr and mTerminalChannel->IsOpen(); }
 	void Open();
 	void Close();
 	void Destroy();
