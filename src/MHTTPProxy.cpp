@@ -5,6 +5,10 @@
 
 #include "MSalt.hpp"
 
+#include <cryptopp/base32.h>
+#include <cryptopp/hmac.h>
+#include <cryptopp/sha.h>
+
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
@@ -33,43 +37,6 @@ namespace fs = std::filesystem;
 using json = zeep::json::element;
 
 // --------------------------------------------------------------------
-
-// 	void set_log_flags(uint32_t log_flags);
-
-// 	using zeep::http::server::log_request;
-
-// 	void log_request(const std::string &client,
-// 					 const zeep::http::request &req, const std::string &request_line,
-// 					 const zeep::http::reply &rep);
-// 	void log_error(const std::exception &e);
-// 	void log_error(const boost::system::error_code &ec);
-
-// 	void validate(zeep::http::request &request);
-
-// 	std::shared_ptr<pinch::basic_connection> get_connection() const { return m_connection; }
-
-// private:
-// 	MHTTPProxy(std::shared_ptr<pinch::basic_connection> connection, bool require_authentication, uint32_t log_flags);
-
-// 	void listen(uint16_t port);
-// 	void stop();
-
-// 	virtual void load_template(const std::string &file, zeep::xml::document &doc);
-// 	virtual void handle_file(const zeep::http::request &request, const zeep::http::scope &scope, zeep::http::reply &reply);
-
-// 	void handle_accept(const boost::system::error_code &ec);
-
-// 	void welcome(const zeep::http::request &request, const zeep::http::scope &scope, zeep::http::reply &reply);
-// 	void status(const zeep::http::request &request, const zeep::http::scope &scope, zeep::http::reply &reply);
-
-// 	static std::shared_ptr<MHTTPProxy> sInstance;
-
-// 	std::shared_ptr<pinch::basic_connection> m_connection;
-// 	std::shared_ptr<proxy_controller> m_new_connection;
-// 	std::shared_ptr<std::ostream> m_log;
-// 	std::shared_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
-// 	uint32_t m_log_flags;
-// 	// zeep::http::authentication_validation_base *m_proxy_authentication = nullptr;
 
 using namespace boost::posix_time;
 
@@ -129,34 +96,22 @@ class proxy_controller : public zeep::http::html_controller
 
 	void handle_status(const zeep::http::request &req, const zeep::http::scope &scope, zeep::http::reply &rep)
 	{
-		// put the http headers in the scope
-
 		zh::scope sub(scope);
-		json headers;
-		for (const auto &h : req.get_headers())
-		{
-			headers.push_back({{"name", h.name},
-				{"value", h.value}});
-		}
-		sub.put("headers", headers);
 
-		json stats;
-
-		//zh::object channelcount;
-		//channelcount["name"] = "Channel Count";
-		//channelcount["value"] = proxy_channel::channel_count();
-		//stats.push_back(channelcount);
-
-		//zh::object openchannelcount;
-		//openchannelcount["name"] = "Open Channel Count";
-		//openchannelcount["value"] = proxy_channel::open_channel_count();
-		//stats.push_back(openchannelcount);
-
-		// zh::object connectioncount;
-		// connectioncount["name"] = "Connection Count";
-		// connectioncount["value"] = proxy_controller::connection_count();
-		// stats.push_back(connectioncount);
-
+		json stats{
+			{
+				{ "name", "Channels created" },
+				{ "value", m_channel_count }
+			},
+			{
+				{ "name", "Channels open" },
+				{ "value", static_cast<uint32_t>(m_open_channel_count) }
+			},
+			{
+				{ "name", "Requests processed" },
+				{ "value", m_request_count }
+			},
+		};
 		sub.put("stats", stats);
 
 		get_template_processor().create_reply_from_template("templates/status.html", sub, rep);
@@ -165,6 +120,8 @@ class proxy_controller : public zeep::http::html_controller
 	bool handle_request(zh::request &req, zh::reply &reply) override
 	{
 		bool result = true;
+
+		++m_request_count;
 
 		if (req.get_host() == "proxy.hekkelman.net")
 			result = zh::html_controller::handle_request(req, reply);
@@ -176,50 +133,55 @@ class proxy_controller : public zeep::http::html_controller
 		return result;
 	}
 
+	struct open_channel_counter
+	{
+		open_channel_counter(std::atomic<uint32_t>& cnt)
+			: m_cnt(cnt)
+		{
+			++m_cnt;
+		}
+
+		~open_channel_counter()
+		{
+			--m_cnt;
+		}
+
+		std::atomic<uint32_t>& m_cnt;
+	};
+
 	struct connect_copy : public std::enable_shared_from_this<connect_copy>
 	{
 		tcp::socket socket;
 		std::shared_ptr<pinch::forwarding_channel> channel;
+		open_channel_counter cnt;
 
-		connect_copy(tcp::socket &&socket, std::shared_ptr<pinch::forwarding_channel> channel)
+		connect_copy(tcp::socket &&socket, std::shared_ptr<pinch::forwarding_channel> channel, std::atomic<uint32_t>& cnt)
 			: socket(std::forward<tcp::socket>(socket))
 			, channel(channel)
+			, cnt(cnt)
 		{
 		}
 
-		void copy_out(std::shared_ptr<connect_copy> self, boost::asio::yield_context yield)
+		template<typename SocketIn, typename SocketOut>
+		void copy(SocketIn& in, SocketOut& out, std::shared_ptr<connect_copy> self, boost::asio::yield_context yield)
 		{
 			char data[1024];
 			boost::system::error_code ec;
 
 			while (not ec)
 			{
-				auto length = boost::asio::async_read(socket, boost::asio::buffer(data), boost::asio::transfer_at_least(1), yield[ec]);
+				auto length = boost::asio::async_read(in, boost::asio::buffer(data), boost::asio::transfer_at_least(1), yield[ec]);
 				if (length == 0 or ec)
 					break;
-				boost::asio::async_write(*channel, boost::asio::buffer(data, length), yield[ec]);
-			}
-		}
-
-		void copy_in(std::shared_ptr<connect_copy> self, boost::asio::yield_context yield)
-		{
-			char data[1024];
-			boost::system::error_code ec;
-
-			while (not ec)
-			{
-				auto length = boost::asio::async_read(*channel, boost::asio::buffer(data), boost::asio::transfer_at_least(1), yield[ec]);
-				if (length == 0 or ec)
-					break;
-				boost::asio::async_write(socket, boost::asio::buffer(data, length), yield[ec]);
+				boost::asio::async_write(out, boost::asio::buffer(data, length), yield[ec]);
 			}
 		}
 
 		void start()
 		{
 			auto self = shared_from_this();
-			boost::asio::spawn(socket.get_executor(), [self](boost::asio::yield_context yield) { self->copy_in(self, yield); });
-			boost::asio::spawn(socket.get_executor(), [self](boost::asio::yield_context yield) { self->copy_out(self, yield); });
+			boost::asio::spawn(socket.get_executor(), [self](boost::asio::yield_context yield) { self->copy(self->socket, *self->channel, self, yield); });
+			boost::asio::spawn(socket.get_executor(), [self](boost::asio::yield_context yield) { self->copy(*self->channel, self->socket, self, yield); });
 		}
 	};
 
@@ -246,9 +208,13 @@ class proxy_controller : public zeep::http::html_controller
 			client = "unknown";
 		}
 
+		++m_request_count;
+
 		boost::system::error_code ec;
 
 		auto channel = std::make_shared<pinch::forwarding_channel>(m_connection, host, port);
+		++m_channel_count;
+
 		channel->async_open(yield[ec]);
 		if (ec)
 		{
@@ -269,7 +235,7 @@ class proxy_controller : public zeep::http::html_controller
 			m_proxy.log_error(ec);
 		else
 		{
-			std::shared_ptr<connect_copy> cc(new connect_copy{std::move(socket), channel});
+			std::shared_ptr<connect_copy> cc(new connect_copy{std::move(socket), channel, m_open_channel_count});
 			cc->start();
 		}
 	}
@@ -290,6 +256,7 @@ class proxy_controller : public zeep::http::html_controller
 	{
 		boost::system::error_code ec;
 		std::shared_ptr<pinch::forwarding_channel> channel;
+		open_channel_counter cnt(m_open_channel_count);
 
 		while (not ec)
 		{
@@ -302,6 +269,8 @@ class proxy_controller : public zeep::http::html_controller
 				send_reply(socket, zh::reply{zh::bad_request}, yield);
 				return;
 			}
+
+			++m_request_count;
 
 			std::string host;
 			uint16_t port = 80;
@@ -332,7 +301,10 @@ class proxy_controller : public zeep::http::html_controller
 				channel.reset(new pinch::forwarding_channel(m_connection, host, port));
 
 			if (not channel->is_open())
+			{
 				channel->async_open(yield[ec]);
+				++m_channel_count;
+			}
 
 			boost::asio::streambuf buffer;
 			std::ostream out(&buffer);
@@ -391,241 +363,9 @@ class proxy_controller : public zeep::http::html_controller
 	std::shared_ptr<pinch::basic_connection> m_connection;
 	tcp::socket *m_socket = nullptr;
 	MHTTPProxyImpl &m_proxy;
+	std::atomic<uint32_t> m_open_channel_count = 0;
+	uint32_t m_channel_count = 0, m_request_count = 0;
 };
-
-// MHTTPProxy::MHTTPProxy(basic_connection* ssh_connection, bool require_authentication, uint32_t log_flags)
-// 	: zh::rsrc_based_webapp("http://proxy.hekkelman.com/ml"), m_connection(ssh_connection), m_log_flags(e_log_none)
-// {
-// 	m_connection->reference();
-
-// 	if (require_authentication)
-// 	{
-// 		m_proxy_authentication = new zh::simple_digest_authentication_validation(kSaltProxyRealm, {
-// 			{ Preferences::GetString("http-proxy-user", ""), Preferences::GetString("http-proxy-password", "") }
-// 		});
-// 		set_authenticator(m_proxy_authentication, false);
-// 	}
-
-// #if DEBUG
-// 	set_log_flags(e_log_request | e_log_debug);
-// #endif
-
-// //#if DEBUG
-// //	set_docroot("C:\\Users\\maarten\\projects\\salt\\Resources\\templates");
-// //#endif
-// 	mount("", &MHTTPProxy::welcome);
-// 	mount("status", &MHTTPProxy::status);
-// 	// mount("style.css", &MHTTPProxy::handle_file);
-
-// 	if (log_flags != e_log_none)
-// 		set_log_flags(log_flags);
-// }
-
-// MHTTPProxy::~MHTTPProxy()
-// {
-// 	delete m_proxy_authentication;
-// 	m_connection->release();
-// }
-
-// void MHTTPProxy::welcome(const zeep::http::request& request, const zeep::http::scope& scope, zeep::http::reply& reply)
-// {
-// 	create_reply_from_template("index.html", scope, reply);
-// }
-
-// void MHTTPProxy::validate(zh::request& request)
-// {
-// 	if (m_proxy_authentication)
-// 	{
-// 		m_proxy_authentication->validate_authentication(request);
-// 		request.remove_header("Proxy-Authorization");
-// 	}
-// }
-
-// void MHTTPProxy::status(const zeep::http::request& request, const zh::scope& scope, zeep::http::reply& reply)
-// {
-// 	// put the http headers in the scope
-
-// 	zh::scope sub(scope);
-// 	vector<zh::object> headers;
-// 	for (const zh::header& h : request.headers)
-// 	{
-// 		zh::object header;
-// 		header["name"] = h.name;
-// 		header["value"] = h.value;
-// 		headers.push_back(header);
-// 	}
-// 	sub.put("headers", headers);
-
-// 	vector<zh::object> stats;
-
-// 	//zh::object channelcount;
-// 	//channelcount["name"] = "Channel Count";
-// 	//channelcount["value"] = proxy_channel::channel_count();
-// 	//stats.push_back(channelcount);
-
-// 	//zh::object openchannelcount;
-// 	//openchannelcount["name"] = "Open Channel Count";
-// 	//openchannelcount["value"] = proxy_channel::open_channel_count();
-// 	//stats.push_back(openchannelcount);
-
-// 	zh::object connectioncount;
-// 	connectioncount["name"] = "Connection Count";
-// 	connectioncount["value"] = proxy_controller::connection_count();
-// 	stats.push_back(connectioncount);
-
-// 	sub.put("stats", stats);
-
-// 	create_reply_from_template("status.html", sub, reply);
-// }
-
-// void MHTTPProxy::set_log_flags(uint32_t log_flags)
-// {
-// 	m_log_flags = log_flags;
-
-// 	if (m_log_flags)
-// 	{
-// 		using namespace boost::local_time;
-
-// 		m_log.reset(new std::ofstream(gPrefsDir / "proxy.log", ios::app));
-
-// 		local_time_facet* lf(new local_time_facet("[%d/%b/%Y:%H:%M:%S %z]"));
-// 		m_log->imbue(locale(cout.getloc(), lf));
-// 	}
-// 	else
-// 		m_log.reset();
-// }
-
-// void MHTTPProxy::load_template(const std::string& file, zeep::xml::document& doc)
-// {
-// //#if DEBUG
-// //	basic_webapp::load_template(file, doc);
-// //#else
-// 	mrsrc::rsrc rsrc(string("templates/") + file);
-// 	if (not rsrc)
-// 		throw runtime_error("missing template");
-
-// 	struct membuf : public std::streambuf
-// 	{
-// 		membuf(char* dict, size_t length)
-// 		{
-// 			this->setg(dict, dict, dict + length);
-// 		}
-// 	} buffer(const_cast<char*>(rsrc.data()), rsrc.size());
-
-// 	std::istream is(&buffer);
-// 	is >> doc;
-// //#endif
-// }
-
-// void MHTTPProxy::handle_file(const zh::request& request, const zh::scope& scope, zh::reply& reply)
-// {
-// 	using namespace boost::local_time;
-// 	using namespace boost::posix_time;
-
-// 	fs::path file = scope["baseuri"].as<string>();
-// 	mrsrc::rsrc rsrc(string("templates/") + file.string());
-// 	if (not rsrc)
-// 		create_error_reply(request, zh::not_found, "The requested file was not found on this 'server'", reply);
-// 	else
-// 	{
-// 		// compare with the date/time of our executable, since we're reading resources :-)
-// 		string ifModifiedSince;
-// 		for (const zeep::http::header& h : request.headers)
-// 		{
-// 			if (ba::iequals(h.name, "If-Modified-Since"))
-// 			{
-// 				local_date_time modifiedSince(local_sec_clock::local_time(time_zone_ptr()));
-
-// 				local_time_input_facet* lif1(new local_time_input_facet("%a, %d %b %Y %H:%M:%S GMT"));
-
-// 				stringstream ss;
-// 				ss.imbue(std::locale(std::locale::classic(), lif1));
-// 				ss.str(h.value);
-// 				ss >> modifiedSince;
-
-// 				local_date_time fileDate(from_time_t(fs::last_write_time(gExecutablePath)), time_zone_ptr());
-
-// 				if (fileDate <= modifiedSince)
-// 				{
-// 					reply = zeep::http::reply::stock_reply(zeep::http::not_modified);
-// 					return;
-// 				}
-
-// 				break;
-// 			}
-// 		}
-
-// 		string data(rsrc.data(), rsrc.size());
-// 		string mimetype = "text/plain";
-
-// 		if (file.extension() == ".css")
-// 			mimetype = "text/css";
-// 		else if (file.extension() == ".js")
-// 			mimetype = "text/javascript";
-// 		else if (file.extension() == ".png")
-// 			mimetype = "image/png";
-// 		else if (file.extension() == ".svg")
-// 			mimetype = "image/svg+xml";
-// 		else if (file.extension() == ".html" or file.extension() == ".htm")
-// 			mimetype = "text/html";
-// 		else if (file.extension() == ".xml" or file.extension() == ".xsl" or file.extension() == ".xslt")
-// 			mimetype = "text/xml";
-// 		else if (file.extension() == ".xhtml")
-// 			mimetype = "application/xhtml+xml";
-
-// 		reply.set_content(data, mimetype);
-
-// 		local_date_time t(local_sec_clock::local_time(time_zone_ptr()));
-// 		local_time_facet* lf(new local_time_facet("%a, %d %b %Y %H:%M:%S GMT"));
-
-// 		stringstream s;
-// 		s.imbue(std::locale(std::cout.getloc(), lf));
-
-// 		ptime pt = from_time_t(std::filesystem::last_write_time(gExecutablePath));
-// 		local_date_time t2(pt, time_zone_ptr());
-// 		s << t2;
-
-// 		reply.set_header("Last-Modified", s.str());
-// 	}
-// }
-
-// void MHTTPProxy::listen(uint16_t port)
-// {
-// 	if (m_log)
-// 		*m_log << "Starting proxy service" << endl;
-
-// 	string address = "0.0.0.0";
-
-// 	m_acceptor.reset(new boost::asio::ip::tcp::acceptor(m_connection->get_io_service()));
-// 	m_new_connection.reset(new proxy_controller(m_connection, shared_from_this()));
-
-// 	boost::asio::ip::tcp::resolver resolver(m_connection->get_io_service());
-// 	boost::asio::ip::tcp::resolver::query query(address, std::to_string(port));
-// 	boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
-
-// 	m_acceptor->open(endpoint.protocol());
-// 	m_acceptor->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-// 	m_acceptor->bind(endpoint);
-// 	m_acceptor->listen();
-// 	m_acceptor->async_accept(m_new_connection->get_socket(),
-// 		std::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
-// }
-
-// void MHTTPProxy::stop()
-// {
-// 	m_acceptor->close();
-// }
-
-// void MHTTPProxy::handle_accept(const boost::system::error_code& ec)
-// {
-// 	if (not ec)
-// 	{
-// 		m_new_connection->start();
-// 		m_new_connection.reset(new proxy_controller(m_connection, shared_from_this()));
-// 		m_acceptor->async_accept(m_new_connection->get_socket(),
-// 			std::bind(&MHTTPProxy::handle_accept, this, boost::asio::placeholders::error));
-// 	}
-// }
 
 // --------------------------------------------------------------------
 

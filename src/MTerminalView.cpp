@@ -2278,7 +2278,7 @@ void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 		for (int i = 0; i < 4; ++i)
 		{
 			truncated <<= 8;
-			truncated |= computed[offset + i];
+			truncated |= static_cast<uint8_t>(computed[offset + i]);
 		}
 
 		truncated &= 0x7fffffff;
