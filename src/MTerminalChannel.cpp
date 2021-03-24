@@ -43,10 +43,6 @@ void MTerminalChannel::Disconnect(bool disconnectProxy)
 {
 }
 
-void MTerminalChannel::KeepAliveIfNeeded()
-{
-}
-
 // --------------------------------------------------------------------
 // MSshTerminalChannel
 
@@ -69,7 +65,6 @@ public:
 	virtual void Close();
 
 	virtual bool IsOpen() const;
-	virtual void KeepAliveIfNeeded();
 
 	virtual bool CanDisconnect() const { return true; }
 	virtual void Disconnect(bool disconnectProxy);
@@ -86,6 +81,7 @@ private:
 MSshTerminalChannel::MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection)
 	: mChannel(new pinch::terminal_channel(inConnection))
 {
+	inConnection->keep_alive();
 }
 
 MSshTerminalChannel::~MSshTerminalChannel()
@@ -182,12 +178,6 @@ void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 		});
 
 	boost::asio::async_read(*mChannel, mResponse, boost::asio::transfer_at_least(1), std::move(cb));
-}
-
-void MSshTerminalChannel::KeepAliveIfNeeded()
-{
-	if (mChannel->is_open())
-		mChannel->keep_alive();
 }
 
 // --------------------------------------------------------------------

@@ -123,13 +123,13 @@ void MSaltApp::Initialise()
 	}
 
 	// set preferred algorithms
-	mConnectionPool.set_algorithm(pinch::algorithm::encryption, pinch::direction::both,
+	pinch::key_exchange::set_algorithm(pinch::algorithm::encryption, pinch::direction::both,
 		Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
-	mConnectionPool.set_algorithm(pinch::algorithm::verification, pinch::direction::both,
+	pinch::key_exchange::set_algorithm(pinch::algorithm::verification, pinch::direction::both,
 		Preferences::GetString("mac", pinch::kMacAlgorithms));
-	mConnectionPool.set_algorithm(pinch::algorithm::compression, pinch::direction::both,
+	pinch::key_exchange::set_algorithm(pinch::algorithm::compression, pinch::direction::both,
 		Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
-	mConnectionPool.set_algorithm(pinch::algorithm::keyexchange, pinch::direction::both,
+	pinch::key_exchange::set_algorithm(pinch::algorithm::keyexchange, pinch::direction::both,
 		Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
 }
 

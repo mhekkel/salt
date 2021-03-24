@@ -2,9 +2,9 @@ bugs:
 
 - Geen Focus op checkbox in Search Panel
 
-[14-11-2013 16:26:46] Marc van Driel: Als ik salt en een verbinding open heb en verhuis van locatie met de laptop is de verbinding dood natuurlijk. Maar Salt is zooo intelligent dat het vraagt om een login voor het herstel van de verbinding. Echter, het opent steeds een nieuw login scherm. Als je niet oppast heb je er zo 20 of meer open staan...
-
 te doen?
+
+- 'Defaults' knop op prefs dialoogvenster
 
 - kopiëren van kleurtjes (RTF? HTML?)
 - popup op 'verbonden' vlak in status bar met opties om connectie te verbreken

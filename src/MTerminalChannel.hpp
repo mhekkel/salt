@@ -42,8 +42,6 @@ public:
 		return mConnectionInfo;
 	}
 
-	virtual void KeepAliveIfNeeded();
-
 protected:
 	MTerminalChannel();
 	virtual ~MTerminalChannel();

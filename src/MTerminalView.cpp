@@ -1325,9 +1325,6 @@ void MTerminalView::Idle(double inTime)
 
 	if (update or mBuffer->IsDirty())
 		Invalidate();
-
-	if (mTerminalChannel->IsOpen())
-		mTerminalChannel->KeepAliveIfNeeded();
 }
 
 string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)

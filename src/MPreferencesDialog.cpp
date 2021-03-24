@@ -214,7 +214,8 @@ void MPreferencesDialog::Apply()
 		{
 			string algo = ba::join(v, ",");
 			Preferences::SetString(alg.conf, algo);
-			connectionPool.set_algorithm(alg.type, pinch::direction::both, algo);
+
+			pinch::key_exchange::set_algorithm(alg.type, pinch::direction::both, algo);
 		}
 	}
 	

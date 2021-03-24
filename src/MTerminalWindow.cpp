@@ -80,8 +80,8 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 	mConnection->set_callback_executor(my_executor);
 
 	mConnection->set_provide_password_callback(boost::asio::bind_executor(my_executor, std::bind(&MSshTerminalWindow::Password, this)));
-	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4), my_executor);
-	mConnection->set_accept_host_key_handler(std::bind(&MSshTerminalWindow::AcceptHostKey, this, _1, _2, _3, _4), my_executor);
+	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4));
+	mConnection->set_accept_host_key_handler(std::bind(&MSshTerminalWindow::AcceptHostKey, this, _1, _2, _3, _4));
 
 	stringstream title;
 	title << mUser << '@' << mServer;
