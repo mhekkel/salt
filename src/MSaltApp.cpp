@@ -246,7 +246,7 @@ bool MSaltApp::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t i
 
 void MSaltApp::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)
 {
-	PRINT(("UpdateSpecialMenu %s", inName.c_str()));
+	// PRINT(("UpdateSpecialMenu %s", inName.c_str()));
 
 	if (inName == "window")
 		UpdateWindowMenu(inMenu);
@@ -268,7 +268,6 @@ void MSaltApp::UpdateWindowMenu(MMenu *inMenu)
 	while (term != nullptr)
 	{
 		string label = term->GetTitle();
-		PRINT(("window titel: '%s'", label.c_str()));
 		inMenu->AppendItem(label, cmd_SelectWindowFromMenu);
 		term = term->GetNextTerminal();
 	}

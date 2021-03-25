@@ -236,7 +236,7 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 
 	if (not result)
 	{
-		PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
+		// PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
 
 		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 
@@ -258,7 +258,7 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 template <class CONTROL>
 void MGtkControlImpl<CONTROL>::OnPopupMenu()
 {
-	PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
+	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
 
 	int32_t x, y;
 

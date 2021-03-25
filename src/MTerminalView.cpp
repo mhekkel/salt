@@ -1854,7 +1854,7 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 	bool inRepeat)
 {
-	PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
+	// PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
 
 	// shortcut
 	if (inRepeat and mDECARM == false)

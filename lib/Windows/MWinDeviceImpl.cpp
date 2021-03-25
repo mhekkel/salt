@@ -362,7 +362,7 @@ MWinDeviceImpl::~MWinDeviceImpl()
 	}
 	catch (...)
 	{
-		PRINT(("Oeps"));
+		// PRINT(("Oeps"));
 	}
 }
 

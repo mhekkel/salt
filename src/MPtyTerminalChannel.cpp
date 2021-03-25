@@ -42,7 +42,6 @@ MPtyTerminalChannel::MPtyTerminalChannel()
 
 MPtyTerminalChannel::~MPtyTerminalChannel()
 {
-	PRINT(("MPtyTerminalChannel::~MPtyTerminalChannel()"));
 }
 
 void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,

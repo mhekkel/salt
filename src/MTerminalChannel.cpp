@@ -24,7 +24,6 @@ MTerminalChannel::MTerminalChannel()
 
 MTerminalChannel::~MTerminalChannel()
 {
-	PRINT(("Deleting MTerminalChannel"));
 	assert(mRefCount == 0);
 }
 

@@ -78,7 +78,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 
 	void OnResponse(int32_t inResponseID)
 	{
-		PRINT(("Response: %d", inResponseID));
+		// PRINT(("Response: %d", inResponseID));
 
 		MDialog *dlog = static_cast<MDialog *>(mWindow);
 
@@ -120,7 +120,7 @@ bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 
 	if (not result)
 	{
-		PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
+		// PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
 
 		uint32_t keyCode = MapKeyCode(inEvent->keyval);
 		uint32_t modifiers = MapModifier(inEvent->state);

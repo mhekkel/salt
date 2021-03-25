@@ -79,13 +79,13 @@ bool MGtkWidgetMixin::OnDestroy()
 
 bool MGtkWidgetMixin::OnDelete(GdkEvent *inEvent)
 {
-	PRINT(("MGtkWidgetMixin::OnDelete"));
+	// PRINT(("MGtkWidgetMixin::OnDelete"));
 	return true;
 }
 
 void MGtkWidgetMixin::OnShow()
 {
-	PRINT(("MGtkWidgetMixin::OnShow"));
+	// PRINT(("MGtkWidgetMixin::OnShow"));
 }
 
 void MGtkWidgetMixin::RequestSize(int32_t inWidth, int32_t inHeight)
@@ -142,7 +142,7 @@ void MGtkWidgetMixin::SetFocus()
 
 void MGtkWidgetMixin::ReleaseFocus()
 {
-	PRINT(("MGtkWidgetMixin::ReleaseFocus"));
+	// PRINT(("MGtkWidgetMixin::ReleaseFocus"));
 }
 
 bool MGtkWidgetMixin::IsFocus() const
@@ -170,7 +170,7 @@ bool MGtkWidgetMixin::OnRealize()
 
 bool MGtkWidgetMixin::OnFocusInEvent(GdkEventFocus *inEvent)
 {
-	PRINT(("MGtkWidgetMixin::OnFocusInEvent [%p, %s]", this, G_OBJECT_TYPE_NAME(mWidget)));
+	// PRINT(("MGtkWidgetMixin::OnFocusInEvent [%p, %s]", this, G_OBJECT_TYPE_NAME(mWidget)));
 
 	mGainedFocusAt = std::chrono::steady_clock::now();
 
@@ -182,7 +182,7 @@ bool MGtkWidgetMixin::OnFocusInEvent(GdkEventFocus *inEvent)
 
 bool MGtkWidgetMixin::OnFocusOutEvent(GdkEventFocus *inEvent)
 {
-	PRINT(("MGtkWidgetMixin::OnFocusOutEvent"));
+	// PRINT(("MGtkWidgetMixin::OnFocusOutEvent"));
 
 	if (mIMContext)
 		gtk_im_context_focus_out(mIMContext);
@@ -197,9 +197,9 @@ bool MGtkWidgetMixin::IsActive() const
 
 bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton *inEvent)
 {
-	PRINT(("MGtkWidgetMixin::OnButtonPressEvent(%ld, %ld) [%s]",
-	       static_cast<int32_t>(inEvent->x),
-	       static_cast<int32_t>(inEvent->y), G_OBJECT_TYPE_NAME(mWidget)));
+	// PRINT(("MGtkWidgetMixin::OnButtonPressEvent(%ld, %ld) [%s]",
+	//        static_cast<int32_t>(inEvent->x),
+	//        static_cast<int32_t>(inEvent->y), G_OBJECT_TYPE_NAME(mWidget)));
 
 	if (std::chrono::steady_clock::now() - mGainedFocusAt < std::chrono::milliseconds(100))
 	{
@@ -297,7 +297,7 @@ bool MGtkWidgetMixin::OnButtonReleaseEvent(GdkEventButton *inEvent)
 
 bool MGtkWidgetMixin::OnGrabBroken(GdkEvent *inEvent)
 {
-	PRINT(("!!! MGtkWidgetMixin::OnGrabBroken (%s)", G_OBJECT_TYPE_NAME(mWidget)));
+//	PRINT(("!!! MGtkWidgetMixin::OnGrabBroken (%s)", G_OBJECT_TYPE_NAME(mWidget)));
 	gtk_grab_remove(GetWidget());
 	return false;
 }
@@ -324,9 +324,9 @@ bool MGtkWidgetMixin::OnMouseExit()
 
 bool MGtkWidgetMixin::OnKeyPressEvent(GdkEventKey *inEvent)
 {
-	PRINT(("OnKeyPressEvent(kv=0x%x,m=0x%x,t=0x%x)", inEvent->keyval, inEvent->state, inEvent->time));
+	// PRINT(("OnKeyPressEvent(kv=0x%x,m=0x%x,t=0x%x)", inEvent->keyval, inEvent->state, inEvent->time));
 
-	PRINT(("This is in %s", G_OBJECT_TYPE_NAME(mWidget)));
+	// PRINT(("This is in %s", G_OBJECT_TYPE_NAME(mWidget)));
 
 	bool result = false;
 
@@ -357,14 +357,14 @@ bool MGtkWidgetMixin::OnKeyReleaseEvent(GdkEventKey *inEvent)
 
 bool MGtkWidgetMixin::OnConfigureEvent(GdkEventConfigure *inEvent)
 {
-	PRINT(("MGtkWidgetMixin::OnConfigureEvent in %s", G_OBJECT_TYPE_NAME(mWidget)));
+	// PRINT(("MGtkWidgetMixin::OnConfigureEvent in %s", G_OBJECT_TYPE_NAME(mWidget)));
 
 	return false;
 }
 
 bool MGtkWidgetMixin::OnScrollEvent(GdkEventScroll *inEvent)
 {
-	PRINT(("MGtkWidgetMixin::OnScrollEvent"));
+	// PRINT(("MGtkWidgetMixin::OnScrollEvent"));
 	return false;
 }
 
@@ -398,7 +398,7 @@ void MGtkWidgetMixin::SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_
 
 void MGtkWidgetMixin::OnDragDataReceived(GdkDragContext *inDragContext, gint inX, gint inY, GtkSelectionData *inData, guint inInfo, guint inTime)
 {
-	PRINT(("MGtkWidgetMixin::OnDragDataReceived"));
+	// PRINT(("MGtkWidgetMixin::OnDragDataReceived"));
 	bool ok = false;
 	bool del = false;
 	bool move = gdk_drag_context_get_selected_action(inDragContext) == GDK_ACTION_MOVE;
@@ -418,7 +418,7 @@ void MGtkWidgetMixin::OnDragDataReceived(GdkDragContext *inDragContext, gint inX
 
 bool MGtkWidgetMixin::OnDragMotion(GdkDragContext *inDragContext, gint inX, gint inY, guint inTime)
 {
-	PRINT(("MGtkWidgetMixin::OnDragMotion"));
+	// PRINT(("MGtkWidgetMixin::OnDragMotion"));
 
 	//	if (not mDragWithin)
 	//	{
@@ -441,7 +441,7 @@ bool MGtkWidgetMixin::OnDragMotion(GdkDragContext *inDragContext, gint inX, gint
 
 void MGtkWidgetMixin::OnDragLeave(GdkDragContext *inDragContext, guint inTime)
 {
-	PRINT(("MGtkWidgetMixin::OnDragLeave"));
+	// PRINT(("MGtkWidgetMixin::OnDragLeave"));
 
 	mDragWithin = false;
 	DragLeave();
@@ -449,13 +449,13 @@ void MGtkWidgetMixin::OnDragLeave(GdkDragContext *inDragContext, guint inTime)
 
 void MGtkWidgetMixin::OnDragDataDelete(GdkDragContext *inDragContext)
 {
-	PRINT(("MGtkWidgetMixin::OnDragDataDelete"));
+	// PRINT(("MGtkWidgetMixin::OnDragDataDelete"));
 	DragDeleteData();
 }
 
 void MGtkWidgetMixin::OnDragDataGet(GdkDragContext *inDragContext, GtkSelectionData *inData, guint inInfo, guint inTime)
 {
-	PRINT(("MGtkWidgetMixin::OnDragDataGet"));
+	// PRINT(("MGtkWidgetMixin::OnDragDataGet"));
 
 	string data;
 
@@ -580,43 +580,43 @@ uint32_t MGtkWidgetMixin::GetModifiers() const
 
 void MGtkWidgetMixin::OnPopupMenu()
 {
-	PRINT(("Show Popup Menu"));
+//	PRINT(("Show Popup Menu"));
 }
 
 bool MGtkWidgetMixin::OnCommit(gchar *inText)
 {
-	PRINT(("MGtkWidgetMixin::OnCommit('%s')", inText));
+//	PRINT(("MGtkWidgetMixin::OnCommit('%s')", inText));
 
 	return false;
 }
 
 bool MGtkWidgetMixin::OnDeleteSurrounding(gint inStart, gint inLength)
 {
-	PRINT(("MGtkWidgetMixin::OnDeleteSurrounding"));
+//	PRINT(("MGtkWidgetMixin::OnDeleteSurrounding"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnPreeditChanged()
 {
-	PRINT(("MGtkWidgetMixin::OnPreeditChanged"));
+//	PRINT(("MGtkWidgetMixin::OnPreeditChanged"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnPreeditEnd()
 {
-	PRINT(("MGtkWidgetMixin::OnPreeditEnd"));
+//	PRINT(("MGtkWidgetMixin::OnPreeditEnd"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnPreeditStart()
 {
-	PRINT(("MGtkWidgetMixin::OnPreeditStart"));
+//	PRINT(("MGtkWidgetMixin::OnPreeditStart"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnRetrieveSurrounding()
 {
-	PRINT(("MGtkWidgetMixin::OnRetrieveSurrounding"));
+//	PRINT(("MGtkWidgetMixin::OnRetrieveSurrounding"));
 	return false;
 }
 

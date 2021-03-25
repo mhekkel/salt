@@ -390,7 +390,7 @@ bool MWinProcMixin::WMKillFocus(HWND inHWnd, UINT inUMsg, WPARAM inWParam,
 
 bool MWinProcMixin::WMQueryEndSession(HWND inHWnd, UINT /*inUMsg*/, WPARAM /*inWParam*/, LPARAM /*inLParam*/, LRESULT& outResult)
 {
-	PRINT(("QueryEndSession, %p", inHWnd));
+//	PRINT(("QueryEndSession, %p", inHWnd));
 
 	outResult = gApp->AllowQuit(true) ? TRUE : FALSE;
 
@@ -399,7 +399,7 @@ bool MWinProcMixin::WMQueryEndSession(HWND inHWnd, UINT /*inUMsg*/, WPARAM /*inW
 
 bool MWinProcMixin::WMEndSession(HWND inHWnd, UINT /*inUMsg*/, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 {
-	PRINT(("EndSession, %p", inHWnd));
+//	PRINT(("EndSession, %p", inHWnd));
 
 	if (inWParam)
 	{

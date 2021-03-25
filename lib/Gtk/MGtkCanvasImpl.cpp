@@ -104,7 +104,7 @@ void MGtkCanvasImpl::Invalidate()
 
 bool MGtkCanvasImpl::OnConfigureEvent(GdkEventConfigure *inEvent)
 {
-	PRINT(("MGtkCanvasImpl::OnConfigureEvent"));
+	// PRINT(("MGtkCanvasImpl::OnConfigureEvent"));
 
 	MRect frame;
 	mControl->GetFrame(frame);
@@ -134,7 +134,7 @@ bool MGtkCanvasImpl::OnConfigureEvent(GdkEventConfigure *inEvent)
 		bounds.height = allocation.height;
 	}
 
-	PRINT(("bounds(%d,%d,%d,%d)", bounds.x, bounds.y, bounds.width, bounds.height));
+	// PRINT(("bounds(%d,%d,%d,%d)", bounds.x, bounds.y, bounds.width, bounds.height));
 
 	mControl->ResizeFrame(bounds.width - frame.width, bounds.height - frame.height);
 
@@ -149,7 +149,7 @@ bool MGtkCanvasImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 	{
 		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 
-		PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
+		// PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
 
 		uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
 		uint32_t keyValue = MapKeyCode(inEvent->keyval);

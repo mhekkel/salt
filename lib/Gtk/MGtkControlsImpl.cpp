@@ -421,7 +421,7 @@ void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxVal
 		if (inValue > maxValue)
 			inValue = maxValue;
 
-		PRINT(("min: %d, max: %d, scrollunit: %d, page: %d, value: %d\n", inMinValue, inMaxValue, inScrollUnit, inPageSize, inValue));
+		// PRINT(("min: %d, max: %d, scrollunit: %d, page: %d, value: %d\n", inMinValue, inMaxValue, inScrollUnit, inPageSize, inValue));
 
 		gtk_adjustment_set_lower(adj, inMinValue);
 		gtk_adjustment_set_upper(adj, inMaxValue + 1);

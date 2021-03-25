@@ -1086,7 +1086,7 @@ void MDevice::ListFonts(
 	vector<string> &outFonts)
 {
 	PangoFontMap *fontMap = pango_cairo_font_map_get_default();
-	PRINT(("DPI volgens pango/cairo: %g", pango_cairo_font_map_get_resolution((PangoCairoFontMap *)fontMap)));
+	// PRINT(("DPI volgens pango/cairo: %g", pango_cairo_font_map_get_resolution((PangoCairoFontMap *)fontMap)));
 
 	PangoFontFamily **families;
 	int n_families;

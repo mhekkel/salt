@@ -77,19 +77,22 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 
 int MGtkApplicationImpl::RunEventLoop()
 {
-PRINT(("Main Thread ID = 0x%x", std::this_thread::get_id()));
+PRINT(("Main Thread ID = %p", std::this_thread::get_id()));
 
 	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
 
 	// Start processing async tasks
 
 	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]() {
+PRINT(("Async task Thread ID = %p", std::this_thread::get_id()));
 		ProcessAsyncTasks(context);
 	});
 
 	mIOContextThread = std::thread([&io_context = mIOContext]() {
 		try
 		{
+PRINT(("IO Context Thread ID = %p", std::this_thread::get_id()));
+
 			boost::asio::executor_work_guard work(io_context.get_executor());
 			io_context.run();
 		}

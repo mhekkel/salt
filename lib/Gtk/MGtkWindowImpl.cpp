@@ -240,7 +240,7 @@ long GetDesktopForWindow(Display* display, Window window)
 	if (not GetLongPropery(display, window, "_NET_WM_DESKTOP", desktop) and
 		not GetLongPropery(display, window, "_WIN_WORKSPACE", desktop))
 	{
-		PRINT(("Error getting desktop for window"));
+	//	PRINT(("Error getting desktop for window"));
 	}
 
 	return desktop;
@@ -255,7 +255,7 @@ long GetCurrentDesktop(Display* display)
 	if (not GetLongPropery(display, root, "_NET_CURRENT_DESKTOP", desktop) and
 		not GetLongPropery(display, root, "_WIN_WORKSPACE", desktop))
 	{
-		PRINT(("Failed to get current desktop"));
+	//	PRINT(("Failed to get current desktop"));
 	}
 
 	return desktop;
@@ -276,8 +276,8 @@ void SetCurrentDesktop(Display* display, long desktop)
 	
 	int ret = XSendEvent(display, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
 	
-	if (ret == 0)
-		PRINT(("_NET_CURRENT_DESKTOP failed"));
+	// if (ret == 0)
+	//	PRINT(("_NET_CURRENT_DESKTOP failed"));
 }
 
 bool ActivateWindow(Display* display, Window window)
@@ -285,7 +285,7 @@ bool ActivateWindow(Display* display, Window window)
 	long desktop = GetDesktopForWindow(display, window);
 	long current = GetCurrentDesktop(display);
 	
-	PRINT(("ActivateWindow, desktop = %ld, current = %ld", desktop, current));
+//	PRINT(("ActivateWindow, desktop = %ld, current = %ld", desktop, current));
 	
 	if (desktop != current and desktop != -1)
 		SetCurrentDesktop(display, desktop);
@@ -304,14 +304,14 @@ bool ActivateWindow(Display* display, Window window)
 	int ret = XSendEvent(display, attr.screen->root, False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 	
 	if (ret == 0)
-		PRINT(("_NET_ACTIVE_WINDOW failed"));
+	//	PRINT(("_NET_ACTIVE_WINDOW failed"));
 
 	return ret != 0;
 }
 
 void MGtkWindowImpl::Select()
 {
-	PRINT(("Select Window (%p)", std::this_thread::get_id()));
+//	PRINT(("Select Window (%p)", std::this_thread::get_id()));
 
 #warning("fixme")
 	ActivateWindow(gdk_x11_display_get_xdisplay(gdk_display_get_default()),
@@ -364,7 +364,7 @@ void MGtkWindowImpl::RecycleWindows()
 
 bool MGtkWindowImpl::OnDestroy()
 {
-	PRINT(("MGtkWindowImpl::OnDestroy"));
+//	PRINT(("MGtkWindowImpl::OnDestroy"));
 	
 	SetWidget(nullptr);
 
@@ -377,7 +377,7 @@ bool MGtkWindowImpl::OnDestroy()
 
 bool MGtkWindowImpl::OnDelete(GdkEvent* inEvent)
 {
-	PRINT(("MGtkWindowImpl::OnDelete"));
+//	PRINT(("MGtkWindowImpl::OnDelete"));
 	
 	bool result = true;
 
@@ -389,7 +389,7 @@ bool MGtkWindowImpl::OnDelete(GdkEvent* inEvent)
 
 bool MGtkWindowImpl::OnMapEvent(GdkEvent* inEvent)
 {
-	PRINT(("MGtkWindowImpl::OnMapEvent"));
+//	PRINT(("MGtkWindowImpl::OnMapEvent"));
 
 	mWindow->BeFocus();
 
@@ -398,7 +398,7 @@ bool MGtkWindowImpl::OnMapEvent(GdkEvent* inEvent)
 
 bool MGtkWindowImpl::OnConfigureEvent(GdkEventConfigure* inEvent)
 {
-	PRINT(("MGtkWindowImpl::OnConfigureEvent"));
+//	PRINT(("MGtkWindowImpl::OnConfigureEvent"));
 	if (not mConfigured)
 		mWindow->Mapped();
 	mConfigured = true;
@@ -408,7 +408,7 @@ bool MGtkWindowImpl::OnConfigureEvent(GdkEventConfigure* inEvent)
 
 void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
-	PRINT(("MGtkWindowImpl::ResizeWindow(%d,%d)", inWidthDelta, inHeightDelta));
+//	PRINT(("MGtkWindowImpl::ResizeWindow(%d,%d)", inWidthDelta, inHeightDelta));
 	int w, h;
 	gtk_window_get_size(GTK_WINDOW(GetWidget()), &w, &h);
 	gtk_window_resize(GTK_WINDOW(GetWidget()), w + inWidthDelta, h + inHeightDelta);
@@ -427,7 +427,7 @@ void MGtkWindowImpl::GetWindowPosition(MRect& outPosition) const
 
 void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 {
-	PRINT(("MGtkWindowImpl::SetWindowPosition"));
+//	PRINT(("MGtkWindowImpl::SetWindowPosition"));
 	if (inTransition)
 	{
 //		if (mTransitionThread != nullptr)
@@ -548,7 +548,7 @@ void MGtkWindowImpl::DoForEach(GtkWidget* inWidget)
 
 bool MGtkWindowImpl::ChildFocus(GdkEventFocus* inEvent)
 {
-	PRINT(("focus-in-event"));
+//	PRINT(("focus-in-event"));
 
 	try
 	{
