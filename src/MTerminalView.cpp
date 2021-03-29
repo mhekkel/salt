@@ -4223,7 +4223,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 
 			for (uint32_t ai = 4; ai < mArgs.size(); ++ai)
 			{
-				uint32_t flag;
+				uint32_t flag{};
 				switch (mArgs[ai])
 				{
 					case 0:

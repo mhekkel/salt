@@ -186,8 +186,6 @@ void MPreferencesDialog::Apply()
 		{ pinch::algorithm::compression, "cmp", "compression", pinch::kCompressionAlgorithms }
 	};
 	
-	auto& connectionPool = static_cast<MSaltApp*>(gApp)->GetConnectionPool();
-
 	for (auto alg: kAlgs) 
 	{
 		bool ok = true;

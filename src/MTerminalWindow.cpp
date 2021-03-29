@@ -16,6 +16,7 @@
 #include "MPortForwardingDialog.hpp"
 #include "MPreferences.hpp"
 #include "MSaltApp.hpp"
+#include "MApplicationImpl.hpp"
 #include "MSearchPanel.hpp"
 #include "MStrings.hpp"
 #include "MTerminalChannel.hpp"
@@ -259,12 +260,14 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 		string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
 	string comment = inKeyToDrop.get_comment();
 
+	MAppExecutor my_executor{&gApp->get_context()};
+
 	mKeyDropper.reset(new pinch::exec_channel(mConnection, command, [this, comment](const string &, int status) {
 		if (status == 0)
 			DisplayAlert(this, "installed-public-key", {comment, this->mServer});
 		else
 			DisplayAlert(this, "failed-to-install-public-key", {comment, this->mServer});
-	}));
+	}, my_executor));
 
 	mKeyDropper->open();
 }
