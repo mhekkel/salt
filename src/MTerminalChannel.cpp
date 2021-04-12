@@ -68,7 +68,7 @@ public:
 	virtual bool CanDisconnect() const { return true; }
 	virtual void Disconnect(bool disconnectProxy);
 
-	virtual void SendData(const string &inData);
+	virtual void SendData(string &&inData);
 	virtual void SendSignal(const string &inSignal);
 	virtual void ReadData(const ReadCallback &inCallback);
 
@@ -155,9 +155,9 @@ void MSshTerminalChannel::Disconnect(bool disconnectProxy)
 	mChannel->get_connection().close();
 }
 
-void MSshTerminalChannel::SendData(const string &inData)
+void MSshTerminalChannel::SendData(string &&inData)
 {
-	mChannel->send_data(inData);
+	mChannel->send_data(std::move(inData));
 }
 
 void MSshTerminalChannel::SendSignal(const string &inSignal)

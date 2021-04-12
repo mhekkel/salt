@@ -26,7 +26,7 @@ public:
 
 	virtual bool IsOpen() const;
 
-	virtual void SendData(const std::string &inData);
+	virtual void SendData(std::string &&inData);
 	virtual void SendSignal(const std::string &inSignal);
 	virtual void ReadData(const ReadCallback &inCallback);
 

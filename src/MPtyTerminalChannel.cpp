@@ -222,13 +222,13 @@ bool MPtyTerminalChannel::IsOpen() const
 	return mPty.is_open();
 }
 
-void MPtyTerminalChannel::SendData(const string &inData)
+void MPtyTerminalChannel::SendData(string &&inData)
 {
 	shared_ptr<boost::asio::streambuf> buffer(new boost::asio::streambuf);
 	ostream out(buffer.get());
 	out << inData;
 
-	boost::asio::async_write(mPty, *buffer, [](const boost::system::error_code &, std::size_t) {});
+	boost::asio::async_write(mPty, *buffer, [buffer](const boost::system::error_code &, std::size_t) {});
 }
 
 void MPtyTerminalChannel::SendSignal(const string &inSignal)

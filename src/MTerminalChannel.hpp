@@ -30,7 +30,14 @@ public:
 
 	void Release();
 
-	virtual void SendData(const std::string &inData) = 0;
+	virtual void SendData(std::string &&inData) = 0;
+
+	void SendData(const std::string& s)
+	{
+		std::string copy(s);
+		SendData(std::move(copy));
+	}
+
 	virtual void SendSignal(const std::string &inSignal) = 0;
 	virtual void ReadData(const ReadCallback &inCallback) = 0;
 

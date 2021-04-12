@@ -2151,7 +2151,7 @@ bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint
 			else
 				ba::replace_all(text, "\n", "\r");
 			if (mTerminalChannel->IsOpen())
-				mTerminalChannel->SendData(text);
+				mTerminalChannel->SendData(std::move(text));
 			break;
 		}
 
@@ -2561,7 +2561,7 @@ void MTerminalView::SendCommand(string inData)
 		// print(cerr, b);
 		// #endif
 
-		mTerminalChannel->SendData(inData);
+		mTerminalChannel->SendData(std::move(inData));
 	}
 }
 
@@ -5370,7 +5370,7 @@ bool MTerminalView::PastePrimaryBuffer(const string &inText)
 		else
 			ba::replace_all(text, "\n", "\r");
 
-		mTerminalChannel->SendData(text);
+		mTerminalChannel->SendData(std::move(text));
 
 		result = true;
 	}
