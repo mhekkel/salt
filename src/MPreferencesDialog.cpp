@@ -106,6 +106,7 @@ MPreferencesDialog::MPreferencesDialog()
 	SetText("mac", Preferences::GetString("mac", pinch::kMacAlgorithms));
 	SetText("kex", Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
 	SetText("cmp", Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
+	SetText("shk", Preferences::GetString("shk", pinch::kServerHostKeyAlgorithms));
 
 //	SetEnabled("apply", false);
 }
@@ -183,6 +184,7 @@ void MPreferencesDialog::Apply()
 		{ pinch::algorithm::encryption, "enc", "encryption", pinch::kEncryptionAlgorithms },
 		{ pinch::algorithm::verification, "mac", "verification", pinch::kMacAlgorithms },
 		{ pinch::algorithm::keyexchange, "kex", "key exchange", pinch::kKeyExchangeAlgorithms },
+		{ pinch::algorithm::serverhostkey, "shk", "host key validation", pinch::kServerHostKeyAlgorithms },
 		{ pinch::algorithm::compression, "cmp", "compression", pinch::kCompressionAlgorithms }
 	};
 	
@@ -232,6 +234,7 @@ void MPreferencesDialog::ButtonClicked(const string& inID)
 		SetText("enc", pinch::kEncryptionAlgorithms);
 		SetText("mac", pinch::kMacAlgorithms);
 		SetText("kex", pinch::kKeyExchangeAlgorithms);
+		SetText("shk", pinch::kServerHostKeyAlgorithms);
 		SetText("cmp", pinch::kCompressionAlgorithms);
 	}
 	else

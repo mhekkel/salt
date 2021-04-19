@@ -36,16 +36,8 @@ AC_DEFUN([AX_LIBCRYPTOPP],
 					AC_MSG_ERROR(['${withval}'' is not a valid directory for --with-crypto++])
 				])
 
-				save_LDFLAGS=$LDFLAGS; LDFLAGS="$LDFLAGS -L${with_val}/lib"
-				save_CPPFLAGS=$CPPFLAGS; CPPFLAGS="$CPPFLAGS -I ${with_val}/include"
-
-				AX_CHECK_LIBRARY([CRYPTOPP], [cryptopp/cryptlib.h], [cryptopp],
-					[ CRYPTOPP_LIBS="-L${with_val}/lib -lcryptopp" ], [], [])
-
-				LDFLAGS=$save_LDFLAGS
-				CPPFLAGS=$save_CPPFLAGS
-
-				CRYPTOPP_CFLAGS="-I ${withval}"
+				CRYPTOPP_CFLAGS="-I ${withval}/include"
+				CRYPTOPP_LIBS="-L${withval}/lib -lcryptopp"
 
 				AC_SUBST([CRYPTOPP_CFLAGS], [$CRYPTOPP_CFLAGS])
 				AC_SUBST([CRYPTOPP_LIBS], [$CRYPTOPP_LIBS])

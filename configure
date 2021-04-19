@@ -647,12 +647,12 @@ BOOST_LDFLAGS
 BOOST_CPPFLAGS
 GTK3_LIBS
 GTK3_CFLAGS
+CRYPTOPP_LDFLAGS
+CRYPTOPP_CPPFLAGS
 AX_PACKAGE_REQUIRES_PRIVATE
 AX_PACKAGE_REQUIRES
 CRYPTOPP_LIBS
 CRYPTOPP_CFLAGS
-CRYPTOPP_LDFLAGS
-CRYPTOPP_CPPFLAGS
 CXXCPP
 USE_RSRC
 MRC
@@ -762,10 +762,10 @@ CPP
 DEBUG
 MRC
 CXXCPP
-CRYPTOPP_CPPFLAGS
-CRYPTOPP_LDFLAGS
 CRYPTOPP_CFLAGS
 CRYPTOPP_LIBS
+CRYPTOPP_CPPFLAGS
+CRYPTOPP_LDFLAGS
 GTK3_CFLAGS
 GTK3_LIBS
 ZEEP_CFLAGS
@@ -1465,14 +1465,14 @@ Some influential environment variables:
   DEBUG       Build a debug version of the application
   MRC         Specify a location for the mrc executable
   CXXCPP      C++ preprocessor
-  CRYPTOPP_CPPFLAGS
-              C preprocessor flags for CRYPTOPP headers
-  CRYPTOPP_LDFLAGS
-              linker flags for CRYPTOPP libraries
   CRYPTOPP_CFLAGS
               C compiler flags for CRYPTOPP, overriding pkg-config
   CRYPTOPP_LIBS
               linker flags for CRYPTOPP, overriding pkg-config
+  CRYPTOPP_CPPFLAGS
+              C preprocessor flags for CRYPTOPP headers
+  CRYPTOPP_LDFLAGS
+              linker flags for CRYPTOPP libraries
   GTK3_CFLAGS C compiler flags for GTK3, overriding pkg-config
   GTK3_LIBS   linker flags for GTK3, overriding pkg-config
   ZEEP_CFLAGS C compiler flags for ZEEP, overriding pkg-config
@@ -6578,93 +6578,8 @@ else
 
 fi
 
-				save_LDFLAGS=$LDFLAGS; LDFLAGS="$LDFLAGS -L${with_val}/lib"
-				save_CPPFLAGS=$CPPFLAGS; CPPFLAGS="$CPPFLAGS -I ${with_val}/include"
-
-
-
-
-
-  if ${ax_cv_have_CRYPTOPP+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  save_CPPFLAGS="$CPPFLAGS"
-     save_LDFLAGS="$LDFLAGS"
-     save_LIBS="$LIBS"
-
-     if test "x$CRYPTOPP_CPPFLAGS" != "x"; then :
-  CPPFLAGS="$CPPFLAGS $CRYPTOPP_CPPFLAGS"
-fi
-
-     if test "x$CRYPTOPP_LDFLAGS" != "x"; then :
-  LDFLAGS="$LDFLAGS $CRYPTOPP_LDFLAGS"
-fi
-
-     ac_fn_cxx_check_header_mongrel "$LINENO" "cryptopp/cryptlib.h" "ac_cv_header_cryptopp_cryptlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_cryptopp_cryptlib_h" = xyes; then :
-
-       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lcryptopp" >&5
-$as_echo_n "checking for main in -lcryptopp... " >&6; }
-if ${ac_cv_lib_cryptopp_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcryptopp  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_cryptopp_main=yes
-else
-  ac_cv_lib_cryptopp_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cryptopp_main" >&5
-$as_echo "$ac_cv_lib_cryptopp_main" >&6; }
-if test "x$ac_cv_lib_cryptopp_main" = xyes; then :
-  ax_cv_have_CRYPTOPP=yes
-else
-  ax_cv_have_CRYPTOPP=no
-fi
-
-
-else
-  ax_cv_have_CRYPTOPP=no
-fi
-
-
-
-     CPPFLAGS="$save_CPPFLAGS"
-     LDFLAGS="$save_LDFLAGS"
-     LIBS="$save_LIBS"
-
-fi
-
-
-  if test "$ax_cv_have_CRYPTOPP" = "yes"; then :
-
-$as_echo "#define HAVE_CRYPTOPP 1" >>confdefs.h
-
-     CRYPTOPP_LIBS="-L${with_val}/lib -lcryptopp"
-fi
-
-
-				LDFLAGS=$save_LDFLAGS
-				CPPFLAGS=$save_CPPFLAGS
-
-				CRYPTOPP_CFLAGS="-I ${withval}"
+				CRYPTOPP_CFLAGS="-I ${withval}/include"
+				CRYPTOPP_LIBS="-L${withval}/lib -lcryptopp"
 
 				CRYPTOPP_CFLAGS=$CRYPTOPP_CFLAGS
 

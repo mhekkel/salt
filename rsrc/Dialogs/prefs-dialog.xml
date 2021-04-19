@@ -68,6 +68,8 @@
 					<edittext bind="top left right bottom" id="env" style="multiline" width="200" height="100" />
 				</page>
 				<page id="page6">
+					<caption text="Server host key protocols" />
+					<edittext bind="top left right bottom" id="shk" style="multiline" width="200" height="100" />
 					<caption text="Key exchange protocols" />
 					<edittext bind="top left right bottom" id="kex" style="multiline" width="200" height="100" />
 					<caption text="Encryption protocols" />
