@@ -246,14 +246,12 @@ PRINT(("AcceptHostKey callback Thread ID = %p", std::this_thread::get_id()));
 void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 {
 	// create the public key
-	pinch::opacket p;
-	p << inKeyToDrop;
-
-	string blob = zeep::encode_base64(p);
+	auto b = inKeyToDrop.get_blob();
+	string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char*>(b.data()), b.size()));
 
 	// create a command
 	ba::replace_all(blob, "\n", "");
-	string publickey = "ssh-rsa " + blob + ' ' + inKeyToDrop.get_comment();
+	string publickey = inKeyToDrop.get_type() + ' ' + blob + ' ' + inKeyToDrop.get_comment();
 	ba::replace_all(publickey, "'", "'\\''");
 
 	string command =
