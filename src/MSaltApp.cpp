@@ -130,9 +130,9 @@ void MSaltApp::Initialise()
 	pinch::key_exchange::set_algorithm(pinch::algorithm::compression, pinch::direction::both,
 		Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
 	pinch::key_exchange::set_algorithm(pinch::algorithm::keyexchange, pinch::direction::both,
-		Preferences::GetString("shk", pinch::kKeyExchangeAlgorithms));
-	pinch::key_exchange::set_algorithm(pinch::algorithm::serverhostkey, pinch::direction::both,
 		Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
+	pinch::key_exchange::set_algorithm(pinch::algorithm::serverhostkey, pinch::direction::both,
+		Preferences::GetString("shk", pinch::kServerHostKeyAlgorithms));
 }
 
 void MSaltApp::SaveGlobals()
