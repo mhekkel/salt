@@ -24,7 +24,7 @@
 #if DEBUG && NDEBUG
 #error "Cannot be defined both"
 #elif ! defined(NDEBUG) && ! defined(DEBUG)
-#pragma message("Neither NDEBUG nor DEBUG is defined, falling back to DEBUG")
+// #pragma message("Neither NDEBUG nor DEBUG is defined, falling back to DEBUG")
 #define DEBUG	1
 #endif
 
