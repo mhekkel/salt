@@ -19,6 +19,7 @@
 #include <zeep/http/message-parser.hpp>
 #include <zeep/http/security.hpp>
 #include <zeep/http/server.hpp>
+#include <zeep/http/uri.hpp>
 
 #include "MApplication.hpp"
 #include "MError.hpp"
@@ -119,7 +120,7 @@ class proxy_controller : public zeep::http::html_controller
 
 		++m_request_count;
 
-		if (req.get_host() == "proxy.hekkelman.net")
+		if (zh::uri(req.get_uri()).get_host() == "proxy.hekkelman.net")
 			result = zh::html_controller::handle_request(req, reply);
 		else if (req.get_method() == "CONNECT")
 			boost::asio::spawn(m_connection->get_executor(), [this, req](boost::asio::yield_context yield) { handle_connect(req, std::move(*m_socket), yield); });
