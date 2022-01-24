@@ -196,4 +196,4 @@ void OpenURI(const std::string& inURI);
 std::string GetUserLocaleName();
 std::string GetApplicationVersion();
 
-void closefrom(int fd);
+extern "C" void closefrom(int fd);

@@ -164,7 +164,9 @@ find_package(Filesystem REQUIRED)
 find_package(pinch)
 find_package(zeep 5.1.6 REQUIRED)
 
-find_library(DL dlsym dl)
+find_library(DL dl)
+find_library(UTIL util)
+
 # set(Boost_DETAILED_FAILURE_MSG ON)
 
 # find_package(Boost COMPONENTS coroutines)
@@ -219,7 +221,6 @@ add_executable(salt
 	${CMAKE_SOURCE_DIR}/lib/MTypes.hpp
 	${CMAKE_SOURCE_DIR}/lib/MApplication.hpp
 	${CMAKE_SOURCE_DIR}/lib/MApplicationImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MConfig.hpp
 	${CMAKE_SOURCE_DIR}/lib/MMenu.cpp
 	${CMAKE_SOURCE_DIR}/lib/mrsrc.hpp
 	${CMAKE_SOURCE_DIR}/lib/MCanvas.cpp
@@ -376,7 +377,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${GTK3_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch Threads::Threads ${GTK3_LIBRARIES} ${DL})
+target_link_libraries(salt zeep::zeep pinch::pinch Threads::Threads ${GTK3_LIBRARIES} ${DL} ${UTIL})
 
 if(USE_RSRC)
 	mrc_target_resources(salt ${RESOURCES})

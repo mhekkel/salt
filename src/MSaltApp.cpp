@@ -369,7 +369,8 @@ void MSaltApp::OpenRecent(const string &inRecent)
 
 void MSaltApp::DoAbout()
 {
-	DisplayAlert(nullptr, "about-alert", {GetApplicationVersion(), PACKAGE_VERSION});
+// TODO: fix package version string
+	DisplayAlert(nullptr, "about-alert", {GetApplicationVersion(), "PACKAGE_VERSION"});
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)

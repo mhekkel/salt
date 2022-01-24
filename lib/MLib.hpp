@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "MConfig.hpp"
-
 #if defined(_MSC_VER)
 #define NOMINMAX
 #pragma warning (disable : 4355)	// this is used in Base Initializer list

@@ -14,10 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-//#include "includes.hpp"
-
-#include "MConfig.hpp"
-
 #ifndef HAVE_CLOSEFROM
 
 #include <sys/types.h>

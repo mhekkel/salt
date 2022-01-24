@@ -37,8 +37,8 @@ MLibTestWindow::MLibTestWindow()
 	: MWindow("Nieuw venster", MRect(0, 0, 400, 400), MWindowFlags(0), "terminal-window-menu")
 {
 	int32_t partWidths[5] = { 250, 250, 45, -1 };
-	mStatusbar = new MStatusbar("status", MRect(0, 0, 16, 400), 4, partWidths);
-	AddChild(mStatusbar);
+	// mStatusbar = new MStatusbar("status", MRect(0, 0, 16, 400), 4, partWidths);
+	// AddChild(mStatusbar);
 }
 
 // --------------------------------------------------------------------
@@ -170,7 +170,7 @@ void MLibTestApp::UpdateSpecialMenu(const std::string& inName, MMenu* inMenu)
 
 void MLibTestApp::DoAbout()
 {
-	DisplayAlert(nullptr, "about-alert", "x", kRevision);
+	DisplayAlert(nullptr, "about-alert", { "x", kRevision });
 }
 
 void MLibTestApp::DoQuit()
