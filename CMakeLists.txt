@@ -161,7 +161,10 @@ find_package(Threads REQUIRED)
 
 find_package(Filesystem REQUIRED)
 
-find_package(pinch)
+# find_package(pinch)
+
+add_subdirectory(pinch EXCLUDE_FROM_ALL)
+
 find_package(zeep 5.1.6 REQUIRED)
 
 find_library(DL dl)
