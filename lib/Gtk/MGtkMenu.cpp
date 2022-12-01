@@ -208,7 +208,7 @@ void MMenuItem::ItemCallback()
 			if (window != nullptr)
 				target = window->FindFocus();
 
-			if (process and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
+			if (process and target != nullptr and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
 				PRINT(("Unhandled command: %s", (const char*)MCommandToString(mCommand)));
 		}
 	}

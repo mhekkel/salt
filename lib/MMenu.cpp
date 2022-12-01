@@ -243,7 +243,7 @@ void MMenu::UpdateCommandStatus()
 			if (mTarget != nullptr)
 			{
 				MWindow* window = dynamic_cast<MWindow*>(mTarget);
-				if (window != nullptr)
+				if (window != nullptr and window->FindFocus() != nullptr)
 					window->FindFocus()->UpdateCommandStatus(GetItemCommand(i), this, i, enabled, checked);
 				else
 					mTarget->UpdateCommandStatus(GetItemCommand(i), this, i, enabled, checked);

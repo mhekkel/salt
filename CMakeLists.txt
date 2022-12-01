@@ -103,26 +103,12 @@ if(MSVC)
 
 	get_WIN32_WINNT(ver)
 	add_definitions(-D_WIN32_WINNT=${ver})
-
-	# On Windows, do not install in the system location
-	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT ($ENV{LOCALAPPDATA} STREQUAL ""))
-		message(STATUS "The executable will be installed in $ENV{LOCALAPPDATA}")
-		set(CMAKE_INSTALL_PREFIX "$ENV{LOCALAPPDATA}" CACHE PATH "..." FORCE)
-	endif()
-endif()
-
-if(UNIX AND NOT APPLE)
-	# On Linux, install in the $HOME/.local folder by default
-	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-		message(STATUS "The library and auxiliary files will be installed in $ENV{HOME}/.local")
-		set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local" CACHE PATH "..." FORCE)
-	endif()
 endif()
 
 # Create a revision file, containing the current git version info
 
 include(VersionString)
-write_version_header()
+write_version_header(${PROJECT_SOURCE_DIR}/src/)
 
 # Optionally use mrc to create resources
 find_package(Mrc)
@@ -154,8 +140,8 @@ add_subdirectory(pinch EXCLUDE_FROM_ALL)
 
 find_package(zeep 5.1.6 REQUIRED)
 
-find_library(DL dl)
-find_library(UTIL util)
+find_library(DL dl REQUIRED)
+find_library(UTIL util REQUIRED)
 
 # set(Boost_DETAILED_FAILURE_MSG ON)
 
@@ -367,7 +353,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${GTK3_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch Threads::Threads ${GTK3_LIBRARIES} ${DL} ${UTIL})
+target_link_libraries(salt zeep::zeep pinch::pinch Threads::Threads ${GTK3_LIBRARIES} dl util)
 
 if(USE_RSRC)
 	mrc_target_resources(salt ${RESOURCES})
