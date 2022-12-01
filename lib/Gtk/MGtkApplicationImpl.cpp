@@ -142,6 +142,8 @@ void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
 				break;
 			}
 
+PRINT(("Async Task in Thread ID = %p", std::this_thread::get_id()));
+
 			g_main_context_invoke_full(context, G_PRIORITY_DEFAULT,
 			                           &MGtkApplicationImpl::HandleAsyncCallback, ah,
 			                           (GDestroyNotify)&MGtkApplicationImpl::DeleteAsyncHandler);
@@ -151,6 +153,8 @@ void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
 
 gboolean MGtkApplicationImpl::HandleAsyncCallback(gpointer inData)
 {
+PRINT(("Handle Async Task in Thread ID = %p", std::this_thread::get_id()));
+
 	MAsyncHandlerBase *handler = reinterpret_cast<MAsyncHandlerBase *>(inData);
 	handler->execute();
 	return G_SOURCE_REMOVE;

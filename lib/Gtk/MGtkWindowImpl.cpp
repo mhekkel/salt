@@ -314,8 +314,11 @@ void MGtkWindowImpl::Select()
 //	PRINT(("Select Window (%p)", std::this_thread::get_id()));
 
 #warning("fixme")
-	ActivateWindow(gdk_x11_display_get_xdisplay(gdk_display_get_default()),
-		gdk_x11_window_get_xid(gtk_widget_get_window(GetWidget())));
+	auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
+	auto w = gdk_x11_window_get_xid(gtk_widget_get_window(GetWidget()));
+
+	if (d and w)
+		ActivateWindow(d, w);
 
 	if (Visible())
 	{

@@ -4,7 +4,7 @@ Name=Salt Terminal
 Comment=Alternative command line and SSH terminal
 Comment[nl]=Alternatieve opdracht prompt en SSH terminal
 TryExec=salt
-Exec=__EXE__
+Exec=env GDK_BACKEND=x11 __EXE__
 Icon=__ICON__
 Type=Application
 Categories=GNOME;GTK;Utility;TerminalEmulator;

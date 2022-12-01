@@ -1,0 +1,3 @@
+[submodule "pinch"]
+	path = pinch
+	url = git@github.com:mhekkel/pinch.git
