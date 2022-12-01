@@ -17,11 +17,10 @@
 #include "MWindow.hpp"
 #include "MControls.hpp"
 
+#include "revision.hpp"
+
 using namespace std;
 namespace ba = boost::algorithm;
-
-const char
-	kAppName[] = "lib-test", kRevision[] = "0.1";
 
 // --------------------------------------------------------------------
 
@@ -170,7 +169,7 @@ void MLibTestApp::UpdateSpecialMenu(const std::string& inName, MMenu* inMenu)
 
 void MLibTestApp::DoAbout()
 {
-	DisplayAlert(nullptr, "about-alert", { "x", kRevision });
+	DisplayAlert(nullptr, "about-alert", { "x", kVersionString });
 }
 
 void MLibTestApp::DoQuit()

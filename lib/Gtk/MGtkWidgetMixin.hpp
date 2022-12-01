@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <memory>
 
 #include "MError.hpp"
 #include "MAlerts.hpp"
