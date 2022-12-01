@@ -1221,7 +1221,7 @@ MTable::MTable(const std::string &inID, MRect inBounds, MView *inChildren[],
 		}
 	}
 
-	int32_t x, y = 0;
+	int32_t x = 0, y = 0;
 
 	for (uint32_t r = 0; r < mRows; ++r)
 	{

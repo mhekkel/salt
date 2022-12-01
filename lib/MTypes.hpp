@@ -18,14 +18,6 @@ struct MRect
 
 	MRect() {}
 
-	MRect(const MRect &inRHS)
-		: x(inRHS.x)
-		, y(inRHS.y)
-		, width(inRHS.width)
-		, height(inRHS.height)
-	{
-	}
-
 	MRect(int32_t inX, int32_t inY, int32_t inWidth, int32_t inHeight)
 		: x(inX)
 		, y(inY)
@@ -34,26 +26,29 @@ struct MRect
 	{
 	}
 
+	MRect(const MRect &) = default;
+	MRect &operator=(const MRect &) = default;
+
 	bool Intersects(const MRect &inRHS) const
 
 	{
 		return x < inRHS.x + inRHS.width and
-			   x + width > inRHS.x and
-			   y < inRHS.y + inRHS.height and
-			   y + height > inRHS.y;
+		       x + width > inRHS.x and
+		       y < inRHS.y + inRHS.height and
+		       y + height > inRHS.y;
 	}
 
 	bool ContainsPoint(int32_t inX, int32_t inY) const
 	{
 		return x <= inX and x + width > inX and
-			   y <= inY and y + height > inY;
+		       y <= inY and y + height > inY;
 	}
 
 	void PinPoint(int32_t &ioX, int32_t &ioY) const;
 	void InsetBy(int32_t inDeltaX, int32_t inDeltaY);
 
 	bool empty() const;
-	explicit operator bool() const		{ return not empty(); }
+	explicit operator bool() const { return not empty(); }
 
 	// Intersection
 	MRect operator&(const MRect &inRegion);
@@ -66,13 +61,13 @@ struct MRect
 	bool operator==(const MRect &inRect) const
 	{
 		return x == inRect.x and y == inRect.y and
-			   width == inRect.width and height == inRect.height;
+		       width == inRect.width and height == inRect.height;
 	}
 
 	bool operator!=(const MRect &inRect) const
 	{
 		return x != inRect.x or y != inRect.y or
-			   width != inRect.width or height != inRect.height;
+		       width != inRect.width or height != inRect.height;
 	}
 };
 

@@ -175,8 +175,7 @@ GdkPixbuf *CreateDot(MColor inColor, uint32_t inSize)
 
 #include <dlfcn.h>
 
-void OpenURI(
-	const string &inURI)
+void OpenURI(const string &inURI)
 {
 	bool opened = false;
 

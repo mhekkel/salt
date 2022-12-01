@@ -5,10 +5,10 @@
 
 #include "MTypes.hpp"
 
+#include <cassert>
 #include <deque>
 #include <string>
 #include <vector>
-#include <cassert>
 
 // --------------------------------------------------------------------
 // Terminal buffer code. We keep a history of the screen content.
@@ -18,22 +18,22 @@
 
 enum MCharStyle
 {
-	kStyleNormal	= 0,
-	kStyleBold		= 1 << 0,
-	kStyleUnderline	= 1 << 1,
-	kStyleBlink		= 1 << 2,
-	kStyleInverse	= 1 << 3,
-	kStyleInvisible	= 1 << 4,
-	
+	kStyleNormal = 0,
+	kStyleBold = 1 << 0,
+	kStyleUnderline = 1 << 1,
+	kStyleBlink = 1 << 2,
+	kStyleInverse = 1 << 3,
+	kStyleInvisible = 1 << 4,
+
 	// not really a style...
-	kUnerasable		= 1 << 5,
-	kProtected		= 1 << 6
+	kUnerasable = 1 << 5,
+	kProtected = 1 << 6
 };
 
 enum MXTermColor
 {
 	kXTermColorNone = 256,
-	
+
 	kXTermColorBlack = 0,
 	kXTermColorRed,
 	kXTermColorGreen,
@@ -55,23 +55,32 @@ enum MXTermColor
 
 class MStyle
 {
-	enum { kForeColorMask = 0x01ff0000, kBackColorMask = 0x0000ff80, kFgShift = 16, kBgShift = 7,
-		kDefaultStyle = kXTermColorNone << kFgShift | kXTermColorNone << kBgShift };
+	enum
+	{
+		kForeColorMask = 0x01ff0000,
+		kBackColorMask = 0x0000ff80,
+		kFgShift = 16,
+		kBgShift = 7,
+		kDefaultStyle = kXTermColorNone << kFgShift | kXTermColorNone << kBgShift
+	};
 
   public:
-	MStyle() : mData(kDefaultStyle)
+	MStyle()
+		: mData(kDefaultStyle)
 	{
 		static_assert(sizeof(MStyle) == 4, "style should be four bytes");
 	}
 
-	explicit MStyle(MCharStyle inStyle) : mData(inStyle)
+	explicit MStyle(MCharStyle inStyle)
+		: mData(inStyle)
 	{
 		SetForeColor(kXTermColorNone);
 		SetBackColor(kXTermColorNone);
 	}
-//	explicit MStyle(uint32_t inValue) : mData(inValue) {}
-	
-	MStyle(MXTermColor inForeColor, MXTermColor inBackColor) : mData(0)
+	//	explicit MStyle(uint32_t inValue) : mData(inValue) {}
+
+	MStyle(MXTermColor inForeColor, MXTermColor inBackColor)
+		: mData(0)
 	{
 		SetForeColor(inForeColor);
 		SetBackColor(inBackColor);
@@ -81,12 +90,12 @@ class MStyle
 	{
 		return (mData & inStyle) != 0;
 	}
-	
+
 	operator uint32_t() const
 	{
 		return mData;
 	}
-	
+
 	void SetFlag(MCharStyle inStyle)
 	{
 		mData |= inStyle;
@@ -106,7 +115,7 @@ class MStyle
 	{
 		switch (inMode)
 		{
-			case 0: mData &= ~(kStyleBold|kStyleUnderline|kStyleInverse|kStyleBlink); break;
+			case 0: mData &= ~(kStyleBold | kStyleUnderline | kStyleInverse | kStyleBlink); break;
 			case 1: mData |= kStyleBold; break;
 			case 4: mData |= kStyleUnderline; break;
 			case 5: mData |= kStyleBlink; break;
@@ -128,7 +137,7 @@ class MStyle
 		mData &= ~kForeColorMask;
 		mData |= ((uint32_t)inColor << kFgShift) & kForeColorMask;
 	}
-  	
+
 	MXTermColor GetBackColor() const
 	{
 		return (MXTermColor)((mData & kBackColorMask) >> kBgShift);
@@ -139,9 +148,9 @@ class MStyle
 		mData &= ~kBackColorMask;
 		mData |= ((uint32_t)inColor << kBgShift) & kBackColorMask;
 	}
-  	
+
   private:
-	uint32_t	mData;
+	uint32_t mData;
 };
 
 // MChar is a container for both a unicode and the style associated with
@@ -154,48 +163,78 @@ class MStyle
 class MChar
 {
   public:
+	//	enum
+	//	{
+	////		kCharMask	= 0x001fffff,
+	//		kCharMask	= 0x0001ffff,
+	////		kStyleMask	= 0xffe00000
+	//		kStyleMask	= 0xfffe0000
+	//	};
+	//
+	MChar()
+		: mUnicode(' ')
+	{
+	}
+	MChar(MXTermColor inForeColor, MXTermColor inBackColor)
+		: mUnicode(' ')
+		, mStyle(inForeColor, inBackColor)
+	{
+	}
+	MChar(unicode inChar, MStyle inStyle)
+		: mUnicode(inChar)
+		, mStyle(inStyle)
+	{
+	}
+	MChar(const MChar &inChar)
+		: mUnicode(inChar.mUnicode)
+		, mStyle(inChar.mStyle)
+	{
+	}
 
-//	enum
-//	{
-////		kCharMask	= 0x001fffff,
-//		kCharMask	= 0x0001ffff,
-////		kStyleMask	= 0xffe00000
-//		kStyleMask	= 0xfffe0000
-//	};
-//
-				MChar()									: mUnicode(' ') {}
-				MChar(MXTermColor inForeColor, MXTermColor inBackColor)
-					: mUnicode(' '), mStyle(inForeColor, inBackColor) {}
-				MChar(unicode inChar, MStyle inStyle)	: mUnicode(inChar), mStyle(inStyle) {}
-				MChar(const MChar& inChar)				: mUnicode(inChar.mUnicode), mStyle(inChar.mStyle) {}
+	MChar &operator=(const MChar &inChar)
+	{
+		mUnicode = inChar.mUnicode;
+		mStyle = inChar.mStyle;
+		return *this;
+	}
+	MChar &operator=(unicode inChar)
+	{
+		mUnicode = inChar;
+		return *this;
+	}
+	MChar &operator=(char inChar)
+	{
+		mUnicode = inChar;
+		return *this;
+	}
+	MChar &operator=(MStyle inStyle)
+	{
+		mStyle = inStyle;
+		return *this;
+	}
 
-	MChar&		operator=(const MChar& inChar)			{ mUnicode = inChar.mUnicode; mStyle = inChar.mStyle; return *this; }
-	MChar&		operator=(unicode inChar)				{ mUnicode = inChar; return *this; }
-	MChar&		operator=(char inChar)					{ mUnicode = inChar; return *this; }
-	MChar&		operator=(MStyle inStyle)				{ mStyle = inStyle; return *this; }
+	bool operator==(char rhs) const { return mUnicode == static_cast<uint32_t>(rhs); }
+	bool operator==(unicode rhs) const { return mUnicode == rhs; }
+	bool operator==(MStyle rhs) const { return mStyle == rhs; }
 
-	bool		operator==(char rhs) const				{ return mUnicode == static_cast<uint32_t>(rhs); }
-	bool		operator==(unicode rhs) const			{ return mUnicode == rhs; }
-	bool		operator==(MStyle rhs) const			{ return mStyle == rhs; }
+	bool operator!=(char rhs) const { return mUnicode != static_cast<uint32_t>(rhs); }
+	bool operator!=(unicode rhs) const { return mUnicode != rhs; }
+	bool operator!=(MStyle rhs) const { return mStyle != rhs; }
 
-	bool		operator!=(char rhs) const				{ return mUnicode != static_cast<uint32_t>(rhs); }
-	bool		operator!=(unicode rhs) const			{ return mUnicode != rhs; }
-	bool		operator!=(MStyle rhs) const			{ return mStyle != rhs; }
+	bool operator&(MCharStyle inStyle) const { return (mStyle & inStyle) != 0; }
 
-	bool		operator&(MCharStyle inStyle) const		{ return (mStyle & inStyle) != 0; }
-	
-	void		operator|=(uint32_t inStyle)				{ mStyle.SetFlag((MCharStyle)inStyle); }
-	void		operator&=(uint32_t inStyle)				{ mStyle.ClearFlag((MCharStyle)inStyle); }
+	void operator|=(uint32_t inStyle) { mStyle.SetFlag((MCharStyle)inStyle); }
+	void operator&=(uint32_t inStyle) { mStyle.ClearFlag((MCharStyle)inStyle); }
 
-	void		ReverseFlag(MCharStyle inStyle)			{ mStyle.ReverseFlag(inStyle); }
-	void		ChangeFlags(uint32_t inMode)				{ mStyle.ChangeFlags(inMode); }
-	
-				operator unicode () const				{ return mUnicode; }
-				operator MStyle () const				{ return mStyle; }
+	void ReverseFlag(MCharStyle inStyle) { mStyle.ReverseFlag(inStyle); }
+	void ChangeFlags(uint32_t inMode) { mStyle.ChangeFlags(inMode); }
+
+	operator unicode() const { return mUnicode; }
+	operator MStyle() const { return mStyle; }
 
   private:
-	uint32_t		mUnicode;
-	MStyle		mStyle;
+	uint32_t mUnicode;
+	MStyle mStyle;
 };
 
 // --------------------------------------------------------------------
@@ -204,50 +243,65 @@ class MChar
 class MLine
 {
   public:
-					MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor);
-					MLine(const MLine& rhs);
-					~MLine();
+	MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor);
+	MLine(const MLine &rhs);
+	~MLine();
 
-	MLine&			operator=(const MLine& rhs);
-	
-	void			Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor, MXTermColor inBackColor);
-	void			Insert(uint32_t inColumn, uint32_t inWidth);
-	
-	MChar&			operator[](uint32_t inColumn)			{ assert(inColumn < mSize); return mCharacters[inColumn]; }
-	MChar			operator[](uint32_t inColumn) const	{ assert(inColumn < mSize); return mCharacters[inColumn]; }
+	MLine &operator=(const MLine &rhs);
 
-	void			swap(MLine& rhs);
+	void Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor, MXTermColor inBackColor);
+	void Insert(uint32_t inColumn, uint32_t inWidth);
 
-	bool			IsSoftWrapped() const				{ return mSoftWrapped; }
-	void			SetSoftWrapped(bool inSoftWrapped)	{ mSoftWrapped = inSoftWrapped; }
-	
-	bool			IsDoubleWidth() const				{ return mDoubleWidth; }
-	bool			IsDoubleHeight() const				{ return mDoubleHeight; }
-	bool			IsDoubleHeightTop() const			{ return mDoubleHeightTop; }
+	MChar &operator[](uint32_t inColumn)
+	{
+		assert(inColumn < mSize);
+		return mCharacters[inColumn];
+	}
+	MChar operator[](uint32_t inColumn) const
+	{
+		assert(inColumn < mSize);
+		return mCharacters[inColumn];
+	}
 
-	void			SetDoubleWidth()					{ mDoubleWidth = true; mDoubleHeight = false; }
-	void			SetDoubleHeight(bool inTop)			{ mDoubleHeight = true; mDoubleHeightTop = inTop; }
-	void			SetSingleWidth()					{ mDoubleHeight = mDoubleWidth = false; }
+	void swap(MLine &rhs);
 
-	template<class OutputIterator>
-	void			CopyOut(OutputIterator iter) const;
+	bool IsSoftWrapped() const { return mSoftWrapped; }
+	void SetSoftWrapped(bool inSoftWrapped) { mSoftWrapped = inSoftWrapped; }
+
+	bool IsDoubleWidth() const { return mDoubleWidth; }
+	bool IsDoubleHeight() const { return mDoubleHeight; }
+	bool IsDoubleHeightTop() const { return mDoubleHeightTop; }
+
+	void SetDoubleWidth()
+	{
+		mDoubleWidth = true;
+		mDoubleHeight = false;
+	}
+	void SetDoubleHeight(bool inTop)
+	{
+		mDoubleHeight = true;
+		mDoubleHeightTop = inTop;
+	}
+	void SetSingleWidth() { mDoubleHeight = mDoubleWidth = false; }
+
+	template <class OutputIterator>
+	void CopyOut(OutputIterator iter) const;
 
   private:
-	MChar*			mCharacters;
-	uint32_t			mSize;
-	bool			mSoftWrapped;
-	bool			mDoubleWidth, mDoubleHeight, mDoubleHeightTop;
+	MChar *mCharacters;
+	uint32_t mSize;
+	bool mSoftWrapped;
+	bool mDoubleWidth = false, mDoubleHeight = false, mDoubleHeightTop = false;
 };
 
 namespace std
 {
-	template<>
-	inline
-	void swap(MLine& a, MLine& b)
-	{
-		a.swap(b);
-	}
+template <>
+inline void swap(MLine &a, MLine &b)
+{
+	a.swap(b);
 }
+} // namespace std
 
 // --------------------------------------------------------------------
 // And all the lines together for a buffer. We store the lines in a
@@ -260,110 +314,109 @@ namespace std
 class MTerminalBuffer
 {
   public:
-					MTerminalBuffer(uint32_t inWidth, uint32_t inHeight, bool inBuffer);
-	virtual			~MTerminalBuffer();
+	MTerminalBuffer(uint32_t inWidth, uint32_t inHeight, bool inBuffer);
+	virtual ~MTerminalBuffer();
 
-	void			SetBufferSize(uint32_t inBufferSize)				{ mBufferSize = inBufferSize; }
-	
-	const MLine&	GetLine(int32_t inLine) const;
+	void SetBufferSize(uint32_t inBufferSize) { mBufferSize = inBufferSize; }
 
-					// anchor line is recalculated in Resize to help to 
-					// adjust scrollbar.
-	void			Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnchorLine);
+	const MLine &GetLine(int32_t inLine) const;
 
-	void			SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar, MStyle inStyle = MStyle());
+	// anchor line is recalculated in Resize to help to
+	// adjust scrollbar.
+	void Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnchorLine);
 
-	template<typename Handler>
-	void			ForeachInRectangle(int32_t inFromLine, int32_t inFromColumn,
-						int32_t inToLine, int32_t inToColumn, Handler&& inHandler)
+	void SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar, MStyle inStyle = MStyle());
+
+	template <typename Handler>
+	void ForeachInRectangle(int32_t inFromLine, int32_t inFromColumn,
+		int32_t inToLine, int32_t inToColumn, Handler &&inHandler)
 	{
 		for (int32_t li = inFromLine; li <= inToLine; ++li)
 		{
 			if (li >= static_cast<int32_t>(mLines.size()))
 				break;
-			
-			MLine& line(mLines[li]);
-			
+
+			MLine &line(mLines[li]);
+
 			for (int32_t ci = inFromColumn; ci <= inToColumn; ++ci)
 			{
 				if (ci >= static_cast<int32_t>(mWidth))
 					break;
-				
+
 				inHandler(line[ci], li, ci);
 			}
 		}
 	}
-	
-	void			ReverseFlag(uint32_t inFromLine, uint32_t inFromColumn,
-						uint32_t inToLine, uint32_t inToColumn, MCharStyle inFlags);
-	void			ChangeFlags(uint32_t inFromLine, uint32_t inFromColumn,
-						uint32_t inToLine, uint32_t inToColumn, uint32_t inMode);
 
-	void			ScrollForward(uint32_t inFromLine, uint32_t inToLine,
-						uint32_t inLeftMargin, uint32_t inRightMargin);
-	void			ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
-						uint32_t inLeftMargin, uint32_t inRightMargin);
+	void ReverseFlag(uint32_t inFromLine, uint32_t inFromColumn,
+		uint32_t inToLine, uint32_t inToColumn, MCharStyle inFlags);
+	void ChangeFlags(uint32_t inFromLine, uint32_t inFromColumn,
+		uint32_t inToLine, uint32_t inToColumn, uint32_t inMode);
 
-	void			Clear();
+	void ScrollForward(uint32_t inFromLine, uint32_t inToLine,
+		uint32_t inLeftMargin, uint32_t inRightMargin);
+	void ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
+		uint32_t inLeftMargin, uint32_t inRightMargin);
 
-	void			EraseDisplay(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective);
-	void			EraseLine(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective);
-	void			EraseCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inCount);
-	void			InsertCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth = 0);
-	void			DeleteCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth = 0);
-	
-	void			WrapLine(uint32_t inLine);
-	
-	void			SetLineDoubleWidth(uint32_t inLine);
-	void			SetLineDoubleHeight(uint32_t inLine, bool inTop);
-	void			SetLineSingleWidth(uint32_t inLine);
+	void Clear();
 
-	void			FillWithE();		// for DECALN
-	
-	void			SetDirty(bool inDirty)			{ mDirty = inDirty; }
-	bool			IsDirty() const					{ return mDirty; }
-	
-	bool			IsSelectionEmpty() const;
-	bool			IsSelectionBlock() const;
+	void EraseDisplay(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective);
+	void EraseLine(uint32_t inLine, uint32_t inColumn, uint32_t inMode, bool inSelective);
+	void EraseCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inCount);
+	void InsertCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth = 0);
+	void DeleteCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth = 0);
 
-	void			GetSelectionBegin(int32_t& outLine, int32_t& outColumn) const;
-	void			GetSelectionEnd(int32_t& outLine, int32_t& outColumn) const;
-	void			GetSelection(int32_t& outBeginLine, int32_t& outBeginColumn,
-						int32_t& outEndLine, int32_t& outEndColumn, bool& outIsBlock) const;
+	void WrapLine(uint32_t inLine);
 
-	void			SetSelection(int32_t inBeginLine, int32_t inBeginColumn,
-						int32_t inEndLine, int32_t inEndColumn, bool inBlock = false);
-	void			SelectAll();
-	void			ClearSelection();
+	void SetLineDoubleWidth(uint32_t inLine);
+	void SetLineDoubleHeight(uint32_t inLine, bool inTop);
+	void SetLineSingleWidth(uint32_t inLine);
 
-	void			SetColors(MXTermColor inForeColor, MXTermColor inBackColor)
+	void FillWithE(); // for DECALN
+
+	void SetDirty(bool inDirty) { mDirty = inDirty; }
+	bool IsDirty() const { return mDirty; }
+
+	bool IsSelectionEmpty() const;
+	bool IsSelectionBlock() const;
+
+	void GetSelectionBegin(int32_t &outLine, int32_t &outColumn) const;
+	void GetSelectionEnd(int32_t &outLine, int32_t &outColumn) const;
+	void GetSelection(int32_t &outBeginLine, int32_t &outBeginColumn,
+		int32_t &outEndLine, int32_t &outEndColumn, bool &outIsBlock) const;
+
+	void SetSelection(int32_t inBeginLine, int32_t inBeginColumn,
+		int32_t inEndLine, int32_t inEndColumn, bool inBlock = false);
+	void SelectAll();
+	void ClearSelection();
+
+	void SetColors(MXTermColor inForeColor, MXTermColor inBackColor)
 	{
 		mForeColor = inForeColor;
 		mBackColor = inBackColor;
 	}
 
-	void			FindWord(int32_t inLine, int32_t inColumn, int32_t& outBeginLine, int32_t& outBeginColumn,
-						int32_t& outEndLine, int32_t& outEndColumn);
+	void FindWord(int32_t inLine, int32_t inColumn, int32_t &outBeginLine, int32_t &outBeginColumn,
+		int32_t &outEndLine, int32_t &outEndColumn);
 
-	std::string		GetSelectedText() const;
-	
-	int32_t			BufferedLines() const			{ return static_cast<int32_t>(mBuffer.size()); }
-	
-	bool			FindNext(int32_t& ioLine, int32_t& ioColumn, const std::string& inWhat,
-						bool inIgnoreCase, bool inWrapAround);
-	bool			FindPrevious(int32_t& ioLine, int32_t& ioColumn, const std::string& inWhat,
-						bool inIgnoreCase, bool inWrapAround);
+	std::string GetSelectedText() const;
+
+	int32_t BufferedLines() const { return static_cast<int32_t>(mBuffer.size()); }
+
+	bool FindNext(int32_t &ioLine, int32_t &ioColumn, const std::string &inWhat,
+		bool inIgnoreCase, bool inWrapAround);
+	bool FindPrevious(int32_t &ioLine, int32_t &ioColumn, const std::string &inWhat,
+		bool inIgnoreCase, bool inWrapAround);
 
   private:
+	unicode GetChar(uint32_t inOffset, bool inToLower) const;
 
-	unicode			GetChar(uint32_t inOffset, bool inToLower) const;
-
-	std::deque<MLine>	mBuffer;
-	uint32_t				mBufferSize;
-	std::vector<MLine>	mLines;
-	uint32_t				mWidth;
-	bool				mDirty;
-	int32_t				mBeginLine, mBeginColumn, mEndLine, mEndColumn;
-	bool				mBlockSelection;
-	MXTermColor			mForeColor, mBackColor;
+	std::deque<MLine> mBuffer;
+	uint32_t mBufferSize;
+	std::vector<MLine> mLines;
+	uint32_t mWidth;
+	bool mDirty;
+	int32_t mBeginLine, mBeginColumn, mEndLine, mEndColumn;
+	bool mBlockSelection;
+	MXTermColor mForeColor, mBackColor;
 };

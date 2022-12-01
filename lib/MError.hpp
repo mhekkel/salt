@@ -42,7 +42,7 @@ class StOKToThrow
 
 #define SIGNAL_THROW(a)
 
-#define PRINT(x)
+#define PRINT(x) {}
 
 #else
 

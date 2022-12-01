@@ -644,8 +644,8 @@ void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inR
 MRect MTerminalView::GetCharacterBounds(uint32_t inLine, uint32_t inColumn)
 {
 	return {
-		kBorderWidth + static_cast<int32_t>(ceil(inColumn * mCharWidth)),
-		kBorderWidth + inLine * mLineHeight,
+		static_cast<int32_t>(kBorderWidth + ceil(inColumn * mCharWidth)),
+		static_cast<int32_t>(kBorderWidth + inLine * mLineHeight),
 		static_cast<int32_t>(ceil(mCharWidth)),
 		mLineHeight};
 }

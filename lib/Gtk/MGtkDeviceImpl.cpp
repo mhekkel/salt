@@ -68,32 +68,6 @@ MGtkDeviceImpl::MGtkDeviceImpl(
 	, mMetrics(nullptr)
 {
 	mPangoScale = PANGO_SCALE;
-
-	auto display = gdk_display_get_default();
-
-	if (GDK_IS_DISPLAY(display))
-	{
-		for (int nr = 0; nr < gdk_display_get_n_monitors(display); ++nr)
-		{
-			auto monitor = gdk_display_get_monitor(display, nr);
-
-			if (not GDK_IS_MONITOR(monitor))
-				continue;
-
-			GdkRectangle r;
-			gdk_monitor_get_geometry(monitor, &r);
-
-			auto width_mm = gdk_monitor_get_width_mm(monitor);
-			auto width_px = r.width;
-			auto res = width_px * 25.4 / width_mm;
-
-			mPangoScale = lrint(PANGO_SCALE * (96 / res));
-
-			pango_cairo_font_map_set_resolution((PangoCairoFontMap *)pango_cairo_font_map_get_default(), res);
-
-			break;
-		}
-	}
 }
 
 MGtkDeviceImpl::~MGtkDeviceImpl()

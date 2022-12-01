@@ -282,10 +282,10 @@ void SetCurrentDesktop(Display* display, long desktop)
 
 bool ActivateWindow(Display* display, Window window)
 {
+	// See: https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm46463187634240
+
 	long desktop = GetDesktopForWindow(display, window);
 	long current = GetCurrentDesktop(display);
-	
-//	PRINT(("ActivateWindow, desktop = %ld, current = %ld", desktop, current));
 	
 	if (desktop != current and desktop != -1)
 		SetCurrentDesktop(display, desktop);
@@ -296,7 +296,7 @@ bool ActivateWindow(Display* display, Window window)
 	xev.xclient.window = window;
 	xev.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
 	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = 2;	// window pager... is dat echt wat we willen?
+	xev.xclient.data.l[0] = 1;	// Comes from an application
 	xev.xclient.data.l[1] = CurrentTime;
 	
 	XWindowAttributes attr;
@@ -304,7 +304,7 @@ bool ActivateWindow(Display* display, Window window)
 	int ret = XSendEvent(display, attr.screen->root, False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 	
 	if (ret == 0)
-	//	PRINT(("_NET_ACTIVE_WINDOW failed"));
+		PRINT(("_NET_ACTIVE_WINDOW failed"));
 
 	return ret != 0;
 }
@@ -313,16 +313,20 @@ void MGtkWindowImpl::Select()
 {
 //	PRINT(("Select Window (%p)", std::this_thread::get_id()));
 
+	auto gdkWindow = gtk_widget_get_window(GetWidget());
+
 #warning("fixme")
 	auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
-	auto w = gdk_x11_window_get_xid(gtk_widget_get_window(GetWidget()));
+	auto w = gdk_x11_window_get_xid(gdkWindow);
 
 	if (d and w)
 		ActivateWindow(d, w);
+	else
+		gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
 
 	if (Visible())
 	{
-		gdk_window_raise(gtk_widget_get_window(GetWidget()));
+		gdk_window_raise(gdkWindow);
 		gtk_window_present(GTK_WINDOW(GetWidget()));
 	}
 	else
@@ -920,6 +924,12 @@ MWindowImpl* MWindowImpl::Create(const string& inTitle, MRect inBounds,
 
 void MWindow::GetMainScreenBounds(MRect& outRect)
 {
-	outRect = MRect(0, 0, 1024, 768);
+	auto display = gdk_display_get_default();
+	auto monitor = gdk_display_get_primary_monitor(display);
+
+	GdkRectangle r{0, 0, 1024, 768};
+	gdk_monitor_get_workarea(monitor, &r);
+
+	outRect = MRect(r.x, r.y, r.width, r.height);
 }
 
