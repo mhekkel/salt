@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include <list>
-#include <vector>
 #include <deque>
 #include <filesystem>
+#include <list>
+#include <vector>
 
-#include "MTypes.hpp"
+#include "MApplicationImpl.hpp"
 #include "MHandler.hpp"
 #include "MP2PEvents.hpp"
-#include "MApplicationImpl.hpp"
+#include "MTypes.hpp"
 
 extern const char kAppName[], kVersionString[];
 
@@ -25,7 +25,7 @@ class MWindow;
 
 class MApplication : public MHandler
 {
-public:
+  public:
 	static MApplication *Create(MApplicationImpl *inImpl);
 	static void Install(const std::string &inPrefix);
 
@@ -37,9 +37,9 @@ public:
 	virtual void Open(const std::string &inURL);
 
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex,
-									 bool &outEnabled, bool &outChecked);
+		bool &outEnabled, bool &outChecked);
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex,
-								uint32_t inModifiers);
+		uint32_t inModifiers);
 
 	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
 	virtual void UpdateWindowMenu(MMenu *inMenu);
@@ -55,22 +55,24 @@ public:
 	bool IsQuitting() const { return mQuitPending; }
 	void CancelQuit() { mQuitPending = false; }
 
-	MApplicationImpl& get_executor()
+	MApplicationImpl &get_executor()
 	{
 		return *mImpl;
 	}
 
-	boost::asio::execution_context& get_context()
+	boost::asio::execution_context &get_context()
 	{
 		return *mImpl->mExContext;
 	}
 
-	boost::asio::io_context& get_io_context()
+	boost::asio::io_context &get_io_context()
 	{
 		return mImpl->mIOContext;
 	}
 
-protected:
+	static int Main(std::initializer_list<std::string> argv);
+
+  protected:
 	MApplication(MApplicationImpl *inImpl);
 
 	typedef std::list<MWindow *> MWindowList;
@@ -93,7 +95,7 @@ extern MApplication *gApp;
 
 class MAppExecutor
 {
-public:
+  public:
 	boost::asio::execution_context *m_context;
 
 	bool operator==(const MAppExecutor &other) const noexcept
@@ -124,4 +126,3 @@ public:
 		gApp->get_executor().execute(std::move(f));
 	}
 };
-

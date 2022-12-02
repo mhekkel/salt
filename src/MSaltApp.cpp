@@ -14,6 +14,7 @@
 
 #include <pinch/ssh_agent.hpp>
 
+#include <mcfp/mcfp.hpp>
 #include <zeep/crypto.hpp>
 
 #include "MAcceleratorTable.hpp"
@@ -31,6 +32,7 @@
 #include "MPreferences.hpp"
 #include "MUtils.hpp"
 #include "mrsrc.hpp"
+#include "revision.hpp"
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "libpinch")
@@ -204,11 +206,11 @@ bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t 
 			break;
 		}
 
-			//#if DEBUG
+			// #if DEBUG
 			//		case 'test':
 			//			new MTestWindow();
 			//			break;
-			//#endif
+			// #endif
 
 		default:
 			result = MApplication::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
@@ -287,9 +289,14 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 
 		if (std::regex_match(recent, m, kRecentRE))
 		{
-			inMenu->AppendItem(m[1].str() + "@"s + m[2].str() +
-								   (m[3].matched ? (":"s + m[3].str()) : ""),
-				cmd_OpenRecentSession);
+			std::string label = m[1].str() + "@"s + m[2].str() +
+			                    (m[3].matched ? (":"s + m[3].str()) : "");
+
+			if (m[5].matched)
+				label += " (" + m[4].str() + "@"s + m[5].str() +
+				         (m[6].matched ? (":"s + m[6].str()) : "") + ")";
+
+			inMenu->AppendItem(label, cmd_OpenRecentSession);
 		}
 	}
 }
@@ -369,8 +376,8 @@ void MSaltApp::OpenRecent(const string &inRecent)
 
 void MSaltApp::DoAbout()
 {
-// TODO: fix package version string
-	DisplayAlert(nullptr, "about-alert", {GetApplicationVersion(), "PACKAGE_VERSION"});
+	// TODO: fix package version string
+	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kVersionGitTag });
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
@@ -433,7 +440,7 @@ void MSaltApp::Open(const string &inFile)
 void MApplication::Install(const string &inPrefix)
 {
 	if (getuid() != 0)
-		throw runtime_error("You must be root to be able to install japi");
+		throw runtime_error("You must be root to be able to install salt");
 
 	if (not fs::exists(gExecutablePath))
 		throw runtime_error(string("I don't seem to exist...?") + gExecutablePath.string());
@@ -515,3 +522,53 @@ void MApplication::Install(const string &inPrefix)
 }
 
 #endif
+
+// --------------------------------------------------------------------
+
+int main(int argc, char *const argv[])
+{
+	auto &config = mcfp::config::instance();
+
+	config.init("usage: salt [options] [url-to-open]",
+		mcfp::make_option("help,h", "Display this message"),
+		mcfp::make_option("version", "Show version number"),
+		mcfp::make_option("connect,c", "Show connect dialog"),
+		mcfp::make_option("install,i", "Install the application"),
+		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix, default is /usr/local"));
+
+	std::error_code ec;
+	config.parse(argc, argv, ec);
+	if (ec)
+	{
+		std::cerr << ec.message() << std::endl;
+		exit(1);
+	}
+
+	if (config.has("help"))
+	{
+		cerr << config << endl;
+		exit(0);
+	}
+
+	if (config.has("version"))
+	{
+		write_version_string(cout, false);
+		exit(0);
+	}
+
+	if (config.has("install"))
+	{
+		gExecutablePath = fs::canonical(argv[0]);
+
+		string prefix = config.get<std::string>("prefix");
+		MApplication::Install(prefix);
+		exit(0);
+	}
+
+	if (config.has("connect"))
+		return MApplication::Main({ "Connect" });
+	else if (config.operands().empty())
+		return MApplication::Main({ "New" });
+	else
+		return MApplication::Main({ "Open", config.operands().front() });
+}

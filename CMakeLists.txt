@@ -137,6 +137,7 @@ find_package(Filesystem REQUIRED)
 # find_package(pinch)
 
 add_subdirectory(pinch EXCLUDE_FROM_ALL)
+add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
 
 find_package(zeep 5.1.6 REQUIRED)
 
@@ -353,7 +354,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${GTK3_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch Threads::Threads ${GTK3_LIBRARIES} dl util)
+target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads ${GTK3_LIBRARIES} dl util)
 
 if(USE_RSRC)
 	mrc_target_resources(salt ${RESOURCES})

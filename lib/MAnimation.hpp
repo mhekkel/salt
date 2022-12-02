@@ -14,48 +14,48 @@ class MStoryboardImpl;
 class MAnimationVariable
 {
   public:
-							MAnimationVariable(MAnimationVariableImpl* inImpl);
-							~MAnimationVariable();
+	MAnimationVariable(MAnimationVariableImpl *inImpl);
+	~MAnimationVariable();
 
-	double					GetValue() const;
+	double GetValue() const;
 
-	MAnimationVariableImpl*	GetImpl()				{ return mImpl; }
+	MAnimationVariableImpl *GetImpl() { return mImpl; }
 
   private:
-	MAnimationVariableImpl*	mImpl;
+	MAnimationVariableImpl *mImpl;
 };
 
 class MStoryboard
 {
   public:
-							MStoryboard(MStoryboardImpl* inImpl);
-							~MStoryboard();
+	MStoryboard(MStoryboardImpl *inImpl);
+	~MStoryboard();
 
-	void					AddTransition(MAnimationVariable* inVariable,
-								double inNewValue, double inDuration,
-								const char* inTransitionName);
+	void AddTransition(MAnimationVariable *inVariable,
+		double inNewValue, double inDuration,
+		const char *inTransitionName);
 
-	MStoryboardImpl*		GetImpl()				{ return mImpl; }
+	MStoryboardImpl *GetImpl() { return mImpl; }
 
   private:
-	MStoryboardImpl*		mImpl;
+	MStoryboardImpl *mImpl;
 };
 
 class MAnimationManager
 {
   public:
-							MAnimationManager();
-							~MAnimationManager();
-	
-	MEventOut<void()>		eAnimate;
-	
-	bool					Update();
-	void					Stop();
-	
-	MAnimationVariable*		CreateVariable(double inValue, double inMin, double inMax);
-	MStoryboard*			CreateStoryboard();
-	void					Schedule(MStoryboard* inStoryboard);
-	
+	MAnimationManager();
+	~MAnimationManager();
+
+	MEventOut<void()> eAnimate;
+
+	bool Update();
+	void Stop();
+
+	MAnimationVariable *CreateVariable(double inValue, double inMin, double inMax);
+	MStoryboard *CreateStoryboard();
+	void Schedule(MStoryboard *inStoryboard);
+
   private:
-	MAnimationManagerImpl*	mImpl;
+	MAnimationManagerImpl *mImpl;
 };

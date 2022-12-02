@@ -17,8 +17,6 @@
 #include "MError.hpp"
 #include "MGtkApplicationImpl.hpp"
 
-#include "../../src/revision.hpp"
-
 using namespace std;
 namespace fs = std::filesystem;
 namespace ba = boost::algorithm;
@@ -33,12 +31,12 @@ MGtkApplicationImpl *MGtkApplicationImpl::sInstance = nullptr;
 class MGDbusServer
 {
   public:
-	MGDbusServer(const string &inOpenParameter)
+	MGDbusServer(std::vector<std::string> &&argv)
 		: mIntrospectionData(nullptr)
 		, mOwnerId(0)
 		, mRegistrationID(0)
 		, mWatcherID(0)
-		, mOpenParameter(inOpenParameter)
+		, mArguments(argv)
 	{
 		static const char my_server_xml[] =
 			"<node>"
@@ -99,16 +97,16 @@ class MGDbusServer
 
 	void NameAcquired(GDBusConnection *connection, const char *name)
 	{
-PRINT(("Name: %s", name));
-		if (mOpenParameter.empty())
+		if (mArguments.empty() or mArguments.front() == "New")
 			gApp->DoNew();
+		else if (mArguments.front() == "Connect")
+			gApp->ProcessCommand('Conn', nullptr, 0, 0);
 		else
-			gApp->Open(mOpenParameter);
+			gApp->Open(mArguments.back());
 	}
 
 	void NameLost(GDBusConnection *connection, const char *name)
 	{
-PRINT(("Name Lost: %s", name));
 		mWatcherID = g_bus_watch_name(G_BUS_TYPE_SESSION, MGDBUS_SERVER_NAME,
 			G_BUS_NAME_WATCHER_FLAGS_NONE, HandleNameAppeared, HandleNameVanished,
 			this, nullptr);
@@ -116,35 +114,17 @@ PRINT(("Name Lost: %s", name));
 
 	void NameAppeared(GDBusConnection *connection, const gchar *name, const char *name_owner)
 	{
-PRINT(("Name Appeared: %s", name));
-		if (mOpenParameter.empty())
-		{
-			g_dbus_connection_call(
-				connection,
-				MGDBUS_SERVER_NAME, MGDBUS_SERVER_OBJECT_NAME, MGDBUS_SERVER_NAME,
-				"New",
-				nullptr,
-				nullptr,
-				G_DBUS_CALL_FLAGS_NONE,
-				-1,
-				nullptr,
-				&HandleAsyncReady,
-				nullptr);
-		}
-		else
-		{
-			g_dbus_connection_call(
-				connection,
-				MGDBUS_SERVER_NAME, MGDBUS_SERVER_OBJECT_NAME, MGDBUS_SERVER_NAME,
-				"Open",
-				g_variant_new("(s)", mOpenParameter.c_str()),
-				nullptr,
-				G_DBUS_CALL_FLAGS_NONE,
-				-1,
-				nullptr,
-				&HandleAsyncReady,
-				nullptr);
-		}
+		g_dbus_connection_call(
+			connection,
+			MGDBUS_SERVER_NAME, MGDBUS_SERVER_OBJECT_NAME, MGDBUS_SERVER_NAME,
+			mArguments.front().c_str(),
+			mArguments.size() > 1 ? g_variant_new("(s)", mArguments.back().c_str()) : nullptr,
+			nullptr,
+			G_DBUS_CALL_FLAGS_NONE,
+			-1,
+			nullptr,
+			&HandleAsyncReady,
+			nullptr);
 	}
 
 	void AsyncReady(GDBusConnection *connection, GVariant *result, GError *error)
@@ -160,12 +140,12 @@ PRINT(("Name Appeared: %s", name));
 
 	void NameVanished(GDBusConnection *connection, const gchar *name)
 	{
-PRINT(("Name Vanished: %s", name));
+		PRINT(("Name Vanished: %s", name));
 		// something fishy... just open
-		if (mOpenParameter.empty())
-			gApp->DoNew();
-		else
-			gApp->Open(mOpenParameter);
+		// if (mOpenParameter.empty())
+		// 	gApp->DoNew();
+		// else
+		// 	gApp->Open(mOpenParameter);
 	}
 
 	void MethodCall(GDBusConnection *connection, const gchar *sender,
@@ -173,6 +153,7 @@ PRINT(("Name Vanished: %s", name));
 		const gchar *method_name, GVariant *parameters,
 		GDBusMethodInvocation *invocation)
 	{
+		PRINT(("MethodCall: %s", method_name));
 		try
 		{
 			if (strcmp(method_name, "Open") == 0)
@@ -252,7 +233,7 @@ PRINT(("Name Vanished: %s", name));
 
 	GDBusNodeInfo *mIntrospectionData;
 	uint32_t mOwnerId, mRegistrationID, mWatcherID;
-	string mOpenParameter;
+	std::vector<std::string> mArguments;
 };
 
 const GDBusInterfaceVTable MGDbusServer::sInterfaceVTable = {
@@ -284,35 +265,12 @@ void my_signal_handler(int inSignal)
 	}
 }
 
-int main(int argc, char *argv[])
+int MApplication::Main(std::initializer_list<std::string> argv)
 {
 	setenv("UBUNTU_MENUPROXY", "0", true);
 
 	try
 	{
-		auto &config = mcfp::config::instance();
-
-		config.init("usage: salt [options] [url-to-open]",
-			mcfp::make_option("help,h", "Display this message"),
-			mcfp::make_option("version", "Show version number"),
-			mcfp::make_option("connect,c", "Show connect dialog"),
-			mcfp::make_option("install,i", "Install the application"),
-			mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix, default is /usr/local"));
-
-		config.parse(argc, argv);
-
-		if (config.has("help"))
-		{
-			cerr << config << endl;
-			exit(0);
-		}
-
-		if (config.has("version"))
-		{
-			write_version_string(cout, false);
-			exit(0);
-		}
-
 		// First find out who we are. Uses proc filesystem to find out.
 		char exePath[PATH_MAX + 1];
 
@@ -324,24 +282,14 @@ int main(int argc, char *argv[])
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 
-		if (not fs::exists(gExecutablePath))
-			gExecutablePath = fs::canonical(argv[0]);
-
-		if (config.has("install"))
-		{
-			string prefix = config.get<std::string>("prefix");
-			MApplication::Install(prefix);
-			exit(0);
-		}
+		// if (not fs::exists(gExecutablePath))
+		// 	gExecutablePath = fs::canonical(argv[0]);
 
 		// gdk_threads_init();
-		gtk_init(&argc, &argv);
+		// gtk_init(&argc, &argv);
+		gtk_init(0, nullptr);
 
-		string url;
-		if (config.operands().size() > 0)
-			url = config.operands().front();
-
-		MGDbusServer dBusServer(url);
+		MGDbusServer dBusServer(argv);
 
 		unique_ptr<MApplication> app(MApplication::Create(
 			new MGtkApplicationImpl));
