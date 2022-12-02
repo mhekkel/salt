@@ -9,6 +9,7 @@
 
 #include "MAlerts.hpp"
 #include "MAnimation.hpp"
+#include "MApplicationImpl.hpp"
 #include "MAuthDialog.hpp"
 #include "MControls.hpp"
 #include "MError.hpp"
@@ -16,12 +17,12 @@
 #include "MPortForwardingDialog.hpp"
 #include "MPreferences.hpp"
 #include "MSaltApp.hpp"
-#include "MApplicationImpl.hpp"
 #include "MSearchPanel.hpp"
 #include "MStrings.hpp"
 #include "MTerminalChannel.hpp"
 #include "MTerminalView.hpp"
 #include "MTerminalWindow.hpp"
+#include "MPtyTerminalChannel.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;
@@ -35,7 +36,7 @@ class MSshTerminalWindow : public MTerminalWindow
 	MSshTerminalWindow(const string &inUser, const string &inHost, uint16_t inPort,
 		const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
-	MTerminalWindow *Clone()
+	MTerminalWindow *Clone(MTerminalWindow *)
 	{
 		return new MSshTerminalWindow(mUser, mServer, mPort, mSSHCommand, mConnection);
 	}
@@ -74,11 +75,11 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 {
 	using namespace std::placeholders;
 
-	MAppExecutor my_executor{&gApp->get_context()};
+	MAppExecutor my_executor{ &gApp->get_context() };
 
 	using namespace std::placeholders;
 
-PRINT(("Setting callbacks in Thread ID = %p", std::this_thread::get_id()));
+	PRINT(("Setting callbacks in Thread ID = %p", std::this_thread::get_id()));
 
 	mConnection->set_callback_executor(my_executor);
 
@@ -171,14 +172,15 @@ bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu,
 
 std::string MSshTerminalWindow::Password()
 {
-PRINT(("Password callback Thread ID = %p", std::this_thread::get_id()));
+	PRINT(("Password callback Thread ID = %p", std::this_thread::get_id()));
 
 	std::string result;
 
-	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string& pw) { result = pw; }));
+	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
+		{ result = pw; }));
 	bool ok = dlog->ShowModal(this);
 	dlog.release();
-	
+
 	return ok ? result : "";
 }
 
@@ -189,17 +191,18 @@ std::vector<std::string> MSshTerminalWindow::Credentials(const string &name, con
 
 	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
 		name, instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
-		prompts, this, [&result](const std::vector<std::string>& r) { result = r; }));
+		prompts, this, [&result](const std::vector<std::string> &r)
+		{ result = r; }));
 	bool ok = dlog->ShowModal(this);
 	dlog.release();
-	
+
 	return ok ? result : std::vector<std::string>{};
 }
 
 pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const string &inHost, const string &inAlgorithm,
 	const vector<uint8_t> &inHostKey, pinch::host_key_state inState)
 {
-PRINT(("AcceptHostKey callback Thread ID = %p", std::this_thread::get_id()));
+	PRINT(("AcceptHostKey callback Thread ID = %p", std::this_thread::get_id()));
 
 	pinch::host_key_reply result = pinch::host_key_reply::reject;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
@@ -225,13 +228,13 @@ PRINT(("AcceptHostKey callback Thread ID = %p", std::this_thread::get_id()));
 	}
 	else
 	{
-		switch (DisplayAlert(this, "unknown-host-alert", {inHost, fingerprint}))
+		switch (DisplayAlert(this, "unknown-host-alert", { inHost, fingerprint }))
 		{
-			case 1:	// Add
+			case 1: // Add
 				result = pinch::host_key_reply::trusted;
 				break;
 
-			case 2:	// Cancel
+			case 2: // Cancel
 				result = pinch::host_key_reply::reject;
 				break;
 
@@ -247,7 +250,7 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 {
 	// create the public key
 	auto b = inKeyToDrop.get_blob();
-	string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char*>(b.data()), b.size()));
+	string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
 
 	// create a command
 	ba::replace_all(blob, "\n", "");
@@ -258,14 +261,16 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 		string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
 	string comment = inKeyToDrop.get_comment();
 
-	MAppExecutor my_executor{&gApp->get_context()};
+	MAppExecutor my_executor{ &gApp->get_context() };
 
-	mKeyDropper.reset(new pinch::exec_channel(mConnection, command, [this, comment](const string &, int status) {
+	mKeyDropper.reset(new pinch::exec_channel(
+		mConnection, command, [this, comment](const string &, int status)
+		{
 		if (status == 0)
 			DisplayAlert(this, "installed-public-key", {comment, this->mServer});
 		else
-			DisplayAlert(this, "failed-to-install-public-key", {comment, this->mServer});
-	}, my_executor));
+			DisplayAlert(this, "failed-to-install-public-key", {comment, this->mServer}); },
+		my_executor));
 
 	mKeyDropper->open();
 }
@@ -276,18 +281,26 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 class MPtyTerminalWindow : public MTerminalWindow
 {
   public:
-	MPtyTerminalWindow();
+	MPtyTerminalWindow(MPtyTerminalWindow *inOriginal = nullptr);
 
-	MTerminalWindow *Clone()
+	MTerminalWindow *Clone(MTerminalWindow *inOriginal)
 	{
-		return new MPtyTerminalWindow();
+		MPtyTerminalWindow *parent = dynamic_cast<MPtyTerminalWindow *>(inOriginal);
+		return new MPtyTerminalWindow(parent);
 	}
 };
 
-MPtyTerminalWindow::MPtyTerminalWindow()
+MPtyTerminalWindow::MPtyTerminalWindow(MPtyTerminalWindow *inOriginal)
 	: MTerminalWindow(MTerminalChannel::Create(), "")
 {
 	SetTitle("Salt - terminal");
+
+	if (inOriginal != nullptr)
+	{
+		auto channel = dynamic_cast<MPtyTerminalChannel *>(inOriginal->mChannel);
+		if (channel != nullptr)
+			static_cast<MPtyTerminalChannel *>(mChannel)->SetCWD(channel->GetCWD());
+	}
 }
 
 // ------------------------------------------------------------------
@@ -325,9 +338,10 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const stri
 	bounds.height = kScrollbarWidth;
 
 	MStatusBarElement parts[] = {
-		{250, ePackStart, 4, false, false},
-		{275, ePackStart, 4, true, true},
-		{60, ePackEnd, 4, false, false}};
+		{ 250, ePackStart, 4, false, false },
+		{ 275, ePackStart, 4, true, true },
+		{ 60, ePackEnd, 4, false, false }
+	};
 
 	mStatusbar = new MStatusbar("status", bounds, 3, parts);
 	AddChild(mStatusbar);
@@ -552,17 +566,17 @@ bool MTerminalWindow::ProcessCommand(
 
 		case cmd_CloneTerminal:
 		{
-			MTerminalWindow *clone = Clone();
+			MTerminalWindow *clone = Clone(this);
 			clone->Select();
 			break;
 		}
 
-			//case cmd_Explore:
+			// case cmd_Explore:
 			//{
 			//	MExploreBrowserWindow* explorer = new MExploreBrowserWindow(mConnection);
 			//	explorer->Select();
 			//	break;
-			//}
+			// }
 
 		case cmd_NextTerminal:
 			if (mNext != nullptr)

@@ -7,7 +7,7 @@
 
 class MTerminalChannel
 {
-public:
+  public:
 	typedef std::function<void(boost::system::error_code)> OpenCallback;
 	typedef std::function<void(const std::string &, const std::string &)> MessageCallback;
 	typedef std::function<void(boost::system::error_code, std::size_t)> WriteCallback;
@@ -16,12 +16,12 @@ public:
 	virtual void SetMessageCallback(const MessageCallback &inMessageCallback);
 
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-								 uint32_t inPixelWidth, uint32_t inPixelHeight) = 0;
+		uint32_t inPixelWidth, uint32_t inPixelHeight) = 0;
 
 	virtual void Open(const std::string &inTerminalType,
-					  bool inForwardAgent, bool inForwardX11,
-					  const std::string &inCommand, const std::vector<std::string> &env,
-					  const OpenCallback &inOpenCallback) = 0;
+		bool inForwardAgent, bool inForwardX11,
+		const std::string &inCommand, const std::vector<std::string> &env,
+		const OpenCallback &inOpenCallback) = 0;
 	virtual bool IsOpen() const = 0;
 	virtual void Close() = 0;
 
@@ -32,7 +32,7 @@ public:
 
 	virtual void SendData(std::string &&inData) = 0;
 
-	void SendData(const std::string& s)
+	void SendData(const std::string &s)
 	{
 		std::string copy(s);
 		SendData(std::move(copy));
@@ -49,7 +49,7 @@ public:
 		return mConnectionInfo;
 	}
 
-protected:
+  protected:
 	MTerminalChannel();
 	virtual ~MTerminalChannel();
 

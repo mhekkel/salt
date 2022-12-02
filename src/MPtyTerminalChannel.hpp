@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <filesystem>
+
 #include "MTerminalChannel.hpp"
 
 // --------------------------------------------------------------------
@@ -10,17 +12,17 @@
 
 class MPtyTerminalChannel : public MTerminalChannel
 {
-public:
+  public:
 	MPtyTerminalChannel();
 	~MPtyTerminalChannel();
 
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-								 uint32_t inPixelWidth, uint32_t inPixelHeight);
+		uint32_t inPixelWidth, uint32_t inPixelHeight);
 
 	virtual void Open(const std::string &inTerminalType,
-					  bool inForwardAgent, bool inForwardX11,
-					  const std::string &inCommand, const std::vector<std::string> &env,
-					  const OpenCallback &inOpenCallback);
+		bool inForwardAgent, bool inForwardX11,
+		const std::string &inCommand, const std::vector<std::string> &env,
+		const OpenCallback &inOpenCallback);
 
 	virtual void Close();
 
@@ -30,13 +32,19 @@ public:
 	virtual void SendSignal(const std::string &inSignal);
 	virtual void ReadData(const ReadCallback &inCallback);
 
-private:
+	std::filesystem::path GetCWD() const;
+	void SetCWD(const std::filesystem::path &inCWD)
+	{
+		mCWD = inCWD;
+	}
+
+  private:
 	void Exec(const std::string &inCommand, const std::string &inTerminalType, int inTtyFD);
 
 	struct ChangeWindowsSizeCommand
 	{
 		ChangeWindowsSizeCommand(uint32_t inColumns, uint32_t inRows,
-								 uint32_t inPixelWidth, uint32_t inPixelHeight)
+			uint32_t inPixelWidth, uint32_t inPixelHeight)
 		{
 			ws.ws_row = inRows;
 			ws.ws_col = inColumns;
@@ -52,6 +60,7 @@ private:
 
 	int mPid;
 	std::string mTtyName;
+	std::filesystem::path mCWD;
 
 	boost::asio::posix::stream_descriptor mPty;
 	boost::asio::streambuf mResponse;

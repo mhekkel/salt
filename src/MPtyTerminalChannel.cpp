@@ -191,7 +191,11 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	if (shell.empty())
 		shell = "/bin/sh";
 
-	(void)chdir(pw->pw_dir);
+	std::error_code ec;
+	if (mCWD.empty())
+		fs::current_path(pw->pw_dir, ec);
+	else
+		fs::current_path(mCWD, ec);
 
 	// close all other file descriptors
 	endpwent();
@@ -220,6 +224,19 @@ void MPtyTerminalChannel::Close()
 bool MPtyTerminalChannel::IsOpen() const
 {
 	return mPty.is_open();
+}
+
+std::filesystem::path MPtyTerminalChannel::GetCWD() const
+{
+	std::filesystem::path result;
+
+	if (mPid > 0)
+	{
+		std::filesystem::path cwd = std::filesystem::path("/proc") / std::to_string(mPid) / "cwd";
+		result = std::filesystem::read_symlink(cwd);
+	}
+
+	return result;
 }
 
 void MPtyTerminalChannel::SendData(string &&inData)

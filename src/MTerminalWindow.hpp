@@ -24,7 +24,7 @@ class MTerminalWindow : public MWindow
 	static MTerminalWindow *Create(const std::string &inUser, const std::string &inHost, uint16_t inPort,
 		const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
-	virtual MTerminalWindow *Clone() = 0;
+	virtual MTerminalWindow *Clone(MTerminalWindow *inOriginal) = 0;
 
 	virtual void Mapped();
 
