@@ -9,9 +9,6 @@
 #include <cmath>
 #include <cstring>
 
-#include <X11/Xlib.h>
-#include <gdk/gdkx.h>
-
 #include "MError.hpp"
 #include "MGtkCanvasImpl.hpp"
 #include "MGtkDeviceImpl.hpp"
