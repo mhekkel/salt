@@ -7,8 +7,6 @@
 
 #include <regex>
 
-#include <boost/program_options.hpp>
-
 #include <ddeml.h>
 #include <windows.h>
 
@@ -21,7 +19,6 @@
 #include "MWinUtils.hpp"
 
 using namespace std;
-namespace po = boost::program_options;
 
 class MWinDocClosedNotifierImpl : public MDocClosedNotifierImpl
 {

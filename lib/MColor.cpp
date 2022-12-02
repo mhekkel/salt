@@ -196,7 +196,7 @@ MColor MColor::Bleach(float inBleachFactor) const
 {
 	float r = (red / 255.f), g = (green / 255.f), b = (blue / 255.f);
 
-	float h, s, v;
+	float h = 0, s = 0, v = 0;
 	rgb2hsv(r, g, b, h, s, v);
 
 	s = (1 - inBleachFactor) * s;

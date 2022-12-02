@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/program_options.hpp>
 
 #include "MDocApplication.hpp"
 #include "MApplicationImpl.hpp"
@@ -27,7 +26,6 @@
 
 using namespace std;
 namespace ba = boost::algorithm;
-namespace po = boost::program_options;
 namespace fs = std::filesystem;
 
 // --------------------------------------------------------------------

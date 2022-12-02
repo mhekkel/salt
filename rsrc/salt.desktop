@@ -4,7 +4,7 @@ Name=Salt Terminal
 Comment=Alternative command line and SSH terminal
 Comment[nl]=Alternatieve opdracht prompt en SSH terminal
 TryExec=salt
-Exec=env GDK_BACKEND=x11 __EXE__
+Exec=__EXE__
 Icon=__ICON__
 Type=Application
 Categories=GNOME;GTK;Utility;TerminalEmulator;
@@ -12,8 +12,7 @@ Keywords=Run;
 MimeType=x-scheme-handler/ssh
 Actions=New
 
-[Desktop Action New]
-Name=New Terminal
-Name[nl]=Nieuwe terminal
-Exec=__EXE__
-
+[Desktop Action Open]
+Name=Open Connection
+Name[nl]=Verbind
+Exec=__EXE__ --connect

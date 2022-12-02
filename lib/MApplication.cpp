@@ -11,7 +11,6 @@
 #include <filesystem>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/program_options.hpp>
 
 #include "MApplication.hpp"
 #include "MWindow.hpp"
@@ -25,7 +24,6 @@
 
 using namespace std;
 namespace ba = boost::algorithm;
-namespace po = boost::program_options;
 namespace fs = std::filesystem;
 
 #if DEBUG

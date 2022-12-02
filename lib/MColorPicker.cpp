@@ -66,7 +66,7 @@ void MColorSquare::Draw()
 	
 	MPickerMode mode = mPicker.GetMode();
 	
-	float r, g, b, h, s, v, sfx, sfy;
+	float r = 0, g = 0, b = 0, h = 0, s = 0, v = 0, sfx = 0, sfy = 0;
 
 	switch (mode)
 	{
@@ -231,8 +231,8 @@ void MColorSlider::Draw()
 	
 	MPickerMode mode = mPicker.GetMode();
 
-	float r, g, b, h, s, v;
-	int32_t sy;
+	float r = 0, g = 0, b = 0, h = 0, s = 0, v = 0;
+	int32_t sy = 0;
 
 	switch (mode)
 	{

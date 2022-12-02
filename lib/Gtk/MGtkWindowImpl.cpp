@@ -276,8 +276,8 @@ void SetCurrentDesktop(Display* display, long desktop)
 	
 	int ret = XSendEvent(display, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
 	
-	// if (ret == 0)
-	//	PRINT(("_NET_CURRENT_DESKTOP failed"));
+	if (ret == 0)
+		PRINT(("_NET_CURRENT_DESKTOP failed"));
 }
 
 bool ActivateWindow(Display* display, Window window)

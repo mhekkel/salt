@@ -6,9 +6,9 @@
 
 const char kProjectName[] = "salt";
 const char kVersionNumber[] = "4.0.0";
-const char kVersionGitTag[] = "420218f";
-const char kBuildInfo[] = "61*";
-const char kBuildDate[] = "2022-12-01T20:38:47Z";
+const char kVersionGitTag[] = "415428e";
+const char kBuildInfo[] = "62*";
+const char kBuildDate[] = "2022-12-02T09:46:03Z";
 
 inline void write_version_string(std::ostream &os, bool verbose)
 {
