@@ -7,28 +7,28 @@
 
 #include <cassert>
 
-#include "MWindow.hpp"
+#include "MAlerts.hpp"
+#include "MApplication.hpp"
 #include "MCommands.hpp"
+#include "MController.hpp"
 #include "MDocument.hpp"
 #include "MPreferences.hpp"
-#include "MApplication.hpp"
-#include "MController.hpp"
-#include "MAlerts.hpp"
+#include "MWindow.hpp"
 
 using namespace std;
 
-namespace {
+namespace
+{
 
 const int32_t
 	kAskSaveChanges_Save = 3,
 	kAskSaveChanges_Cancel = 2,
 	kAskSaveChanges_DontSave = 1,
-	
+
 	kDiscardChanges_Discard = 1;
 }
 
-MController::MController(
-	MWindow*	inWindow)
+MController::MController(MWindow *inWindow)
 	: MHandler(inWindow)
 	, mDocument(nullptr)
 	, mWindow(inWindow)
@@ -40,8 +40,7 @@ MController::~MController()
 	assert(mDocument == nullptr);
 }
 
-void MController::SetDocument(
-	MDocument*		inDocument)
+void MController::SetDocument(MDocument *inDocument)
 {
 	if (inDocument != mDocument)
 	{
@@ -50,24 +49,24 @@ void MController::SetDocument(
 			eAboutToCloseDocument(mDocument);
 			mDocument->RemoveController(this);
 		}
-		
+
 		mDocument = inDocument;
-		
+
 		if (mDocument != nullptr)
 			mDocument->AddController(this);
-		
+
 		eDocumentChanged(mDocument);
 	}
 }
 
 bool MController::ProcessCommand(
-	uint32_t			inCommand,
-	const MMenu*	inMenu,
-	uint32_t			inItemIndex,
-	uint32_t			inModifiers)
+	uint32_t inCommand,
+	const MMenu *inMenu,
+	uint32_t inItemIndex,
+	uint32_t inModifiers)
 {
 	bool handled = false;
-	
+
 	if (mDocument != nullptr)
 		handled = mDocument->ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
 
@@ -76,47 +75,47 @@ bool MController::ProcessCommand(
 		handled = true;
 		switch (inCommand)
 		{
-			//case cmd_Close:
-			//	TryCloseController(kSaveChangesClosingDocument);
-			//	break;
-	
+				// case cmd_Close:
+				//	TryCloseController(kSaveChangesClosingDocument);
+				//	break;
+
 			case cmd_Save:
 				SaveDocument();
 				break;
-	
+
 			case cmd_SaveAs:
 				SaveDocumentAs();
 				break;
-	
+
 			case cmd_Revert:
 				TryDiscardChanges();
 				break;
-			
+
 			case cmd_Print:
 				Print();
 				break;
-				
+
 			default:
 				handled = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
 				break;
 		}
 	}
-	
+
 	return handled;
 }
 
 bool MController::UpdateCommandStatus(
-	uint32_t			inCommand,
-	MMenu*			inMenu,
-	uint32_t			inItemIndex,
-	bool&			outEnabled,
-	bool&			outChecked)
+	uint32_t inCommand,
+	MMenu *inMenu,
+	uint32_t inItemIndex,
+	bool &outEnabled,
+	bool &outChecked)
 {
 	bool handled = false;
 
 	if (mDocument != nullptr)
 		handled = mDocument->UpdateCommandStatus(inCommand, inMenu, inItemIndex,
-					outEnabled, outChecked);
+			outEnabled, outChecked);
 
 	if (not handled)
 	{
@@ -124,13 +123,13 @@ bool MController::UpdateCommandStatus(
 		switch (inCommand)
 		{
 			// always
-			//case cmd_Close:
+			// case cmd_Close:
 			case cmd_SaveAs:
 			case cmd_Find:
 			case cmd_Print:
 				outEnabled = true;
 				break;
-	
+
 			// dirty
 			case cmd_Save:
 				outEnabled =
@@ -138,25 +137,25 @@ bool MController::UpdateCommandStatus(
 					mDocument->IsModified() and
 					(not mDocument->IsSpecified() or not mDocument->IsReadOnly());
 				break;
-	
+
 			case cmd_Revert:
 				outEnabled = mDocument != nullptr and mDocument->IsSpecified() and mDocument->IsModified();
 				break;
-	
+
 			default:
 				handled = MHandler::UpdateCommandStatus(
 					inCommand, inMenu, inItemIndex, outEnabled, outChecked);
 				break;
 		}
 	}
-	
+
 	return handled;
 }
 
 bool MController::HandleKeyDown(
-	uint32_t			inKeyCode,
-	uint32_t			inModifiers,
-	bool			inRepeat)
+	uint32_t inKeyCode,
+	uint32_t inModifiers,
+	bool inRepeat)
 {
 	bool handled = false;
 	if (mDocument != nullptr)
@@ -166,7 +165,7 @@ bool MController::HandleKeyDown(
 	return handled;
 }
 
-bool MController::HandleCharacter(const string& inText, bool inRepeat)
+bool MController::HandleCharacter(const string &inText, bool inRepeat)
 {
 	bool handled = false;
 	if (mDocument != nullptr)
@@ -176,8 +175,7 @@ bool MController::HandleCharacter(const string& inText, bool inRepeat)
 	return handled;
 }
 
-bool MController::TryCloseDocument(
-	MCloseReason		inAction)
+bool MController::TryCloseDocument(MCloseReason inAction)
 {
 	bool result = true;
 
@@ -188,14 +186,14 @@ bool MController::TryCloseDocument(
 		else
 		{
 			result = false;
-			string name;	
-			
-			//if (mDocument->IsSpecified())
+			string name;
+
+			// if (mDocument->IsSpecified())
 			//	name = mDocument->GetFile().GetPath().filename();
-			//else
-				name = mWindow->GetTitle();
-			
-#pragma message("FOUT!!! save changes alert?")
+			// else
+			name = mWindow->GetTitle();
+
+			// TODO: FOUT!!! save changes alert?
 			switch (DisplayAlert(mWindow, "save-changes-alert", { name }))
 			{
 				case kAskSaveChanges_Save:
@@ -216,12 +214,11 @@ bool MController::TryCloseDocument(
 			}
 		}
 	}
-	
+
 	return result;
 }
 
-bool MController::TryCloseController(
-	MCloseReason		inAction)
+bool MController::TryCloseController(MCloseReason inAction)
 {
 	bool result = true;
 
@@ -232,19 +229,19 @@ bool MController::TryCloseController(
 		else
 			result = TryCloseDocument(inAction);
 	}
-	
+
 	return result;
 }
 
 void MController::SaveDocumentAs()
 {
 	fs::path file;
-	
+
 	if (mDocument->IsSpecified())
 		file = mDocument->GetFile().GetPath();
 	else
 		file = fs::path(mDocument->GetDocumentName());
-	
+
 	if (MFileDialogs::SaveFileAs(mWindow, file))
 		mDocument->DoSaveAs(file);
 }
@@ -261,7 +258,7 @@ void MController::TryDiscardChanges()
 bool MController::SaveDocument()
 {
 	bool result = true;
-	
+
 	try
 	{
 		if (mDocument != nullptr)
@@ -275,12 +272,12 @@ bool MController::SaveDocument()
 			}
 		}
 	}
-	catch (std::exception& inErr)
+	catch (std::exception &inErr)
 	{
 		DisplayError(inErr);
 		result = false;
 	}
-	
+
 	return result;
 }
 
@@ -289,7 +286,7 @@ void MController::RevertDocument()
 	mDocument->RevertDocument();
 }
 
-bool MController::DoSaveAs(const string& inURL)
+bool MController::DoSaveAs(const string &inURL)
 {
 	return mDocument->DoSaveAs(inURL);
 }

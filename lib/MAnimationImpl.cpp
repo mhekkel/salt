@@ -81,7 +81,7 @@ void MFallBackStoryboardImpl::AddTransition(MAnimationVariable* inVariable,
 
 	if (s == mVariableStories.end())
 	{
-		MVariableStory st = { inVariable, inVariable->GetValue() };
+		MVariableStory st = { inVariable, inVariable->GetValue(), {} };
 		mVariableStories.push_back(st);
 		s = prev(mVariableStories.end());
 	}

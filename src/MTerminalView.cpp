@@ -2506,7 +2506,7 @@ MRect MTerminalView::GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows)
 {
 	uint32_t w, h;
 	GetTerminalMetrics(inColumns, inRows, Preferences::GetBoolean("show-status-line", false), w, h);
-	return {0, 0, w, h};
+	return {0, 0, static_cast<int32_t>(w), static_cast<int32_t>(h)};
 }
 
 void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
@@ -3647,7 +3647,7 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 				case 25:
 					SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
 					break;
-#pragma message("Find out the keyboard layout")
+				// TODO: Find out the keyboard layout
 				case 26:
 					SendCommand("\033[?27;0n");
 					break; // report an unknown keyboard for now

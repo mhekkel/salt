@@ -104,9 +104,13 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 
 	dlg = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL,
 	                             type, GTK_BUTTONS_NONE, "%s", instruction.c_str());
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
 	THROW_IF_NIL(dlg);
 	if (not content.empty())
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), content.c_str());
+#pragma GCC diagnostic pop
 
 	for (auto b : btns)
 		gtk_dialog_add_button(GTK_DIALOG(dlg), b.first.c_str(), b.second);

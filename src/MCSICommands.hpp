@@ -290,7 +290,7 @@ struct MCmdName
 	{ eICH, "ICH" },
 	{ eDECSCUSR, "DECSCUSR" },
 	{ eDECREQTPARM, "DECREQTPARM" },
-	{ 0 }
+	{ 0, "" }
 };
 
 const char* Cmd2Name(uint32_t cmd)

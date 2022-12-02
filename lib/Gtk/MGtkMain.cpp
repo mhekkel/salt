@@ -237,7 +237,7 @@ class MGDbusServer
 };
 
 const GDBusInterfaceVTable MGDbusServer::sInterfaceVTable = {
-	MGDbusServer::HandleMethodCall
+	MGDbusServer::HandleMethodCall, nullptr, nullptr, {}
 };
 
 // ----------------------------------------------------------------------------

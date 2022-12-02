@@ -315,7 +315,6 @@ void MGtkWindowImpl::Select()
 
 	auto gdkWindow = gtk_widget_get_window(GetWidget());
 
-#warning("fixme")
 	auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
 	auto w = gdk_x11_window_get_xid(gdkWindow);
 
