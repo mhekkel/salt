@@ -37,6 +37,7 @@ class MGtkClipboardImpl : public MClipboardImpl
 	GtkClipboard *mGtkClipboard;
 	bool mClipboardIsMine;
 	bool mOwnerChanged;
+	bool mNoCommit;
 };
 
 MGtkClipboardImpl::MGtkClipboardImpl(MClipboard *inClipboard)
@@ -44,7 +45,8 @@ MGtkClipboardImpl::MGtkClipboardImpl(MClipboard *inClipboard)
 	, mOwnerChange(this, &MGtkClipboardImpl::OnOwnerChange)
 	, mGtkClipboard(gtk_clipboard_get_for_display(gdk_display_get_default(), GDK_SELECTION_CLIPBOARD))
 	, mClipboardIsMine(false)
-	, mOwnerChanged(false)
+	, mOwnerChanged(true)
+	, mNoCommit(true)
 {
 	mOwnerChange.Connect(G_OBJECT(mGtkClipboard), "owner-change");
 }
@@ -55,14 +57,20 @@ void MGtkClipboardImpl::LoadClipboardIfNeeded()
 	    mOwnerChanged and
 	    gtk_clipboard_wait_is_text_available(mGtkClipboard))
 	{
+		mOwnerChanged = false;
+
 		//cout << "Reloading clipboard" << endl;
 		gchar *text = gtk_clipboard_wait_for_text(mGtkClipboard);
 		if (text != nullptr)
 		{
+			mNoCommit = true;
+
 			mClipboard->SetData(text, false);
+
+			mNoCommit = false;
+
 			g_free(text);
 		}
-		mOwnerChanged = false;
 	}
 }
 
@@ -72,21 +80,24 @@ void MGtkClipboardImpl::Reset()
 
 void MGtkClipboardImpl::Commit()
 {
-	GtkTargetEntry targets[] = {
-		{const_cast<gchar *>("UTF8_STRING"), 0, 0},
-		{const_cast<gchar *>("COMPOUND_TEXT"), 0, 0},
-		{const_cast<gchar *>("TEXT"), 0, 0},
-		{const_cast<gchar *>("STRING"), 0, 0},
-	};
+	if (not mNoCommit)
+	{
+		GtkTargetEntry targets[] = {
+			{const_cast<gchar *>("UTF8_STRING"), 0, 0},
+			{const_cast<gchar *>("COMPOUND_TEXT"), 0, 0},
+			{const_cast<gchar *>("TEXT"), 0, 0},
+			{const_cast<gchar *>("STRING"), 0, 0},
+		};
 
-	gtk_clipboard_set_with_data(mGtkClipboard,
-	                            targets, sizeof(targets) / sizeof(GtkTargetEntry),
-	                            &MGtkClipboardImpl::GtkClipboardGet, &MGtkClipboardImpl::GtkClipboardClear, this);
+		gtk_clipboard_set_with_data(mGtkClipboard,
+									targets, sizeof(targets) / sizeof(GtkTargetEntry),
+									&MGtkClipboardImpl::GtkClipboardGet, &MGtkClipboardImpl::GtkClipboardClear, this);
 
-	//	gtk_clipboard_set_text(mGtkClipboard, inText.c_str(), inText.length());
+		//	gtk_clipboard_set_text(mGtkClipboard, inText.c_str(), inText.length());
 
-	mOwnerChanged = false;
-	mClipboardIsMine = true;
+		mOwnerChanged = false;
+		mClipboardIsMine = true;
+	}
 }
 
 void MGtkClipboardImpl::GtkClipboardGet(GtkClipboard *inClipboard, GtkSelectionData *inSelectionData,
