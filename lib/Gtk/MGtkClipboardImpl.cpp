@@ -30,7 +30,7 @@ class MGtkClipboardImpl : public MClipboardImpl
 	}
 
 	static void GtkClipboardGet(GtkClipboard *inClipboard, GtkSelectionData *inSelectionData,
-	                            guint inInfo, gpointer inUserDataOrOwner);
+		guint inInfo, gpointer inUserDataOrOwner);
 	static void GtkClipboardClear(GtkClipboard *inClipboard, gpointer inUserDataOrOwner);
 
 	MSlot<void(GdkEventOwnerChange *)> mOwnerChange;
@@ -46,7 +46,7 @@ MGtkClipboardImpl::MGtkClipboardImpl(MClipboard *inClipboard)
 	, mGtkClipboard(gtk_clipboard_get_for_display(gdk_display_get_default(), GDK_SELECTION_CLIPBOARD))
 	, mClipboardIsMine(false)
 	, mOwnerChanged(true)
-	, mNoCommit(true)
+	, mNoCommit(false)
 {
 	mOwnerChange.Connect(G_OBJECT(mGtkClipboard), "owner-change");
 }
@@ -54,12 +54,12 @@ MGtkClipboardImpl::MGtkClipboardImpl(MClipboard *inClipboard)
 void MGtkClipboardImpl::LoadClipboardIfNeeded()
 {
 	if (not mClipboardIsMine and
-	    mOwnerChanged and
-	    gtk_clipboard_wait_is_text_available(mGtkClipboard))
+		mOwnerChanged and
+		gtk_clipboard_wait_is_text_available(mGtkClipboard))
 	{
 		mOwnerChanged = false;
 
-		//cout << "Reloading clipboard" << endl;
+		// cout << "Reloading clipboard" << endl;
 		gchar *text = gtk_clipboard_wait_for_text(mGtkClipboard);
 		if (text != nullptr)
 		{
@@ -83,15 +83,15 @@ void MGtkClipboardImpl::Commit()
 	if (not mNoCommit)
 	{
 		GtkTargetEntry targets[] = {
-			{const_cast<gchar *>("UTF8_STRING"), 0, 0},
-			{const_cast<gchar *>("COMPOUND_TEXT"), 0, 0},
-			{const_cast<gchar *>("TEXT"), 0, 0},
-			{const_cast<gchar *>("STRING"), 0, 0},
+			{ const_cast<gchar *>("UTF8_STRING"), 0, 0 },
+			{ const_cast<gchar *>("COMPOUND_TEXT"), 0, 0 },
+			{ const_cast<gchar *>("TEXT"), 0, 0 },
+			{ const_cast<gchar *>("STRING"), 0, 0 },
 		};
 
 		gtk_clipboard_set_with_data(mGtkClipboard,
-									targets, sizeof(targets) / sizeof(GtkTargetEntry),
-									&MGtkClipboardImpl::GtkClipboardGet, &MGtkClipboardImpl::GtkClipboardClear, this);
+			targets, sizeof(targets) / sizeof(GtkTargetEntry),
+			&MGtkClipboardImpl::GtkClipboardGet, &MGtkClipboardImpl::GtkClipboardClear, this);
 
 		//	gtk_clipboard_set_text(mGtkClipboard, inText.c_str(), inText.length());
 
@@ -101,7 +101,7 @@ void MGtkClipboardImpl::Commit()
 }
 
 void MGtkClipboardImpl::GtkClipboardGet(GtkClipboard *inClipboard, GtkSelectionData *inSelectionData,
-                                        guint inInfo, gpointer inUserDataOrOwner)
+	guint inInfo, gpointer inUserDataOrOwner)
 {
 	string text;
 	bool block;
