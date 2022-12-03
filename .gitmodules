@@ -1,5 +1,5 @@
 [submodule "pinch"]
-	path = pinch
+	path = libpinch
 	url = git@github.com:mhekkel/pinch.git
 [submodule "libmcfp"]
 	path = libmcfp
