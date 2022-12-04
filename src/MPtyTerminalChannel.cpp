@@ -232,8 +232,12 @@ std::filesystem::path MPtyTerminalChannel::GetCWD() const
 
 	if (mPid > 0)
 	{
+		std::error_code ec;
+
 		std::filesystem::path cwd = std::filesystem::path("/proc") / std::to_string(mPid) / "cwd";
-		result = std::filesystem::read_symlink(cwd);
+
+		if (fs::exists(cwd, ec))
+			result = std::filesystem::read_symlink(cwd, ec);
 	}
 
 	return result;

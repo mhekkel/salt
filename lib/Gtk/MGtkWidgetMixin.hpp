@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <string>
+#include <chrono>
 #include <map>
 #include <memory>
-#include <chrono>
-#include <memory>
+#include <string>
 
-#include "MError.hpp"
 #include "MAlerts.hpp"
+#include "MError.hpp"
 #include "MView.hpp"
 
 class MHandler;
@@ -151,7 +150,10 @@ struct MCallbackInHandler : public Handler<MCallbackInHandler<C, Function>, C, F
 	typedef C Owner;
 
 	MCallbackInHandler(Owner *inOwner, CallbackProc inHandler)
-		: mOwner(inOwner), mHandler(inHandler) {}
+		: mOwner(inOwner)
+		, mHandler(inHandler)
+	{
+	}
 
 	C *mOwner;
 	CallbackProc mHandler;
@@ -171,7 +173,7 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 {
 	typedef typename MakeGtkCallbackHandler<Function>::type base_class;
 
-public:
+  public:
 	MSlot(const MSlot &) = delete;
 	MSlot &operator=(const MSlot &) = delete;
 
@@ -188,28 +190,28 @@ public:
 	{
 		THROW_IF_NIL(inObject);
 		g_signal_connect(G_OBJECT(inObject), inSignalName,
-						 G_CALLBACK(&base_class::GCallback), this);
+			G_CALLBACK(&base_class::GCallback), this);
 	}
 
 	void Connect(GObject *inObject, const char *inSignalName)
 	{
 		THROW_IF_NIL(inObject);
 		g_signal_connect(inObject, inSignalName,
-						 G_CALLBACK(&base_class::GCallback), this);
+			G_CALLBACK(&base_class::GCallback), this);
 	}
 
 	void Block(GtkWidget *inObject, const char *inSignalName)
 	{
 		THROW_IF_NIL(inObject);
 		g_signal_handlers_block_by_func(G_OBJECT(inObject),
-										(void *)G_CALLBACK(&base_class::GCallback), this);
+			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
 
 	void Unblock(GtkWidget *inObject, const char *inSignalName)
 	{
 		THROW_IF_NIL(inObject);
 		g_signal_handlers_unblock_by_func(G_OBJECT(inObject),
-										  (void *)G_CALLBACK(&base_class::GCallback), this);
+			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
 
 	GObject *GetSourceGObject() const
@@ -220,7 +222,7 @@ public:
 
 class MGtkWidgetMixin
 {
-public:
+  public:
 	MGtkWidgetMixin(const MGtkWidgetMixin &) = delete;
 	MGtkWidgetMixin &operator=(const MGtkWidgetMixin &) = delete;
 
@@ -246,9 +248,9 @@ public:
 	void SetWidget(GtkWidget *inWidget);
 
 	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-						bool inExpand, bool inFill, uint32_t inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
-protected:
+  protected:
 	virtual bool OnDestroy();
 	virtual bool OnDelete(GdkEvent *inEvent);
 	virtual void OnShow();
@@ -312,29 +314,29 @@ protected:
 	MSlot<void()> mPopupMenu;
 
 	MSlot<void(GdkDragContext *,
-			   gint,
-			   gint,
-			   GtkSelectionData *,
-			   guint,
-			   guint)>
+		gint,
+		gint,
+		GtkSelectionData *,
+		guint,
+		guint)>
 		mDragDataReceived;
 
 	MSlot<bool(GdkDragContext *,
-			   gint,
-			   gint,
-			   guint)>
+		gint,
+		gint,
+		guint)>
 		mDragMotion;
 
 	MSlot<void(GdkDragContext *,
-			   guint)>
+		guint)>
 		mDragLeave;
 
 	MSlot<void(GdkDragContext *)> mDragDataDelete;
 
 	MSlot<void(GdkDragContext *,
-			   GtkSelectionData *,
-			   guint,
-			   guint)>
+		GtkSelectionData *,
+		guint,
+		guint)>
 		mDragDataGet;
 
 	// IMContext support
@@ -355,11 +357,11 @@ protected:
 	MSlot<bool()> mOnRetrieveSurrounding;
 	MSlot<bool(GdkEvent *)> mOnGrabBroken;
 
-protected:
+  protected:
 	int32_t mRequestedWidth, mRequestedHeight;
 	bool mAutoRepeat;
 
-private:
+  private:
 	bool mDragWithin;
 	GtkIMContext *mIMContext;
 	bool mNextKeyPressIsAutoRepeat;
