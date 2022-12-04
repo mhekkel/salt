@@ -1437,8 +1437,14 @@ void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPack
 {
 	assert(GTK_IS_BOX(GetWidget()));
 
+	auto childWidget = inChild->GetWidget();
+	gtk_widget_set_margin_top(childWidget, inPadding);
+	gtk_widget_set_margin_bottom(childWidget, inPadding);
+	gtk_widget_set_margin_start(childWidget, inPadding);
+	gtk_widget_set_margin_end(childWidget, inPadding);
+
 	if (inPacking == ePackStart)
-		gtk_box_pack_start(GTK_BOX(GetWidget()), inChild->GetWidget(), inExpand, inFill, inPadding);
+		gtk_box_pack_start(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
 	else
-		gtk_box_pack_end(GTK_BOX(GetWidget()), inChild->GetWidget(), inExpand, inFill, inPadding);
+		gtk_box_pack_end(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
 }

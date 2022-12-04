@@ -5,6 +5,8 @@
 
 #include "MGtkLib.hpp"
 
+#include <charconv>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -27,6 +29,20 @@ using namespace std;
 using namespace zeep;
 namespace io = boost::iostreams;
 namespace ba = boost::algorithm;
+
+namespace
+{
+
+int get_attribute_int(const zeep::xml::element *e, const char *name)
+{
+	std::string attr = e->get_attribute(name);
+
+	int result = 0;
+	auto r = std::from_chars(attr.data(), attr.data() + attr.length(), result);
+	return r.ec != std::errc() ? 0 : result;
+}
+
+}
 
 class MGtkDialogImpl : public MGtkWindowImpl
 {
@@ -183,10 +199,10 @@ void MGtkDialogImpl::Finish()
 
 	uint32_t minWidth = 40;
 	if (not dialog->get_attribute("width").empty())
-		minWidth = std::stoul(dialog->get_attribute("width"));
+		minWidth = get_attribute_int(dialog, "width");
 	uint32_t minHeight = 40;
 	if (not dialog->get_attribute("height").empty())
-		minHeight = std::stoul(dialog->get_attribute("height"));
+		minHeight = get_attribute_int(dialog, "height");
 
 	MRect bounds(0, 0, minWidth, minHeight);
 
@@ -214,6 +230,17 @@ void MGtkDialogImpl::Finish()
 	//	MControlBase* control = dynamic_cast<MControlBase*>(content);
 	//	if (control != nullptr)
 	//		control->SetPadding(4);
+
+	GtkWidget *dlogBox = gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
+
+	int padding = get_attribute_int(dialog, "padding");
+	if (padding == 0)
+		padding = 4;
+
+	gtk_widget_set_margin_top(dlogBox, padding * mDLUY);
+	gtk_widget_set_margin_bottom(dlogBox, padding * mDLUY);
+	gtk_widget_set_margin_start(dlogBox, padding * mDLUX);
+	gtk_widget_set_margin_end(dlogBox, padding * mDLUX);
 
 	mWindow->AddChild(content);
 
@@ -256,10 +283,16 @@ void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 	GtkWidget *box =
 		gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
 
+	auto childWidget = inChild->GetWidget();
+	gtk_widget_set_margin_top(childWidget, inPadding);
+	gtk_widget_set_margin_bottom(childWidget, inPadding);
+	gtk_widget_set_margin_start(childWidget, inPadding);
+	gtk_widget_set_margin_end(childWidget, inPadding);
+
 	if (inPacking == ePackStart)
-		gtk_box_pack_start(GTK_BOX(box), inChild->GetWidget(), inExpand, inFill, inPadding);
+		gtk_box_pack_start(GTK_BOX(box), childWidget, inExpand, inFill, 0);
 	else
-		gtk_box_pack_end(GTK_BOX(box), inChild->GetWidget(), inExpand, inFill, inPadding);
+		gtk_box_pack_end(GTK_BOX(box), childWidget, inExpand, inFill, 0);
 }
 
 void MGtkDialogImpl::GetMargins(xml::element *inTemplate,
@@ -270,39 +303,16 @@ void MGtkDialogImpl::GetMargins(xml::element *inTemplate,
 	if (inTemplate->name() == "dialog" or inTemplate->name() == "notebook")
 		outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 7;
 
-	string m = inTemplate->get_attribute("margin");
-	if (not m.empty())
-		outLeftMargin = outRightMargin =
-			outTopMargin = outBottomMargin = std::stoi(m);
+	outLeftMargin = outRightMargin =
+		outTopMargin = outBottomMargin = get_attribute_int(inTemplate, "margin");
 
-	m = inTemplate->get_attribute("margin-left-right");
-	if (not m.empty())
-		outLeftMargin = outRightMargin = std::stoi(m);
+	outLeftMargin = outRightMargin = get_attribute_int(inTemplate, "margin-left-right");
+	outTopMargin = outBottomMargin = get_attribute_int(inTemplate, "margin-top-bottom");
 
-	m = inTemplate->get_attribute("margin-top-bottom");
-	if (not m.empty())
-		outTopMargin = outBottomMargin = std::stoi(m);
-
-	m = inTemplate->get_attribute("margin-left");
-	if (not m.empty())
-		outLeftMargin = std::stoi(m);
-
-	m = inTemplate->get_attribute("margin-top");
-	if (not m.empty())
-		outTopMargin = std::stoi(m);
-
-	m = inTemplate->get_attribute("margin-right");
-	if (not m.empty())
-		outRightMargin = std::stoi(m);
-
-	m = inTemplate->get_attribute("margin-bottom");
-	if (not m.empty())
-		outBottomMargin = std::stoi(m);
-
-	//	outLeftMargin = static_cast<int32_t>(outLeftMargin * mDLUX);
-	//	outRightMargin = static_cast<int32_t>(outRightMargin * mDLUX);
-	//	outTopMargin = static_cast<int32_t>(outTopMargin * mDLUY);
-	//	outBottomMargin = static_cast<int32_t>(outBottomMargin * mDLUY);
+	outLeftMargin = get_attribute_int(inTemplate, "margin-left");
+	outTopMargin = get_attribute_int(inTemplate, "margin-top");
+	outRightMargin = get_attribute_int(inTemplate, "margin-right");
+	outBottomMargin = get_attribute_int(inTemplate, "margin-bottom");
 }
 
 MView *MGtkDialogImpl::CreateButton(xml::element *inTemplate, int32_t inX, int32_t inY)
@@ -636,13 +646,8 @@ MView *MGtkDialogImpl::CreateBox(xml::element *inTemplate, int32_t inX, int32_t 
 {
 	string id = inTemplate->get_attribute("id");
 
-	uint32_t spacing = 4;
-	if (not inTemplate->get_attribute("spacing").empty())
-		spacing = std::stoul(inTemplate->get_attribute("spacing"));
-
-	uint32_t padding = 4;
-	if (not inTemplate->get_attribute("padding").empty())
-		spacing = std::stoul(inTemplate->get_attribute("padding"));
+	uint32_t spacing = get_attribute_int(inTemplate, "spacing");
+	uint32_t padding = get_attribute_int(inTemplate, "padding");
 
 	bool expand = inTemplate->get_attribute("expand") == "true";
 	bool fill = inTemplate->get_attribute("fill") == "true";
@@ -752,7 +757,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 			width += kScrollbarWidth;
 		else
 			//			width += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("width")) * mDLUX);
-			width += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("width")));
+			width += get_attribute_int(inTemplate, "width");
 
 		MGtkWidgetMixin *impl = dynamic_cast<MGtkWidgetMixin *>(control->GetControlImplBase());
 		if (impl != nullptr)
@@ -781,7 +786,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 			inTemplate->get_attribute("packing") == "end" ? ePackEnd : ePackStart,
 			inTemplate->get_attribute("expand") == "true" ? true : false,
 			inTemplate->get_attribute("fill") == "true" ? true : false,
-			inTemplate->get_attribute("padding").empty() ? 0 : std::stoi(inTemplate->get_attribute("padding")));
+			get_attribute_int(inTemplate, "padding"));
 	}
 
 	return result;

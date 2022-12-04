@@ -7,15 +7,15 @@
 
 #include <list>
 
+#include "MGtkWidgetMixin.hpp"
 #include "MMenu.hpp"
 #include "MWindowImpl.hpp"
-#include "MGtkWidgetMixin.hpp"
 
 class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 {
-public:
+  public:
 	MGtkWindowImpl(MWindowFlags inFlags,
-				   const std::string &inMenu, MWindow *inWindow);
+		const std::string &inMenu, MWindow *inWindow);
 	virtual ~MGtkWindowImpl();
 
 	static void RecycleWindows();
@@ -27,14 +27,14 @@ public:
 	virtual void AddMenubarWidget(GtkWidget *inWidget);
 	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
 	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-						bool inExpand, bool inFill, uint32_t inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
 	virtual void SetTitle(std::string inTitle);
 
 	virtual void Show();
 	virtual void Hide();
 
-	virtual void SetTransientFor(MWindow* inWindow);
+	virtual void SetTransientFor(MWindow *inWindow);
 
 	virtual bool Visible() const;
 
@@ -67,7 +67,7 @@ public:
 
 	virtual MHandler *GetFocus();
 
-protected:
+  protected:
 	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText);
 
 	virtual bool OnDestroy();

@@ -137,11 +137,17 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin* inChild, MControlPacking inPacking,
 		gtk_container_add(GTK_CONTAINER(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
-	
+
+	auto childWidget = inChild->GetWidget();
+	gtk_widget_set_margin_top(childWidget, inPadding);
+	gtk_widget_set_margin_bottom(childWidget, inPadding);
+	gtk_widget_set_margin_start(childWidget, inPadding);
+	gtk_widget_set_margin_end(childWidget, inPadding);
+
 	if (inPacking == ePackStart)
-		gtk_box_pack_start(GTK_BOX(mMainVBox), inChild->GetWidget(), inExpand, inFill, inPadding);
+		gtk_box_pack_start(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
 	else
-		gtk_box_pack_end(GTK_BOX(mMainVBox), inChild->GetWidget(), inExpand, inFill, inPadding);
+		gtk_box_pack_end(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
 }
 
 void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)

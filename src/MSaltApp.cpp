@@ -293,7 +293,7 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 			                    (m[3].matched ? (":"s + m[3].str()) : "");
 
 			if (m[5].matched)
-				label += " (" + m[4].str() + "@"s + m[5].str() +
+				label += " (via " + m[4].str() + "@"s + m[5].str() +
 				         (m[6].matched ? (":"s + m[6].str()) : "") + ")";
 
 			inMenu->AppendItem(label, cmd_OpenRecentSession);
