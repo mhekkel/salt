@@ -5,8 +5,6 @@
 
 #include "MWinLib.hpp"
 
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <zeep/xml/document.hpp>
@@ -22,7 +20,6 @@
 
 using namespace std;
 namespace xml = zeep::xml;
-namespace io = boost::iostreams;
 namespace ba = boost::algorithm;
 
 string localise(const string& inResourceName, const string& inText)
@@ -35,15 +32,10 @@ int32_t DisplayAlert(
 	const string&		inResourceName,
 	vector<string>&		inArguments)
 {
-	string resource = string("Alerts/") + inResourceName + ".xml";
-	mrsrc::rsrc rsrc(resource);
+	using namespace std::literals;
 
-	if (not rsrc)
-		THROW(("Could not load resource %s", resource.c_str()));
-	
-	// parse the XML data
-	io::stream<io::array_source> data(rsrc.data(), rsrc.size());
-	xml::document doc(data);
+	mrsrc::rsrc rsrc("Alerts/"s + inResourceName + ".xml");
+	xml::document doc(rsrc);
 	
 	// build an alert
 	xml::element* root = doc.find_first("/alert");

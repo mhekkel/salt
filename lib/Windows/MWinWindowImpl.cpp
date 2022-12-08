@@ -13,9 +13,6 @@
 #pragma comment(lib, "dwmapi")
 
 #include "zeep/xml/document.hpp"
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include "MWinWindowImpl.hpp"
 #include "MWindow.hpp"
 #include "MError.hpp"
@@ -29,7 +26,6 @@
 
 using namespace std;
 using namespace zeep;
-namespace io = boost::iostreams;
 
 const int BIT_COUNT = 32;
 

@@ -125,7 +125,7 @@ if(USE_RSRC)
 	message("Using resources compiled with ${MRC_EXECUTABLE}")
 	add_compile_definitions(USE_RSRC)
 
-	mrc_write_header(${CMAKE_BINARY_DIR}/mrsrc.hpp)
+	mrc_write_header(${PROJECT_SOURCE_DIR}/lib/mrsrc.hpp)
 endif()
 
 set(CMAKE_THREAD_PREFER_PTHREAD)
@@ -146,9 +146,9 @@ find_library(UTIL util REQUIRED)
 
 # set(Boost_DETAILED_FAILURE_MSG ON)
 
-# find_package(Boost COMPONENTS coroutines)
+find_package(Boost COMPONENTS coroutines)
 
-pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED)
+pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 # pkg_check_modules(PQXX libpqxx>=7.2 REQUIRED)
 # pkg_check_modules(MAILIO mailio REQUIRED)
 # pkg_check_modules(SSL libssl)
@@ -353,8 +353,8 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/MakeRes.pl
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
-target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${GTK3_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads ${GTK3_LIBRARIES} dl util)
+target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib)
+target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads PkgConfig::GTK3 dl util)
 
 if(USE_RSRC)
 	mrc_target_resources(salt ${RESOURCES})

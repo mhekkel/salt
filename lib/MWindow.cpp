@@ -9,9 +9,6 @@
 
 #include "zeep/xml/document.hpp"
 
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include "MCommands.hpp"
 #include "MWindow.hpp"
 #include "MError.hpp"
@@ -25,7 +22,6 @@
 
 using namespace std;
 using namespace zeep;
-namespace io = boost::iostreams;
 
 // --------------------------------------------------------------------
 //
@@ -34,15 +30,10 @@ namespace io = boost::iostreams;
 
 MMenuBar* MWindowImpl::CreateMenu(const std::string& inMenu)
 {
-	string resource = string("Menus/") + inMenu + ".xml";
-	mrsrc::rsrc rsrc(resource);
-	
-	if (not rsrc)
-		THROW(("Menu resource not found: %s", resource.c_str()));
+	using namespace std::literals;
 
-	io::stream<io::array_source> data(rsrc.data(), rsrc.size());
-	
-	xml::document doc(data);
+	mrsrc::istream rsrc("Menus/"s + inMenu + ".xml");
+	xml::document doc(rsrc);
 
 	return MMenuBar::Create(&doc.front());
 }

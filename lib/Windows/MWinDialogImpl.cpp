@@ -8,8 +8,7 @@
 #include <filesystem>
 
 #include "zeep/xml/document.hpp"
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <boost/algorithm/string.hpp>
 
 #include "MWinWindowImpl.hpp"
@@ -29,7 +28,6 @@
 
 using namespace std;
 using namespace zeep;
-namespace io = boost::iostreams;
 namespace ba = boost::algorithm;
 
 class MWinDialogImpl : public MWinWindowImpl
@@ -183,14 +181,10 @@ bool MWinDialogImpl::IsDialogMessage(MSG& inMessage)
 
 void MWinDialogImpl::Finish()
 {
-	string resource = string("Dialogs/") + mRsrc + ".xml";
-	mrsrc::rsrc rsrc(resource);
-		
-	if (not rsrc)
-		THROW(("Dialog resource not found: %s", resource.c_str()));
+	using namespace std::literals;
 
-	io::stream<io::array_source> data(rsrc.data(), rsrc.size());
-	xml::document doc(data);
+	mrsrc::rsrc rsrc("Dialogs/"s) + mRsrc + ".xml");
+	xml::document doc(rsrc);
 
 	xml::element* dialog = doc.find_first("/dialog");
 	if (dialog == nullptr)

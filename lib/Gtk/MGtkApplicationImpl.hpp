@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <filesystem>
+
 #include "MApplicationImpl.hpp"
 
 class MGtkApplicationImpl : public MApplicationImpl

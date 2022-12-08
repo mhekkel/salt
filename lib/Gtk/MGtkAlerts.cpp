@@ -6,9 +6,6 @@
 #include "MGtkLib.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include <zeep/xml/document.hpp>
 
 #include "MAlerts.hpp"
@@ -19,22 +16,20 @@
 
 using namespace std;
 namespace xml = zeep::xml;
-namespace io = boost::iostreams;
 namespace ba = boost::algorithm;
 
 GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
 {
+	using namespace std::literals;
+
 	GtkWidget *dlg = nullptr;
 
-	string resource = string("Alerts/") + inResourceName + ".xml";
-
-	mrsrc::rsrc rsrc(resource);
+	mrsrc::istream rsrc("Alerts/"s + inResourceName + ".xml");
 	if (not rsrc)
 		THROW(("Could not load resource Alerts/%s.xml", inResourceName));
 
 	// parse the XML data
-	io::stream<io::array_source> data(rsrc.data(), rsrc.size());
-	xml::document doc(data);
+	xml::document doc(rsrc);
 
 	// build an alert
 	xml::element *root = doc.find_first("/alert");

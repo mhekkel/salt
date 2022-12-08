@@ -16,8 +16,6 @@
 #include <limits>
 #include <filesystem>
 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -32,7 +30,6 @@
 #include "MFileImpl.hpp"
 
 using namespace std;
-namespace io = boost::iostreams;
 namespace ba = boost::algorithm;
 
 // These are declarations of file attribute I/O routines, very OS specific

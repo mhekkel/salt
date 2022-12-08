@@ -5,10 +5,10 @@
 
 #include "MSalt.hpp"
 
+#include <fstream>
+
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <pinch/port_forwarding.hpp>
 
@@ -312,7 +312,7 @@ class proxy_controller : public zeep::http::html_controller
 				break;
 
 			zeep::http::reply_parser rep_parser;
-			boost::tribool r;
+			zh::parse_result r;
 
 			do
 			{
@@ -322,7 +322,7 @@ class proxy_controller : public zeep::http::html_controller
 					break;
 				buffer.commit(n);
 				r = rep_parser.parse(buffer);
-			} while (not ec and boost::indeterminate(r));
+			} while (not ec and r == zh::indeterminate);
 
 			auto reply = rep_parser.get_reply();
 
@@ -347,7 +347,7 @@ class proxy_controller : public zeep::http::html_controller
 					break;
 				buffer.commit(n);
 				r = req_parser.parse(buffer);
-			} while (not ec and boost::indeterminate(r));
+			} while (not ec and r == zh::indeterminate);
 
 			req = req_parser.get_request();
 		}
@@ -417,7 +417,7 @@ class MHTTPServer : public zeep::http::basic_server
 	}
 
 	void log_request(const std::string &client, const zh::request &req, const zh::reply &rep,
-		const boost::posix_time::ptime &start, const std::string &referer,
+		const std::chrono::system_clock::time_point &pt, const std::string &referer,
 		const std::string &userAgent, const std::string &entry) noexcept override
 	{
 		// m_proxy.log_request(client, req, req.get_request_line(), rep);
@@ -472,14 +472,7 @@ void MHTTPProxyImpl::set_log_level(log_level level)
 	m_log_level = level;
 
 	if (level > log_level::none)
-	{
-		using namespace boost::local_time;
-
 		m_log.reset(new std::ofstream(gPrefsDir / "proxy.log", std::ios::app));
-
-		local_time_facet *lf(new local_time_facet("[%d/%b/%Y:%H:%M:%S %z]"));
-		m_log->imbue(std::locale(std::cout.getloc(), lf));
-	}
 	else
 		m_log.reset(nullptr);
 }
@@ -498,13 +491,12 @@ void MHTTPProxyImpl::log_request(const std::string &client, const zh::request &r
 			if (userAgent.empty())
 				userAgent = "-";
 
-			using namespace boost::local_time;
-			local_date_time start_local(request.get_timestamp(), time_zone_ptr());
+			const std::time_t now_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
 			*m_log << client << ' '
 				   << "-" << ' '
 				   << "-" << ' '
-				   << start_local << ' '
+				   << std::put_time(std::localtime(&now_t), "[%d/%b/%Y:%H:%M:%S %z]") << ' '
 				   << '"' << request_line << "\" "
 				   << std::to_string(reply.get_status()) << ' '
 				   << reply.size() << ' '

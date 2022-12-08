@@ -534,7 +534,7 @@ int main(int argc, char *const argv[])
 		mcfp::make_option("version", "Show version number"),
 		mcfp::make_option("connect,c", "Show connect dialog"),
 		mcfp::make_option("install,i", "Install the application"),
-		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix, default is /usr/local"));
+		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
 
 	std::error_code ec;
 	config.parse(argc, argv, ec);

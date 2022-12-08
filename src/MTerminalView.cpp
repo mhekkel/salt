@@ -9,9 +9,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/stream.hpp>
 
 #include <zeep/crypto.hpp>
 
@@ -41,7 +38,6 @@
 
 using namespace std;
 namespace ba = boost::algorithm;
-namespace io = boost::iostreams;
 
 namespace
 {
@@ -2679,10 +2675,8 @@ void MTerminalView::HandleReceived(const boost::system::error_code &ec, streambu
 	}
 	else
 	{
-		istream in(&inData);
-		io::stream<io::back_insert_device<deque<char>>> out(mInputBuffer);
-
-		io::copy(in, out);
+		while (inData.in_avail() > 0)
+			mInputBuffer.push_back(inData.sbumpc());
 
 		mTerminalChannel->ReadData([this](boost::system::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
 

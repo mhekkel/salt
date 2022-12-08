@@ -9,9 +9,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/serialization/serialization.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include <zeep/xml/document.hpp>
 #include <zeep/xml/node.hpp>
 #include <zeep/xml/serialize.hpp>
@@ -23,7 +20,6 @@
 using namespace std;
 namespace ba = boost::algorithm;
 namespace xml = zeep::xml;
-namespace io = boost::iostreams;
 
 struct ls
 {
@@ -67,15 +63,19 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 {
 	try
 	{
-		mrsrc::rsrc rsrc("strings.xml");
+		std::string ls = std::locale("").name();
+
+		auto s = ls.find('_');
+		std::string lang = ls.substr(0, s);
+
+		mrsrc::istream rsrc("strings.xml." + lang);
 		if (rsrc)
 		{
 			// parse the XML data
-			io::stream<io::array_source> data(rsrc.data(), rsrc.size());
-			xml::document doc(data);
+			xml::document doc(rsrc);
 			doc.deserialize("strings", *this);
 
-			for (ls& s: mLocalStrings)
+			for (auto &s: mLocalStrings)
 			{
 				ba::replace_all(s.key, "\\r", "\r");
 				ba::replace_all(s.key, "\\n", "\n");

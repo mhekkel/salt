@@ -11,9 +11,6 @@
 #include <cstring>
 #include <iostream>
 
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include <zeep/xml/document.hpp>
 
 #include "MAcceleratorTable.hpp"
@@ -28,7 +25,6 @@
 
 using namespace std;
 namespace xml = zeep::xml;
-namespace io = boost::iostreams;
 
 namespace
 {
