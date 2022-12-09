@@ -147,6 +147,9 @@ void MGtkExpanderImpl::SetOpen(bool inOpen)
 	if (inOpen != mIsOpen)
 	{
 		mIsOpen = inOpen;
+
+		gtk_expander_set_expanded(GTK_EXPANDER(GetWidget()), mIsOpen);
+
 		mControl->Invalidate();
 		mControl->eClicked(mControl->GetID());
 	}
@@ -573,14 +576,37 @@ string MGtkComboboxImpl::GetText() const
 	return result;
 }
 
-void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
+void MGtkComboboxImpl::SetText(const std::string &inText)
 {
+	auto i = find(mChoices.begin(), mChoices.end(), inText);
+	if (i == mChoices.end())
+	{
+		mChoices.insert(mChoices.begin(), inText);
+		i = mChoices.begin();
+
+		SetChoices(mChoices);
+	}
+
 	GtkWidget *wdgt = GetWidget();
 
-	if (wdgt == nullptr)
-		mChoices = inChoices;
-	else
+	if (not GTK_IS_COMBO_BOX(wdgt))
+		THROW(("Item is not a combo box"));
+
+	auto ix = i - mChoices.begin();
+	if (ix != gtk_combo_box_get_active(GTK_COMBO_BOX(wdgt)))
+		gtk_combo_box_set_active(GTK_COMBO_BOX(wdgt), ix);
+}
+
+void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
+{
+	mChoices = inChoices;
+
+	GtkWidget *wdgt = GetWidget();
+
+	if (wdgt != nullptr)
 	{
+		mChanged.Disconnect(wdgt);
+	
 		if (not GTK_IS_COMBO_BOX(wdgt))
 			THROW(("Item is not a combo box"));
 

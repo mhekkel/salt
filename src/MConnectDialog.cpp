@@ -37,7 +37,7 @@ MConnectDialog::MConnectDialog()
 {
 //	SetVisible("more-box", false);
 	SetOpen("more-expander", false);
-	SetText("proxy-command", "/usr/bin/nc %h %p");
+	// SetText("proxy-command", "/usr/bin/nc %h %p");
 
 	//SetChecked("use-proxy", false);
 	//SetEnabled("proxy-user", false);
@@ -48,25 +48,18 @@ MConnectDialog::MConnectDialog()
 	vector<string> ss, hosts;
 
 	Preferences::GetArray("recent-proxies", ss);
+
 	for (string& s: ss)
 	{
 		if (std::regex_match(s, m, kProxyRE))
 		{
 			hosts.push_back(m[2]);
-			
-			if (mRecentProxies.empty())
-			{
-				SetText("proxy-user", m[1]);
-				SetText("proxy-host", m[2]);
-				SetText("proxy-command", m[3]);
-			}
-			
 			mRecentProxies.push_back(s);
 		}
 	}
-	
+
 	SetChoices("proxy-host", hosts);
-	
+
 	hosts.clear();
 
 	Preferences::GetArray("recent-sessions", ss);
@@ -74,7 +67,10 @@ MConnectDialog::MConnectDialog()
 	{
 		if (std::regex_match(s, m, kRecentRE))
 		{
-			hosts.push_back(m[2]);
+			if (m[4].matched)
+				hosts.push_back(m[2].str() + " via " + m[4].str());
+			else
+				hosts.push_back(m[2]);
 			mRecentSessions.push_back(s);
 		}
 	}
@@ -139,6 +135,11 @@ bool MConnectDialog::OKClicked()
 	MWindow* w = nullptr;
 	
 	string host = GetText("host");
+
+	auto via = host.find(" via ");
+	if (via != std::string::npos)
+		host = host.substr(0, via);
+
 	string user = GetText("user");
 	string port = "22";
 	string command = GetText("ssh-command");
@@ -223,8 +224,6 @@ bool MConnectDialog::OKClicked()
 
 void MConnectDialog::TextChanged(const string& inID, const string& inText)
 {
-	std::smatch m;
-
 	if (inID == "host")
 		SelectRecent(inText);
 	else if (inID == "proxy-host")
@@ -233,51 +232,64 @@ void MConnectDialog::TextChanged(const string& inID, const string& inText)
 
 void MConnectDialog::SelectRecent(const string& inRecent)
 {
+	std::string host, proxy;
+	auto v = inRecent.find(" via ");
+	if (v != std::string::npos)
+	{
+		host = inRecent.substr(0, v);
+		proxy = inRecent.substr(v + 5);
+	}
+	else
+		host = inRecent;
+
 	for (const string& recent: mRecentSessions)
 	{
 		std::smatch m;
-		if (std::regex_match(recent, m, kRecentRE) and m[2] == inRecent)
+		if (not std::regex_match(recent, m, kRecentRE))
+			continue;
+
+		if (m[2] != host or (proxy.empty() == false and (m[4].matched and m[4] != proxy)))
+			continue;
+
+		SetText("user", m[1]);
+
+		bool expand = false;
+		
+		if (m[6].matched)
 		{
-			SetText("user", m[1]);
+			expand = true;
+			SetText("ssh-command", m[6]);
+		}
+		else
+			SetText("ssh-command", "");
 
-			bool expand = false;
-			
-			if (m[6].matched)
-			{
-				expand = true;
-				SetText("ssh-command", m[6]);
-			}
-			else
-				SetText("ssh-command", "");
+		// proxied?
+		if (m[4].matched)
+		{
+			expand = true;
 
-			// proxied?
-			if (m[4].matched)
-			{
-				expand = true;
+			SetChecked("use-proxy", true);
 
-				SetChecked("use-proxy", true);
+			SetText("proxy-user", m[3]);
+			SetText("proxy-host", m[4]);
+			SetText("proxy-command", m[5]);
 
-				SetText("proxy-user", m[3]);
-				SetText("proxy-host", m[4]);
-				SetText("proxy-command", m[5]);
+			SetEnabled("proxy-user", true);
+			SetEnabled("proxy-host", true);
+			SetEnabled("proxy-command", true);
+		}
+		else
+		{
+			SetChecked("use-proxy", false);
+			SetEnabled("proxy-user", false);
+			SetEnabled("proxy-host", false);
+			SetEnabled("proxy-command", false);
+		}
 
-				SetEnabled("proxy-user", true);
-				SetEnabled("proxy-host", true);
-				SetEnabled("proxy-command", true);
-			}
-			else
-			{
-				SetChecked("use-proxy", false);
-				SetEnabled("proxy-user", false);
-				SetEnabled("proxy-host", false);
-				SetEnabled("proxy-command", false);
-			}
-
-			SetOpen("more-expander", expand);
+		SetOpen("more-expander", expand);
 //			SetVisible("more-box", expand);
 
-			break;
-		}
+		break;
 	}
 }
 
@@ -296,7 +308,7 @@ void MConnectDialog::SelectProxy(const string& inProxy)
 		SetEnabled("proxy-host", true);
 		SetEnabled("proxy-command", true);
 
-		string proxy_user, proxy_command = "/usr/bin/nc %h %p";
+		string proxy_user, proxy_command /* = "/usr/bin/nc %h %p" */;
 		
 		for (string& recent: mRecentProxies)
 		{

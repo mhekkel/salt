@@ -171,8 +171,8 @@ class MGtkComboboxImpl : public MGtkControlImpl<MCombobox>
 	virtual void CreateWidget();
 	virtual void AddedToWindow();
 
-	virtual std::string
-	GetText() const;
+	virtual std::string GetText() const;
+	virtual void SetText(const std::string &inText);
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices);
 

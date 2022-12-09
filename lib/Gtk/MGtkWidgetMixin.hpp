@@ -186,18 +186,22 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 		self->mHandler.reset(new Handler(inOwner, inProc));
 	}
 
-	void Connect(GtkWidget *inObject, const char *inSignalName)
-	{
-		THROW_IF_NIL(inObject);
-		g_signal_connect(G_OBJECT(inObject), inSignalName,
-			G_CALLBACK(&base_class::GCallback), this);
-	}
-
 	void Connect(GObject *inObject, const char *inSignalName)
 	{
 		THROW_IF_NIL(inObject);
-		g_signal_connect(inObject, inSignalName,
+		mID = g_signal_connect(inObject, inSignalName,
 			G_CALLBACK(&base_class::GCallback), this);
+	}
+
+	void Connect(GtkWidget *inObject, const char *inSignalName)
+	{
+		Connect(G_OBJECT(inObject), inSignalName);
+	}
+
+	void Disconnect(GtkWidget *inObject)
+	{
+		g_signal_handler_disconnect(G_OBJECT(inObject), mID);
+		mID = 0;
 	}
 
 	void Block(GtkWidget *inObject, const char *inSignalName)
@@ -218,6 +222,9 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 	{
 		return base_class::mSendingGObject;
 	}
+
+  private:
+	ulong mID = 0;
 };
 
 class MGtkWidgetMixin
