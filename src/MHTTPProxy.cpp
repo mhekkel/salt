@@ -184,15 +184,11 @@ class proxy_controller : public zeep::http::html_controller
 
 	void handle_connect(zh::request req, tcp::socket socket, boost::asio::yield_context yield)
 	{
-		std::string host = req.get_uri();
-		uint16_t port = 443;
+		std::string host = req.get_uri().get_host();
 
-		auto cp = host.find(':');
-		if (cp != std::string::npos)
-		{
-			port = std::stoi(host.substr(cp + 1));
-			host.erase(cp, std::string::npos);
-		}
+		uint16_t port = req.get_uri().get_port();
+		if (port == 0)
+			port = 80;
 
 		std::string client;
 		try // asking for the remote endpoint address failed sometimes
@@ -257,40 +253,25 @@ class proxy_controller : public zeep::http::html_controller
 
 		while (not ec)
 		{
-			std::regex re("^(?:http://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?(/.*)?");
-			std::smatch mr;
+			auto uri = req.get_uri();
 
-			std::string uri = req.get_uri();
-			if (not std::regex_match(uri, mr, re))
-			{
-				send_reply(socket, zh::reply{zh::bad_request}, yield);
-				return;
-			}
+			// std::regex re("^(?:http://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?(/.*)?");
+			// std::smatch mr;
+
+			// std::string uri = req.get_uri();
+			// if (not std::regex_match(uri, mr, re))
+			// {
+			// 	send_reply(socket, zh::reply{zh::bad_request}, yield);
+			// 	return;
+			// }
 
 			++m_request_count;
 
-			std::string host;
-			uint16_t port = 80;
+			std::string host = uri.get_host();
+			uint16_t port = uri.get_port();
 
-			if (host.empty())
-			{
-				if (mr[3].matched)
-					host = mr[3].str();
-				else
-					host = "localhost";
-
-				if (mr[4].matched)
-					port = std::stoi(mr[4]);
-			}
-			else
-			{
-				auto cp = host.find(':');
-				if (cp != std::string::npos)
-				{
-					port = std::stoi(host.substr(cp + 1));
-					host.erase(cp, std::string::npos);
-				}
-			}
+			if (port == 0)
+				port = 80;
 
 			// m_proxy.validate(m_request);
 

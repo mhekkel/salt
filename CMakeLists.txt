@@ -105,6 +105,8 @@ if(MSVC)
 	add_definitions(-D_WIN32_WINNT=${ver})
 endif()
 
+add_compile_definitions(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+
 # Create a revision file, containing the current git version info
 
 include(VersionString)

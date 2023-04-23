@@ -12,7 +12,7 @@ using namespace std;
 
 // --------------------------------------------------------------------
 
-MAnimationVariable::MAnimationVariable(MAnimationVariableImpl* inImpl)
+MAnimationVariable::MAnimationVariable(MAnimationVariableImpl *inImpl)
 	: mImpl(inImpl)
 {
 }
@@ -29,7 +29,7 @@ double MAnimationVariable::GetValue() const
 
 // --------------------------------------------------------------------
 
-MStoryboard::MStoryboard(MStoryboardImpl* inImpl)
+MStoryboard::MStoryboard(MStoryboardImpl *inImpl)
 	: mImpl(inImpl)
 {
 }
@@ -39,8 +39,8 @@ MStoryboard::~MStoryboard()
 	delete mImpl;
 }
 
-void MStoryboard::AddTransition(MAnimationVariable* inVariable,
-	double inNewValue, double inDuration, const char* inTransitionName)
+void MStoryboard::AddTransition(MAnimationVariable *inVariable,
+	double inNewValue, double inDuration, const char *inTransitionName)
 {
 	mImpl->AddTransition(inVariable, inNewValue, inDuration, inTransitionName);
 }
@@ -67,18 +67,17 @@ void MAnimationManager::Stop()
 	mImpl->Stop();
 }
 
-MAnimationVariable* MAnimationManager::CreateVariable(double inValue, double inMin, double inMax)
+MAnimationVariable *MAnimationManager::CreateVariable(double inValue, double inMin, double inMax)
 {
 	return mImpl->CreateVariable(inValue, inMin, inMax);
 }
 
-MStoryboard* MAnimationManager::CreateStoryboard()
+MStoryboard *MAnimationManager::CreateStoryboard()
 {
 	return mImpl->CreateStoryboard();
 }
 
-void MAnimationManager::Schedule(MStoryboard* inStoryboard)
+void MAnimationManager::Schedule(MStoryboard *inStoryboard)
 {
 	mImpl->Schedule(inStoryboard);
 }
-

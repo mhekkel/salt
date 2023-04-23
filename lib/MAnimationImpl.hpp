@@ -10,19 +10,19 @@
 class MAnimationManagerImpl
 {
   public:
-	virtual			~MAnimationManagerImpl() {}
+	virtual ~MAnimationManagerImpl() {}
 
-	static MAnimationManagerImpl*	Create(MAnimationManager* inManager);
+	static MAnimationManagerImpl *Create(MAnimationManager *inManager);
 
-	virtual bool					Update() = 0;
-	virtual void					Stop() {}
+	virtual bool Update() = 0;
+	virtual void Stop() {}
 
-	virtual MAnimationVariable*		CreateVariable(double inValue, double inMin, double inMax) = 0;
-	virtual MStoryboard*			CreateStoryboard() = 0;
-	virtual void					Schedule(MStoryboard* inStoryboard) = 0;
+	virtual MAnimationVariable *CreateVariable(double inValue, double inMin, double inMax) = 0;
+	virtual MStoryboard *CreateStoryboard() = 0;
+	virtual void Schedule(MStoryboard *inStoryboard) = 0;
 
   protected:
-					MAnimationManagerImpl() {}	
+	MAnimationManagerImpl() {}
 };
 
 // --------------------------------------------------------------------
@@ -30,12 +30,12 @@ class MAnimationManagerImpl
 class MAnimationVariableImpl
 {
   public:
-	virtual			~MAnimationVariableImpl() {}
+	virtual ~MAnimationVariableImpl() {}
 
-	virtual double	GetValue() const = 0;
+	virtual double GetValue() const = 0;
 
   protected:
-					MAnimationVariableImpl() {}
+	MAnimationVariableImpl() {}
 };
 
 // --------------------------------------------------------------------
@@ -43,14 +43,14 @@ class MAnimationVariableImpl
 class MStoryboardImpl
 {
   public:
-	virtual			~MStoryboardImpl() {}
+	virtual ~MStoryboardImpl() {}
 
-	virtual void	AddTransition(MAnimationVariable* inVariable,
-						double inNewValue, double inDuration,
-						const char* inTransitionName) = 0;
+	virtual void AddTransition(MAnimationVariable *inVariable,
+		double inNewValue, double inDuration,
+		const char *inTransitionName) = 0;
 
   protected:
-					MStoryboardImpl() {}
+	MStoryboardImpl() {}
 };
 
 #if 0
@@ -61,6 +61,5 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 {
 
 };
-
 
 #endif // 0

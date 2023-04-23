@@ -500,6 +500,8 @@ void MTerminalView::Reset()
 
 	ResetCursor();
 
+	mBracketedPaste = Preferences::GetBoolean("enable-bracketed-paste", true);
+
 	mIRM = false;
 	mKAM = false;
 	mLNM = false;
@@ -2029,6 +2031,44 @@ bool MTerminalView::HandleCharacter(const string &inText, bool inRepeat)
 	return handled;
 }
 
+bool MTerminalView::PastePrimaryBuffer(const string &inText)
+{
+	bool result = false;
+
+	if (mTerminalChannel->IsOpen())
+	{
+		mBuffer->ClearSelection();
+
+		if (mKAM)
+			Beep();
+		else
+		{
+			if (mBracketedPaste)
+				SendCommand(kCSI + "200~" + inText + kCSI + "201~");
+			else
+				SendCommand(inText);
+
+			if (not mSRM)
+				mInputBuffer.insert(mInputBuffer.end(), inText.begin(), inText.end());
+
+			// force a scroll to the bottom
+			Scroll(kScrollToEnd);
+		}
+
+		mLastBlink = 0;
+		mBlinkOn = true;
+
+		if (mBuffer->IsDirty())
+			Invalidate();
+
+		ObscureCursor();
+
+		result = true;
+	}
+
+	return result;
+}
+
 bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 {
 	bool handled = true;
@@ -2142,12 +2182,7 @@ bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint
 			string text;
 			bool block;
 			MClipboard::Instance().GetData(text, block);
-			if (mLNM)
-				ba::replace_all(text, "\n", "\r\n");
-			else
-				ba::replace_all(text, "\n", "\r");
-			if (mTerminalChannel->IsOpen())
-				mTerminalChannel->SendData(std::move(text));
+			handled = PastePrimaryBuffer(text);
 			break;
 		}
 
@@ -2529,10 +2564,6 @@ void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 		ResizeTerminal(w, h, false, false);
 }
 
-#if DEBUG
-extern void print(ostream &os, const vector<uint8_t> &b);
-#endif
-
 void MTerminalView::SendCommand(string inData)
 {
 	if (mTerminalChannel->IsOpen())
@@ -2550,12 +2581,6 @@ void MTerminalView::SendCommand(string inData)
 			ba::replace_all(inData, "\033\\", "\234"); // ST
 			ba::replace_all(inData, "\033]", "\235");  // OSC
 		}
-
-		// #if DEBUG
-		// vector<uint8_t> b;
-		// copy(inData.begin(), inData.end(), back_inserter(b));
-		// print(cerr, b);
-		// #endif
 
 		mTerminalChannel->SendData(std::move(inData));
 	}
@@ -5264,6 +5289,10 @@ void MTerminalView::SetResetMode(uint32_t inMode, bool inANSI, bool inSet)
 				}
 				break;
 
+			case 2004:
+				mBracketedPaste = inSet;
+				break;
+
 			default:
 				PRINT(("Ignored %s of option %d", inSet ? "set" : "reset", inMode));
 				break;
@@ -5345,28 +5374,10 @@ bool MTerminalView::GetMode(uint32_t inMode, bool inANSI)
 			case 69:
 				result = mDECVSSM;
 				break;
+			case 2004:
+				result = mBracketedPaste;
+				break;
 		}
-	}
-
-	return result;
-}
-
-bool MTerminalView::PastePrimaryBuffer(const string &inText)
-{
-	bool result = false;
-
-	if (mTerminalChannel->IsOpen())
-	{
-		string text(inText);
-
-		if (mLNM)
-			ba::replace_all(text, "\n", "\r\n");
-		else
-			ba::replace_all(text, "\n", "\r");
-
-		mTerminalChannel->SendData(std::move(text));
-
-		result = true;
 	}
 
 	return result;

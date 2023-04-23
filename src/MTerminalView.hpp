@@ -29,7 +29,7 @@ class MTerminalView : public MCanvas
 {
   public:
 	MTerminalView(const std::string &inID, MRect inBounds, MStatusbar *inStatusbar, MScrollbar *inScrollbar,
-	              MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::string &inSSHCommand);
+		MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::string &inSSHCommand);
 	virtual ~MTerminalView();
 
 	static MTerminalView *
@@ -48,7 +48,7 @@ class MTerminalView : public MCanvas
 	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
 	virtual void ShowContextMenu(int32_t inX, int32_t inY);
 	static void GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
-	                               uint32_t &outWidth, uint32_t &outHeight);
+		uint32_t &outWidth, uint32_t &outHeight);
 	static MRect GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows);
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
@@ -182,7 +182,7 @@ class MTerminalView : public MCanvas
 	void SetTabstop();
 	uint32_t GetParam(uint32_t inParamNr, uint32_t inDefaultValue);
 	void GetRectParam(uint32_t inParamOffset,
-	                  int32_t &outTop, int32_t &outLeft, int32_t &outBottom, int32_t &outRight);
+		int32_t &outTop, int32_t &outLeft, int32_t &outBottom, int32_t &outRight);
 
 	void SetResetMode(uint32_t inMode, bool inANSI, bool inSet);
 	bool GetMode(uint32_t inMode, bool inANSI);
@@ -192,15 +192,13 @@ class MTerminalView : public MCanvas
 
 	void Idle(double inTime);
 
-	MEventIn<void(double)>
-		eIdle;
+	MEventIn<void(double)> eIdle;
 
-	std::deque<char>
-		mInputBuffer;
+	std::deque<char> mInputBuffer;
+	bool mBracketedPaste = true;
 
 	static std::string sSelectBuffer;
-	static std::list<MTerminalView *>
-		sTerminalList;
+	static std::list<MTerminalView *> sTerminalList;
 
 	enum MColorType
 	{
@@ -215,8 +213,7 @@ class MTerminalView : public MCanvas
 	int32_t mLineHeight;
 	int32_t mMarginLeft, mMarginTop, mMarginRight, mMarginBottom;
 	MEncoding mEncoding;
-	std::vector<bool>
-		mTabStops;
+	std::vector<bool> mTabStops;
 
 	struct MCursor
 	{
@@ -287,8 +284,7 @@ class MTerminalView : public MCanvas
 	} mEscState;
 
 	int mState;
-	std::vector<uint32_t>
-		mArgs;
+	std::vector<uint32_t> mArgs;
 	std::string mArgString;
 	std::string mCtrlSeq;
 	uint32_t mCSICmd;

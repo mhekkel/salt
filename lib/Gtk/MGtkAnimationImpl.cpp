@@ -256,7 +256,7 @@ void MGtkAnimationManagerImpl::Run()
 
 			if (mStoryboards.empty())
 			{
-				mCondition.wait_for(lock, std::chrono::seconds(1));
+				mCondition.wait_for(lock, 1s);
 				continue;
 			}
 
@@ -287,7 +287,7 @@ void MGtkAnimationManagerImpl::Run()
 		{
 		}
 
-		usleep(10000);
+		this_thread::sleep_for(0.05s);
 	}
 }
 

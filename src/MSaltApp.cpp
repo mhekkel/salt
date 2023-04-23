@@ -527,6 +527,12 @@ void MApplication::Install(const string &inPrefix)
 
 int main(int argc, char *const argv[])
 {
+#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
+	if (err_fd > 0)
+		dup2(err_fd, STDERR_FILENO);
+#endif
+
 	auto &config = mcfp::config::instance();
 
 	config.init("usage: salt [options] [url-to-open]",
