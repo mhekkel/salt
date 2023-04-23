@@ -355,6 +355,8 @@ class MTerminalView : public MCanvas
 	} mMouseMode;
 	int32_t mMouseTrackX, mMouseTrackY;
 
+	std::string mSetWindowTitle;
+
 #if DEBUG
 	bool mDebugUpdate;
 #endif

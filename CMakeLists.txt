@@ -136,8 +136,6 @@ find_package(Threads REQUIRED)
 
 find_package(Filesystem REQUIRED)
 
-# find_package(pinch)
-
 add_subdirectory(libpinch EXCLUDE_FROM_ALL)
 add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
 
@@ -146,19 +144,9 @@ find_package(zeep 5.1.6 REQUIRED)
 find_library(DL dl REQUIRED)
 find_library(UTIL util REQUIRED)
 
-# set(Boost_DETAILED_FAILURE_MSG ON)
-
 find_package(Boost COMPONENTS coroutines)
 
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
-# pkg_check_modules(PQXX libpqxx>=7.2 REQUIRED)
-# pkg_check_modules(MAILIO mailio REQUIRED)
-# pkg_check_modules(SSL libssl)
-# pkg_check_modules(CRYPTO libcrypto)
-# pkg_check_modules(JPEG libjpeg REQUIRED)
-# pkg_check_modules(PNG libpng REQUIRED)
-# pkg_check_modules(TIDY tidy REQUIRED)
-# pkg_check_modules(ZLIB zlib)
 
 # The salt executable
 

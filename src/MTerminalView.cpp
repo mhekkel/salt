@@ -1323,6 +1323,9 @@ void MTerminalView::Idle(double inTime)
 
 	if (update or mBuffer->IsDirty())
 		Invalidate();
+	
+	if (not mSetWindowTitle.empty())
+		GetWindow()->SetTitle(std::exchange(mSetWindowTitle, ""));
 }
 
 string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
@@ -4988,7 +4991,12 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 			case 0:
 			case 1:
 			case 2:
-				GetWindow()->SetTitle(mArgString);
+				mSetWindowTitle = mArgString;
+				for (char &ch : mSetWindowTitle)
+				{
+					if (std::iscntrl(ch))
+						ch = '_';
+				}
 				break;
 
 			case 10:
@@ -5024,6 +5032,19 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 				break;
 
 				/* unimplemented: veel */
+
+			case 52:
+				if (mArgString.length() > 2 and mArgString[1] == ';' and mArgString[0] == 'c')
+				{
+					if (mArgString[2] == '?')
+						SendCommand("\033]52;c;\033\\");	// empty string as reply, sorry
+					else
+					{
+						auto s = zeep::decode_base64({mArgString.data() + 2, mArgString.length() - 2});
+						MClipboard::Instance().SetData(s, false);
+					}
+				}
+				break;
 
 			default:
 				PRINT(("Ignored %d OSC option", mArgs[0]));
