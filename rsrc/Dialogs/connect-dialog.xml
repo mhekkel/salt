@@ -2,12 +2,12 @@
 <dialog title="Connect">
 	<vbox bind="left right" spacing="4">
 		<hbox bind="left right">
-			<caption margin-top="3" width="30" id="label-1" text="Server:"/>
-			<combobox width="80" bind="left right" id="host"/>
+			<caption margin-top="3" width="50" id="label-1" text="Server:"/>
+			<combobox width="120" bind="left right" id="host"/>
 		</hbox>
 		<hbox bind="left right" spacing="4">
-			<caption margin-top="3" width="30" id="label-2" text="Username:"/>
-			<edittext width="80" bind="left right" id="user"/>
+			<caption margin-top="3" width="50" id="label-2" text="Username:"/>
+			<edittext width="120" bind="left right" id="user"/>
 		</hbox>
 		<expander id="more-expander" title="More Options">
 			<vbox id="more-box">

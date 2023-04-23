@@ -12,7 +12,7 @@ void DisplayError(const std::exception &inErr)
 	DisplayAlert(nullptr, "error-alert", { inErr.what() });
 }
 
-void DisplayError(const boost::system::error_code &ec)
+void DisplayError(const std::error_code &ec)
 {
 	DisplayAlert(nullptr, "error-alert", { ec.message() });
 }
