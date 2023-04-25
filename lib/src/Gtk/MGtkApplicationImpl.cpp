@@ -3,7 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <cstring>
 
@@ -14,8 +14,8 @@
 #include "MApplication.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
-#include "MGtkApplicationImpl.hpp"
-#include "MGtkWindowImpl.hpp"
+#include "Gtk/MGtkApplicationImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 #include "mrsrc.hpp"
 
 using namespace std;
@@ -68,11 +68,6 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 	mCV.notify_one();
 	if (mAsyncTaskThread.joinable())
 		mAsyncTaskThread.join();
-
-	if (not mIOContext.stopped())
-		mIOContext.stop();
-	if (mIOContextThread.joinable())
-		mIOContextThread.join();
 }
 
 int MGtkApplicationImpl::RunEventLoop()
@@ -83,18 +78,6 @@ int MGtkApplicationImpl::RunEventLoop()
 
 	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]() {
 		ProcessAsyncTasks(context);
-	});
-
-	mIOContextThread = std::thread([&io_context = mIOContext]() {
-		try
-		{
-			auto wg = boost::asio::make_work_guard(io_context.get_executor());
-			io_context.run();
-		}
-		catch (const std::exception &ex)
-		{
-			std::cerr << ex.what() << std::endl;
-		}
 	});
 
 	gtk_main();
@@ -108,8 +91,6 @@ void MGtkApplicationImpl::Quit()
 		g_source_remove(mPulseID);
 
 	gtk_main_quit();
-
-	mIOContext.stop();
 
 	std::unique_lock lock(mMutex);
 	mHandlerQueue.push_front(nullptr);

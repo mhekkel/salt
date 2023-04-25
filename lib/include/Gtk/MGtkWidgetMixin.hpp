@@ -31,7 +31,7 @@ struct MGtkCallbackOutHandler<CallbackIn, Result(Arguments...)>
 
 	static Result GCallback(GObject *inObject, Arguments... args, gpointer inData)
 	{
-		Result result = Result();
+		Result result{};
 
 		try
 		{
@@ -41,6 +41,37 @@ struct MGtkCallbackOutHandler<CallbackIn, Result(Arguments...)>
 			{
 				handler.mSendingGObject = inObject;
 				result = handler.mHandler->DoCallback(args...);
+			}
+		}
+		catch (...)
+		{
+			std::cerr << "caught exception in GCallback" << std::endl;
+		}
+
+		return result;
+	}
+};
+
+// What the f*ck... optimising code nukes the default, somehow bool and int are not equal
+template <class CallbackIn, typename... Arguments>
+struct MGtkCallbackOutHandler<CallbackIn, bool(Arguments...)>
+{
+	std::unique_ptr<CallbackIn> mHandler;
+	GObject *mSendingGObject;
+
+	static gboolean GCallback(GObject *inObject, Arguments... args, gpointer inData)
+	{
+		gboolean result = FALSE;
+
+		try
+		{
+			MGtkCallbackOutHandler &handler = *reinterpret_cast<MGtkCallbackOutHandler *>(inData);
+
+			if (handler.mHandler.get() != nullptr)
+			{
+				handler.mSendingGObject = inObject;
+				if (handler.mHandler->DoCallback(args...))
+					result = TRUE;
 			}
 		}
 		catch (...)
@@ -104,7 +135,7 @@ struct Handler<Derived, Owner, Result(Arguments...)> : public HandlerBase<Result
 		Owner *owner = self->mOwner;
 		Callback func = self->mHandler;
 
-		Result result = Result();
+		Result result = {};
 
 		try
 		{
@@ -200,7 +231,8 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 
 	void Disconnect(GtkWidget *inObject)
 	{
-		g_signal_handler_disconnect(G_OBJECT(inObject), mID);
+		if (mID > 0)
+			g_signal_handler_disconnect(G_OBJECT(inObject), mID);
 		mID = 0;
 	}
 

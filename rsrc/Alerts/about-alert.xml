@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes" ?>
 <alert type="information">
-	<instruction>Salt ^0 - rev ^1</instruction>
+	<instruction>Salt ^0 - rev ^2 (^3)</instruction>
 	<content>Salt is a Terminal Emulator using SSH to connect to hosts.
 
 Salt was written by Maarten L. Hekkelman.

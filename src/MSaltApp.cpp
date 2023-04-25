@@ -12,7 +12,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 // #include <boost/algorithm/string/regex.hpp>
 
-#include <pinch/ssh_agent.hpp>
+#include <pinch.hpp>
 
 #include <mcfp/mcfp.hpp>
 #include <zeep/crypto.hpp>
@@ -25,7 +25,6 @@
 #include "MPreferencesDialog.hpp"
 #include "MSaltApp.hpp"
 #include "MTerminalWindow.hpp"
-// #include "MSaltVersion.hpp"
 #include "MAddTOTPHashDialog.hpp"
 #include "MAlerts.hpp"
 #include "MError.hpp"
@@ -60,7 +59,7 @@ std::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)"
 
 MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	: MApplication(inImpl)
-	, mConnectionPool(inImpl->mIOContext)
+	, mConnectionPool(mIOContext)
 {
 	MAcceleratorTable &at = MAcceleratorTable::Instance();
 
@@ -84,6 +83,27 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 
 MSaltApp::~MSaltApp()
 {
+	if (not mIOContext.stopped())
+		mIOContext.stop();
+	if (mIOContextThread.joinable())
+		mIOContextThread.join();
+}
+
+int MSaltApp::RunEventLoop()
+{
+	mIOContextThread = std::thread([&io_context = mIOContext]() {
+		try
+		{
+			auto wg = asio_ns::make_work_guard(io_context.get_executor());
+			io_context.run();
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << ex.what() << std::endl;
+		}
+	});
+
+	return MApplication::RunEventLoop();
 }
 
 void MSaltApp::Initialise()
@@ -377,7 +397,7 @@ void MSaltApp::OpenRecent(const string &inRecent)
 void MSaltApp::DoAbout()
 {
 	// TODO: fix package version string
-	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kVersionGitTag });
+	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kVersionGitTag, kBuildInfo, kBuildDate });
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
@@ -527,11 +547,11 @@ void MApplication::Install(const string &inPrefix)
 
 int main(int argc, char *const argv[])
 {
-#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
-	if (err_fd > 0)
-		dup2(err_fd, STDERR_FILENO);
-#endif
+// #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+// 	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
+// 	if (err_fd > 0)
+// 		dup2(err_fd, STDERR_FILENO);
+// #endif
 
 	auto &config = mcfp::config::instance();
 

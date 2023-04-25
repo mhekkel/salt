@@ -3,17 +3,17 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <boost/algorithm/string.hpp>
 
 #include "MColorPicker.hpp"
-#include "MGtkCanvasImpl.hpp"
-#include "MGtkControlsImpl.hpp"
-#include "MGtkWindowImpl.hpp"
+#include "Gtk/MGtkCanvasImpl.hpp"
+#include "Gtk/MGtkControlsImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 #include "MUtils.hpp"
 
-#include "MGtkControlsImpl.inl"
+#include "Gtk/MGtkControlsImpl.inl"
 
 using namespace std;
 namespace ba = boost::algorithm;

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <pinch/port_forwarding.hpp>
+#include <pinch.hpp>
 
 class proxy_connection;
 class proxy_channel;
@@ -21,19 +21,19 @@ enum class log_level
 
 class MHTTPProxy
 {
-public:
-	MHTTPProxy(const MHTTPProxy&) = delete;
-	MHTTPProxy& operator=(const MHTTPProxy&) = delete;
+  public:
+	MHTTPProxy(const MHTTPProxy &) = delete;
+	MHTTPProxy &operator=(const MHTTPProxy &) = delete;
 
 	~MHTTPProxy();
 
-	static MHTTPProxy& instance();
+	static MHTTPProxy &instance();
 
 	void Init(std::shared_ptr<pinch::basic_connection> inConnection,
 		uint16_t inPort, bool require_authentication, log_level log);
 
-private:
+  private:
 	MHTTPProxy();
 
-	struct MHTTPProxyImpl* m_impl;
+	struct MHTTPProxyImpl *m_impl;
 };

@@ -3,7 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <gdk/gdkkeysyms.h>
 
@@ -16,8 +16,8 @@
 #include "MAcceleratorTable.hpp"
 #include "MError.hpp"
 #include "MFile.hpp"
-#include "MGtkWidgetMixin.hpp"
-#include "MGtkWindowImpl.hpp"
+#include "Gtk/MGtkWidgetMixin.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 #include "MMenuImpl.hpp"
 #include "MStrings.hpp"
 #include "MUtils.hpp"

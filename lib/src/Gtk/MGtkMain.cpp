@@ -3,7 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <cstring>
 #include <filesystem>
@@ -15,7 +15,7 @@
 
 #include "MApplication.hpp"
 #include "MError.hpp"
-#include "MGtkApplicationImpl.hpp"
+#include "Gtk/MGtkApplicationImpl.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -174,10 +174,9 @@ class MGDbusServer
 			g_dbus_method_invocation_return_value(invocation,
 				g_variant_new("(s)", "ok"));
 		}
-		catch (exception &e)
+		catch (const exception &e)
 		{
-			g_dbus_method_invocation_return_value(invocation,
-				g_variant_new("(s)", e.what()));
+			g_dbus_method_invocation_return_value(invocation, g_variant_new("(s)", e.what()));
 		}
 	}
 
@@ -282,11 +281,6 @@ int MApplication::Main(std::initializer_list<std::string> argv)
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 
-		// if (not fs::exists(gExecutablePath))
-		// 	gExecutablePath = fs::canonical(argv[0]);
-
-		// gdk_threads_init();
-		// gtk_init(&argc, &argv);
 		gtk_init(0, nullptr);
 
 		MGDbusServer dBusServer(argv);

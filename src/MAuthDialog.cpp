@@ -12,7 +12,7 @@
 
 #include <cmath>
 
-#include <pinch/channel.hpp>
+#include <pinch.hpp>
 
 #include "MAlerts.hpp"
 #include "MAuthDialog.hpp"

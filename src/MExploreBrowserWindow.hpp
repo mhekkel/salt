@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <pinch/sftp_channel.hpp>
+#include <pinch.hpp>
 
 #include "MWindow.hpp"
 #include "MControls.hpp"
@@ -21,8 +21,8 @@ class MExploreBrowserWindow : public MWindow
 
   private:
 	
-	void					ChannelOpened(const boost::system::error_code& ec);
-	bool					ReadDir(const boost::system::error_code& ec,
+	void					ChannelOpened(const std::error_code& ec);
+	bool					ReadDir(const std::error_code& ec,
 								const std::string& inName, const std::string& inLongName,
 								const pinch::sftp_channel::file_attributes& attr);
 

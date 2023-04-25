@@ -9,8 +9,6 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <boost/asio.hpp>
-
 class MAsyncHandlerBase
 {
 public:
@@ -51,27 +49,6 @@ public:
 	virtual int RunEventLoop() = 0;
 	virtual void Quit() = 0;
 
-	bool operator==(const MApplicationImpl &other) const noexcept
-	{
-		return mExContext == other.mExContext && &mHandlerQueue == &other.mHandlerQueue;
-	}
-
-	bool operator!=(const MApplicationImpl &other) const noexcept
-	{
-		return !(*this == other);
-	}
-
-	boost::asio::execution_context &query(boost::asio::execution::context_t) const noexcept
-	{
-		return *mExContext;
-	}
-
-	static constexpr boost::asio::execution::blocking_t::never_t query(boost::asio::execution::blocking_t) noexcept
-	{
-		// This executor always has blocking.never semantics.
-		return boost::asio::execution::blocking.never;
-	}
-
 	template<typename Handler>
 	void execute(Handler&& h)
 	{
@@ -81,9 +58,6 @@ public:
 
 		mCV.notify_one();
 	}
-
-	boost::asio::io_context mIOContext;
-	boost::asio::execution_context* mExContext = &mIOContext;
 
 	std::deque<MAsyncHandlerBase*> mHandlerQueue;
 	std::mutex mMutex;

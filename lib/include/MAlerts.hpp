@@ -20,7 +20,7 @@ class MWindow;
 
 void DisplayError(const std::exception &inException);
 void DisplayError(const std::string &inError);
-void DisplayError(const boost::system::error_code &inError);
+void DisplayError(const std::error_code &inError);
 
 // the actual implementation
 

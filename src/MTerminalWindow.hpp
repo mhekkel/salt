@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include <pinch/channel.hpp>
-#include <pinch/connection.hpp>
-#include <pinch/ssh_agent.hpp>
+#include <pinch.hpp>
 
 #include "MWindow.hpp"
 

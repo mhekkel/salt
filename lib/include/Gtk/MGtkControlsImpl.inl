@@ -232,12 +232,12 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 template <class CONTROL>
 bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 {
+	PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
+
 	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
 
 	if (not result)
 	{
-		// PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
-
 		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 
 		uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
@@ -252,6 +252,7 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 		}
 	}
 
+	PRINT(("OnKeyPressEvent returns %d", result));
 	return result;
 }
 

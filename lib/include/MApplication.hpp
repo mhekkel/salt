@@ -5,15 +5,14 @@
 
 #pragma once
 
-#include <deque>
-#include <filesystem>
-#include <list>
-#include <vector>
-
 #include "MApplicationImpl.hpp"
 #include "MHandler.hpp"
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
+
+#include <filesystem>
+#include <list>
+#include <vector>
 
 extern const char kAppName[], kVersionString[];
 
@@ -36,17 +35,15 @@ class MApplication : public MHandler
 	virtual void DoOpen();
 	virtual void Open(const std::string &inURL);
 
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex,
-		bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex,
-		uint32_t inModifiers);
+	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
+	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
 	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
 	virtual void UpdateWindowMenu(MMenu *inMenu);
 
 	MEventOut<void(double)> eIdle;
 
-	int RunEventLoop();
+	virtual int RunEventLoop();
 	virtual void Pulse();
 
 	virtual bool AllowQuit(bool inLogOff);
@@ -54,21 +51,6 @@ class MApplication : public MHandler
 
 	bool IsQuitting() const { return mQuitPending; }
 	void CancelQuit() { mQuitPending = false; }
-
-	MApplicationImpl &get_executor()
-	{
-		return *mImpl;
-	}
-
-	boost::asio::execution_context &get_context()
-	{
-		return *mImpl->mExContext;
-	}
-
-	boost::asio::io_context &get_io_context()
-	{
-		return mImpl->mIOContext;
-	}
 
 	static int Main(std::initializer_list<std::string> argv);
 
@@ -90,39 +72,3 @@ class MApplication : public MHandler
 // --------------------------------------------------------------------
 
 extern MApplication *gApp;
-
-// --------------------------------------------------------------------
-
-class MAppExecutor
-{
-  public:
-	boost::asio::execution_context *m_context;
-
-	bool operator==(const MAppExecutor &other) const noexcept
-	{
-		return m_context == other.m_context;
-	}
-
-	bool operator!=(const MAppExecutor &other) const noexcept
-	{
-		return !(*this == other);
-	}
-
-	boost::asio::execution_context &query(boost::asio::execution::context_t) const noexcept
-	{
-		return *m_context;
-	}
-
-	static constexpr boost::asio::execution::blocking_t::never_t query(
-		boost::asio::execution::blocking_t) noexcept
-	{
-		// This executor always has blocking.never semantics.
-		return boost::asio::execution::blocking.never;
-	}
-
-	template <class F>
-	void execute(F f) const
-	{
-		gApp->get_executor().execute(std::move(f));
-	}
-};

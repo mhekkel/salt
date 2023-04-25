@@ -9,7 +9,7 @@
 
 #include <boost/format.hpp>
 
-#include <pinch/terminal_channel.hpp>
+#include <pinch.hpp>
 
 #include "MCanvas.hpp"
 #include "MColor.hpp"
@@ -67,8 +67,8 @@ class MTerminalView : public MCanvas
 	}
 	virtual void SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY, uint32_t inModifiers);
 
-	void HandleOpened(const boost::system::error_code &ec);
-	void HandleReceived(const boost::system::error_code &ec, std::streambuf &inData);
+	void HandleOpened(const std::error_code &ec);
+	void HandleReceived(const std::error_code &ec, std::streambuf &inData);
 
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);

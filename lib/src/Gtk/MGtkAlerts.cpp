@@ -3,14 +3,14 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <zeep/xml/document.hpp>
 
 #include "MAlerts.hpp"
 #include "MError.hpp"
-#include "MGtkWindowImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 #include "MStrings.hpp"
 #include "mrsrc.hpp"
 

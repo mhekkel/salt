@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 
 // MPrimary is a class used to handle PRIMARY atom selections in X
@@ -14,20 +15,19 @@
 class MPrimary
 {
   public:
-	static MPrimary&	Instance();
-	
-	bool				HasText();
-	void				GetText(std::string& text);
-	void				SetText(const std::string& text);
-	void				SetText(std::function<void(std::string&)> provider);
+	static MPrimary &Instance();
+
+	bool HasText();
+	void GetText(std::string &text);
+	void SetText(const std::string &text);
+	void SetText(std::function<void(std::string &)> provider);
 
   private:
-						MPrimary();
-						~MPrimary();
+	MPrimary();
+	~MPrimary();
 
-						MPrimary(const MPrimary&);
-	MPrimary&			operator=(const MPrimary&);
+	MPrimary(const MPrimary &);
+	MPrimary &operator=(const MPrimary &);
 
-	struct MPrimaryImpl*
-						mImpl;
+	struct MPrimaryImpl *mImpl;
 };

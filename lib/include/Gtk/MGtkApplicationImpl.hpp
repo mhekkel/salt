@@ -5,9 +5,10 @@
 
 #pragma once
 
-#include <filesystem>
-
 #include "MApplicationImpl.hpp"
+
+#include <filesystem>
+#include <thread>
 
 class MGtkApplicationImpl : public MApplicationImpl
 {
@@ -33,7 +34,7 @@ class MGtkApplicationImpl : public MApplicationImpl
 	static MGtkApplicationImpl *sInstance;
 
 	guint mPulseID = 0;
-	std::thread mAsyncTaskThread, mIOContextThread;
+	std::thread mAsyncTaskThread;
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;

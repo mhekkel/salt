@@ -29,6 +29,8 @@ project(salt VERSION 4.0.0 LANGUAGES C CXX)
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+option(USE_BOOST_ASIO "Use the asio library from Boost instead of the non-boost version" ON)
+
 include(GNUInstallDirs)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
@@ -107,6 +109,10 @@ endif()
 
 add_compile_definitions(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
 
+if(USE_BOOST_ASIO)
+	add_compile_definitions(USE_BOOST_ASIO)
+endif()
+
 # Create a revision file, containing the current git version info
 
 include(VersionString)
@@ -136,163 +142,25 @@ find_package(Threads REQUIRED)
 
 find_package(Filesystem REQUIRED)
 
+# find_package(pinch 1.1 REQUIRED)
 add_subdirectory(libpinch EXCLUDE_FROM_ALL)
 add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
+add_subdirectory(lib EXCLUDE_FROM_ALL)
 
 find_package(zeep 5.1.6 REQUIRED)
 
 find_library(DL dl REQUIRED)
 find_library(UTIL util REQUIRED)
 
-find_package(Boost COMPONENTS coroutines)
+# find_package(Boost COMPONENTS coroutines)
 
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
 # The salt executable
 
+add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
+
 add_executable(salt
-	${CMAKE_SOURCE_DIR}/lib/bsd-closefrom.c
-
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkAlerts.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkAnimationImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkCanvasImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkClipboardImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkControlsImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkDeviceImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkDocClosedNotifier.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkError.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkFile.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkLib.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkList.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkList.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkMenu.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkSound.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkUtils.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkWidgetMixin.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkWindowImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MPrimary.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MPrimary.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkCanvasImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkControlsImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkDeviceImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkDialogImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkWidgetMixin.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkApplicationImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkApplicationImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkMain.cpp
-	${CMAKE_SOURCE_DIR}/lib/Gtk/MGtkWindowImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/MAcceleratorTable.cpp
-	${CMAKE_SOURCE_DIR}/lib/MAcceleratorTable.hpp
-	${CMAKE_SOURCE_DIR}/lib/MAnimation.cpp
-	${CMAKE_SOURCE_DIR}/lib/MAnimation.hpp
-	${CMAKE_SOURCE_DIR}/lib/MTypes.hpp
-	${CMAKE_SOURCE_DIR}/lib/MApplication.hpp
-	${CMAKE_SOURCE_DIR}/lib/MApplicationImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MMenu.cpp
-	${CMAKE_SOURCE_DIR}/lib/mrsrc.hpp
-	${CMAKE_SOURCE_DIR}/lib/MCanvas.cpp
-	${CMAKE_SOURCE_DIR}/lib/MCanvas.hpp
-	${CMAKE_SOURCE_DIR}/lib/MCanvasImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MClipboard.cpp
-	${CMAKE_SOURCE_DIR}/lib/MClipboard.hpp
-	${CMAKE_SOURCE_DIR}/lib/MClipboardImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MColorPicker.cpp
-	${CMAKE_SOURCE_DIR}/lib/MColorPicker.hpp
-	${CMAKE_SOURCE_DIR}/lib/MCommands.hpp
-	${CMAKE_SOURCE_DIR}/lib/MFile.cpp
-	${CMAKE_SOURCE_DIR}/lib/MUnicode.hpp
-	${CMAKE_SOURCE_DIR}/lib/MController.hpp
-	${CMAKE_SOURCE_DIR}/lib/MView.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDevice.cpp
-	${CMAKE_SOURCE_DIR}/lib/MDevice.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDialog.cpp
-	${CMAKE_SOURCE_DIR}/lib/MDialog.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDocApplication.cpp
-	${CMAKE_SOURCE_DIR}/lib/MDocApplication.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDocClosedNotifier.cpp
-	${CMAKE_SOURCE_DIR}/lib/MDocClosedNotifier.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDocWindow.hpp
-	${CMAKE_SOURCE_DIR}/lib/MWindow.cpp
-	${CMAKE_SOURCE_DIR}/lib/MError.cpp
-	${CMAKE_SOURCE_DIR}/lib/MError.hpp
-	${CMAKE_SOURCE_DIR}/lib/MExploreBrowserView.hpp
-	${CMAKE_SOURCE_DIR}/lib/MFile.hpp
-	${CMAKE_SOURCE_DIR}/lib/MFileImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MGfxDevice.cpp
-	${CMAKE_SOURCE_DIR}/lib/MGfxDevice.hpp
-	${CMAKE_SOURCE_DIR}/lib/MApplication.cpp
-	${CMAKE_SOURCE_DIR}/lib/MLib.cpp
-	${CMAKE_SOURCE_DIR}/lib/MLib.hpp
-	${CMAKE_SOURCE_DIR}/lib/MWindowImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/MListViewImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MMenu.hpp
-	${CMAKE_SOURCE_DIR}/lib/MP2PEvents.hpp
-	${CMAKE_SOURCE_DIR}/lib/MPreferences.cpp
-	${CMAKE_SOURCE_DIR}/lib/MPreferences.hpp
-	${CMAKE_SOURCE_DIR}/lib/MPrinter.cpp
-	${CMAKE_SOURCE_DIR}/lib/MPrinter.hpp
-	${CMAKE_SOURCE_DIR}/lib/MSound.hpp
-	${CMAKE_SOURCE_DIR}/lib/MStrings.cpp
-	${CMAKE_SOURCE_DIR}/lib/MStrings.hpp
-	${CMAKE_SOURCE_DIR}/lib/MTypes.cpp
-	${CMAKE_SOURCE_DIR}/lib/MUnicode.cpp
-	${CMAKE_SOURCE_DIR}/lib/MUnicodeTables.hpp
-	${CMAKE_SOURCE_DIR}/lib/MUtils.cpp
-	${CMAKE_SOURCE_DIR}/lib/MUtils.hpp
-	${CMAKE_SOURCE_DIR}/lib/MView.cpp
-	${CMAKE_SOURCE_DIR}/lib/MWindow.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinApplicationImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinCanvasImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinExploreBrowserView.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinExploreBrowserView.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinFile.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinLib.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinListViewImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinListViewImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinMenuImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinPreferences.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinSound.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinUtils.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinWindowImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinAlerts.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinAnimationImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinApplicationImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinCanvasImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinClipboardImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinControlsImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinControlsImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinDeviceImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinDialogImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinLib.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinMain.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinMenuImpl.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinProcMixin.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinResources.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinUtils.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinWindowImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/comptr.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinDeviceImpl.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/Windows/MWinProcMixin.cpp
-	# ${CMAKE_SOURCE_DIR}/lib/MListView.hpp
-	# ${CMAKE_SOURCE_DIR}/lib/MListView.cpp
-	${CMAKE_SOURCE_DIR}/lib/MHandler.cpp
-	${CMAKE_SOURCE_DIR}/lib/MHandler.hpp
-	${CMAKE_SOURCE_DIR}/lib/MAlerts.cpp
-	${CMAKE_SOURCE_DIR}/lib/MAlerts.hpp
-	${CMAKE_SOURCE_DIR}/lib/MAnimationImpl.cpp
-	${CMAKE_SOURCE_DIR}/lib/MAnimationImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MColor.cpp
-	${CMAKE_SOURCE_DIR}/lib/MColor.hpp
-	${CMAKE_SOURCE_DIR}/lib/MController.cpp
-	${CMAKE_SOURCE_DIR}/lib/MControls.cpp
-	${CMAKE_SOURCE_DIR}/lib/MControls.hpp
-	${CMAKE_SOURCE_DIR}/lib/MControlsImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDeviceImpl.hpp
-	${CMAKE_SOURCE_DIR}/lib/MDocWindow.cpp
-	${CMAKE_SOURCE_DIR}/lib/MDocument.cpp
-	${CMAKE_SOURCE_DIR}/lib/MDocument.hpp
-	${CMAKE_SOURCE_DIR}/lib/MMenuImpl.hpp
-
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.cpp
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.hpp
 	${CMAKE_SOURCE_DIR}/src/MAuthDialog.cpp
@@ -309,7 +177,6 @@ add_executable(salt
 	${CMAKE_SOURCE_DIR}/src/MPortForwardingDialog.hpp
 	${CMAKE_SOURCE_DIR}/src/MPreferencesDialog.hpp
 	${CMAKE_SOURCE_DIR}/src/MSalt.hpp
-	${CMAKE_SOURCE_DIR}/src/MSaltVersion.h.tmpl
 	${CMAKE_SOURCE_DIR}/src/MSearchPanel.hpp
 	${CMAKE_SOURCE_DIR}/src/MTerminalBuffer.hpp
 	${CMAKE_SOURCE_DIR}/src/MTerminalChannel.hpp
@@ -344,7 +211,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads PkgConfig::GTK3 dl util)
+target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui dl util)
 
 if(USE_RSRC)
 	mrc_target_resources(salt ${RESOURCES})

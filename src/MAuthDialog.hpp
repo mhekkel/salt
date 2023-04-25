@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <pinch/connection.hpp>
+#include <pinch.hpp>
 
 #include "MDialog.hpp"
 

@@ -62,6 +62,6 @@ class MPtyTerminalChannel : public MTerminalChannel
 	std::string mTtyName;
 	std::filesystem::path mCWD;
 
-	boost::asio::posix::stream_descriptor mPty;
-	boost::asio::streambuf mResponse;
+	asio_ns::posix::stream_descriptor mPty;
+	asio_ns::streambuf mResponse;
 };

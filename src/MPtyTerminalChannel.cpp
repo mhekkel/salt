@@ -22,7 +22,7 @@
 
 #include <fstream>
 
-#include <pinch/terminal_channel.hpp>
+#include <pinch.hpp>
 
 #include "MError.hpp"
 #include "MPtyTerminalChannel.hpp"
@@ -36,7 +36,7 @@ using namespace std;
 
 MPtyTerminalChannel::MPtyTerminalChannel()
 	: mPid(-1)
-	, mPty(gApp->get_io_context())
+	, mPty(MSaltApp::instance().get_io_context())
 {
 }
 
@@ -102,7 +102,7 @@ void MPtyTerminalChannel::Open(const string &inTerminalType,
 		close(ttyfd);
 		mPty.assign(ptyfd);
 
-		inOpenCallback(boost::system::error_code());
+		inOpenCallback(std::error_code());
 	}
 	catch (exception &e)
 	{
@@ -245,11 +245,11 @@ std::filesystem::path MPtyTerminalChannel::GetCWD() const
 
 void MPtyTerminalChannel::SendData(string &&inData)
 {
-	shared_ptr<boost::asio::streambuf> buffer(new boost::asio::streambuf);
+	shared_ptr<asio_ns::streambuf> buffer(new asio_ns::streambuf);
 	ostream out(buffer.get());
 	out << inData;
 
-	boost::asio::async_write(mPty, *buffer, [buffer](const boost::system::error_code &, std::size_t) {});
+	asio_ns::async_write(mPty, *buffer, [buffer](const std::error_code &, std::size_t) {});
 }
 
 void MPtyTerminalChannel::SendSignal(const string &inSignal)
@@ -258,16 +258,16 @@ void MPtyTerminalChannel::SendSignal(const string &inSignal)
 
 void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	MAppExecutor my_executor{&gApp->get_context()};
+	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
 
-	auto cb = boost::asio::bind_executor(
+	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inCallback](const boost::system::error_code &ec, size_t inBytesReceived) {
+		[this, inCallback](const std::error_code &ec, size_t inBytesReceived) {
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);
 		});
 
-	boost::asio::async_read(mPty, mResponse, boost::asio::transfer_at_least(1), std::move(cb));
+	asio_ns::async_read(mPty, mResponse, asio_ns::transfer_at_least(1), std::move(cb));
 }
 
 // --------------------------------------------------------------------

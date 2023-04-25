@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-#include <pinch/terminal_channel.hpp>
+#include <pinch.hpp>
 
 #include "MTerminalChannel.hpp"
 #include "MUtils.hpp"
@@ -74,7 +74,7 @@ public:
 
 private:
 	shared_ptr<pinch::terminal_channel> mChannel;
-	boost::asio::streambuf mResponse;
+	asio_ns::streambuf mResponse;
 };
 
 MSshTerminalChannel::MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection)
@@ -89,9 +89,9 @@ MSshTerminalChannel::~MSshTerminalChannel()
 
 void MSshTerminalChannel::SetMessageCallback(const MessageCallback &inMessageCallback)
 {
-	MAppExecutor my_executor{&gApp->get_context()};
+	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
 
-	mMessageCB = boost::asio::bind_executor(
+	mMessageCB = asio_ns::bind_executor(
 		my_executor,
 		[this, inMessageCallback](const std::string &s1, const std::string &s2) {
 			inMessageCallback(s1, s2);
@@ -120,11 +120,11 @@ void MSshTerminalChannel::Open(const string &inTerminalType,
 {
 	// env is ignored anyway...
 
-	MAppExecutor my_executor{&gApp->get_context()};
+	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
 
-	auto cb = boost::asio::bind_executor(
+	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inOpenCallback](const boost::system::error_code &ec) {
+		[this, inOpenCallback](const std::error_code &ec) {
 			auto &connection = mChannel->get_connection();
 			mConnectionInfo = vector<string>({connection.get_connection_parameters(pinch::direction::c2s),
 											  connection.get_connection_parameters(pinch::direction::s2c),
@@ -167,16 +167,16 @@ void MSshTerminalChannel::SendSignal(const string &inSignal)
 
 void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	MAppExecutor my_executor{&gApp->get_context()};
+	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
 
-	auto cb = boost::asio::bind_executor(
+	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inCallback](const boost::system::error_code &ec, size_t inBytesReceived) {
+		[this, inCallback](const std::error_code &ec, size_t inBytesReceived) {
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);
 		});
 
-	boost::asio::async_read(*mChannel, mResponse, boost::asio::transfer_at_least(1), std::move(cb));
+	asio_ns::async_read(*mChannel, mResponse, asio_ns::transfer_at_least(1), std::move(cb));
 }
 
 // --------------------------------------------------------------------

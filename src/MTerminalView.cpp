@@ -7,7 +7,6 @@
 #include <map>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
 #include <boost/format.hpp>
 
 #include <zeep/crypto.hpp>
@@ -258,7 +257,7 @@ MTerminalView::MTerminalView(const string &inID, MRect inBounds,
 
 	Reset();
 
-	AddRoute(gApp->eIdle, eIdle);
+	AddRoute(MSaltApp::instance().eIdle, eIdle);
 	AddRoute(MPreferencesDialog::ePreferencesChanged, ePreferencesChanged);
 	AddRoute(MPreferencesDialog::eColorPreview, ePreviewColor);
 	AddRoute(mStatusbar->ePartClicked, eStatusPartClicked);
@@ -323,7 +322,7 @@ void MTerminalView::Open()
 		Preferences::GetBoolean("forward-agent", true),
 		Preferences::GetBoolean("forward-x11", true),
 		mSSHCommand, env,
-		[this](const boost::system::error_code &ec) {
+		[this](const std::error_code &ec) {
 			this->HandleOpened(ec);
 		});
 }
@@ -2672,7 +2671,7 @@ void MTerminalView::Closed()
 	mAnimationManager->Schedule(storyboard);
 }
 
-void MTerminalView::HandleOpened(const boost::system::error_code &ec)
+void MTerminalView::HandleOpened(const std::error_code &ec)
 {
 	PRINT(("Open callback in %p", std::this_thread::get_id()));
 
@@ -2688,11 +2687,11 @@ void MTerminalView::HandleOpened(const boost::system::error_code &ec)
 	else
 	{
 		Opened();
-		mTerminalChannel->ReadData([this](boost::system::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
+		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
 	}
 }
 
-void MTerminalView::HandleReceived(const boost::system::error_code &ec, streambuf &inData)
+void MTerminalView::HandleReceived(const std::error_code &ec, streambuf &inData)
 {
 	if (ec)
 	{
@@ -2706,7 +2705,7 @@ void MTerminalView::HandleReceived(const boost::system::error_code &ec, streambu
 		while (inData.in_avail() > 0)
 			mInputBuffer.push_back(inData.sbumpc());
 
-		mTerminalChannel->ReadData([this](boost::system::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
+		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
 
 		Idle(0);
 	}

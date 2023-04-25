@@ -3,15 +3,15 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
 #include "MError.hpp"
-#include "MGtkCanvasImpl.hpp"
-#include "MGtkDeviceImpl.hpp"
+#include "Gtk/MGtkCanvasImpl.hpp"
+#include "Gtk/MGtkDeviceImpl.hpp"
 #include "MUnicode.hpp"
 #include "MView.hpp"
 #include "MWindow.hpp"

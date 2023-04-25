@@ -4,8 +4,7 @@
 
 #include <regex>
 
-#include <pinch/port_forwarding.hpp>
-#include <pinch/connection.hpp>
+#include <pinch.hpp>
 
 #include <zeep/crypto.hpp>
 

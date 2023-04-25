@@ -75,7 +75,7 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 {
 	using namespace std::placeholders;
 
-	MAppExecutor my_executor{ &gApp->get_context() };
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	using namespace std::placeholders;
 
@@ -261,7 +261,7 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 		string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
 	string comment = inKeyToDrop.get_comment();
 
-	MAppExecutor my_executor{ &gApp->get_context() };
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	mKeyDropper.reset(new pinch::exec_channel(
 		mConnection, command, [this, comment](const string &, int status)

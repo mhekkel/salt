@@ -3,7 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <charconv>
 
@@ -15,9 +15,9 @@
 #include "MDevice.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
-#include "MGtkApplicationImpl.hpp"
-#include "MGtkControlsImpl.hpp"
-#include "MGtkWindowImpl.hpp"
+#include "Gtk/MGtkApplicationImpl.hpp"
+#include "Gtk/MGtkControlsImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 #include "MStrings.hpp"
 #include "MUtils.hpp"
 #include "mrsrc.hpp"
@@ -128,12 +128,12 @@ class MGtkDialogImpl : public MGtkWindowImpl
 
 bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 {
+	PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
+
 	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
 
 	if (not result)
 	{
-		// PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
-
 		uint32_t keyCode = MapKeyCode(inEvent->keyval);
 		uint32_t modifiers = MapModifier(inEvent->state);
 
@@ -143,6 +143,8 @@ bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 			result = true;
 		}
 	}
+
+	PRINT(("MGtkDialogImpl::OnKeyPressEvent => %d", result));
 
 	return result;
 }

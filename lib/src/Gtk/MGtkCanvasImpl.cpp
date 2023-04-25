@@ -8,22 +8,23 @@
 	Created 28-09-07 11:18:30
 */
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <cassert>
 #include <iostream>
 
+#include "Gtk/MGtkCanvasImpl.hpp"
+#include "Gtk/MGtkDeviceImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
+#include "Gtk/MPrimary.hpp"
+
 #include "MControls.hpp"
-#include "MGtkCanvasImpl.hpp"
-#include "MGtkDeviceImpl.hpp"
-#include "MGtkWindowImpl.hpp"
-#include "MPrimary.hpp"
 #include "MUnicode.hpp"
 #include "MUtils.hpp"
 #include "MWindow.hpp"
 
 #include "MControls.inl"
-#include "MGtkControlsImpl.inl"
+#include "Gtk/MGtkControlsImpl.inl"
 
 using namespace std;
 

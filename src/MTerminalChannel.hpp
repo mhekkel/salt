@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <pinch/channel.hpp>
+#include <pinch.hpp>
 
 class MTerminalChannel
 {
   public:
-	typedef std::function<void(boost::system::error_code)> OpenCallback;
+	typedef std::function<void(std::error_code)> OpenCallback;
 	typedef std::function<void(const std::string &, const std::string &)> MessageCallback;
-	typedef std::function<void(boost::system::error_code, std::size_t)> WriteCallback;
-	typedef std::function<void(boost::system::error_code, std::streambuf &inData)> ReadCallback;
+	typedef std::function<void(std::error_code, std::size_t)> WriteCallback;
+	typedef std::function<void(std::error_code, std::streambuf &inData)> ReadCallback;
 
 	virtual void SetMessageCallback(const MessageCallback &inMessageCallback);
 

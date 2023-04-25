@@ -8,7 +8,7 @@
 #pragma comment(lib, "cryptlib")
 #endif
 
-#include <pinch/connection_pool.hpp>
+#include <pinch.hpp>
 
 #include "MApplication.hpp"
 #include "MTypes.hpp"
@@ -57,6 +57,34 @@ class MSaltApp : public MApplication
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
 
+	int RunEventLoop();
+
+	MSaltApp &get_executor()
+	{
+		return *this;
+	}
+
+	asio_ns::execution_context &get_context()
+	{
+		return *mExContext;
+	}
+
+	asio_ns::io_context &get_io_context()
+	{
+		return mIOContext;
+	}
+
+	static MSaltApp& instance()
+	{
+		return static_cast<MSaltApp &>(*gApp);
+	}
+
+	template<typename Handler>
+	void execute(Handler&& h)
+	{
+		mImpl->execute(std::move(h));
+	}
+
   private:
 	virtual void DoAbout();
 
@@ -72,6 +100,47 @@ class MSaltApp : public MApplication
 	virtual void Initialise();
 	virtual void SaveGlobals();
 
+	asio_ns::io_context mIOContext;
+	asio_ns::execution_context* mExContext = &mIOContext;
+	std::thread mIOContextThread;
+
 	std::deque<std::string> mRecent;
 	pinch::connection_pool mConnectionPool;
+};
+
+
+// --------------------------------------------------------------------
+
+class MAppExecutor
+{
+  public:
+	asio_ns::execution_context *m_context;
+
+	bool operator==(const MAppExecutor &other) const noexcept
+	{
+		return m_context == other.m_context;
+	}
+
+	bool operator!=(const MAppExecutor &other) const noexcept
+	{
+		return !(*this == other);
+	}
+
+	asio_ns::execution_context &query(asio_ns::execution::context_t) const noexcept
+	{
+		return *m_context;
+	}
+
+	static constexpr asio_ns::execution::blocking_t::never_t query(
+		asio_ns::execution::blocking_t) noexcept
+	{
+		// This executor always has blocking.never semantics.
+		return asio_ns::execution::blocking.never;
+	}
+
+	template <class F>
+	void execute(F f) const
+	{
+		static_cast<MSaltApp *>(gApp)->execute(std::move(f));
+	}
 };

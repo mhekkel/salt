@@ -3,7 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
 
 #include <iostream>
 
@@ -14,7 +14,7 @@
 #include "MWindow.hpp"
 #include "MError.hpp"
 #include "MApplication.hpp"
-#include "MGtkWindowImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 #include "mrsrc.hpp"
 
 using namespace std;

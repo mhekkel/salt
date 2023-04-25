@@ -3,48 +3,38 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "MGtkLib.hpp"
+#include "Gtk/MGtkLib.hpp"
+#include "Gtk/MGtkWidgetMixin.hpp"
+#include "Gtk/MPrimary.hpp"
 
-#include "MGtkWidgetMixin.hpp"
-
-#include "MTypes.hpp"
-#include "MPrimary.hpp"
-#include "MUnicode.hpp"
 #include "MError.hpp"
+#include "MTypes.hpp"
+#include "MUnicode.hpp"
 
 using namespace std;
 
 struct MPrimaryImpl
 {
-						MPrimaryImpl();
-						~MPrimaryImpl();
+	MPrimaryImpl();
+	~MPrimaryImpl();
 
-	bool				HasText();
-	void				GetText(string& outText);
-	void				SetText(const string& inText);
-	void				SetText(std::function<void(std::string&)> provider);
-	void				LoadClipboardIfNeeded();
+	bool HasText();
+	void GetText(string &outText);
+	void SetText(const string &inText);
+	void SetText(std::function<void(std::string &)> provider);
+	void LoadClipboardIfNeeded();
 
-	static void			GtkClipboardGet(
-							GtkClipboard*		inClipboard,
-							GtkSelectionData*	inSelectionData,
-							guint				inInfo,
-							gpointer			inUserDataOrOwner);
-	
-	static void			GtkClipboardClear(
-							GtkClipboard*		inClipboard,
-							gpointer			inUserDataOrOwner);
+	static void GtkClipboardGet(GtkClipboard *inClipboard, GtkSelectionData *inSelectionData, guint inInfo, gpointer inUserDataOrOwner);
+	static void GtkClipboardClear(GtkClipboard *inClipboard, gpointer inUserDataOrOwner);
+	void OnOwnerChange(GdkEventOwnerChange *inEvent);
 
-	void				OnOwnerChange(
-							GdkEventOwnerChange*inEvent);
-	
-	string										mText;
-	std::function<void(string&)>				mProvider;
-	MSlot<void(GdkEventOwnerChange*)>			mOwnerChange;
-	GtkClipboard*								mGtkClipboard;
-	bool										mClipboardIsMine;
-	bool										mOwnerChanged;
-	bool										mSettingOwner;
+	string mText;
+	std::function<void(string &)> mProvider;
+	MSlot<void(GdkEventOwnerChange *)> mOwnerChange;
+	GtkClipboard *mGtkClipboard;
+	bool mClipboardIsMine;
+	bool mOwnerChanged;
+	bool mSettingOwner;
 };
 
 MPrimaryImpl::MPrimaryImpl()
@@ -63,27 +53,27 @@ MPrimaryImpl::~MPrimaryImpl()
 }
 
 void MPrimaryImpl::GtkClipboardGet(
-	GtkClipboard*		inClipboard,
-	GtkSelectionData*	inSelectionData,
-	guint				inInfo,
-	gpointer			inUserDataOrOwner)
+	GtkClipboard *inClipboard,
+	GtkSelectionData *inSelectionData,
+	guint inInfo,
+	gpointer inUserDataOrOwner)
 {
-	MPrimaryImpl* self = reinterpret_cast<MPrimaryImpl*>(inUserDataOrOwner);
-	
+	MPrimaryImpl *self = reinterpret_cast<MPrimaryImpl *>(inUserDataOrOwner);
+
 	if (self->mText.empty() and self->mProvider)
 	{
 		self->mProvider(self->mText);
 		self->mProvider = {};
 	}
-	
+
 	gtk_selection_data_set_text(inSelectionData, self->mText.c_str(), self->mText.length());
 }
 
 void MPrimaryImpl::GtkClipboardClear(
-	GtkClipboard*		inClipboard,
-	gpointer			inUserDataOrOwner)
+	GtkClipboard *inClipboard,
+	gpointer inUserDataOrOwner)
 {
-	MPrimaryImpl* self = reinterpret_cast<MPrimaryImpl*>(inUserDataOrOwner);
+	MPrimaryImpl *self = reinterpret_cast<MPrimaryImpl *>(inUserDataOrOwner);
 
 	if (self->mClipboardIsMine and not self->mSettingOwner)
 	{
@@ -95,7 +85,7 @@ void MPrimaryImpl::GtkClipboardClear(
 }
 
 void MPrimaryImpl::OnOwnerChange(
-	GdkEventOwnerChange*inEvent)
+	GdkEventOwnerChange *inEvent)
 {
 	if (not mClipboardIsMine and not mSettingOwner)
 	{
@@ -111,7 +101,7 @@ void MPrimaryImpl::LoadClipboardIfNeeded()
 		mOwnerChanged and
 		gtk_clipboard_wait_is_text_available(mGtkClipboard))
 	{
-		gchar* text = gtk_clipboard_wait_for_text(mGtkClipboard);
+		gchar *text = gtk_clipboard_wait_for_text(mGtkClipboard);
 		if (text != nullptr)
 		{
 			SetText(string(text));
@@ -124,10 +114,10 @@ void MPrimaryImpl::LoadClipboardIfNeeded()
 bool MPrimaryImpl::HasText()
 {
 	LoadClipboardIfNeeded();
-	return not (mText.empty() and not mProvider);
+	return not(mText.empty() and not mProvider);
 }
 
-void MPrimaryImpl::GetText(string& outText)
+void MPrimaryImpl::GetText(string &outText)
 {
 	if (not mText.empty())
 		outText = mText;
@@ -135,16 +125,16 @@ void MPrimaryImpl::GetText(string& outText)
 		mProvider(outText);
 }
 
-void MPrimaryImpl::SetText(const string& inText)
+void MPrimaryImpl::SetText(const string &inText)
 {
 	mText = inText;
 	mProvider = {};
-	
+
 	GtkTargetEntry targets[] = {
-		{ const_cast<gchar*>("UTF8_STRING"), 0, 0 },
-		{ const_cast<gchar*>("COMPOUND_TEXT"), 0, 0 },
-		{ const_cast<gchar*>("TEXT"), 0, 0 },
-		{ const_cast<gchar*>("STRING"), 0, 0 },
+		{ const_cast<gchar *>("UTF8_STRING"), 0, 0 },
+		{ const_cast<gchar *>("COMPOUND_TEXT"), 0, 0 },
+		{ const_cast<gchar *>("TEXT"), 0, 0 },
+		{ const_cast<gchar *>("STRING"), 0, 0 },
 	};
 
 	mSettingOwner = true;
@@ -157,7 +147,7 @@ void MPrimaryImpl::SetText(const string& inText)
 	mClipboardIsMine = true;
 }
 
-void MPrimaryImpl::SetText(std::function<void(string&)> provider)
+void MPrimaryImpl::SetText(std::function<void(string &)> provider)
 {
 	SetText(string(""));
 	mProvider = provider;
@@ -165,7 +155,7 @@ void MPrimaryImpl::SetText(std::function<void(string&)> provider)
 
 // --------------------------------------------------------------------
 
-MPrimary& MPrimary::Instance()
+MPrimary &MPrimary::Instance()
 {
 	static MPrimary sInstance;
 	return sInstance;
@@ -186,17 +176,17 @@ bool MPrimary::HasText()
 	return mImpl->HasText();
 }
 
-void MPrimary::GetText(string& text)
+void MPrimary::GetText(string &text)
 {
 	mImpl->GetText(text);
 }
 
-void MPrimary::SetText(const string& text)
+void MPrimary::SetText(const string &text)
 {
 	mImpl->SetText(text);
 }
 
-void MPrimary::SetText(std::function<void(std::string&)> provider)
+void MPrimary::SetText(std::function<void(std::string &)> provider)
 {
 	mImpl->SetText(provider);
 }

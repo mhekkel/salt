@@ -47,7 +47,7 @@ MExploreBrowserWindow::~MExploreBrowserWindow()
 	
 }
 
-void MExploreBrowserWindow::ChannelOpened(const boost::system::error_code& ec)
+void MExploreBrowserWindow::ChannelOpened(const std::error_code& ec)
 {
 	if (ec)
 		DisplayError(ec);
@@ -60,7 +60,7 @@ void MExploreBrowserWindow::ChannelOpened(const boost::system::error_code& ec)
 	}
 }
 
-bool MExploreBrowserWindow::ReadDir(const boost::system::error_code& ec,
+bool MExploreBrowserWindow::ReadDir(const std::error_code& ec,
 	const string& inName, const string& inLongName,
 	const pinch::sftp_channel::file_attributes& attr)
 {
