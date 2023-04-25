@@ -4,3 +4,5 @@
 [submodule "libmcfp"]
 	path = libmcfp
 	url = git@github.com:mhekkel/libmcfp.git
+[submodule "libpinch/"]
+	url = git@github.com:mhekkel/libpinch.git
