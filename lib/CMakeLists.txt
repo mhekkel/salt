@@ -108,11 +108,11 @@ list(APPEND headers
 	${PROJECT_SOURCE_DIR}/include/MView.hpp
 	${PROJECT_SOURCE_DIR}/include/MDevice.hpp
 	${PROJECT_SOURCE_DIR}/include/MDialog.hpp
-	${PROJECT_SOURCE_DIR}/include/MDocApplication.hpp
-	${PROJECT_SOURCE_DIR}/include/MDocClosedNotifier.hpp
-	${PROJECT_SOURCE_DIR}/include/MDocWindow.hpp
+	# ${PROJECT_SOURCE_DIR}/include/MDocApplication.hpp
+	# ${PROJECT_SOURCE_DIR}/include/MDocClosedNotifier.hpp
+	# ${PROJECT_SOURCE_DIR}/include/MDocWindow.hpp
 	${PROJECT_SOURCE_DIR}/include/MError.hpp
-	${PROJECT_SOURCE_DIR}/include/MExploreBrowserView.hpp
+	# ${PROJECT_SOURCE_DIR}/include/MExploreBrowserView.hpp
 	${PROJECT_SOURCE_DIR}/include/MFile.hpp
 	${PROJECT_SOURCE_DIR}/include/MFileImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/MGfxDevice.hpp
@@ -168,18 +168,18 @@ list(APPEND sources
 	${PROJECT_SOURCE_DIR}/src/MCanvas.cpp
 	${PROJECT_SOURCE_DIR}/src/MClipboard.cpp
 	${PROJECT_SOURCE_DIR}/src/MColorPicker.cpp
-	${PROJECT_SOURCE_DIR}/src/MFile.cpp
+	# ${PROJECT_SOURCE_DIR}/src/MFile.cpp
 	${PROJECT_SOURCE_DIR}/src/MDevice.cpp
 	${PROJECT_SOURCE_DIR}/src/MDialog.cpp
-	${PROJECT_SOURCE_DIR}/src/MDocApplication.cpp
-	${PROJECT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
+	# ${PROJECT_SOURCE_DIR}/src/MDocApplication.cpp
+	# ${PROJECT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
 	${PROJECT_SOURCE_DIR}/src/MWindow.cpp
 	${PROJECT_SOURCE_DIR}/src/MError.cpp
 	${PROJECT_SOURCE_DIR}/src/MGfxDevice.cpp
 	${PROJECT_SOURCE_DIR}/src/MApplication.cpp
 	${PROJECT_SOURCE_DIR}/src/MLib.cpp
 	${PROJECT_SOURCE_DIR}/src/MPreferences.cpp
-	${PROJECT_SOURCE_DIR}/src/MPrinter.cpp
+	# ${PROJECT_SOURCE_DIR}/src/MPrinter.cpp
 	${PROJECT_SOURCE_DIR}/src/MStrings.cpp
 	${PROJECT_SOURCE_DIR}/src/MTypes.cpp
 	${PROJECT_SOURCE_DIR}/src/MUnicode.cpp
@@ -190,10 +190,11 @@ list(APPEND sources
 	${PROJECT_SOURCE_DIR}/src/MAlerts.cpp
 	${PROJECT_SOURCE_DIR}/src/MAnimationImpl.cpp
 	${PROJECT_SOURCE_DIR}/src/MColor.cpp
-	${PROJECT_SOURCE_DIR}/src/MController.cpp
+	# ${PROJECT_SOURCE_DIR}/src/MController.cpp
 	${PROJECT_SOURCE_DIR}/src/MControls.cpp
-	${PROJECT_SOURCE_DIR}/src/MDocWindow.cpp
-	${PROJECT_SOURCE_DIR}/src/MDocument.cpp)
+	# ${PROJECT_SOURCE_DIR}/src/MDocWindow.cpp
+	# ${PROJECT_SOURCE_DIR}/src/MDocument.cpp
+	)
 
 add_library(mgui ${sources} ${headers})
 add_library(mgui::mgui ALIAS mgui)

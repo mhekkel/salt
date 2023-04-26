@@ -8,19 +8,18 @@
 class MConnectDialog : public MDialog
 {
   public:
-						MConnectDialog();
+	MConnectDialog();
 
-	virtual bool		CancelClicked();
-	virtual bool		OKClicked();
-	
-	virtual void		TextChanged(const std::string& inID, const std::string& inText);
-	virtual void		CheckboxChanged(const std::string& inID, bool inValue);
-	virtual void		ButtonClicked(const std::string& inID);
+	virtual bool CancelClicked();
+	virtual bool OKClicked();
+
+	virtual void TextChanged(const std::string &inID, const std::string &inText);
+	virtual void CheckboxChanged(const std::string &inID, bool inValue);
+	virtual void ButtonClicked(const std::string &inID);
 
   private:
+	void SelectProxy(const std::string &inProxy);
+	void SelectRecent(const std::string &inRecent);
 
-	void				SelectProxy(const std::string& inProxy);
-	void				SelectRecent(const std::string& inRecent);
-
-	std::vector<std::string>	mRecentSessions, mRecentProxies;
+	std::vector<std::string> mRecentSessions, mRecentProxies;
 };

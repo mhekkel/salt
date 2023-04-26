@@ -110,8 +110,7 @@ class MTerminalView : public MCanvas
 	MScrollbar *mScrollbar;
 	MSearchPanel *mSearchPanel;
 
-	MTerminalChannel *
-		mTerminalChannel;
+	MTerminalChannel *mTerminalChannel;
 	std::string mSSHCommand;
 	int32_t mTerminalWidth, mTerminalHeight;
 
@@ -142,6 +141,7 @@ class MTerminalView : public MCanvas
 	void EscapeDCS(uint8_t inChar);
 	void CommitPFK();
 	void EscapeOSC(uint8_t inChar);
+	void EscapeAPC(uint8_t inChar);
 
 	void SaveCursor();
 	void RestoreCursor();
@@ -149,6 +149,9 @@ class MTerminalView : public MCanvas
 
 	void SwitchToAlternateScreen();
 	void SwitchToRegularScreen();
+
+	void DownloadFile(const std::string &path);
+	void UploadFile(const std::string &path);
 
 	void Beep();
 

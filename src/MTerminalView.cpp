@@ -2990,8 +2990,13 @@ void MTerminalView::Emulate()
 			switch (ch)
 			{
 				case ENQ:
-					mTerminalChannel->SendData(Preferences::GetString("answer-back", "salt\r"));
+				{
+					std::string answer_back = Preferences::GetString("answer-back", "salt");
+					for (auto p = answer_back.find_first_of("\r\n"); p != std::string::npos; p = answer_back.find_first_of("\n\r", p))
+						answer_back.erase(answer_back.begin() + p);
+					mTerminalChannel->SendData(answer_back);
 					break;
+				}
 
 				case BEL:
 					if (mEscState == eOSC)
@@ -3159,7 +3164,9 @@ void MTerminalView::Emulate()
 					break;
 				case ePM: /* ignore */
 					break;
-				case eAPC: /* ignore */
+
+				case eAPC:
+					EscapeAPC(ch);
 					break;
 
 				case eSELECT_CHAR_SET:
@@ -5095,6 +5102,87 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 	}
 }
 
+void MTerminalView::EscapeAPC(uint8_t inChar)
+{
+	if (inChar == BEL or inChar == ST)
+	{
+		// done
+		mEscState = eESC_NONE;
+
+		switch (mArgs[0])
+		{
+			case 7:
+			{
+				// Bash function for get is:
+				// get() { file="$1"; printf "\033_7;%s\x9c" $(realpath -qez "$file" | base64);}
+
+				auto s = zeep::decode_base64({mArgString.data(), mArgString.length()});
+
+				DownloadFile(s);
+				break;
+			}
+
+			case 8:
+			{
+				// Bash function for get is:
+				// put() { file="$1"; printf "\033_8;%s\x9c" $(realpath -qz "$file" | base64);}
+
+				auto s = zeep::decode_base64({mArgString.data(), mArgString.length()});
+
+				UploadFile(s);
+				break;
+			}
+
+			default:
+				PRINT(("Ignored %d APC option", mArgs[0]));
+				break;
+		}
+	}
+	else
+	{
+		switch (mState)
+		{
+			case 0: // start, expect a number, or ';'
+				mArgs.clear();
+				mArgs.push_back(0);
+				mArgString.clear();
+
+				if (inChar == ';')
+				{
+					mArgs.push_back(0);
+					mState = 2;
+				}
+				else if (inChar >= '0' and inChar <= '9')
+				{
+					mArgs[0] = inChar - '0';
+					mState = 1;
+				}
+				else
+				{
+					mArgString += inChar;
+					mState = 2;
+				}
+				break;
+
+			case 1:
+				if (inChar >= '0' and inChar <= '9')
+					mArgs.back() = mArgs.back() * 10 + (inChar - '0');
+				else if (inChar == ';')
+					mArgs.push_back(0);
+				else // error
+				{
+					mArgString += inChar;
+					mState = 2;
+				}
+				break;
+
+			case 2:
+				mArgString += inChar;
+				break;
+		}
+	}
+}
+
 void MTerminalView::SaveCursor(void)
 {
 	if (mBuffer == &mAlternateBuffer)
@@ -5402,3 +5490,28 @@ bool MTerminalView::GetMode(uint32_t inMode, bool inANSI)
 
 	return result;
 }
+
+// --------------------------------------------------------------------
+
+void MTerminalView::DownloadFile(const std::string &path)
+{
+	if (mTerminalChannel->CanDownloadFiles())
+	{
+		MFileDialogs::SaveFileAs(GetWindow(), path, [path, channel=mTerminalChannel](std::filesystem::path file)
+		{
+			channel->DownloadFile(path, file);
+		});
+	}
+}
+
+void MTerminalView::UploadFile(const std::string &path)
+{
+	if (mTerminalChannel->CanDownloadFiles())
+	{
+		MFileDialogs::ChooseOneFile(GetWindow(), [path, channel=mTerminalChannel](std::filesystem::path file)
+		{
+			channel->UploadFile(path, file);
+		});
+	}
+}
+

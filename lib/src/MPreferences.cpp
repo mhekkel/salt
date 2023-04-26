@@ -4,91 +4,88 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 /*	$Id: MPreferences.cpp 85 2006-09-14 08:23:20Z maarten $
-	Copyright Maarten L. Hekkelman
-	Created Sunday August 01 2004 13:33:22
+    Copyright Maarten L. Hekkelman
+    Created Sunday August 01 2004 13:33:22
 */
 
 #include "MLib.hpp"
 
-#include <sstream>
-#include <fstream>
 #include <cerrno>
 #include <cstring>
+#include <fstream>
 #include <map>
+#include <sstream>
 
 #include <cstring>
 
-#include "MTypes.hpp"
-#include "MPreferences.hpp"
-#include "MError.hpp"
 #include "MApplication.hpp"
-#include "MUtils.hpp"
+#include "MError.hpp"
 #include "MFile.hpp"
+#include "MPreferences.hpp"
+#include "MTypes.hpp"
+#include "MUtils.hpp"
 
 #include <zeep/xml/document.hpp>
 #include <zeep/xml/node.hpp>
 #include <zeep/xml/serialize.hpp>
 
-using namespace std;
 namespace xml = zeep::xml;
 namespace fs = std::filesystem;
 
-fs::path	gPrefsDir;
-string		gPrefsFileName = string(kAppName) + ".cfg";
+fs::path gPrefsDir;
+std::string gPrefsFileName = std::string(kAppName) + ".cfg";
 
 namespace Preferences
 {
 
 struct preference
 {
-	string				name;
-	vector<string>		value;
-	
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int version)
+	std::string name;
+	std::vector<std::string> value;
+
+	template <class Archive>
+	void serialize(Archive &ar, const unsigned int version)
 	{
-		ar & zeep::make_nvp("name", name)
-		   & zeep::make_nvp("value", value);
+		ar &zeep::make_nvp("name", name) & zeep::make_nvp("value", value);
 	}
 };
 
 struct preferences
 {
-	vector<preference>	pref;
-	
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int version)
+	std::vector<preference> pref;
+
+	template <class Archive>
+	void serialize(Archive &ar, const unsigned int version)
 	{
-		ar & zeep::xml::make_element_nvp("pref", pref);
+		ar &zeep::xml::make_element_nvp("pref", pref);
 	}
 };
 
 class IniFile
 {
   public:
+	static IniFile &Instance();
 
-	static IniFile&	Instance();
-	
-	void		SetString(const char* inName, const string& inValue);
-	string		GetString(const char* inName, const string& inDefault);
+	void SetString(const char *inName, const std::string &inValue);
+	std::string GetString(const char *inName, const std::string &inDefault);
 
-	void		SetStrings(const char* inName, const vector<string>& inValues);
-	void		GetStrings(const char* inName, vector<string>& outStrings);
-	
-	time_t		GetCreationTime() const		{ return GetFileCreationTime(mPrefsFile); }
-	bool		IsDirty() const				{ return mDirty;  }
+	void SetStrings(const char *inName, const std::vector<std::string> &inValues);
+	void GetStrings(const char *inName, std::vector<std::string> &outStrings);
 
-	void		Save();
-	
+	std::filesystem::file_time_type GetCreationTime() const { return fs::last_write_time(mPrefsFile); }
+	bool IsDirty() const { return mDirty; }
+
+	void Save();
+
   private:
-				IniFile();
-				~IniFile();
+	IniFile();
+	~IniFile();
 
-	typedef map<string,vector<string>> PrefsMap;
-	
-	fs::path	mPrefsFile;
-	PrefsMap	mPrefs;
-	bool		mDirty;
+	typedef std::map<std::string, std::vector<std::string>> PrefsMap;
+
+	fs::path mPrefsFile;
+	PrefsMap mPrefs;
+	bool mDirty;
 };
 
 IniFile::IniFile()
@@ -111,26 +108,26 @@ IniFile::IniFile()
 
 			mPrefsFile = gPrefsDir / gPrefsFileName;
 		}
-		
+
 		if (fs::exists(mPrefsFile))
 		{
-			std::ifstream data(mPrefsFile, ios::binary);
-			
+			std::ifstream data(mPrefsFile, std::ios::binary);
+
 			if (data.is_open())
 			{
 				xml::document doc(data);
-				
+
 				preferences prefs;
 				doc.deserialize("preferences", prefs);
 
-				for (const preference& p: prefs.pref)
+				for (const preference &p : prefs.pref)
 					mPrefs[p.name] = p.value;
 			}
 		}
 	}
-	catch (exception& e)
+	catch (const std::exception &ex)
 	{
-		cerr << "Exception reading preferences: " << e.what() << endl;		
+		std::cerr << "Exception reading preferences: " << ex.what() << std::endl;
 	}
 }
 
@@ -140,7 +137,7 @@ IniFile::~IniFile()
 		Save();
 }
 
-IniFile& IniFile::Instance()
+IniFile &IniFile::Instance()
 {
 	static IniFile sInstance;
 	return sInstance;
@@ -154,20 +151,20 @@ void IniFile::Save()
 		{
 			if (not fs::exists(gPrefsDir))
 				fs::create_directories(gPrefsDir);
-		
+
 			mPrefsFile = gPrefsDir / gPrefsFileName;
 		}
-		
+
 		fs::path tmpPrefs = mPrefsFile.parent_path() / (mPrefsFile.filename().string() + "-new");
-		
+
 		std::ofstream data(tmpPrefs);
-	
+
 		if (data.is_open())
 		{
 			preferences prefs;
 
-			transform(mPrefs.begin(), mPrefs.end(), back_inserter(prefs.pref),
-				[](const pair<string,vector<string>>& p) -> preference
+			transform(mPrefs.begin(), mPrefs.end(), std::back_inserter(prefs.pref),
+				[](const std::pair<std::string, std::vector<std::string>> &p) -> preference
 				{
 					preference pp = { p.first, p.second };
 					return pp;
@@ -177,34 +174,34 @@ void IniFile::Save()
 			doc.serialize("preferences", prefs);
 
 			data << doc;
-			
+
 			data.close();
 
 			fs::path oldPrefs = mPrefsFile.parent_path() / (mPrefsFile.filename().string() + "-old");
-			
+
 			if (fs::exists(mPrefsFile))
 				fs::rename(mPrefsFile, oldPrefs);
-		
+
 			fs::rename(tmpPrefs, mPrefsFile);
-		
+
 			if (fs::exists(oldPrefs))
 				fs::remove(oldPrefs);
-			
+
 			mDirty = false;
 		}
 	}
-	catch (exception& e)
+	catch (const std::exception &ex)
 	{
-		PRINT(("Exception writing prefs file: %s", e.what()));
+		PRINT(("Exception writing prefs file: %s", ex.what()));
 	}
-	catch (...) {}
+	catch (...)
+	{
+	}
 }
 
-void IniFile::SetString(
-	const char*		inName,
-	const string&	inValue)
+void IniFile::SetString(const char *inName, const std::string &inValue)
 {
-	vector<string> values = { inValue };
+	std::vector<std::string> values = { inValue };
 	if (mPrefs[inName] != values)
 	{
 		mDirty = true;
@@ -212,22 +209,18 @@ void IniFile::SetString(
 	}
 }
 
-string IniFile::GetString(
-	const char*		inName,
-	const string&	inDefault)
+std::string IniFile::GetString(const char *inName, const std::string &inDefault)
 {
 	if (mPrefs.find(inName) == mPrefs.end() or mPrefs[inName].size() == 0)
 		SetString(inName, inDefault);
-	vector<string>& values = mPrefs[inName];
+	std::vector<std::string> &values = mPrefs[inName];
 	assert(values.size() == 1);
 	if (values.size() != 1)
-		cerr << "Inconsistent use of preference array/value" << endl;
+		std::cerr << "Inconsistent use of preference array/value" << std::endl;
 	return mPrefs[inName].front();
 }
 
-void IniFile::SetStrings(
-	const char*				inName,
-	const vector<string>&	inValues)
+void IniFile::SetStrings(const char *inName, const std::vector<std::string> &inValues)
 {
 	if (mPrefs[inName] != inValues)
 	{
@@ -236,22 +229,18 @@ void IniFile::SetStrings(
 	}
 }
 
-void IniFile::GetStrings(
-	const char*				inName,
-	vector<string>&			outStrings)
+void IniFile::GetStrings(const char *inName, std::vector<std::string> &outStrings)
 {
 	outStrings = mPrefs[inName];
 }
 
-bool GetBoolean(
-	const char*	inName,
-	bool		inDefaultValue)
+bool GetBoolean(const char *inName, bool inDefaultValue)
 {
 	bool result = inDefaultValue;
 
 	try
 	{
-		string s = GetString(inName, inDefaultValue ? "true" : "false");
+		std::string s = GetString(inName, inDefaultValue ? "true" : "false");
 		result = (s == "true" or s == "1");
 	}
 	catch (...)
@@ -261,16 +250,12 @@ bool GetBoolean(
 	return result;
 }
 
-void SetBoolean(
-	const char*	inName,
-	bool		inValue)
+void SetBoolean(const char *inName, bool inValue)
 {
 	SetString(inName, inValue ? "true" : "false");
 }
 
-int32_t GetInteger(
-	const char*	inName,
-	int32_t		inDefaultValue)
+int32_t GetInteger(const char *inName, int32_t inDefaultValue)
 {
 	int32_t result = inDefaultValue;
 
@@ -286,72 +271,60 @@ int32_t GetInteger(
 	return result;
 }
 
-void SetInteger(
-	const char*	inName,
-	int32_t		inValue)
+void SetInteger(const char *inName, int32_t inValue)
 {
 	SetString(inName, std::to_string(inValue));
 }
 
-string GetString(
-	const char*	inName,
-	string		inDefaultValue)
+std::string GetString(const char *inName, std::string inDefaultValue)
 {
 	return IniFile::Instance().GetString(inName, inDefaultValue);
 }
 
-void SetString(
-	const char*	inName,
-	string		inValue)
+void SetString(const char *inName, std::string inValue)
 {
 	IniFile::Instance().SetString(inName, inValue);
 }
 
-void
-GetArray(
-	const char*		inName,
-	vector<string>&	outArray)
+void GetArray(const char *inName, std::vector<std::string> &outArray)
 {
 	IniFile::Instance().GetStrings(inName, outArray);
 }
 
-void
-SetArray(
-	const char*				inName,
-	const vector<string>&	inArray)
+void SetArray(const char *inName, const std::vector<std::string> &inArray)
 {
 	IniFile::Instance().SetStrings(inName, inArray);
 }
 
-MColor GetColor(const char* inName, MColor inDefaultValue)
+MColor GetColor(const char *inName, MColor inDefaultValue)
 {
 	inDefaultValue.hex(GetString(inName, inDefaultValue.hex()));
 	return inDefaultValue;
 }
 
-void SetColor(const char* inName, MColor inValue)
+void SetColor(const char *inName, MColor inValue)
 {
 	SetString(inName, inValue.hex());
 }
 
-MRect GetRect(const char* inName, MRect inDefault)
+MRect GetRect(const char *inName, MRect inDefault)
 {
-	stringstream s;
+	std::stringstream s;
 	s << inDefault.x << ' ' << inDefault.y << ' ' << inDefault.width << ' ' << inDefault.height;
 	s.str(GetString(inName, s.str()));
-	
+
 	s >> inDefault.x >> inDefault.y >> inDefault.width >> inDefault.height;
 	return inDefault;
 }
 
-void SetRect(const char* inName, MRect inValue)
+void SetRect(const char *inName, MRect inValue)
 {
-	ostringstream s;
+	std::ostringstream s;
 	s << inValue.x << ' ' << inValue.y << ' ' << inValue.width << ' ' << inValue.height;
 	SetString(inName, s.str());
 }
 
-time_t GetPrefsFileCreationTime()
+std::filesystem::file_time_type GetPrefsFileCreationTime()
 {
 	return IniFile::Instance().GetCreationTime();
 }
@@ -363,9 +336,9 @@ void Save()
 
 void SaveIfDirty()
 {
-	auto& instance = IniFile::Instance();
+	auto &instance = IniFile::Instance();
 	if (instance.IsDirty())
 		instance.Save();
 }
 
-}
+} // namespace Preferences

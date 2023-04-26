@@ -7,10 +7,10 @@
 
 #include <pinch.hpp>
 
-#include "MTerminalChannel.hpp"
-#include "MUtils.hpp"
 #include "MError.hpp"
 #include "MSaltApp.hpp"
+#include "MTerminalChannel.hpp"
+#include "MUtils.hpp"
 
 using namespace std;
 
@@ -47,19 +47,19 @@ void MTerminalChannel::Disconnect(bool disconnectProxy)
 
 class MSshTerminalChannel : public MTerminalChannel
 {
-public:
+  public:
 	MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection);
 	~MSshTerminalChannel();
 
 	virtual void SetMessageCallback(const MessageCallback &inMessageCallback);
 
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-								 uint32_t inPixelWidth, uint32_t inPixelHeight);
+		uint32_t inPixelWidth, uint32_t inPixelHeight);
 
 	virtual void Open(const string &inTerminalType,
-					  bool inForwardAgent, bool inForwardX11,
-					  const string &inCommand, const vector<string> &env,
-					  const OpenCallback &inOpenCallback);
+		bool inForwardAgent, bool inForwardX11,
+		const string &inCommand, const vector<string> &env,
+		const OpenCallback &inOpenCallback);
 
 	virtual void Close();
 
@@ -72,7 +72,11 @@ public:
 	virtual void SendSignal(const string &inSignal);
 	virtual void ReadData(const ReadCallback &inCallback);
 
-private:
+	virtual bool CanDownloadFiles() const { return true; }
+	virtual void DownloadFile(const std::string &remotepath, const std::string &localpath);
+	virtual void UploadFile(const std::string &remotepath, const std::string &localpath);
+
+  private:
 	shared_ptr<pinch::terminal_channel> mChannel;
 	asio_ns::streambuf mResponse;
 };
@@ -89,11 +93,12 @@ MSshTerminalChannel::~MSshTerminalChannel()
 
 void MSshTerminalChannel::SetMessageCallback(const MessageCallback &inMessageCallback)
 {
-	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	mMessageCB = asio_ns::bind_executor(
 		my_executor,
-		[this, inMessageCallback](const std::string &s1, const std::string &s2) {
+		[this, inMessageCallback](const std::string &s1, const std::string &s2)
+		{
 			inMessageCallback(s1, s2);
 		});
 
@@ -102,7 +107,7 @@ void MSshTerminalChannel::SetMessageCallback(const MessageCallback &inMessageCal
 }
 
 void MSshTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-										  uint32_t inPixelWidth, uint32_t inPixelHeight)
+	uint32_t inPixelWidth, uint32_t inPixelHeight)
 {
 	mTerminalWidth = inColumns;
 	mTerminalHeight = inRows;
@@ -114,21 +119,22 @@ void MSshTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 }
 
 void MSshTerminalChannel::Open(const string &inTerminalType,
-							   bool inForwardAgent, bool inForwardX11,
-							   const string &inCommand, const vector<string> &env,
-							   const OpenCallback &inOpenCallback)
+	bool inForwardAgent, bool inForwardX11,
+	const string &inCommand, const vector<string> &env,
+	const OpenCallback &inOpenCallback)
 {
 	// env is ignored anyway...
 
-	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inOpenCallback](const std::error_code &ec) {
+		[this, inOpenCallback](const std::error_code &ec)
+		{
 			auto &connection = mChannel->get_connection();
-			mConnectionInfo = vector<string>({connection.get_connection_parameters(pinch::direction::c2s),
-											  connection.get_connection_parameters(pinch::direction::s2c),
-											  connection.get_key_exchange_algorithm()});
+			mConnectionInfo = vector<string>({ connection.get_connection_parameters(pinch::direction::c2s),
+				connection.get_connection_parameters(pinch::direction::s2c),
+				connection.get_key_exchange_algorithm() });
 
 			mConnectionInfo.erase(unique(mConnectionInfo.begin(), mConnectionInfo.end()), mConnectionInfo.end());
 
@@ -137,7 +143,7 @@ void MSshTerminalChannel::Open(const string &inTerminalType,
 		});
 
 	mChannel->open_with_pty(mTerminalWidth, mTerminalHeight,
-							inTerminalType, inForwardAgent, inForwardX11, inCommand, std::move(cb));
+		inTerminalType, inForwardAgent, inForwardX11, inCommand, std::move(cb));
 }
 
 void MSshTerminalChannel::Close()
@@ -167,17 +173,68 @@ void MSshTerminalChannel::SendSignal(const string &inSignal)
 
 void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inCallback](const std::error_code &ec, size_t inBytesReceived) {
+		[this, inCallback](const std::error_code &ec, size_t inBytesReceived)
+		{
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);
 		});
 
 	asio_ns::async_read(*mChannel, mResponse, asio_ns::transfer_at_least(1), std::move(cb));
 }
+
+void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std::string &localpath)
+{
+	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+
+	p->async_init(3,
+		[self = p, remotepath, localpath](const asio_system_ns::error_code &ec, int version)
+		{
+			if (ec or version != 3)
+			{
+				std::cerr << "error sftp opening channel: " << ec.message() << std::endl;
+				self->close();
+			}
+			else
+			{
+				self->read_file(remotepath, localpath,
+					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
+					{
+						if (ec)
+							std::cerr << "ec: " << ec.message() << std::endl;
+					});
+			}
+		});
+}
+
+void MSshTerminalChannel::UploadFile(const std::string &remotepath, const std::string &localpath)
+{
+	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+
+	p->async_init(3,
+		[self = p, remotepath, localpath](const asio_system_ns::error_code &ec, int version)
+		{
+			if (ec or version != 3)
+			{
+				std::cerr << "error sftp opening channel: " << ec.message() << std::endl;
+				self->close();
+			}
+			else
+			{
+				self->write_file(remotepath, localpath,
+					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
+					{
+						if (ec)
+							std::cerr << "ec: " << ec.message() << std::endl;
+					});
+			}
+		});
+}
+
+
 
 // --------------------------------------------------------------------
 // MTerminalChannel factory

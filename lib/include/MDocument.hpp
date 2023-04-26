@@ -31,7 +31,7 @@ class MDocument : public MHandler
 	virtual				~MDocument();
 
 	virtual void		SetFile(const std::string& inURL);
-	const MFile&		GetFile() const						{ return mFile; }
+	// const MFile&		GetFile() const						{ return mFile; }
 
 	virtual void		DoLoad();
 
@@ -85,7 +85,7 @@ class MDocument : public MHandler
 	MEventOut<void(bool)>					eModifiedChanged;
 	MEventOut<void(MDocument*)>				eDocumentClosed;
 	MEventOut<void(MDocument*)>				eFileSpecChanged;
-	MEventOut<void(const fs::path&)>		eBaseDirChanged;
+	// MEventOut<void(const fs::path&)>		eBaseDirChanged;
 
 	// Asynchronous IO support
 	virtual void		IOReadFile(std::istream& inFile) = 0;
@@ -103,7 +103,7 @@ class MDocument : public MHandler
 	MControllerList		mControllers;
 	MDocClosedNotifierList
 						mNotifiers;
-	MFile				mFile;
+	// MFile				mFile;
 	bool				mWarnedReadOnly;
 	bool				mDirty;
 

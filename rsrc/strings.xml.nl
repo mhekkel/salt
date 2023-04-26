@@ -45,6 +45,10 @@
     <value>Naamloos</value>
   </localstring>
   <localstring>
+    <key>Untitled document</key>
+    <value>Naamloos bestand</value>
+  </localstring>
+  <localstring>
     <key>User cancelled</key>
     <value>Afgebroken door gebruiker</value>
   </localstring>
@@ -612,6 +616,15 @@ Meer informatie vindt u op http://www.hekkelman.com/</value>
     <key>One Time Passwords</key>
     <value>Tijdelijk wachtwoord</value>
   </localstring>
-	
+
+  <localstring>
+    <key>Save File</key>
+    <value>Bewaar bestand</value>
+  </localstring>
+
+  <localstring>
+    <key>Save</key>
+    <value>Bewaar</value>
+  </localstring>
 
 </strings>

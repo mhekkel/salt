@@ -20,7 +20,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include "MFile.hpp"
-#include "MDocument.hpp"
 #include "MError.hpp"
 #include "MUnicode.hpp"
 #include "MUtils.hpp"

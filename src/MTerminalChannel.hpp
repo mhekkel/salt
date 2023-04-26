@@ -49,6 +49,10 @@ class MTerminalChannel
 		return mConnectionInfo;
 	}
 
+	virtual bool CanDownloadFiles() const { return false; }
+	virtual void DownloadFile(const std::string &remotepath, const std::string &localpath) {}
+	virtual void UploadFile(const std::string &remotepath, const std::string &localpath) {}
+
   protected:
 	MTerminalChannel();
 	virtual ~MTerminalChannel();
