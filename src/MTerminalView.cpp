@@ -10,6 +10,7 @@
 #include <boost/format.hpp>
 
 #include <zeep/crypto.hpp>
+#include <zeep/unicode-support.hpp>
 
 #include "MAnimation.hpp"
 #include "MApplication.hpp"
@@ -2033,12 +2034,75 @@ bool MTerminalView::HandleCharacter(const string &inText, bool inRepeat)
 	return handled;
 }
 
-bool MTerminalView::PastePrimaryBuffer(const string &inText)
+// const std::vector<std::string> kDisallowedPasteCharacters{
+// 	"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT",
+// 	"FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
+// 	"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "DEL"};
+
+struct DisallowedChar
+{
+	const char *name;
+	char ch;
+} kDisallowedPasteCharacters[] = {
+	{ "NUL", 0x00 }, //  '\0' (null character)
+	{ "SOH", 0x01 }, //  (start of heading)
+	{ "STX", 0x02 }, //  (start of text)
+	{ "ETX", 0x03 }, //  (end of text)
+	{ "EOT", 0x04 }, //  (end of transmission)
+	{ "ENQ", 0x05 }, //  (enquiry)
+	{ "ACK", 0x06 }, //  (acknowledge)
+	{ "BEL", 0x07 }, //  '\a' (bell)
+	{ "BS", 0x08 },  //  '\b' (backspace)
+	{ "HT", 0x09 },  //  '\t' (horizontal tab)
+	{ "LF", 0x0A },  //  '\n' (new line)
+	{ "VT", 0x0B },  //  '\v' (vertical tab)
+	{ "FF", 0x0C },  //  '\f' (form feed)
+	{ "CR", 0x0D },  //  '\r' (carriage ret)
+	{ "SO", 0x0E },  //  (shift out)
+	{ "SI", 0x0F },  //  (shift in)
+	{ "DLE", 0x10 }, //  (data link escape)
+	{ "DC1", 0x11 }, //  (device control 1)
+	{ "DC2", 0x12 }, //  (device control 2)
+	{ "DC3", 0x13 }, //  (device control 3)
+	{ "DC4", 0x14 }, //  (device control 4)
+	{ "NAK", 0x15 }, //  (negative ack.)
+	{ "SYN", 0x16 }, //  (synchronous idle)
+	{ "ETB", 0x17 }, //  (end of trans. blk)
+	{ "CAN", 0x18 }, //  (cancel)
+	{ "EM", 0x19 },  //  (end of medium)
+	{ "SUB", 0x1A }, //  (substitute)
+	{ "ESC", 0x1B }, //  (escape)
+	{ "FS", 0x1C },  //  (file separator)
+	{ "GS", 0x1D },  //  (group separator)
+	{ "RS", 0x1E },  //  (record separator)
+	{ "US", 0x1F },  //  (unit separator)
+	{ "DEL", 0x7F }
+};
+
+bool MTerminalView::PastePrimaryBuffer(string inText)
 {
 	bool result = false;
 
 	if (mTerminalChannel->IsOpen())
 	{
+		// clean up the text to be pasted
+
+		std::vector<std::string> dpc;
+		Preferences::GetArray("disallowed-paste-characters", dpc);
+		if (dpc.empty())
+		{
+			dpc = std::vector<std::string>{"BS","DEL","ENQ","EOT","ESC","NUL"};
+			Preferences::SetArray("disallowed-paste-characters", dpc);
+		}
+
+		for (const auto &[name, ch] : kDisallowedPasteCharacters)
+		{
+			if (std::find(dpc.begin(), dpc.end(), name) == dpc.end())
+				continue;
+			
+			zeep::replace_all(inText, { &ch, 1 }, " ");
+		}
+
 		mBuffer->ClearSelection();
 
 		if (mKAM)

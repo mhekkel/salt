@@ -87,7 +87,7 @@ class MTerminalView : public MCanvas
 	MEventIn<void()> ePreferencesChanged;
 	MEventIn<void(MColor)> ePreviewColor;
 
-	virtual bool PastePrimaryBuffer(const std::string &inText);
+	virtual bool PastePrimaryBuffer(std::string inText);
 
   private:
 	virtual void ActivateSelf();
