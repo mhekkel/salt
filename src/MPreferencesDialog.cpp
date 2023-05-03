@@ -10,6 +10,8 @@
 
 #include <pinch.hpp>
 
+#include <zeep/unicode-support.hpp>
+
 #include "MPreferencesDialog.hpp"
 #include "MTerminalWindow.hpp"
 #include "MPreferences.hpp"
@@ -75,6 +77,16 @@ MPreferencesDialog::MPreferencesDialog()
 
 	SetEnabled("forward-agent", useCertificates);
 	SetEnabled("act-as-pageant", useCertificates);
+
+	std::vector<std::string> dpc;
+	Preferences::GetArray("disallowed-paste-characters", dpc);
+	if (dpc.empty())
+	{
+		dpc = std::vector<std::string>{"BS","DEL","ENQ","EOT","ESC","NUL"};
+		Preferences::SetArray("disallowed-paste-characters", dpc);
+	}
+
+	SetText("disallowed-paste-characters", zeep::join(dpc, ","));
 
 	SetChecked("forward-x11", Preferences::GetBoolean("forward-x11", true));
 	SetChecked("udk-with-shift", Preferences::GetBoolean("udk-with-shift", true));
@@ -147,6 +159,31 @@ void MPreferencesDialog::Apply()
 
 	// commit pageant setting
 	pinch::ssh_agent::instance().expose_pageant(IsChecked("act-as-pageant"));
+
+	const std::set<std::string> kDisallowedPasteCharacters{
+		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT",
+		"FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
+		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "DEL"};
+
+	std::string s = GetText("disallowed-paste-characters");
+	std::vector<std::string> dpc;
+	auto i = 0;
+	for (;;)
+	{
+		auto j = s.find_first_of(",; ", i);
+
+		auto s1 = s.substr(i, j - i);
+		if (kDisallowedPasteCharacters.count(s1))
+			dpc.emplace_back(s1);
+		
+		if (j == std::string::npos)
+			break;
+		
+		i = j + 1;
+	}
+
+	Preferences::SetArray("disallowed-paste-characters", dpc);
+	SetText("disallowed-paste-characters", zeep::join(dpc, ","));
 
 	string answerback = GetText("answer-back");
 	ba::replace_all(answerback, "\\r", "\r");

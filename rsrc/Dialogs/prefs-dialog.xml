@@ -57,7 +57,10 @@
 				<page id="page3">
 					<checkbox bind="top left" id="use-certificate" title="Use Certficates for authentication" />
 					<checkbox margin-left="10" bind="top left" id="forward-agent" title="Forward ssh-agent (may require a restart)" />
-					<checkbox margin-left="10" bind="top left" id="act-as-pageant" title="Provide SSH authentication to other programs (Pageant)" />
+					<checkbox margin-left="10" margin-bottom="20" bind="top left" id="act-as-pageant" title="Provide SSH authentication to other programs (Pageant)" />
+					<caption text="" /> <!-- spacing -->
+					<caption text="Disallow pasting of the following characters" />
+					<edittext bind="top left right bottom" id="disallowed-paste-characters" style="multiline" width="200" height="100" />
 				</page>
 				<page id="page4">
 					<checkbox bind="top left" id="audible-beep" title="Use audible beep (sound)" />

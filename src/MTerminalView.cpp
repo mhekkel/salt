@@ -2095,12 +2095,13 @@ bool MTerminalView::PastePrimaryBuffer(string inText)
 			Preferences::SetArray("disallowed-paste-characters", dpc);
 		}
 
-		for (const auto &[name, ch] : kDisallowedPasteCharacters)
+		for (const auto &dc : dpc)
 		{
-			if (std::find(dpc.begin(), dpc.end(), name) == dpc.end())
-				continue;
-			
-			zeep::replace_all(inText, { &ch, 1 }, " ");
+			for (const auto &[name, ch] : kDisallowedPasteCharacters)
+			{
+				if (zeep::iequals(dc, name) or (zeep::iequals(dc, "C0") and ch <= 0x1F))
+					zeep::replace_all(inText, { &ch, 1 }, " ");
+			}
 		}
 
 		mBuffer->ClearSelection();

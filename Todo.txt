@@ -8,7 +8,6 @@ te doen?
 
 - kopiëren van kleurtjes (RTF? HTML?)
 - popup op 'verbonden' vlak in status bar met opties om connectie te verbreken
-- SFTP
 - drag&drop?
 - Telnet, rlogin, seriële poort, console
 - Kleur van rand aanpassen aan achtergrond
