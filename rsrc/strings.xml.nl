@@ -627,4 +627,9 @@ Meer informatie vindt u op http://www.hekkelman.com/</value>
     <value>Bewaar</value>
   </localstring>
 
+  <localstring>
+  	<key>Disallow pasting of the following characters</key>
+	<value>Het plakken van de volgende karakters niet toestaan</value>
+  </localstring>
+
 </strings>
