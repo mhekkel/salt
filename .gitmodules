@@ -8,4 +8,4 @@
 	url = git@github.com:mhekkel/libpinch.git
 [submodule "libmgui"]
 	path = libmgui
-	url = s4.hekkelman.net:git-repo/libmgui.git
+	url = git@github.com:mhekkel/libmgui.git
