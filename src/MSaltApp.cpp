@@ -558,6 +558,7 @@ int main(int argc, char *const argv[])
 	config.init("usage: salt [options] [url-to-open]",
 		mcfp::make_option("help,h", "Display this message"),
 		mcfp::make_option("version", "Show version number"),
+		mcfp::make_option("verbose", "More verbose"),
 		mcfp::make_option("connect,c", "Show connect dialog"),
 		mcfp::make_option("install,i", "Install the application"),
 		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
@@ -578,7 +579,7 @@ int main(int argc, char *const argv[])
 
 	if (config.has("version"))
 	{
-		write_version_string(cout, false);
+		write_version_string(cout, config.has("verbose"));
 		exit(0);
 	}
 
