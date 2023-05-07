@@ -110,8 +110,10 @@ void MSaltApp::Initialise()
 {
 	MApplication::Initialise();
 
+#if defined _MSC_VER
 	if (Preferences::GetBoolean("act-as-pageant", true))
 		pinch::ssh_agent::instance().expose_pageant(true);
+#endif
 
 	// recent menu
 	vector<string> recent;

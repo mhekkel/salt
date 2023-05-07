@@ -69,14 +69,15 @@ MPreferencesDialog::MPreferencesDialog()
 	SetChecked("show-status-bar", Preferences::GetBoolean("show-status-bar", false));
 	
 	// connection page
+#if defined _MSC_VER
 	bool useCertificates = Preferences::GetBoolean("use-certificate", true);
 
 	SetChecked("use-certificate", useCertificates);
-	SetChecked("forward-agent", Preferences::GetBoolean("forward-agent", true));
-	SetChecked("act-as-pageant", Preferences::GetBoolean("act-as-pageant", true));
-
 	SetEnabled("forward-agent", useCertificates);
 	SetEnabled("act-as-pageant", useCertificates);
+#else
+	SetChecked("forward-agent", Preferences::GetBoolean("forward-agent", true));
+#endif
 
 	std::vector<std::string> dpc;
 	Preferences::GetArray("disallowed-paste-characters", dpc);
@@ -151,14 +152,19 @@ void MPreferencesDialog::Apply()
 	Preferences::SetBoolean("show-status-bar", IsChecked("show-status-bar"));
 	
 	//
+#if defined _MSC_VER
 	Preferences::SetBoolean("use-certificate", IsChecked("use-certificate"));
 	Preferences::SetBoolean("forward-agent", IsChecked("forward-agent"));
 	Preferences::SetBoolean("act-as-pageant", IsChecked("act-as-pageant"));
-	Preferences::SetBoolean("forward-x11", IsChecked("forward-x11"));
-	Preferences::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
 
 	// commit pageant setting
 	pinch::ssh_agent::instance().expose_pageant(IsChecked("act-as-pageant"));
+#else
+	Preferences::SetBoolean("forward-agent", IsChecked("forward-agent"));
+#endif
+
+	Preferences::SetBoolean("forward-x11", IsChecked("forward-x11"));
+	Preferences::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
 
 	const std::set<std::string> kDisallowedPasteCharacters{
 		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT",
@@ -300,6 +306,7 @@ void MPreferencesDialog::CheckboxChanged(const string& inID, bool inValue)
 //	SetEnabled("apply", true);
 //	SetEnabled("apply", true);
 
+#if defined _MSC_VER
 	bool useCertificates = IsChecked("use-certificate");
 	SetEnabled("forward-agent", useCertificates);
 	SetEnabled("act-as-pageant", useCertificates);
@@ -309,6 +316,7 @@ void MPreferencesDialog::CheckboxChanged(const string& inID, bool inValue)
 		SetChecked("forward-agent", false);
 		SetChecked("act-as-pageant", false);
 	}
+#endif
 }
 
 void MPreferencesDialog::ColorPreview(const string& inID, MColor inValue)
