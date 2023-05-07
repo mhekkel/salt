@@ -1,3 +1,29 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ * 
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
@@ -12,7 +38,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	'[',	'\\',	']',	'^',	'_',
 		'`',	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	'{',	'|',	'}',	'~',	0
-	},
+	};
+
+const wchar_t
 	kUSCharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -20,7 +48,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	'[',	'\\',	']',	'^',	'_',
 		'`',	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	'{',	'|',	'}',	'~',	0
-	},
+	};
+
+const wchar_t
 	kLineCharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -28,7 +58,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	'[',	'\\',	']',	'^',	' ',
 		0x2666,	0x2592,	0x2409,	0x240c,	0x240d,	0x240a,	0x00b0,	0x00b1,	0x2424,	0x240b,	0x2518,	0x2510,	0x250c,	0x2514,	0x253c,	0x00af,
 		0x23bb,	0x2500,	0x23bc,	0x23bd,	0x251c,	0x2524,	0x2534,	0x252c,	0x2502,	0x2264,	0x2265,	0x03c0,	0x2260,	0x00a3,	0x00b7,	0
-	},
+	};
+
+const wchar_t
 	kNLCharSet[96] = {
 		' ',	'!',	'"',	0x00a3,	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -36,7 +68,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x0133,	0x00bd,	'|',	'^',	'_',
 		'`',	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00a8,	0x0192,	0x00bc,	0x00b4,	0
-	},
+	};
+
+const wchar_t
 	kDKCharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -44,7 +78,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00c6,	0x00d8,	0x00c5,	0x00dc,	'_',
 		0x00e4,	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e6,	0x00f8,	0x00d5,	0x00fc,	0
-	},
+	};
+
+const wchar_t
 	kFICharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -52,7 +88,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00c4,	0x00d6,	0x00c5,	0x00dc,	'_',
 		0x00e9,	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e4,	0x00f6,	0x00e5,	0x00fc,	0
-	},
+	};
+
+const wchar_t
 	kFRCharSet[96] = {
 		' ',	'!',	'"',	0x00a3,	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -60,7 +98,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00b0,	0x00e7,	0x00a7,	'^',	'_',
 		'`',	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e9,	0x00f9,	0x00e8,	0x00a8,	0
-	},
+	};
+
+const wchar_t
 	kCACharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -68,7 +108,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00e2,	0x00e7,	0x00ea,	0x00ee,	'_',
 		0x00f4,	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e9,	0x00f9,	0x00e8,	0x00fb,	0
-	},
+	};
+
+const wchar_t
 	kDECharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -76,7 +118,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00c4,	0x00d6,	0x00dc,	'^',	'_',
 		'`',	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e4,	0x00f6,	0x00fc,	0x00df,	0
-	},
+	};
+
+const wchar_t
 	kITCharSet[96] = {
 		' ',	'!',	'"',	0x00a3,	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -84,7 +128,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00b0,	0x00e7,	0x00e9,	'^',	'_',
 		0x00f9,	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e0,	0x00f2,	0x00e8,	0x00ec,	0
-	},
+	};
+
+const wchar_t
 	kSPCharSet[96] = {
 		' ',	'!',	'"',	0x00a3,	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -92,7 +138,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00a1,	0x00d1,	0x00bf,	'^',	'_',
 		'`',	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00b0,	0x00f1,	0x00e7,	'~',	0
-	},
+	};
+
+const wchar_t
 	kSECharSet[96] = {
 		' ',	'!',	'"',	'#',	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -100,7 +148,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00c4,	0x00d6,	0x00c5,	0x00dc,	'_',
 		0x00e9,	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e4,	0x00f6,	0x00e5,	0x00fc,	0
-	},
+	};
+
+const wchar_t
 	kCHCharSet[96] = {
 		' ',	'!',	'"',	0x00f9,	'$',	'%',	'&',	'\'',	'(',	')',	'*',	'+',	',',	'-',	'.',	'/',
 		'0',	'1',	'2',	'3',	'4',	'5',	'6',	'7',	'8',	'9',	':',	';',	'<',	'=',	'>',	'?',
@@ -108,7 +158,9 @@ const wchar_t
 		'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',	'X',	'Y',	'Z',	0x00e9,	0x00e7,	0x00ea,	0x00ee,	0x00e8,
 		0x00f4,	'a',	'b',	'c',	'd',	'e',	'f',	'g',	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
 		'p',	'q',	'r',	's',	't',	'u',	'v',	'w',	'x',	'y',	'z',	0x00e4,	0x00f6,	0x00fc,	0x00fb,	0
-	},
+	};
+
+const wchar_t
 	kISOLatin1Supplemental[96] = {
 		0x00A0,	0x00A1,	0x00A2,	0x00A3,	0x00A4,	0x00A5,	0x00A6,	0x00A7,	0x00A8,	0x00A9,	0x00AA,	0x00AB,	0x00AC,	0x0020,	0x00AE,	0x00AF,
 		0x00B0,	0x00B1,	0x00B2,	0x00B3,	0x00B4,	0x00B5,	0x00B6,	0x00B7,	0x00B8,	0x00B9,	0x00BA,	0x00BB,	0x00BC,	0x00BD,	0x00BE,	0x00BF,

@@ -1,15 +1,39 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.hpp"
+#include "MAddTOTPHashDialog.hpp"
+#include "MAlerts.hpp"
+#include "MError.hpp"
+#include "MPreferences.hpp"
+#include "MUtils.hpp"
 
 #include <zeep/crypto.hpp>
-
-#include "MPreferences.hpp"
-#include "MAddTOTPHashDialog.hpp"
-#include "MError.hpp"
-#include "MAlerts.hpp"
-#include "MUtils.hpp"
 
 using namespace std;
 
@@ -27,13 +51,13 @@ MAddTOTPHashDialog::~MAddTOTPHashDialog()
 bool MAddTOTPHashDialog::OKClicked()
 {
 	bool result = false;
-	
+
 	try
 	{
 		string name = GetText("name");
 		if (name.empty())
 			throw runtime_error("Empty name");
-		
+
 		string hash = GetText("hash");
 		if (hash.empty())
 			throw runtime_error("Empty hash");
@@ -44,17 +68,17 @@ bool MAddTOTPHashDialog::OKClicked()
 		if (b.length() < 8) // or (size % 8) != 0)
 			throw runtime_error("invalid hash");
 
-	    vector<string> totp;
-	    Preferences::GetArray("totp", totp);
-	    totp.push_back(name + ";" + hash);
-	    Preferences::SetArray("totp", totp);
+		vector<string> totp;
+		Preferences::GetArray("totp", totp);
+		totp.push_back(name + ";" + hash);
+		Preferences::SetArray("totp", totp);
 
 		result = true;
 	}
-	catch (const exception& ex)
+	catch (const exception &ex)
 	{
 		DisplayError(ex);
 	}
-	
+
 	return result;
 }

@@ -1,14 +1,38 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.hpp"
+#include "MTerminalBuffer.hpp"
+#include "MError.hpp"
+#include "MPreferences.hpp"
+#include "MUnicode.hpp"
 
 #include <algorithm>
-
-#include "MTerminalBuffer.hpp"
-#include "MPreferences.hpp"
-#include "MError.hpp"
-#include "MUnicode.hpp"
 
 using namespace std;
 
@@ -24,10 +48,11 @@ MLine::MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor)
 	, mDoubleHeight(false)
 {
 	std::for_each(mCharacters, mCharacters + mSize,
-		[inForeColor, inBackColor](MChar& ch) { ch = MChar(inForeColor, inBackColor); });
+		[inForeColor, inBackColor](MChar &ch)
+		{ ch = MChar(inForeColor, inBackColor); });
 }
 
-MLine::MLine(const MLine& rhs)
+MLine::MLine(const MLine &rhs)
 	: mCharacters(new MChar[rhs.mSize])
 	, mSize(rhs.mSize)
 	, mSoftWrapped(rhs.mSoftWrapped)
@@ -43,13 +68,13 @@ MLine::~MLine()
 	delete[] mCharacters;
 }
 
-MLine& MLine::operator=(const MLine& rhs)
+MLine &MLine::operator=(const MLine &rhs)
 {
 	if (this != &rhs)
 	{
 		if (rhs.mSize != mSize)
 		{
-			MChar* tmp = new MChar[rhs.mSize];
+			MChar *tmp = new MChar[rhs.mSize];
 			delete[] mCharacters;
 			mCharacters = tmp;
 			mSize = rhs.mSize;
@@ -62,7 +87,7 @@ MLine& MLine::operator=(const MLine& rhs)
 		mDoubleHeight = rhs.mDoubleHeight;
 		mDoubleHeightTop = rhs.mDoubleHeightTop;
 	}
-	
+
 	return *this;
 }
 
@@ -70,7 +95,7 @@ void MLine::Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor,
 {
 	if (inWidth == 0 or inWidth > mSize)
 		inWidth = mSize;
-	
+
 	assert(inColumn < mSize);
 	for (uint32_t i = inColumn; i < inWidth - 1; ++i)
 		mCharacters[i] = mCharacters[i + 1];
@@ -81,21 +106,21 @@ void MLine::Insert(uint32_t inColumn, uint32_t inWidth)
 {
 	if (inWidth == 0 or inWidth > mSize)
 		inWidth = mSize;
-	
+
 	for (uint32_t i = inWidth - 1; i > inColumn; --i)
 		mCharacters[i] = mCharacters[i - 1];
 	mCharacters[inColumn] = ' ';
 }
 
-template<class OutputIterator>
+template <class OutputIterator>
 void MLine::CopyOut(OutputIterator iter) const
 {
-	MChar* begin = mCharacters;
-	MChar* end = mCharacters + mSize;
+	MChar *begin = mCharacters;
+	MChar *end = mCharacters + mSize;
 	copy(begin, end, iter);
 }
 
-void MLine::swap(MLine& p)
+void MLine::swap(MLine &p)
 {
 	std::swap(mCharacters, p.mCharacters);
 	std::swap(mSize, p.mSize);
@@ -126,7 +151,7 @@ MTerminalBuffer::~MTerminalBuffer()
 {
 }
 
-const MLine& MTerminalBuffer::GetLine(int32_t inLine) const
+const MLine &MTerminalBuffer::GetLine(int32_t inLine) const
 {
 	if (inLine >= 0)
 	{
@@ -143,7 +168,7 @@ const MLine& MTerminalBuffer::GetLine(int32_t inLine) const
 	}
 }
 
-void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnchorLine)
+void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnchorLine)
 {
 	if (inWidth == mWidth)
 	{
@@ -159,11 +184,11 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnc
 			mBuffer.push_front(mLines.front());
 			mLines.erase(mLines.begin());
 		}
-		
+
 		// this can happen if mBuffer is exhausted or was empty
 		while (mLines.size() < inHeight)
 			mLines.insert(mLines.begin(), MLine(mWidth, mForeColor, mBackColor));
-		
+
 		assert(mLines.size() == inHeight);
 	}
 	else
@@ -176,13 +201,13 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnc
 				++anchor;
 		}
 
-		// first push all lines in the buffer	
-		for (MLine& line: mLines)
+		// first push all lines in the buffer
+		for (MLine &line : mLines)
 			mBuffer.push_front(line);
-		
+
 		deque<MLine> rewrapped;
 		vector<MChar> chars;
-	
+
 		// then pull the lines out of the buffer, starting by the oldest
 		do
 		{
@@ -191,43 +216,43 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnc
 				MLine line = mBuffer.back();
 				mBuffer.pop_back();
 				line.CopyOut(back_inserter(chars));
-				
+
 				// concatenate lines, if they were softwrapped
 				if (line.IsSoftWrapped())
 					continue;
 			}
-		
+
 			// strip off trailing spaces of old line
 			vector<MChar>::iterator e = chars.end();
 			while (e != chars.begin() and *(e - 1) == ' ')
 				--e;
 			if (e != chars.end())
 				chars.erase(e, chars.end());
-	
+
 			// if this is the first line and it is empty, ignore it
 			if (chars.empty() and rewrapped.empty())
 				continue;
-	
+
 			// create a new line
 			rewrapped.push_front(MLine(inWidth, mForeColor, mBackColor));
-			
+
 			// store the new anchor position
 			if (--anchor == 0)
 				newAnchorLine = rewrapped.size();
-			
+
 			// copy over to new
 			uint32_t offset = 0;
 			while (offset < chars.size())
 			{
-				MLine& line(rewrapped.front());
-				
+				MLine &line(rewrapped.front());
+
 				uint32_t n = inWidth;
 				if (n + offset >= chars.size())
 					n = chars.size() - offset;
-				
+
 				for (uint32_t i = 0; i < n; ++i)
 					line[i] = chars[i + offset];
-				
+
 				offset += n;
 				if (offset < chars.size())
 				{
@@ -235,11 +260,10 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnc
 					rewrapped.push_front(MLine(inWidth, mForeColor, mBackColor));
 				}
 			}
-			
+
 			// rinse and repeat until end
 			chars.clear();
-		}
-		while (not mBuffer.empty());
+		} while (not mBuffer.empty());
 
 		mWidth = inWidth;
 		mLines = vector<MLine>(inHeight, MLine(inWidth, mForeColor, mBackColor));
@@ -258,7 +282,7 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t& ioAnc
 		if (ioAnchorLine < 0)
 			ioAnchorLine = newAnchorLine - static_cast<int32_t>(mBuffer.size());
 	}
-	
+
 	mDirty = true;
 }
 
@@ -270,13 +294,13 @@ void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
 
 	// check the selection
 	ClearSelection();
-	
+
 	if (inLeftMargin == 0 and inRightMargin == mWidth - 1)
 	{
 		mBuffer.push_front(mLines[inFromLine]);
 		while (mBuffer.size() > mBufferSize)
 			mBuffer.pop_back();
-		
+
 		for (uint32_t line = inFromLine; line < inToLine; ++line)
 			mLines[line].swap(mLines[line + 1]);
 	}
@@ -284,15 +308,15 @@ void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
 	{
 		for (uint32_t line = inFromLine; line < inToLine; ++line)
 		{
-			MLine& a = mLines[line];
-			MLine& b = mLines[line + 1];
-			
+			MLine &a = mLines[line];
+			MLine &b = mLines[line + 1];
+
 			for (uint32_t col = inLeftMargin; col <= inRightMargin; ++col)
 				swap(a[col], b[col]);
 		}
 	}
 
-	MLine& line = mLines[inToLine];
+	MLine &line = mLines[inToLine];
 	for (uint32_t c = inLeftMargin; c <= inRightMargin; ++c)
 		line[c] = MChar(mForeColor, mBackColor);
 	line.SetSoftWrapped(false);
@@ -318,15 +342,15 @@ void MTerminalBuffer::ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
 	{
 		for (uint32_t line = inToLine; line > inFromLine; --line)
 		{
-			MLine& a = mLines[line];
-			MLine& b = mLines[line - 1];
-			
+			MLine &a = mLines[line];
+			MLine &b = mLines[line - 1];
+
 			for (uint32_t col = inLeftMargin; col <= inRightMargin; ++col)
 				swap(a[col], b[col]);
 		}
 	}
-	
-	MLine& line = mLines[inFromLine];
+
+	MLine &line = mLines[inFromLine];
 	for (uint32_t c = inLeftMargin; c <= inRightMargin; ++c)
 		line[c] = MChar(mForeColor, mBackColor);
 	line.SetSoftWrapped(false);
@@ -345,7 +369,7 @@ void MTerminalBuffer::SetCharacter(uint32_t inLine, uint32_t inColumn, unicode i
 	if (inLine >= mLines.size())
 		return;
 
-	MLine& line(mLines[inLine]);
+	MLine &line(mLines[inLine]);
 	line[inColumn] = MChar(inChar, inStyle);
 
 	mDirty = true;
@@ -358,14 +382,14 @@ void MTerminalBuffer::ReverseFlag(uint32_t inFromLine, uint32_t inFromColumn,
 	{
 		if (li >= mLines.size())
 			break;
-		
-		MLine& line(mLines[li]);
-		
+
+		MLine &line(mLines[li]);
+
 		for (uint32_t ci = inFromColumn; ci <= inToColumn; ++ci)
 		{
 			if (ci >= mWidth)
 				break;
-			
+
 			line[ci].ReverseFlag(inFlags);
 		}
 	}
@@ -380,14 +404,14 @@ void MTerminalBuffer::ChangeFlags(uint32_t inFromLine, uint32_t inFromColumn,
 	{
 		if (li >= mLines.size())
 			break;
-		
-		MLine& line(mLines[li]);
-		
+
+		MLine &line(mLines[li]);
+
 		for (uint32_t ci = inFromColumn; ci <= inToColumn; ++ci)
 		{
 			if (ci >= mWidth)
 				break;
-			
+
 			line[ci].ChangeFlags(inMode);
 		}
 	}
@@ -426,20 +450,26 @@ void MTerminalBuffer::EraseDisplay(uint32_t inLine, uint32_t inColumn, uint32_t 
 {
 	for (uint32_t l = 0; l < mLines.size(); ++l)
 	{
-		MLine& line(mLines[l]);
+		MLine &line(mLines[l]);
 		line.SetSoftWrapped(false);
 		line.SetSingleWidth();
-		
+
 		for (uint32_t c = 0; c < mWidth; ++c)
 		{
 			if (line[c] & kProtected or (inSelective and line[c] & kUnerasable))
 				continue;
-			
+
 			switch (inMode)
 			{
-				case 0:		if (l > inLine or (l == inLine and c >= inColumn)) line[c] = MChar(mForeColor, mBackColor); break;
-				case 1:		if (l < inLine or (l == inLine and c <= inColumn)) line[c] = MChar(mForeColor, mBackColor); break;
-				case 2:		line[c] = MChar(mForeColor, mBackColor); break;
+				case 0:
+					if (l > inLine or (l == inLine and c >= inColumn))
+						line[c] = MChar(mForeColor, mBackColor);
+					break;
+				case 1:
+					if (l < inLine or (l == inLine and c <= inColumn))
+						line[c] = MChar(mForeColor, mBackColor);
+					break;
+				case 2: line[c] = MChar(mForeColor, mBackColor); break;
 			}
 		}
 	}
@@ -452,17 +482,17 @@ void MTerminalBuffer::EraseLine(uint32_t inLine, uint32_t inColumn, uint32_t inM
 	if (inLine >= mLines.size())
 		return;
 
-	MLine& line(mLines[inLine]);
+	MLine &line(mLines[inLine]);
 	line.SetSoftWrapped(false);
-//	line.SetSingleWidth();
+	//	line.SetSingleWidth();
 
 	uint32_t cf = 0, ct = mWidth;
 	switch (inMode)
 	{
-		case 0:	cf = inColumn; break;
-		case 1:	ct = inColumn + 1; break;
+		case 0: cf = inColumn; break;
+		case 1: ct = inColumn + 1; break;
 	}
-	
+
 	for (uint32_t c = cf; c < ct; ++c)
 	{
 		if (line[c] & kProtected or (inSelective and line[c] & kUnerasable))
@@ -481,8 +511,8 @@ void MTerminalBuffer::EraseCharacter(uint32_t inLine, uint32_t inColumn, uint32_
 	if (inCount >= mWidth - inColumn)
 		inCount = mWidth - inColumn;
 
-	MLine& line(mLines[inLine]);
-	
+	MLine &line(mLines[inLine]);
+
 	for (uint32_t c = inColumn; c < inColumn + inCount and c < mWidth; ++c)
 	{
 		if (line[c] & kProtected)
@@ -492,7 +522,6 @@ void MTerminalBuffer::EraseCharacter(uint32_t inLine, uint32_t inColumn, uint32_
 
 	mDirty = true;
 }
-
 
 void MTerminalBuffer::DeleteCharacter(uint32_t inLine, uint32_t inColumn, uint32_t inWidth)
 {
@@ -514,7 +543,6 @@ void MTerminalBuffer::InsertCharacter(uint32_t inLine, uint32_t inColumn, uint32
 	mDirty = true;
 }
 
-
 void MTerminalBuffer::WrapLine(uint32_t inLine)
 {
 	if (inLine < mLines.size())
@@ -525,7 +553,7 @@ void MTerminalBuffer::FillWithE()
 {
 	for (uint32_t l = 0; l < mLines.size(); ++l)
 	{
-		MLine& line(mLines[l]);
+		MLine &line(mLines[l]);
 		for (uint32_t column = 0; column < mWidth; ++column)
 			line[column] = MChar('E', MStyle(mForeColor, mBackColor));
 	}
@@ -543,20 +571,20 @@ bool MTerminalBuffer::IsSelectionBlock() const
 	return mBlockSelection;
 }
 
-void MTerminalBuffer::GetSelectionBegin(int32_t& outLine, int32_t& outColumn) const
+void MTerminalBuffer::GetSelectionBegin(int32_t &outLine, int32_t &outColumn) const
 {
 	outLine = mBeginLine;
 	outColumn = mBeginColumn;
 }
 
-void MTerminalBuffer::GetSelectionEnd(int32_t& outLine, int32_t& outColumn) const
+void MTerminalBuffer::GetSelectionEnd(int32_t &outLine, int32_t &outColumn) const
 {
 	outLine = mEndLine;
 	outColumn = mEndColumn;
 }
 
-void MTerminalBuffer::GetSelection(int32_t& outBeginLine, int32_t& outBeginColumn,
-	int32_t& outEndLine, int32_t& outEndColumn, bool& outIsBlock) const
+void MTerminalBuffer::GetSelection(int32_t &outBeginLine, int32_t &outBeginColumn,
+	int32_t &outEndLine, int32_t &outEndColumn, bool &outIsBlock) const
 {
 	outBeginLine = mBeginLine;
 	outBeginColumn = mBeginColumn;
@@ -569,7 +597,7 @@ void MTerminalBuffer::SetSelection(int32_t inBeginLine, int32_t inBeginColumn,
 	int32_t inEndLine, int32_t inEndColumn, bool inBlock)
 {
 	assert(inBeginLine < inEndLine or (inBeginLine == inEndLine and inBeginColumn <= inEndColumn));
-	
+
 	mBeginLine = inBeginLine;
 	mBeginColumn = inBeginColumn;
 	mEndLine = inEndLine;
@@ -592,13 +620,15 @@ void MTerminalBuffer::ClearSelection()
 	mBlockSelection = false;
 }
 
-namespace {
+namespace
+{
 
 // a custom wordbreak class routine
 // since we expect slightly different behaviour for word selection in terminals
 // and we don't have CR/LF/TAB in the terminal buffer.
-	
-enum TerminalWordBreakClass {
+
+enum TerminalWordBreakClass
+{
 	eTWB_Sep,
 	eTWB_Let,
 	eTWB_Com,
@@ -611,7 +641,7 @@ enum TerminalWordBreakClass {
 TerminalWordBreakClass GetTerminalWordBreakClass(unicode inUnicode)
 {
 	TerminalWordBreakClass result;
-	
+
 	switch (GetProperty(inUnicode))
 	{
 		case kLETTER:
@@ -633,38 +663,38 @@ TerminalWordBreakClass GetTerminalWordBreakClass(unicode inUnicode)
 		case kCOMBININGMARK:
 			result = eTWB_Com;
 			break;
-		
+
 		case kSEPARATOR:
 			result = eTWB_Sep;
 			break;
-		
+
 		case kPUNCTUATION:
-			switch (inUnicode)		// special case
+			switch (inUnicode) // special case
 			{
 				case '.':
 				case '-':
 				case '/':
 					result = eTWB_Com;
 					break;
-					
+
 				default:
 					result = eTWB_Other;
 					break;
 			}
 			break;
-		
+
 		default:
 			result = eTWB_Other;
 			break;
 	}
-	
+
 	return result;
 }
 
-}
+} // namespace
 
 void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
-	int32_t& outLine1, int32_t& outColumn1, int32_t& outLine2, int32_t& outColumn2)
+	int32_t &outLine1, int32_t &outColumn1, int32_t &outLine2, int32_t &outColumn2)
 {
 	// sensible defaults:
 	outLine1 = outLine2 = inLine;
@@ -689,16 +719,16 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 			--inLine;
 			inColumn += mWidth;
 		}
-		
+
 		break;
 	}
-	
+
 	// collect the unicode string for this line
 	vector<MChar> s;
 	int32_t lineNr = inLine;
 	for (;;)
 	{
-		const MLine& line = GetLine(lineNr);
+		const MLine &line = GetLine(lineNr);
 		++lineNr;
 
 		line.CopyOut(back_inserter(s));
@@ -707,7 +737,7 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 	}
 
 	// strip off trailing white space
-	while (not s.empty() and (wchar_t)s.back() == ' ')
+	while (not s.empty() and (wchar_t) s.back() == ' ')
 		s.pop_back();
 
 	if (inColumn > static_cast<int32_t>(s.size()))
@@ -716,20 +746,20 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 	const int8_t
 		kNextWordBreakStateTable[5][7] = {
 			//	Sep	Let	Com	Hir	Kat	Han	Other		State
-			{	 0,	 1,	 1,	 2,	 3,	 4,	 0	},	//	0
-			{	-1,	 1,	 1,	-1,	-1,	-1,	-1	},	//	1
-			{	-1,	-1,	 2,	 2,	-1,	-1,	-1	},	//	2
-			{	-1,	-1,	 3,	 2,	 3,	-1,	-1	},	//	3
-			{	-1,	-1,	 4,	 2,	-1,	 4,	-1	},	//	4
+			{ 0, 1, 1, 2, 3, 4, 0 },      //	0
+			{ -1, 1, 1, -1, -1, -1, -1 }, //	1
+			{ -1, -1, 2, 2, -1, -1, -1 }, //	2
+			{ -1, -1, 3, 2, 3, -1, -1 },  //	3
+			{ -1, -1, 4, 2, -1, 4, -1 },  //	4
 		},
 		kPrevWordBreakStateTable[6][7] = {
 			//	Sep	Let	Com	Hir	Kat	Han	Other		State
-			{	 0,	 1,	 2,	 3,	 4,	 5,	 0	},	//	0
-			{	-1,	 2,	 1,	 3,	 4,	 5,	-1	},	//	1
-			{	-1,	 2,	 2,	-1,	-1,	-1,	-1	},	//	2
-			{	-1,	-1,	 3,	 3,	 4,	 5,	-1	},	//	3
-			{	-1,	-1,	 4,	-1,	 4,	-1,	-1	},	//	4
-			{	-1,	-1,	 5,	-1,	-1,	 5,	-1	},	//	5
+			{ 0, 1, 2, 3, 4, 5, 0 },      //	0
+			{ -1, 2, 1, 3, 4, 5, -1 },    //	1
+			{ -1, 2, 2, -1, -1, -1, -1 }, //	2
+			{ -1, -1, 3, 3, 4, 5, -1 },   //	3
+			{ -1, -1, 4, -1, 4, -1, -1 }, //	4
+			{ -1, -1, 5, -1, -1, 5, -1 }, //	5
 		};
 
 	// now find the word position, start by going right
@@ -744,7 +774,7 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 		TerminalWordBreakClass cl = GetTerminalWordBreakClass(s[column]);
 		state = kNextWordBreakStateTable[uint8_t(state)][cl];
 	}
-	
+
 	// then go back
 	column = nextColumn;
 	state = 0;
@@ -757,14 +787,14 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 		TerminalWordBreakClass cl = GetTerminalWordBreakClass(s[column]);
 		state = kPrevWordBreakStateTable[uint8_t(state)][cl];
 	}
-	
+
 	// check if we did find anything
 	if (prevColumn < inColumn and nextColumn > inColumn)
 	{
 		outColumn1 = prevColumn;
 		outColumn2 = nextColumn;
-		outLine1 = outLine2 = inLine;	// we now have to correct for the wrapping
-		
+		outLine1 = outLine2 = inLine; // we now have to correct for the wrapping
+
 		while (outColumn1 > static_cast<int32_t>(mWidth))
 		{
 			outColumn1 -= mWidth;
@@ -782,11 +812,11 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 string MTerminalBuffer::GetSelectedText() const
 {
 	string result;
-	
+
 	for (int32_t l = mBeginLine; l <= mEndLine; ++l)
 	{
-		const MLine& line(GetLine(l));
-		
+		const MLine &line(GetLine(l));
+
 		int32_t c1 = 1, c2 = 0;
 		if (mBlockSelection)
 		{
@@ -797,19 +827,24 @@ string MTerminalBuffer::GetSelectedText() const
 		}
 		else
 		{
-			if (l == mBeginLine or mBlockSelection) c1 = mBeginColumn; else c1 = 0;
-			if (l == mEndLine or mBlockSelection) c2 = mEndColumn; else c2 = mWidth;
+			if (l == mBeginLine or mBlockSelection)
+				c1 = mBeginColumn;
+			else
+				c1 = 0;
+			if (l == mEndLine or mBlockSelection)
+				c2 = mEndColumn;
+			else
+				c2 = mWidth;
 		}
-		
-		
+
 		if (not mBlockSelection and (l == mEndLine or not line.IsSoftWrapped()))
 		{
 			while (c2 > c1 and line[c2 - 1] == ' ')
 				--c2;
 		}
-		
+
 		auto iter = back_inserter(result);
-		
+
 		for (int32_t c = c1; c < c2; ++c)
 			MEncodingTraits<kEncodingUTF8>::WriteUnicode(iter, (unicode)line[c]);
 
@@ -824,18 +859,18 @@ unicode MTerminalBuffer::GetChar(uint32_t inOffset, bool inToLower) const
 {
 	int32_t line = inOffset / mWidth;
 	int32_t column = inOffset % mWidth;
-	
+
 	assert(line >= 0 and line < static_cast<int32_t>(mBuffer.size() + mLines.size()));
-	
+
 	unicode result;
 	if (line >= static_cast<int32_t>(mBuffer.size()))
 		result = mLines[line - mBuffer.size()][column];
 	else
 		result = mBuffer[mBuffer.size() - line - 1][column];
-	
+
 	if (inToLower)
 		result = ToLower(result);
-	
+
 	return result;
 }
 
@@ -844,65 +879,66 @@ unicode MTerminalBuffer::GetChar(uint32_t inOffset, bool inToLower) const
 // Implement forward and backward searching in separate routines to
 // keep code readable.
 
-bool MTerminalBuffer::FindNext(int32_t& ioLine, int32_t& ioColumn, const string& inWhat,
+bool MTerminalBuffer::FindNext(int32_t &ioLine, int32_t &ioColumn, const string &inWhat,
 	bool inIgnoreCase, bool inWrapAround)
 {
 	// q is a rather large prime, d is the alphabet size (of Unicode)
 	const int64_t q = 33554393, d = 1114112;
-	
+
 	// convert the search string to unicode's
 	vector<unicode> what;
 	for (string::const_iterator w = inWhat.begin(); w != inWhat.end();)
 	{
-		unicode ch; uint32_t l;
+		unicode ch;
+		uint32_t l;
 		MEncodingTraits<kEncodingUTF8>::ReadUnicode(w, l, ch);
 		w += l;
-		
+
 		if (inIgnoreCase)
 			ch = ToLower(ch);
-		
+
 		what.push_back(ch);
 	}
 
 	// M is the length of the search string
 	int32_t M = what.size();
-	
+
 	// We're looking forward. N is the length of the remaining characters in the buffer
 	int32_t lineCount = static_cast<int32_t>(mBuffer.size() + mLines.size());
 	int32_t line = static_cast<int32_t>(mBuffer.size()) + ioLine;
 	int32_t N = (lineCount - line) * mWidth - ioColumn;
-	int32_t O = lineCount * mWidth - N;	// offset from start for ioLine/ioColumn
+	int32_t O = lineCount * mWidth - N; // offset from start for ioLine/ioColumn
 
-	// sanity check	
+	// sanity check
 	if (M >= N)
 		return false;
 
 	int64_t dM = 1, h1 = 0, h2 = 0;
 	int32_t i;
-	
-    for (i = 1; i < M; ++i)
-    	dM = (d * dM) % q;
-    
-    for (i = 0; i < M; ++i)
-    {
-        h1 = (h1 * d + what[i]) % q;
-        h2 = (h2 * d + GetChar(O + i, inIgnoreCase)) % q;
-    }
 
-    for (i = 0; i < N - M; ++i)
-    {
-    	if (h1 == h2)	// hashes match, make sure the characters are the same too (collision?)
-    	{
-    		bool found = true;
-    		for (int j = 0; found and j < M; ++j)
-    			found = what[j] == GetChar(O + i + j, inIgnoreCase);
-    		if (found)
-    			break;
-    	}
-    	
-        h2 = (h2 + d * q - GetChar(O + i, inIgnoreCase) * dM) % q;
-        h2 = (h2 * d + GetChar(O + i + M, inIgnoreCase)) % q;
-    }
+	for (i = 1; i < M; ++i)
+		dM = (d * dM) % q;
+
+	for (i = 0; i < M; ++i)
+	{
+		h1 = (h1 * d + what[i]) % q;
+		h2 = (h2 * d + GetChar(O + i, inIgnoreCase)) % q;
+	}
+
+	for (i = 0; i < N - M; ++i)
+	{
+		if (h1 == h2) // hashes match, make sure the characters are the same too (collision?)
+		{
+			bool found = true;
+			for (int j = 0; found and j < M; ++j)
+				found = what[j] == GetChar(O + i + j, inIgnoreCase);
+			if (found)
+				break;
+		}
+
+		h2 = (h2 + d * q - GetChar(O + i, inIgnoreCase) * dM) % q;
+		h2 = (h2 * d + GetChar(O + i + M, inIgnoreCase)) % q;
+	}
 
 	bool result = false;
 	if (i < N - M)
@@ -923,70 +959,71 @@ bool MTerminalBuffer::FindNext(int32_t& ioLine, int32_t& ioColumn, const string&
 			ioColumn = column;
 		}
 	}
-	
+
 	return result;
 }
 
-bool MTerminalBuffer::FindPrevious(int32_t& ioLine, int32_t& ioColumn, const string& inWhat,
+bool MTerminalBuffer::FindPrevious(int32_t &ioLine, int32_t &ioColumn, const string &inWhat,
 	bool inIgnoreCase, bool inWrapAround)
 {
 	// q is a rather large prime, d is the alphabet size (of Unicode)
 	const int64_t q = 33554393, d = 1114112;
-	
+
 	// convert the search string to unicode's
 	vector<unicode> what;
 	for (string::const_iterator w = inWhat.begin(); w != inWhat.end();)
 	{
-		unicode ch; uint32_t l;
+		unicode ch;
+		uint32_t l;
 		MEncodingTraits<kEncodingUTF8>::ReadUnicode(w, l, ch);
 		w += l;
-		
+
 		if (inIgnoreCase)
 			ch = ToLower(ch);
-		
+
 		what.push_back(ch);
 	}
 	reverse(what.begin(), what.end());
 
 	// M is the length of the search string
 	int32_t M = what.size();
-	
+
 	// We're looking backward now. N is the length of the characters in the buffer
 	// up until the point where we start.
 	int32_t lineCount = static_cast<int32_t>(mBuffer.size() + mLines.size());
 	int32_t line = static_cast<int32_t>(mBuffer.size()) + ioLine;
 	int32_t N = line * mWidth + ioColumn;
 
-	// sanity check	
+	// sanity check
 	if (M >= N)
 		return false;
 
 	int64_t dM = 1, h1 = 0, h2 = 0;
 	int32_t i;
-	
-    for (i = 1; i < M; ++i)
-    	dM = (d * dM) % q;
-    
-    for (i = 0; i < M; ++i)
-    {
-        h1 = (h1 * d + what[i]) % q;
-        h2 = (h2 * d + GetChar(N - i, inIgnoreCase)) % q;
-    }
 
-    for (i = 0; i < N - M; ++i)
-    {
-    	if (h1 == h2)	// hashes match, make sure the characters are the same too (collision?)
-    	{
-    		bool found = true;
-    		for (int j = 0; found and j < M; ++j)
-    			found = what[j] == GetChar(N - (i + j), inIgnoreCase);
-    		if (found)
-    			break;
-    	}
-    	
-        h2 = (h2 + d * q - GetChar(N - i, inIgnoreCase) * dM) % q;
-        h2 = (h2 * d + GetChar(N - (i + M), inIgnoreCase)) % q;
-    }
+	for (i = 1; i < M; ++i)
+		dM = (d * dM) % q;
+
+	for (i = 0; i < M; ++i)
+	{
+		h1 = (h1 * d + what[i]) % q;
+		h2 = (h2 * d + GetChar(N - i, inIgnoreCase)) % q;
+	}
+
+	for (i = 0; i < N - M; ++i)
+	{
+		if (h1 == h2) // hashes match, make sure the characters are the same too (collision?)
+		{
+			bool found = true;
+			for (int j = 0; found and j < M; ++j)
+				found = what[j] == GetChar(N - (i + j), inIgnoreCase);
+			if (found)
+				break;
+		}
+
+		h2 = (h2 + d * q - GetChar(N - i, inIgnoreCase) * dM) % q;
+		h2 = (h2 * d + GetChar(N - (i + M), inIgnoreCase)) % q;
+	}
 
 	bool result = false;
 	if (i < N - M)
@@ -1007,6 +1044,6 @@ bool MTerminalBuffer::FindPrevious(int32_t& ioLine, int32_t& ioColumn, const str
 			ioColumn = column;
 		}
 	}
-	
+
 	return result;
 }

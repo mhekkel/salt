@@ -124,16 +124,7 @@ find_package(Mrc QUIET)
 if(MRC_FOUND)
 	option(USE_RSRC "Use mrc to create resources" ON)
 else()
-	message(STATUS "Not using resources since mrc was not found")
-endif()
-
-if(USE_RSRC)
-	set(USE_RSRC 1)
-
-	message("Using resources compiled with ${MRC_EXECUTABLE}")
-	add_compile_definitions(USE_RSRC)
-
-	mrc_write_header(${PROJECT_SOURCE_DIR}/lib/mrsrc.hpp)
+	message(FATAL_ERROR "Cannot continue since mrc was not found")
 endif()
 
 set(CMAKE_THREAD_PREFER_PTHREAD)
@@ -213,9 +204,7 @@ set(RESOURCES
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib)
 target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui dl util)
 
-if(USE_RSRC)
-	mrc_target_resources(salt ${RESOURCES})
-endif()
+mrc_target_resources(salt ${RESOURCES})
 
 install(TARGETS salt
     RUNTIME DESTINATION ${BIN_INSTALL_DIR}

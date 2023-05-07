@@ -1,37 +1,56 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.hpp"
-
-#include <filesystem>
-#include <fstream>
-#include <regex>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/date_time/gregorian/gregorian_types.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-// #include <boost/algorithm/string/regex.hpp>
+#include "MSaltApp.hpp"
+#include "MAcceleratorTable.hpp"
+#include "MAddTOTPHashDialog.hpp"
+#include "MAlerts.hpp"
+#include "MApplicationImpl.hpp"
+#include "MConnectDialog.hpp"
+#include "MError.hpp"
+#include "MMenu.hpp"
+#include "MPreferences.hpp"
+#include "MPreferencesDialog.hpp"
+#include "MTerminalWindow.hpp"
+#include "MUtils.hpp"
+#include "mrsrc.hpp"
+#include "revision.hpp"
 
 #include <pinch.hpp>
 
 #include <mcfp/mcfp.hpp>
 #include <zeep/crypto.hpp>
+#include <zeep/unicode-support.hpp>
 
-#include "MAcceleratorTable.hpp"
-#include "MApplicationImpl.hpp"
-#include "MConnectDialog.hpp"
-#include "MMenu.hpp"
-#include "MPreferences.hpp"
-#include "MPreferencesDialog.hpp"
-#include "MSaltApp.hpp"
-#include "MTerminalWindow.hpp"
-#include "MAddTOTPHashDialog.hpp"
-#include "MAlerts.hpp"
-#include "MError.hpp"
-#include "MPreferences.hpp"
-#include "MUtils.hpp"
-#include "mrsrc.hpp"
-#include "revision.hpp"
+#include <filesystem>
+#include <fstream>
+#include <regex>
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "libpinch")
@@ -39,7 +58,6 @@
 #endif
 
 using namespace std;
-namespace ba = boost::algorithm;
 namespace fs = std::filesystem;
 
 const char
@@ -91,7 +109,8 @@ MSaltApp::~MSaltApp()
 
 int MSaltApp::RunEventLoop()
 {
-	mIOContextThread = std::thread([&io_context = mIOContext]() {
+	mIOContextThread = std::thread([&io_context = mIOContext]()
+		{
 		try
 		{
 			auto wg = asio_ns::make_work_guard(io_context.get_executor());
@@ -100,8 +119,7 @@ int MSaltApp::RunEventLoop()
 		catch (const std::exception &ex)
 		{
 			std::cerr << ex.what() << std::endl;
-		}
-	});
+		} });
 
 	return MApplication::RunEventLoop();
 }
@@ -504,8 +522,8 @@ void MApplication::Install(const string &inPrefix)
 		throw runtime_error("salt.desktop file could not be created, missing data");
 
 	string desktop(rsrc.data(), rsrc.size());
-	ba::replace_all(desktop, "__EXE__", exeDest.string());
-	ba::replace_all(desktop, "__ICON__", iconDest.string());
+	zeep::replace_all(desktop, "__EXE__", exeDest.string());
+	zeep::replace_all(desktop, "__ICON__", iconDest.string());
 
 	// locate applications directory
 	// don't use glib here,
@@ -549,11 +567,11 @@ void MApplication::Install(const string &inPrefix)
 
 int main(int argc, char *const argv[])
 {
-// #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-// 	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
-// 	if (err_fd > 0)
-// 		dup2(err_fd, STDERR_FILENO);
-// #endif
+	// #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+	// 	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
+	// 	if (err_fd > 0)
+	// 		dup2(err_fd, STDERR_FILENO);
+	// #endif
 
 	auto &config = mcfp::config::instance();
 
