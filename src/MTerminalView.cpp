@@ -5212,7 +5212,7 @@ void MTerminalView::EscapeAPC(uint8_t inChar)
 			case 7:
 			{
 				// Bash function for get is:
-				// get() { file="$1"; printf "\033_7;%s\x9c" $(realpath -qez "$file" | base64);}
+				// get() { file="$1"; printf "\033_7;%s\x9c" $(realpath -qez "$file" | base64 -w0);}
 
 				auto s = zeep::decode_base64({ mArgString.data(), mArgString.length() });
 
@@ -5223,7 +5223,7 @@ void MTerminalView::EscapeAPC(uint8_t inChar)
 			case 8:
 			{
 				// Bash function for get is:
-				// put() { file="$1"; printf "\033_8;%s\x9c" $(realpath -qz "$file" | base64);}
+				// put() { file="$1"; printf "\033_8;%s\x9c" $(realpath -qz "$file" | base64 -w0);}
 
 				auto s = zeep::decode_base64({ mArgString.data(), mArgString.length() });
 
