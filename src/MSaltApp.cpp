@@ -450,7 +450,7 @@ void MSaltApp::Open(const string &inFile)
 		string command;
 
 		std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
-		MWindow *w = MTerminalWindow::Create(host, user, port, command, connection);
+		MWindow *w = MTerminalWindow::Create(user, host, port, command, connection);
 		w->Select();
 	}
 }
