@@ -2104,9 +2104,11 @@ struct DisallowedChar
 	{ "DEL", 0x7F }
 };
 
-bool MTerminalView::PastePrimaryBuffer(string inText)
+bool MTerminalView::PastePrimaryBuffer(const string &inText)
 {
 	bool result = false;
+
+	std::string text(inText);
 
 	if (mTerminalChannel->IsOpen())
 	{
@@ -2125,7 +2127,7 @@ bool MTerminalView::PastePrimaryBuffer(string inText)
 			for (const auto &[name, ch] : kDisallowedPasteCharacters)
 			{
 				if (zeep::iequals(dc, name) or (zeep::iequals(dc, "C0") and ch <= 0x1F))
-					zeep::replace_all(inText, { &ch, 1 }, " ");
+					zeep::replace_all(text, { &ch, 1 }, " ");
 			}
 		}
 
@@ -2136,12 +2138,12 @@ bool MTerminalView::PastePrimaryBuffer(string inText)
 		else
 		{
 			if (mBracketedPaste)
-				SendCommand(kCSI + "200~" + inText + kCSI + "201~");
+				SendCommand(kCSI + "200~" + text + kCSI + "201~");
 			else
-				SendCommand(inText);
+				SendCommand(text);
 
 			if (not mSRM)
-				mInputBuffer.insert(mInputBuffer.end(), inText.begin(), inText.end());
+				mInputBuffer.insert(mInputBuffer.end(), text.begin(), text.end());
 
 			// force a scroll to the bottom
 			Scroll(kScrollToEnd);

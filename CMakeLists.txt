@@ -6,10 +6,10 @@
 # modification, are permitted provided that the following conditions are met:
 
 # 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer
+# list of conditions and the following disclaimer
 # 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -46,17 +46,18 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    if(WIN32)
+	if(WIN32)
 		set(pinch_compile_flags "/clang:-fcoroutines-ts")
 	else()
 		set(pinch_compile_flags "-fcoroutines-ts")
 	endif()
 elseif(MSVC)
-    check_include_file_cxx("coroutine" has_coroutine "/std:c++latest")
-    if(NOT has_coroutine)
-        message(STATUS "Try <experimental/coroutine> (Coroutines TS) instead of <coroutine> ...")
-        check_include_file_cxx("experimental/coroutine" has_coroutine_ts "/std:c++17")
-    endif()
+	check_include_file_cxx("coroutine" has_coroutine "/std:c++latest")
+
+	if(NOT has_coroutine)
+		message(STATUS "Try <experimental/coroutine> (Coroutines TS) instead of <coroutine> ...")
+		check_include_file_cxx("experimental/coroutine" has_coroutine_ts "/std:c++17")
+	endif()
 
 	# has coroutine headers?
 	if(has_coroutine)
@@ -64,13 +65,14 @@ elseif(MSVC)
 	elseif(has_coroutine_ts)
 		set(pinch_compile_flags "/std:c++17")
 	else()
-        message(FATAL_ERROR "There are no headers for C++ Coroutines")
-    endif()
+		message(FATAL_ERROR "There are no headers for C++ Coroutines")
+	endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    #
-    # expect GCC 10 or later
-    #
-    check_include_file_cxx("coroutine" has_coroutine "-fcoroutines")
+	#
+	# expect GCC 10 or later
+	#
+	check_include_file_cxx("coroutine" has_coroutine "-fcoroutines")
+
 	if(has_coroutine)
 		set(pinch_compile_flags "-fcoroutines")
 	endif()
@@ -78,11 +80,13 @@ endif()
 
 # support compiler options for coroutine?
 check_cxx_compiler_flag("${pinch_compile_flags}" support_coroutines)
+
 if(NOT support_coroutines)
-    message(FATAL_ERROR "The compiler doesn't support C++ Coroutines")
+	message(FATAL_ERROR "The compiler doesn't support C++ Coroutines")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${pinch_compile_flags}")
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-multichar")
 elseif(MSVC)
@@ -90,15 +94,26 @@ elseif(MSVC)
 endif()
 
 if(MSVC)
-    # make msvc standards compliant...
-    add_compile_options(/permissive-)
+	# make msvc standards compliant...
+	add_compile_options(/permissive-)
 
 	macro(get_WIN32_WINNT version)
-		if (WIN32 AND CMAKE_SYSTEM_VERSION)
+		if(CMAKE_SYSTEM_VERSION)
 			set(ver ${CMAKE_SYSTEM_VERSION})
-			string(REPLACE "." "" ver ${ver})
-			string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+			string(REGEX MATCH "^([0-9]+).([0-9])" ver ${ver})
+			string(REGEX MATCH "^([0-9]+)" verMajor ${ver})
 
+			# Check for Windows 10, b/c we'll need to convert to hex 'A'.
+			if("${verMajor}" MATCHES "10")
+				set(verMajor "A")
+				string(REGEX REPLACE "^([0-9]+)" ${verMajor} ver ${ver})
+			endif()
+
+			# Remove all remaining '.' characters.
+			string(REPLACE "." "" ver ${ver})
+
+			# Prepend each digit with a zero.
+			string(REGEX REPLACE "([0-9A-Z])" "0\\1" ver ${ver})
 			set(${version} "0x${ver}")
 		endif()
 	endmacro()
@@ -114,7 +129,6 @@ if(USE_BOOST_ASIO)
 endif()
 
 # Create a revision file, containing the current git version info
-
 include(VersionString)
 write_version_header(${PROJECT_SOURCE_DIR}/src/)
 
@@ -144,11 +158,9 @@ find_library(DL dl REQUIRED)
 find_library(UTIL util REQUIRED)
 
 # find_package(Boost COMPONENTS coroutines)
-
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
 # The salt executable
-
 add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
 
 add_executable(salt
@@ -159,9 +171,11 @@ add_executable(salt
 	${CMAKE_SOURCE_DIR}/src/MCSICommands.hpp
 	${CMAKE_SOURCE_DIR}/src/MConnectDialog.cpp
 	${CMAKE_SOURCE_DIR}/src/MConnectDialog.hpp
+
 	# ${CMAKE_SOURCE_DIR}/src/MExploreBrowserWindow.cpp
 	# ${CMAKE_SOURCE_DIR}/src/MExploreBrowserWindow.hpp
 	${CMAKE_SOURCE_DIR}/src/MHTTPProxy.hpp
+
 	# ${CMAKE_SOURCE_DIR}/src/MLibTestApp.cpp
 	# ${CMAKE_SOURCE_DIR}/src/MLibTestApp.hpp
 	${CMAKE_SOURCE_DIR}/src/MPortForwardingDialog.cpp
@@ -207,5 +221,5 @@ target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Thr
 mrc_target_resources(salt ${RESOURCES})
 
 install(TARGETS salt
-    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+	RUNTIME DESTINATION ${BIN_INSTALL_DIR}
 )

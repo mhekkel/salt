@@ -3,4 +3,3 @@ build/
 **/.gdb_history
 src/revision.hpp
 libmcfp/cmake
-lib/mrsrc.hpp
