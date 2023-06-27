@@ -107,7 +107,8 @@ if(MSVC)
 	add_definitions(-D_WIN32_WINNT=${ver})
 endif()
 
-add_compile_definitions(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+# add_compile_definitions(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+add_compile_definitions(BOOST_ASIO_NO_DEPRECATED)
 
 if(USE_BOOST_ASIO)
 	add_compile_definitions(USE_BOOST_ASIO)
