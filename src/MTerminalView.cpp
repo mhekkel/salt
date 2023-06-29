@@ -325,8 +325,6 @@ MTerminalView *MTerminalView::GetFrontTerminal()
 
 void MTerminalView::Open()
 {
-	PRINT(("Opening terminal view in %p", std::this_thread::get_id()));
-
 	mStatusbar->SetStatusText(0, _("Trying to connect"), false);
 
 	MRect bounds;
@@ -2013,8 +2011,6 @@ void MTerminalView::HandleMessage(const string &inMessage, const string &inLangu
 
 bool MTerminalView::HandleCharacter(const string &inText, bool inRepeat)
 {
-	PRINT(("HandleCharacter(0x%x)", inText[0]));
-
 	// shortcut
 	if (inRepeat and mDECARM == false)
 		return true;
@@ -2765,8 +2761,6 @@ void MTerminalView::Closed()
 
 void MTerminalView::HandleOpened(const std::error_code &ec)
 {
-	PRINT(("Open callback in %p", std::this_thread::get_id()));
-
 	if (ec)
 	{
 		const string &msg = ec.message();

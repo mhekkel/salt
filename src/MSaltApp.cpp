@@ -109,16 +109,17 @@ MSaltApp::~MSaltApp()
 
 int MSaltApp::RunEventLoop()
 {
-	mIOContextThread = std::thread([&io_context = mIOContext]()
+	mIOContextThread = std::thread([this]()
 		{
 		try
 		{
-			auto wg = asio_ns::make_work_guard(io_context.get_executor());
-			io_context.run();
+			auto wg = asio_ns::make_work_guard(mIOContext.get_executor());
+			mIOContext.run();
+			std::cerr << "io_context thread leaving" << std::endl;
 		}
 		catch (const std::exception &ex)
 		{
-			std::cerr << ex.what() << std::endl;
+			std::cerr << "Exception in io_context thread: " << ex.what() << std::endl;
 		} });
 
 	return MApplication::RunEventLoop();

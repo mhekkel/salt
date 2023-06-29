@@ -103,8 +103,6 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 
 	using namespace std::placeholders;
 
-	PRINT(("Setting callbacks in Thread ID = %p", std::this_thread::get_id()));
-
 	mConnection->set_callback_executor(my_executor);
 
 	mConnection->set_provide_password_callback(std::bind(&MSshTerminalWindow::Password, this));
@@ -196,8 +194,6 @@ bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu,
 
 std::string MSshTerminalWindow::Password()
 {
-	PRINT(("Password callback Thread ID = %p", std::this_thread::get_id()));
-
 	std::string result;
 
 	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
@@ -226,8 +222,6 @@ std::vector<std::string> MSshTerminalWindow::Credentials(const string &name, con
 pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const string &inHost, const string &inAlgorithm,
 	const vector<uint8_t> &inHostKey, pinch::host_key_state inState)
 {
-	PRINT(("AcceptHostKey callback Thread ID = %p", std::this_thread::get_id()));
-
 	pinch::host_key_reply result = pinch::host_key_reply::reject;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
 
@@ -444,6 +438,12 @@ MTerminalWindow::~MTerminalWindow()
 
 	delete mAnimationVariable;
 	delete mAnimationManager;
+
+	RemoveWindowFromWindowList(this);
+
+	// Time to quit?
+	if (sFirst == nullptr)	
+		gApp->DoQuit();
 }
 
 void MTerminalWindow::Mapped()
