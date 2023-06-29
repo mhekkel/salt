@@ -1,7 +1,41 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2015
 // All rights reserved
 
-#include "MSalt.hpp"
+#include "MPtyTerminalChannel.hpp"
+#include "MError.hpp"
+#include "MSaltApp.hpp"
+#include "MTerminalChannel.hpp"
+#include "MUtils.hpp"
+
+#include <fstream>
+
+#include <pinch.hpp>
 
 #include <pwd.h>
 #include <signal.h>
@@ -19,16 +53,6 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
-
-#include <fstream>
-
-#include <pinch.hpp>
-
-#include "MError.hpp"
-#include "MPtyTerminalChannel.hpp"
-#include "MSaltApp.hpp"
-#include "MTerminalChannel.hpp"
-#include "MUtils.hpp"
 
 using namespace std;
 
@@ -82,7 +106,7 @@ void MPtyTerminalChannel::Open(const string &inTerminalType,
 			throw runtime_error(strerror(errno));
 
 		mTtyName = ttyname(ttyfd);
-		mConnectionInfo = vector<string>({mTtyName});
+		mConnectionInfo = vector<string>({ mTtyName });
 
 		mPid = fork();
 		switch (mPid)
@@ -204,7 +228,7 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	// export TERM
 	setenv("TERM", inTerminalType.c_str(), true);
 
-	char *argv[] = {strdup(shell.c_str()), nullptr};
+	char *argv[] = { strdup(shell.c_str()), nullptr };
 	execvp(shell.c_str(), argv);
 	perror("exec failed");
 	exit(1);
@@ -258,11 +282,12 @@ void MPtyTerminalChannel::SendSignal(const string &inSignal)
 
 void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	MAppExecutor my_executor{&MSaltApp::instance().get_context()};
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inCallback](const std::error_code &ec, size_t inBytesReceived) {
+		[this, inCallback](const std::error_code &ec, size_t inBytesReceived)
+		{
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);
 		});

@@ -1,46 +1,74 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2013
 // All rights reserved
 
-#include "MSalt.hpp"
+#include "MSearchPanel.hpp"
+#include "MCanvas.hpp"
+#include "MCommands.hpp"
+#include "MControls.hpp"
+#include "MDevice.hpp"
+#include "MPreferences.hpp"
+#include "MSound.hpp"
+#include "MStrings.hpp"
 
 #include "mrsrc.hpp"
-#include "MSearchPanel.hpp"
-#include "MDevice.hpp"
-#include "MControls.hpp"
-#include "MSound.hpp"
-#include "MCommands.hpp"
-#include "MPreferences.hpp"
-#include "MStrings.hpp"
-#include "MCanvas.hpp"
 
 using namespace std;
 
 class MImageButton : public MCanvas
 {
   public:
-					MImageButton(const std::string& inID, MRect inBounds, const char* inImageResource);
+	MImageButton(const std::string &inID, MRect inBounds, const char *inImageResource);
 
-	MEventOut<void()>	eClicked;
+	MEventOut<void()> eClicked;
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw();
-	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void	MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void	MouseExit();
+	virtual void Draw();
+	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
+	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void MouseExit();
 
-	virtual void	ActivateSelf()			{ Invalidate(); }
-	virtual void	DeactivateSelf()		{ Invalidate(); }
+	virtual void ActivateSelf() { Invalidate(); }
+	virtual void DeactivateSelf() { Invalidate(); }
 
-  private:	
+  private:
 	enum MMouseStateForCloseButton
 	{
-		mouseOut, mouseOver, mouseDownOver, mouseDownOut
-	}				mMouseState;
-	MBitmap			mCloseButtonBitmaps[3];
+		mouseOut,
+		mouseOver,
+		mouseDownOver,
+		mouseDownOut
+	} mMouseState;
+	MBitmap mCloseButtonBitmaps[3];
 };
 
-MImageButton::MImageButton(const std::string& inID, MRect inBounds, const char* inImageResource)
+MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *inImageResource)
 	: MCanvas(inID, inBounds, false, false)
 	, mMouseState(mouseOut)
 {
@@ -49,7 +77,7 @@ MImageButton::MImageButton(const std::string& inID, MRect inBounds, const char* 
 		throw runtime_error("resource not found");
 
 	MBitmap buttons(rsrc.data(), rsrc.size());
-	mCloseButtonBitmaps[0] = MBitmap(buttons, MRect{  0, 0, 16, 16 });
+	mCloseButtonBitmaps[0] = MBitmap(buttons, MRect{ 0, 0, 16, 16 });
 	mCloseButtonBitmaps[1] = MBitmap(buttons, MRect{ 16, 0, 16, 16 });
 	mCloseButtonBitmaps[2] = MBitmap(buttons, MRect{ 32, 0, 16, 16 });
 }
@@ -58,9 +86,9 @@ void MImageButton::Draw()
 {
 	MRect bounds;
 	GetBounds(bounds);
-	
+
 	MDevice dev(this);
-	
+
 	if (kDialogBackgroundColor != kBlack)
 	{
 		dev.SetBackColor(kDialogBackgroundColor);
@@ -68,14 +96,14 @@ void MImageButton::Draw()
 	}
 
 	float y = (bounds.height - 16) / 2;
-	
+
 	switch (mMouseState)
 	{
-		default:			dev.DrawBitmap(mCloseButtonBitmaps[0], 0, y);	break;
+		default: dev.DrawBitmap(mCloseButtonBitmaps[0], 0, y); break;
 		case mouseOver:
-		case mouseDownOut:	dev.DrawBitmap(mCloseButtonBitmaps[1], 0, y);	break;
-		case mouseDownOver:	dev.DrawBitmap(mCloseButtonBitmaps[2], 0, y);	break;
-	}		
+		case mouseDownOut: dev.DrawBitmap(mCloseButtonBitmaps[1], 0, y); break;
+		case mouseDownOver: dev.DrawBitmap(mCloseButtonBitmaps[2], 0, y); break;
+	}
 }
 
 void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
@@ -84,7 +112,7 @@ void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, ui
 	{
 		mMouseState = mouseDownOver;
 		Invalidate();
-	}	
+	}
 }
 
 void MImageButton::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
@@ -96,10 +124,10 @@ void MImageButton::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	MMouseStateForCloseButton state(mMouseState);
-	
+
 	if (mMouseState == mouseOut)
 		TrackMouse(true, true);
-	
+
 	if (mBounds.ContainsPoint(inX, inY))
 	{
 		if (mMouseState == mouseOut)
@@ -114,7 +142,7 @@ void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 		else if (mMouseState == mouseDownOver)
 			mMouseState = mouseDownOut;
 	}
-	
+
 	if (mMouseState != state)
 		Invalidate();
 }
@@ -130,7 +158,7 @@ void MImageButton::MouseExit()
 
 // --------------------------------------------------------------------
 
-MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
+MSearchPanel::MSearchPanel(const string &inID, MRect inBounds)
 	: MBoxControl(inID, inBounds, true)
 	, eClose(this, &MSearchPanel::Close)
 	, eFindBtn(this, &MSearchPanel::FindBtn)
@@ -142,26 +170,26 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 	string captionString(_("Find:"));
 	dev.SetText(captionString);
 	uint32_t captionWidth = static_cast<uint32_t>(dev.GetTextWidth());
-	
+
 	MRect bounds(inBounds);
 
 	// close button
-	
+
 	bounds.x = bounds.y = (kSearchPanelHeight - 16) / 2;
 	bounds.width = bounds.height = 16;
-	MImageButton* closeButton = new MImageButton("close-button", bounds, "close.png");
+	MImageButton *closeButton = new MImageButton("close-button", bounds, "close.png");
 	closeButton->SetLayout(ePackStart, false, false, 8);
 	AddChild(closeButton);
 	AddRoute(eClose, closeButton->eClicked);
-	
+
 	// caption
 	GetBounds(bounds);
 	bounds.x = 32;
 	bounds.width = captionWidth;
 	bounds.y = (bounds.height - 24) / 2 + 4;
 	bounds.height = dev.GetLineHeight();
-//	bounds.height = 24;
-	MCaption* caption = new MCaption("search-caption", bounds, captionString);
+	//	bounds.height = 24;
+	MCaption *caption = new MCaption("search-caption", bounds, captionString);
 	caption->SetLayout(ePackStart, false, false, 4);
 	AddChild(caption);
 
@@ -198,7 +226,7 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 	labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
 	bounds.width = labelWidth + 20;
-	MButton* next = new MButton("find-next", bounds, label);
+	MButton *next = new MButton("find-next", bounds, label);
 	next->SetLayout(ePackStart, false, false, 4);
 	AddChild(next);
 	AddRoute(next->eClicked, eFindBtn);
@@ -210,7 +238,7 @@ MSearchPanel::MSearchPanel(const string& inID, MRect inBounds)
 	labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
 	bounds.width = labelWidth + 20;
-	MButton* prev = new MButton("find-prev", bounds, label);
+	MButton *prev = new MButton("find-prev", bounds, label);
 	prev->SetLayout(ePackStart, false, false, 4);
 	AddChild(prev);
 	AddRoute(prev->eClicked, eFindBtn);
@@ -226,7 +254,7 @@ void MSearchPanel::Close()
 	ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
 }
 
-void MSearchPanel::FindBtn(const std::string& inID)
+void MSearchPanel::FindBtn(const std::string &inID)
 {
 	if (inID == "find-next")
 		eSearch(searchDown);
@@ -248,18 +276,18 @@ bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool 
 	{
 		case kReturnKeyCode:
 		case kEnterKeyCode:
-			eSearch((inModifiers & kShiftKey) ? searchUp: searchDown);
+			eSearch((inModifiers & kShiftKey) ? searchUp : searchDown);
 			break;
-		
+
 		case kEscapeKeyCode:
 			Close();
 			break;
-		
+
 		default:
 			result = MBoxControl::HandleKeyDown(inKeyCode, inModifiers, inRepeat);
 			break;
 	}
-	
+
 	return result;
 }
 
@@ -272,4 +300,3 @@ bool MSearchPanel::GetIgnoreCase() const
 {
 	return not mCaseSensitive->IsChecked();
 }
-

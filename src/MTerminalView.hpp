@@ -1,15 +1,33 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
 #pragma once
-
-#include <deque>
-#include <list>
-#include <map>
-
-#include <boost/format.hpp>
-
-#include <pinch.hpp>
 
 #include "MCanvas.hpp"
 #include "MColor.hpp"
@@ -19,6 +37,14 @@
 #include "MTerminalBuffer.hpp"
 #include "MTerminalChannel.hpp"
 #include "MUnicode.hpp"
+
+#include <boost/format.hpp>
+
+#include <pinch.hpp>
+
+#include <deque>
+#include <list>
+#include <map>
 
 class MStatusbar;
 class MScrollbar;
@@ -30,7 +56,8 @@ class MTerminalView : public MCanvas
   public:
 	MTerminalView(const std::string &inID, MRect inBounds, MStatusbar *inStatusbar, MScrollbar *inScrollbar,
 		MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::string &inSSHCommand);
-	virtual ~MTerminalView();
+
+	~MTerminalView() override;
 
 	static MTerminalView *
 	GetFrontTerminal();
@@ -40,40 +67,41 @@ class MTerminalView : public MCanvas
 	// What lines are visible:
 	int32_t GetTopLine() const;
 
-	virtual void Draw();
-	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseExit();
-	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
-	virtual void ShowContextMenu(int32_t inX, int32_t inY);
+	void Draw() override;
+	void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers) override;
+	void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void MouseExit() override;
+	void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) override;
+	void ShowContextMenu(int32_t inX, int32_t inY) override;
 	static void GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
 		uint32_t &outWidth, uint32_t &outHeight);
 	static MRect GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows);
-	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
+	void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta) override;
 
 	bool IsOpen() const { return mTerminalChannel != nullptr and mTerminalChannel->IsOpen(); }
 	void Open();
 	void Close();
 	void Destroy();
 
-	virtual void Opened();
-	virtual void Closed();
+	void Opened();
+	void Closed();
 
-	virtual void SendCommand(std::string inData);
-	virtual void SendCommand(const boost::format &inData)
+	void SendCommand(std::string inData);
+	void SendCommand(const boost::format &inData)
 	{
 		SendCommand(inData.str());
 	}
-	virtual void SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY, uint32_t inModifiers);
+	
+	void SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY, uint32_t inModifiers);
 
 	void HandleOpened(const std::error_code &ec);
 	void HandleReceived(const std::error_code &ec, std::streambuf &inData);
 
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
-	virtual bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
-	virtual bool HandleCharacter(const std::string &inText, bool inRepeat);
+	bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked) override;
+	bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers) override;
+	bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat) override;
+	bool HandleCharacter(const std::string &inText, bool inRepeat) override;
 
 	void HandleMessage(const std::string &inMessage, const std::string &inLanguage);
 
@@ -87,16 +115,16 @@ class MTerminalView : public MCanvas
 	MEventIn<void()> ePreferencesChanged;
 	MEventIn<void(MColor)> ePreviewColor;
 
-	virtual bool PastePrimaryBuffer(std::string inText);
+	bool PastePrimaryBuffer(const std::string &inText) override;
 
   private:
-	virtual void ActivateSelf();
-	virtual void DeactivateSelf();
+	void ActivateSelf() override;
+	void DeactivateSelf() override;
 
 	void AdjustScrollbar(int32_t inTopLine);
 	void Scroll(MScrollMessage inMessage);
 
-	virtual void AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers);
+	void AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 
 	void ReadPreferences();
 	void PreferencesChanged();

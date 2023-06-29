@@ -1,12 +1,33 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.hpp"
-
-#include <boost/algorithm/string.hpp>
-
-#include <zeep/crypto.hpp>
-
+#include "MTerminalWindow.hpp"
 #include "MAlerts.hpp"
 #include "MAnimation.hpp"
 #include "MApplicationImpl.hpp"
@@ -16,16 +37,19 @@
 #include "MMenu.hpp"
 #include "MPortForwardingDialog.hpp"
 #include "MPreferences.hpp"
+#include "MPtyTerminalChannel.hpp"
 #include "MSaltApp.hpp"
 #include "MSearchPanel.hpp"
 #include "MStrings.hpp"
 #include "MTerminalChannel.hpp"
 #include "MTerminalView.hpp"
-#include "MTerminalWindow.hpp"
-#include "MPtyTerminalChannel.hpp"
+
+#include "MSalt.hpp"
+
+#include <zeep/crypto.hpp>
+#include <zeep/unicode-support.hpp>
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 // ------------------------------------------------------------------
 //
@@ -78,8 +102,6 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	using namespace std::placeholders;
-
-	PRINT(("Setting callbacks in Thread ID = %p", std::this_thread::get_id()));
 
 	mConnection->set_callback_executor(my_executor);
 
@@ -172,8 +194,6 @@ bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu,
 
 std::string MSshTerminalWindow::Password()
 {
-	PRINT(("Password callback Thread ID = %p", std::this_thread::get_id()));
-
 	std::string result;
 
 	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
@@ -202,8 +222,6 @@ std::vector<std::string> MSshTerminalWindow::Credentials(const string &name, con
 pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const string &inHost, const string &inAlgorithm,
 	const vector<uint8_t> &inHostKey, pinch::host_key_state inState)
 {
-	PRINT(("AcceptHostKey callback Thread ID = %p", std::this_thread::get_id()));
-
 	pinch::host_key_reply result = pinch::host_key_reply::reject;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
 
@@ -253,9 +271,9 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 	string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
 
 	// create a command
-	ba::replace_all(blob, "\n", "");
+	zeep::replace_all(blob, "\n", "");
 	string publickey = inKeyToDrop.get_type() + ' ' + blob + ' ' + inKeyToDrop.get_comment();
-	ba::replace_all(publickey, "'", "'\\''");
+	zeep::replace_all(publickey, "'", "'\\''");
 
 	string command =
 		string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
@@ -420,6 +438,12 @@ MTerminalWindow::~MTerminalWindow()
 
 	delete mAnimationVariable;
 	delete mAnimationManager;
+
+	RemoveWindowFromWindowList(this);
+
+	// Time to quit?
+	if (sFirst == nullptr)	
+		gApp->DoQuit();
 }
 
 void MTerminalWindow::Mapped()

@@ -1,17 +1,33 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 // Copyright Maarten L. Hekkelman 2011
 // All rights reserved
 
-#include "MSalt.hpp"
-
-#include <cmath>
-#include <map>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
-#include <zeep/crypto.hpp>
-#include <zeep/unicode-support.hpp>
-
+#include "MTerminalView.hpp"
 #include "MAnimation.hpp"
 #include "MApplication.hpp"
 #include "MCSICommands.hpp"
@@ -27,7 +43,6 @@
 #include "MSound.hpp"
 #include "MStrings.hpp"
 #include "MTerminalBuffer.hpp"
-#include "MTerminalView.hpp"
 #include "MUtils.hpp"
 #include "MVT220CharSets.hpp"
 #include "MWindow.hpp"
@@ -36,8 +51,13 @@
 
 #include "Gtk/MPrimary.hpp"
 
+#include <zeep/crypto.hpp>
+#include <zeep/unicode-support.hpp>
+
+#include <cmath>
+#include <map>
+
 using namespace std;
-namespace ba = boost::algorithm;
 
 namespace
 {
@@ -49,7 +69,7 @@ const uint32_t
 	cmd_EncodingUTF8 = 'enU8',
 
 	// cmd_AllowColor		= 'tClr',
-	// cmd_AllowTitle		= 'tTtl',
+    // cmd_AllowTitle		= 'tTtl',
 
 	cmd_MetaSendsEscape = 'tEsc',
 	cmd_BackSpaceIsDel = 'tBsD',
@@ -88,13 +108,13 @@ uint32_t
 double
 	kSmoothScrollDelay = 0.083333;
 
-//enum {
+// enum {
 //	kTextColor,
 //	kBackColor,
 //	kBoldColor,
 //
 //	kColorCount
-//};
+// };
 //
 MColor
 	sSelectionColor;
@@ -241,7 +261,8 @@ MTerminalView::MTerminalView(const string &inID, MRect inBounds,
 	, mDisabledFactor(mAnimationManager->CreateVariable(1, 0, 1))
 {
 	mTerminalChannel->SetMessageCallback(
-		[this](const std::string &msg, const std::string &lang) { this->HandleMessage(msg, lang); });
+		[this](const std::string &msg, const std::string &lang)
+		{ this->HandleMessage(msg, lang); });
 
 	ReadPreferences();
 
@@ -304,8 +325,6 @@ MTerminalView *MTerminalView::GetFrontTerminal()
 
 void MTerminalView::Open()
 {
-	PRINT(("Opening terminal view in %p", std::this_thread::get_id()));
-
 	mStatusbar->SetStatusText(0, _("Trying to connect"), false);
 
 	MRect bounds;
@@ -323,7 +342,8 @@ void MTerminalView::Open()
 		Preferences::GetBoolean("forward-agent", true),
 		Preferences::GetBoolean("forward-x11", true),
 		mSSHCommand, env,
-		[this](const std::error_code &ec) {
+		[this](const std::error_code &ec)
+		{
 			this->HandleOpened(ec);
 		});
 }
@@ -645,7 +665,8 @@ MRect MTerminalView::GetCharacterBounds(uint32_t inLine, uint32_t inColumn)
 		static_cast<int32_t>(kBorderWidth + ceil(inColumn * mCharWidth)),
 		static_cast<int32_t>(kBorderWidth + inLine * mLineHeight),
 		static_cast<int32_t>(ceil(mCharWidth)),
-		mLineHeight};
+		mLineHeight
+	};
 }
 
 bool MTerminalView::GetCharacterForPosition(int32_t inX, int32_t inY, int32_t &outLine, int32_t &outColumn)
@@ -966,7 +987,7 @@ void MTerminalView::Draw()
 			// write default status line
 			text = (boost::format(" 1 (%03.3d,%03.3d)") %
 					(mCursor.y + 1) % (mCursor.x + 1))
-					   .str();
+			           .str();
 
 			string trailing = "Printer: None          Network: ";
 			trailing += (mTerminalChannel->IsOpen() ? "Connected    " : "Not Connected");
@@ -1022,7 +1043,8 @@ void MTerminalView::Draw()
 		vector<uint32_t> backColorIndex, backColorOffset;
 		vector<uint32_t> styleValue, styleOffset;
 
-		auto pushColor = [&](MColor c, bool back, uint32_t offset) {
+		auto pushColor = [&](MColor c, bool back, uint32_t offset)
+		{
 			uint32_t ix = find(colors.begin(), colors.end(), c) - colors.begin();
 			if (ix >= colors.size())
 				colors.push_back(c);
@@ -1160,8 +1182,8 @@ void MTerminalView::Draw()
 
 			// wow, quite a few conditions:
 			bool drawCaret = mCursor.y == lineNr and mCursor.x == c and
-							 (mBlinkOn or mCursor.blink == false) and
-							 mDECTCEM and IsActive() and IsFocus() and mTerminalChannel->IsOpen();
+			                 (mBlinkOn or mCursor.blink == false) and
+			                 mDECTCEM and IsActive() and IsFocus() and mTerminalChannel->IsOpen();
 
 			if (drawCaret)
 			{
@@ -1323,7 +1345,7 @@ void MTerminalView::Idle(double inTime)
 
 	if (update or mBuffer->IsDirty())
 		Invalidate();
-	
+
 	if (not mSetWindowTitle.empty())
 		GetWindow()->SetTitle(std::exchange(mSetWindowTitle, ""));
 }
@@ -1655,8 +1677,8 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 		(inModifiers & kOptionKey ? 2 : 0) +
 		(inModifiers & kControlKey ? 4 : 0);
 
-	char modS2[3] = {modN ? ';' : '\0', static_cast<char>('0' + modN + 1), 0};
-	char modS3[4] = {modN ? '1' : '\0', ';', static_cast<char>('0' + modN + 1), 0};
+	char modS2[3] = { modN ? ';' : '\0', static_cast<char>('0' + modN + 1), 0 };
+	char modS3[4] = { modN ? '1' : '\0', ';', static_cast<char>('0' + modN + 1), 0 };
 
 	switch (inKeyCode)
 	{
@@ -1735,14 +1757,15 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 	{
 		const char *kFnKeyCode[24] = {
 			"11", "12", "13", "14", "15", "17", "18", "19", "20", "21", "23", "24",
-			"23", "24", "25", "26", "28", "29", "31", "32", "33", "34", "42", "43"};
+			"23", "24", "25", "26", "28", "29", "31", "32", "33", "34", "42", "43"
+		};
 
 		int keyNr = inKeyCode - kF1KeyCode + (inModifiers & kControlKey ? 12 : 0);
 
 		int modN =
 			(inModifiers & kShiftKey ? 1 : 0) +
 			(inModifiers & kOptionKey ? 2 : 0);
-		char modS[3] = {modN ? ';' : '\0', static_cast<char>('0' + modN + 1), 0};
+		char modS[3] = { modN ? ';' : '\0', static_cast<char>('0' + modN + 1), 0 };
 
 		text = kCSI + kFnKeyCode[keyNr] + modS + "~";
 	}
@@ -1834,7 +1857,7 @@ string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 	{
 		if (mAltSendsEscape)
 		{
-			char s[3] = {ESC, static_cast<char>(inKeyCode), 0};
+			char s[3] = { ESC, static_cast<char>(inKeyCode), 0 };
 			text = s;
 		}
 		else if (mEncoding == kEncodingUTF8)
@@ -1988,8 +2011,6 @@ void MTerminalView::HandleMessage(const string &inMessage, const string &inLangu
 
 bool MTerminalView::HandleCharacter(const string &inText, bool inRepeat)
 {
-	PRINT(("HandleCharacter(0x%x)", inText[0]));
-
 	// shortcut
 	if (inRepeat and mDECARM == false)
 		return true;
@@ -2079,9 +2100,11 @@ struct DisallowedChar
 	{ "DEL", 0x7F }
 };
 
-bool MTerminalView::PastePrimaryBuffer(string inText)
+bool MTerminalView::PastePrimaryBuffer(const string &inText)
 {
 	bool result = false;
+
+	std::string text(inText);
 
 	if (mTerminalChannel->IsOpen())
 	{
@@ -2091,7 +2114,7 @@ bool MTerminalView::PastePrimaryBuffer(string inText)
 		Preferences::GetArray("disallowed-paste-characters", dpc);
 		if (dpc.empty())
 		{
-			dpc = std::vector<std::string>{"BS","DEL","ENQ","EOT","ESC","NUL"};
+			dpc = std::vector<std::string>{ "BS", "DEL", "ENQ", "EOT", "ESC", "NUL" };
 			Preferences::SetArray("disallowed-paste-characters", dpc);
 		}
 
@@ -2100,7 +2123,7 @@ bool MTerminalView::PastePrimaryBuffer(string inText)
 			for (const auto &[name, ch] : kDisallowedPasteCharacters)
 			{
 				if (zeep::iequals(dc, name) or (zeep::iequals(dc, "C0") and ch <= 0x1F))
-					zeep::replace_all(inText, { &ch, 1 }, " ");
+					zeep::replace_all(text, { &ch, 1 }, " ");
 			}
 		}
 
@@ -2111,12 +2134,12 @@ bool MTerminalView::PastePrimaryBuffer(string inText)
 		else
 		{
 			if (mBracketedPaste)
-				SendCommand(kCSI + "200~" + inText + kCSI + "201~");
+				SendCommand(kCSI + "200~" + text + kCSI + "201~");
 			else
-				SendCommand(inText);
+				SendCommand(text);
 
 			if (not mSRM)
-				mInputBuffer.insert(mInputBuffer.end(), inText.begin(), inText.end());
+				mInputBuffer.insert(mInputBuffer.end(), text.begin(), text.end());
 
 			// force a scroll to the bottom
 			Scroll(kScrollToEnd);
@@ -2604,7 +2627,7 @@ MRect MTerminalView::GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows)
 {
 	uint32_t w, h;
 	GetTerminalMetrics(inColumns, inRows, Preferences::GetBoolean("show-status-line", false), w, h);
-	return {0, 0, static_cast<int32_t>(w), static_cast<int32_t>(h)};
+	return { 0, 0, static_cast<int32_t>(w), static_cast<int32_t>(h) };
 }
 
 void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
@@ -2637,16 +2660,16 @@ void MTerminalView::SendCommand(string inData)
 	{
 		if (mS8C1T)
 		{
-			ba::replace_all(inData, "\033D", "\204");  // IND
-			ba::replace_all(inData, "\033E", "\205");  // NEL
-			ba::replace_all(inData, "\033H", "\210");  // HTS
-			ba::replace_all(inData, "\033M", "\215");  // RI
-			ba::replace_all(inData, "\033N", "\216");  // SS2
-			ba::replace_all(inData, "\033O", "\217");  // SS3
-			ba::replace_all(inData, "\033P", "\220");  // DCS
-			ba::replace_all(inData, "\033[", "\233");  // CSI
-			ba::replace_all(inData, "\033\\", "\234"); // ST
-			ba::replace_all(inData, "\033]", "\235");  // OSC
+			zeep::replace_all(inData, "\033D", "\204");  // IND
+			zeep::replace_all(inData, "\033E", "\205");  // NEL
+			zeep::replace_all(inData, "\033H", "\210");  // HTS
+			zeep::replace_all(inData, "\033M", "\215");  // RI
+			zeep::replace_all(inData, "\033N", "\216");  // SS2
+			zeep::replace_all(inData, "\033O", "\217");  // SS3
+			zeep::replace_all(inData, "\033P", "\220");  // DCS
+			zeep::replace_all(inData, "\033[", "\233");  // CSI
+			zeep::replace_all(inData, "\033\\", "\234"); // ST
+			zeep::replace_all(inData, "\033]", "\235");  // OSC
 		}
 
 		mTerminalChannel->SendData(std::move(inData));
@@ -2707,7 +2730,7 @@ void MTerminalView::Opened()
 	}
 
 	Reset();
-	//EraseInDisplay(2);
+	// EraseInDisplay(2);
 	Invalidate();
 
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
@@ -2738,8 +2761,6 @@ void MTerminalView::Closed()
 
 void MTerminalView::HandleOpened(const std::error_code &ec)
 {
-	PRINT(("Open callback in %p", std::this_thread::get_id()));
-
 	if (ec)
 	{
 		const string &msg = ec.message();
@@ -2752,7 +2773,8 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 	else
 	{
 		Opened();
-		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
+		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
+			{ this->HandleReceived(ec, inData); });
 	}
 }
 
@@ -2770,7 +2792,8 @@ void MTerminalView::HandleReceived(const std::error_code &ec, streambuf &inData)
 		while (inData.in_avail() > 0)
 			mInputBuffer.push_back(inData.sbumpc());
 
-		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData) { this->HandleReceived(ec, inData); });
+		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
+			{ this->HandleReceived(ec, inData); });
 
 		Idle(0);
 	}
@@ -3029,7 +3052,7 @@ void MTerminalView::Emulate()
 		// sequence and so we can easily check for them here.
 
 		if (ch < 0x20 or ch == 0x7f or // a C0 control code
-									   // or a C1 control code
+		                               // or a C1 control code
 			(mDECSCL >= 2 and mS8C1T and (ch & 0xe0) == 0x80))
 		{
 			if (mLastCtrl)
@@ -3816,9 +3839,9 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 		case eSCORC:
 			RestoreCursor();
 			break;
-		//case eSCOSC:
+		// case eSCOSC:
 		//	break;
-		// SD -- Pan Up
+		//  SD -- Pan Up
 		case eSD:
 			while (n-- > 0)
 				ScrollBackward();
@@ -4180,7 +4203,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 
 			for (int a : mArgs)
 			{
-				mBuffer->ForeachInRectangle(t, l, b, r, [a](MChar &inChar, int32_t inLine, int32_t inColumn) {
+				mBuffer->ForeachInRectangle(t, l, b, r, [a](MChar &inChar, int32_t inLine, int32_t inColumn)
+					{
 					switch (a)
 					{
 						case 0:
@@ -4210,8 +4234,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 						case 27:
 							inChar &= ~kStyleInverse;
 							break;
-					}
-				});
+					} });
 			}
 			break;
 		}
@@ -4253,7 +4276,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 			vector<MChar> buffer(mTerminalWidth * mTerminalHeight);
 			uint32_t i = 0;
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn) {
+				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn)
+				{
 					buffer[i++] = inChar;
 				});
 
@@ -4261,7 +4285,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 			i = 0;
 
 			mBuffer->ForeachInRectangle(dt, dl, dt + h, dl + w,
-				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn) {
+				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn)
+				{
 					inChar = buffer[i++];
 				});
 			break;
@@ -4279,7 +4304,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 
 			MChar ch(' ', mCursor.style);
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[ch](MChar &inChar, int32_t inLine, int32_t inColumn) {
+				[ch](MChar &inChar, int32_t inLine, int32_t inColumn)
+				{
 					inChar = ch;
 				});
 			break;
@@ -4292,7 +4318,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 
 			MChar ch(GetParam(0, ' '), mCursor.style);
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[ch](MChar &inChar, int32_t inLine, int32_t inColumn) {
+				[ch](MChar &inChar, int32_t inLine, int32_t inColumn)
+				{
 					inChar = ch;
 				});
 			break;
@@ -4337,7 +4364,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 				}
 
 				mBuffer->ForeachInRectangle(t, l, b, r,
-					[flag](MChar &inChar, int32_t inLine, int32_t inColumn) {
+					[flag](MChar &inChar, int32_t inLine, int32_t inColumn)
+					{
 						inChar.ReverseFlag(MCharStyle(flag));
 					});
 			}
@@ -4386,7 +4414,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 					for (int i = 0; i < mTerminalWidth; ++i)
 						if (mTabStops[i])
 							ts.push_back(std::to_string(i + 1));
-					SendCommand(kDCS + "2$u" + ba::join(ts, "/") + "\033\\");
+					SendCommand(kDCS + "2$u" + zeep::join(ts, "/") + "\033\\");
 					break;
 				}
 			}
@@ -4449,7 +4477,8 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 			GetRectParam(0, t, l, b, r);
 
 			mBuffer->ForeachInRectangle(t, l, b, r,
-				[](MChar &inChar, int32_t inLine, int32_t inColumn) {
+				[](MChar &inChar, int32_t inLine, int32_t inColumn)
+				{
 					if (not(inChar & kUnerasable))
 						inChar = ' ';
 				});
@@ -4808,7 +4837,7 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 				if (mCursor.style.GetBackColor() != kXTermColorNone)
 					sgr.push_back(std::to_string(40 + mCursor.style.GetBackColor()));
 
-				response = (boost::format("\033P1$r%s") % ba::join(sgr, ";")).str();
+				response = (boost::format("\033P1$r%s") % zeep::join(sgr, ";")).str();
 			}
 			//			else if (mDECRQSS == ",|")	// DECAC - Assign Color
 			//			else if (mDECRQSS == ",}")	// DECATC - Alternate Text Color
@@ -5108,10 +5137,10 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 				if (mArgString.length() > 2 and mArgString[1] == ';' and mArgString[0] == 'c')
 				{
 					if (mArgString[2] == '?')
-						SendCommand("\033]52;c;\033\\");	// empty string as reply, sorry
+						SendCommand("\033]52;c;\033\\"); // empty string as reply, sorry
 					else
 					{
-						auto s = zeep::decode_base64({mArgString.data() + 2, mArgString.length() - 2});
+						auto s = zeep::decode_base64({ mArgString.data() + 2, mArgString.length() - 2 });
 						MClipboard::Instance().SetData(s, false);
 					}
 				}
@@ -5179,9 +5208,9 @@ void MTerminalView::EscapeAPC(uint8_t inChar)
 			case 7:
 			{
 				// Bash function for get is:
-				// get() { file="$1"; printf "\033_7;%s\x9c" $(realpath -qez "$file" | base64);}
+				// get() { file="$1"; printf "\033_7;%s\x9c" $(realpath -qez "$file" | base64 -w0);}
 
-				auto s = zeep::decode_base64({mArgString.data(), mArgString.length()});
+				auto s = zeep::decode_base64({ mArgString.data(), mArgString.length() });
 
 				DownloadFile(s);
 				break;
@@ -5190,9 +5219,9 @@ void MTerminalView::EscapeAPC(uint8_t inChar)
 			case 8:
 			{
 				// Bash function for get is:
-				// put() { file="$1"; printf "\033_8;%s\x9c" $(realpath -qz "$file" | base64);}
+				// put() { file="$1"; printf "\033_8;%s\x9c" $(realpath -qz "$file" | base64 -w0);}
 
-				auto s = zeep::decode_base64({mArgString.data(), mArgString.length()});
+				auto s = zeep::decode_base64({ mArgString.data(), mArgString.length() });
 
 				UploadFile(s);
 				break;
@@ -5562,10 +5591,8 @@ void MTerminalView::DownloadFile(const std::string &path)
 {
 	if (mTerminalChannel->CanDownloadFiles())
 	{
-		MFileDialogs::SaveFileAs(GetWindow(), path, [path, channel=mTerminalChannel](std::filesystem::path file)
-		{
-			channel->DownloadFile(path, file);
-		});
+		MFileDialogs::SaveFileAs(GetWindow(), path, [path, channel = mTerminalChannel](std::filesystem::path file)
+			{ channel->DownloadFile(path, file); });
 	}
 }
 
@@ -5573,10 +5600,7 @@ void MTerminalView::UploadFile(const std::string &path)
 {
 	if (mTerminalChannel->CanDownloadFiles())
 	{
-		MFileDialogs::ChooseOneFile(GetWindow(), [path, channel=mTerminalChannel](std::filesystem::path file)
-		{
-			channel->UploadFile(path, file);
-		});
+		MFileDialogs::ChooseOneFile(GetWindow(), [path, channel = mTerminalChannel](std::filesystem::path file)
+			{ channel->UploadFile(path, file); });
 	}
 }
-

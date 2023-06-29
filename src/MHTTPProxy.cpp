@@ -1,13 +1,33 @@
-//           Copyright Maarten L. Hekkelman 2013
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "MSalt.hpp"
-
-#include <fstream>
-
-#include <pinch.hpp>
+#include "MHTTPProxy.hpp"
+#include "MError.hpp"
+#include "MPreferences.hpp"
+#include "MSaltApp.hpp"
 
 #include <zeep/crypto.hpp>
 #include <zeep/http/error-handler.hpp>
@@ -18,10 +38,9 @@
 #include <zeep/http/server.hpp>
 #include <zeep/http/uri.hpp>
 
-#include "MSaltApp.hpp"
-#include "MError.hpp"
-#include "MHTTPProxy.hpp"
-#include "MPreferences.hpp"
+#include <pinch.hpp>
+
+#include <fstream>
 
 // --------------------------------------------------------------------
 
@@ -93,18 +112,12 @@ class proxy_controller : public zeep::http::html_controller
 		zh::scope sub(scope);
 
 		json stats{
-			{
-				{ "name", "Channels created" },
-				{ "value", m_channel_count }
-			},
-			{
-				{ "name", "Channels open" },
-				{ "value", static_cast<uint32_t>(m_open_channel_count) }
-			},
-			{
-				{ "name", "Requests processed" },
-				{ "value", m_request_count }
-			},
+			{ { "name", "Channels created" },
+				{ "value", m_channel_count } },
+			{ { "name", "Channels open" },
+				{ "value", static_cast<uint32_t>(m_open_channel_count) } },
+			{ { "name", "Requests processed" },
+				{ "value", m_request_count } },
 		};
 		sub.put("stats", stats);
 
@@ -120,16 +133,22 @@ class proxy_controller : public zeep::http::html_controller
 		if (zh::uri(req.get_uri()).get_host() == "proxy.hekkelman.net")
 			result = zh::html_controller::handle_request(req, reply);
 		else if (req.get_method() == "CONNECT")
-			asio_ns::co_spawn(m_connection->get_executor(), [this, req]() { return handle_connect(req, std::move(*m_socket)); }, asio_ns::detached);
+			asio_ns::co_spawn(
+				m_connection->get_executor(), [this, req]()
+				{ return handle_connect(req, std::move(*m_socket)); },
+				asio_ns::detached);
 		else
-			asio_ns::co_spawn(m_connection->get_executor(), [this, req]() { return handle_proxy_requests(req, std::move(*m_socket)); }, asio_ns::detached);
+			asio_ns::co_spawn(
+				m_connection->get_executor(), [this, req]()
+				{ return handle_proxy_requests(req, std::move(*m_socket)); },
+				asio_ns::detached);
 
 		return result;
 	}
 
 	struct open_channel_counter
 	{
-		open_channel_counter(std::atomic<uint32_t>& cnt)
+		open_channel_counter(std::atomic<uint32_t> &cnt)
 			: m_cnt(cnt)
 		{
 			++m_cnt;
@@ -140,7 +159,7 @@ class proxy_controller : public zeep::http::html_controller
 			--m_cnt;
 		}
 
-		std::atomic<uint32_t>& m_cnt;
+		std::atomic<uint32_t> &m_cnt;
 	};
 
 	struct connect_copy : public std::enable_shared_from_this<connect_copy>
@@ -149,15 +168,15 @@ class proxy_controller : public zeep::http::html_controller
 		std::shared_ptr<pinch::forwarding_channel> channel;
 		open_channel_counter cnt;
 
-		connect_copy(tcp::socket &&socket, std::shared_ptr<pinch::forwarding_channel> channel, std::atomic<uint32_t>& cnt)
+		connect_copy(tcp::socket &&socket, std::shared_ptr<pinch::forwarding_channel> channel, std::atomic<uint32_t> &cnt)
 			: socket(std::forward<tcp::socket>(socket))
 			, channel(channel)
 			, cnt(cnt)
 		{
 		}
 
-		template<typename SocketIn, typename SocketOut>
-		asio_ns::awaitable<void> copy(SocketIn& in, SocketOut& out)
+		template <typename SocketIn, typename SocketOut>
+		asio_ns::awaitable<void> copy(SocketIn &in, SocketOut &out)
 		{
 			char data[1024];
 			std::error_code ec;
@@ -172,14 +191,22 @@ class proxy_controller : public zeep::http::html_controller
 					co_await asio_ns::async_write(out, asio_ns::buffer(data, length), asio_ns::use_awaitable);
 				}
 			}
-			catch (...) {}
+			catch (...)
+			{
+			}
 		}
 
 		void start()
 		{
 			auto self = shared_from_this();
-			asio_ns::co_spawn(socket.get_executor(), [self]() { return self->copy(self->socket, *self->channel); }, asio_ns::detached);
-			asio_ns::co_spawn(socket.get_executor(), [self]() { return self->copy(*self->channel, self->socket); }, asio_ns::detached);
+			asio_ns::co_spawn(
+				socket.get_executor(), [self]()
+				{ return self->copy(self->socket, *self->channel); },
+				asio_ns::detached);
+			asio_ns::co_spawn(
+				socket.get_executor(), [self]()
+				{ return self->copy(*self->channel, self->socket); },
+				asio_ns::detached);
 		}
 	};
 
@@ -193,7 +220,7 @@ class proxy_controller : public zeep::http::html_controller
 
 		std::string client;
 		try // asking for the remote endpoint address failed sometimes
-			// causing aborting exceptions, so I moved it here.
+		    // causing aborting exceptions, so I moved it here.
 		{
 			client = socket.remote_endpoint().address().to_string();
 		}
@@ -358,7 +385,7 @@ bool http_proxy_error_handler::create_error_reply(const zeep::http::request &req
 class MHTTPServer : public zeep::http::basic_server
 {
   public:
-	MHTTPServer(MHTTPProxyImpl& proxy, asio_ns::io_context &io_context, zeep::http::security_context *sctxt)
+	MHTTPServer(MHTTPProxyImpl &proxy, asio_ns::io_context &io_context, zeep::http::security_context *sctxt)
 		: zeep::http::basic_server(sctxt)
 		, m_io_context(io_context)
 		, m_proxy(proxy)
@@ -379,14 +406,14 @@ class MHTTPServer : public zeep::http::basic_server
 
   private:
 	asio_ns::io_context &m_io_context;
-	MHTTPProxyImpl& m_proxy;
+	MHTTPProxyImpl &m_proxy;
 };
 
 // --------------------------------------------------------------------
 
 MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnection, uint16_t inPort,
 	bool require_authentication, const std::string &user, const std::string &password, log_level log)
-	: m_user_service({{user, password, {"PROXY_USER"}}})
+	: m_user_service({ { user, password, { "PROXY_USER" } } })
 	, m_connection(inConnection)
 	, m_log_level(log)
 {
@@ -403,7 +430,7 @@ MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnec
 	// m_server.reset(new MHTTPServer(gApp->get_io_context(), sc));
 	m_server.reset(new MHTTPServer(*this, MSaltApp::instance().get_io_context(), nullptr));
 
-	m_server->set_allowed_methods({"GET", "POST", "PUT", "OPTIONS", "HEAD", "DELETE", "CONNECT"});
+	m_server->set_allowed_methods({ "GET", "POST", "PUT", "OPTIONS", "HEAD", "DELETE", "CONNECT" });
 
 	m_server->add_error_handler(new http_proxy_error_handler());
 
