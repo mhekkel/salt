@@ -56,8 +56,10 @@
 				</page>
 				<page id="page3">
 					<checkbox if="WINDOWS" bind="top left" id="use-certificate" title="Use Certficates for authentication" />
-					<checkbox margin-left="10" bind="top left" id="forward-agent" title="Forward ssh-agent (may require a restart)" />
+					<checkbox margin-left="10" bind="top left" id="forward-ssh-agent" title="Forward ssh-agent (may require a restart)" />
 					<checkbox if="WINDOWS" margin-left="10" margin-bottom="20" bind="top left" id="act-as-pageant" title="Provide SSH authentication to other programs (Pageant)" />
+					<caption text="" /> <!-- spacing -->
+					<checkbox margin-left="10" bind="top left" id="forward-gpg-agent" title="Forward gpg-agent" />
 					<caption text="" /> <!-- spacing -->
 					<caption text="Disallow pasting of the following characters" />
 					<edittext bind="top left right bottom" id="disallowed-paste-characters" style="multiline" width="200" height="100" />

@@ -339,7 +339,7 @@ void MTerminalView::Open()
 
 	mTerminalChannel->Open(
 		Preferences::GetString("terminal-type", "xterm-256color"),
-		Preferences::GetBoolean("forward-agent", true),
+		Preferences::GetBoolean("forward-ssh-agent", true),
 		Preferences::GetBoolean("forward-x11", true),
 		mSSHCommand, env,
 		[this](const std::error_code &ec)
@@ -2773,6 +2773,12 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 	else
 	{
 		Opened();
+
+		if (Preferences::GetBoolean("forward-gpg-agent", true))
+		{
+
+		}
+
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
 			{ this->HandleReceived(ec, inData); });
 	}

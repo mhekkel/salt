@@ -97,11 +97,13 @@ MPreferencesDialog::MPreferencesDialog()
 	bool useCertificates = Preferences::GetBoolean("use-certificate", true);
 
 	SetChecked("use-certificate", useCertificates);
-	SetEnabled("forward-agent", useCertificates);
+	SetEnabled("forward-ssh-agent", useCertificates);
 	SetEnabled("act-as-pageant", useCertificates);
 #else
-	SetChecked("forward-agent", Preferences::GetBoolean("forward-agent", true));
+	SetChecked("forward-ssh-agent", Preferences::GetBoolean("forward-ssh-agent", true));
 #endif
+
+	SetChecked("forward-gpg-agent", Preferences::GetBoolean("forward-gpg-agent", true));
 
 	std::vector<std::string> dpc;
 	Preferences::GetArray("disallowed-paste-characters", dpc);
@@ -178,14 +180,16 @@ void MPreferencesDialog::Apply()
 	//
 #if defined _MSC_VER
 	Preferences::SetBoolean("use-certificate", IsChecked("use-certificate"));
-	Preferences::SetBoolean("forward-agent", IsChecked("forward-agent"));
+	Preferences::SetBoolean("forward-ssh-agent", IsChecked("forward-ssh-agent"));
 	Preferences::SetBoolean("act-as-pageant", IsChecked("act-as-pageant"));
 
 	// commit pageant setting
 	pinch::ssh_agent::instance().expose_pageant(IsChecked("act-as-pageant"));
 #else
-	Preferences::SetBoolean("forward-agent", IsChecked("forward-agent"));
+	Preferences::SetBoolean("forward-ssh-agent", IsChecked("forward-ssh-agent"));
 #endif
+
+	Preferences::SetBoolean("forward-gpg-agent", IsChecked("forward-gpg-agent"));
 
 	Preferences::SetBoolean("forward-x11", IsChecked("forward-x11"));
 	Preferences::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
@@ -339,12 +343,12 @@ void MPreferencesDialog::CheckboxChanged(const string &inID, bool inValue)
 
 #if defined _MSC_VER
 	bool useCertificates = IsChecked("use-certificate");
-	SetEnabled("forward-agent", useCertificates);
+	SetEnabled("forward-ssh-agent", useCertificates);
 	SetEnabled("act-as-pageant", useCertificates);
 
 	if (not useCertificates)
 	{
-		SetChecked("forward-agent", false);
+		SetChecked("forward-ssh-agent", false);
 		SetChecked("act-as-pageant", false);
 	}
 #endif

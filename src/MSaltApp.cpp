@@ -419,7 +419,7 @@ void MSaltApp::OpenRecent(const string &inRecent)
 void MSaltApp::DoAbout()
 {
 	// TODO: fix package version string
-	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kVersionGitTag, kBuildInfo, kBuildDate });
+	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, to_string(kBuildNumber), kRevisionDate });
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
