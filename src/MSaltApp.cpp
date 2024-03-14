@@ -53,8 +53,8 @@
 #include <regex>
 
 #if defined(_MSC_VER)
-#pragma comment(lib, "libpinch")
-#pragma comment(lib, "libz")
+# pragma comment(lib, "libpinch")
+# pragma comment(lib, "libz")
 #endif
 
 using namespace std;
@@ -116,7 +116,6 @@ int MSaltApp::RunEventLoop()
 		{
 			auto wg = asio_ns::make_work_guard(mIOContext.get_executor());
 			mIOContext.run();
-			std::cerr << "io_context thread leaving" << std::endl;
 		}
 		catch (const std::exception &ex)
 		{
@@ -459,25 +458,35 @@ void MSaltApp::DoNew()
 
 void MSaltApp::Open(const string &inFile)
 {
-	std::regex re("^(?:ssh://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?$");
-	std::smatch m;
+	// Check to see if inFile is a command to execute
 
-	if (std::regex_match(inFile, m, re))
+	if (inFile.front() == '/')
 	{
-		string user = m[1];
-		string host = m[3];
-		uint16_t port = m[4].matched ? std::stoi(m[4]) : 22;
-		string command;
-
-		std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
-		MWindow *w = MTerminalWindow::Create(user, host, port, command, connection);
+		MWindow *w = MTerminalWindow::Create();
 		w->Select();
+	}
+	else
+	{
+		std::regex re("^(?:ssh://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?$");
+		std::smatch m;
+
+		if (std::regex_match(inFile, m, re))
+		{
+			string user = m[1];
+			string host = m[3];
+			uint16_t port = m[4].matched ? std::stoi(m[4]) : 22;
+			string command;
+
+			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
+			MWindow *w = MTerminalWindow::Create(user, host, port, command, connection);
+			w->Select();
+		}
 	}
 }
 
 #if not defined(_MSC_VER)
 
-#include <gtk/gtk.h>
+# include <gtk/gtk.h>
 
 void MApplication::Install(const string &inPrefix)
 {
@@ -582,8 +591,12 @@ int main(int argc, char *const argv[])
 		mcfp::make_option("version", "Show version number"),
 		mcfp::make_option("verbose", "More verbose"),
 		mcfp::make_option("connect,c", "Show connect dialog"),
+		mcfp::make_option<std::string>("exec,e", "Execute command"),
 		mcfp::make_option("install,i", "Install the application"),
 		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
+
+	// for now
+	config.set_ignore_unknown(true);
 
 	std::error_code ec;
 	config.parse(argc, argv, ec);
@@ -616,6 +629,10 @@ int main(int argc, char *const argv[])
 
 	if (config.has("connect"))
 		return MApplication::Main({ "Connect" });
+	else if (config.has("exec"))
+	{
+		return MApplication::Main({ "Exec", config.get("exec") });
+	}
 	else if (config.operands().empty())
 		return MApplication::Main({ "New" });
 	else

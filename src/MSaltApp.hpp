@@ -44,6 +44,7 @@ extern const char kAppName[], kVersionString[];
 const uint32_t
 	cmd_Connect = 'Conn',
 	cmd_Disconnect = 'Disc',
+	cmd_Execute = 'Exec',
 	cmd_Reset = 'rset',
 	cmd_NextTerminal = 'nxtt',
 	cmd_PrevTerminal = 'prvt',
