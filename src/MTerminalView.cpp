@@ -1142,10 +1142,18 @@ void MTerminalView::Draw()
 
 			if (not mIgnoreColors)
 			{
-				if (st.GetForeColor() != kXTermColorNone)
+				if (st.GetForeColor() == kXTermColorRegularBack)
+					textColorIx = eNormalBack;
+				else if (st.GetForeColor() == kXTermColorRegularText)
+					textColorIx = eNormalText;
+				else if (st.GetForeColor() != kXTermColorNone)
 					textColorIx = st.GetForeColor();
 
-				if (st.GetBackColor() != kXTermColorNone)
+				if (st.GetBackColor() == kXTermColorRegularBack)
+					backColorIx = eNormalBack;
+				else if (st.GetBackColor() == kXTermColorRegularText)
+					backColorIx = eNormalText;
+				else if (st.GetBackColor() != kXTermColorNone)
 					backColorIx = st.GetBackColor();
 
 				if (st & kStyleBold and (textColorIx >= kXTermColorBlack and textColorIx <= kXTermColorWhite))
@@ -1195,7 +1203,7 @@ void MTerminalView::Draw()
 			if (c >= sc1 and c < sc2) // 'selected!'
 				backC = selectionColor;
 
-			if (textColorIx < 16)
+			if (textColorIx < 16 and st.GetForeColor() != kXTermColorRegularBack and st.GetBackColor() != kXTermColorRegularText)
 				textC = textC.Distinct(backC);
 
 			if (st & kStyleBlink and mBlinkOn)
@@ -3920,7 +3928,7 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 
 					// xterm colors
 					case 30:
-						mCursor.style.SetForeColor(kXTermColorBlack);
+						mCursor.style.SetForeColor(kXTermColorRegularBack);
 						break;
 					case 31:
 						mCursor.style.SetForeColor(kXTermColorRed);
@@ -3941,14 +3949,14 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 						mCursor.style.SetForeColor(kXTermColorCyan);
 						break;
 					case 37:
-						mCursor.style.SetForeColor(kXTermColorWhite);
+						mCursor.style.SetForeColor(kXTermColorNone);
 						break;
 					case 39:
 						mCursor.style.SetForeColor(kXTermColorNone);
 						break;
 
 					case 40:
-						mCursor.style.SetBackColor(kXTermColorBlack);
+						mCursor.style.SetBackColor(kXTermColorNone);
 						break;
 					case 41:
 						mCursor.style.SetBackColor(kXTermColorRed);
@@ -3969,7 +3977,7 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 						mCursor.style.SetBackColor(kXTermColorCyan);
 						break;
 					case 47:
-						mCursor.style.SetBackColor(kXTermColorWhite);
+						mCursor.style.SetBackColor(kXTermColorRegularText);
 						break;
 					case 49:
 						mCursor.style.SetBackColor(kXTermColorNone);

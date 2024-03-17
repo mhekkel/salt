@@ -60,6 +60,9 @@ enum MXTermColor
 {
 	kXTermColorNone = 256,
 
+	kXTermColorRegularBack,
+	kXTermColorRegularText,
+
 	kXTermColorBlack = 0,
 	kXTermColorRed,
 	kXTermColorGreen,
