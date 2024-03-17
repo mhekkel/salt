@@ -34,22 +34,22 @@
 const MColor k256AnsiColors[256] = {
 
 	{ uint8_t(0), uint8_t(0), uint8_t(0) },
-	{ uint8_t(147), uint8_t(29), uint8_t(29) },
-	{ uint8_t(29), uint8_t(147), uint8_t(29) },
-	{ uint8_t(147), uint8_t(147), uint8_t(29) },
-	{ uint8_t(29), uint8_t(49), uint8_t(147) },
-	{ uint8_t(147), uint8_t(29), uint8_t(147) },
-	{ uint8_t(29), uint8_t(147), uint8_t(147) },
-	{ uint8_t(183), uint8_t(183), uint8_t(183) },
+	{ uint8_t(197), uint8_t(0), uint8_t(13) },
+	{ uint8_t(0), uint8_t(172), uint8_t(92) },
+	{ uint8_t(177), uint8_t(128), uint8_t(30) },
+	{ uint8_t(0), uint8_t(63), uint8_t(141) },
+	{ uint8_t(157), uint8_t(28), uint8_t(190) },
+	{ uint8_t(15), uint8_t(168), uint8_t(192) },
+	{ uint8_t(208), uint8_t(207), uint8_t(204) },
 
-	{ uint8_t(128), uint8_t(128), uint8_t(128) },
-	{ uint8_t(204), uint8_t(80), uint8_t(80) },
-	{ uint8_t(80), uint8_t(204), uint8_t(80) },
-	{ uint8_t(204), uint8_t(204), uint8_t(80) },
-	{ uint8_t(80), uint8_t(80), uint8_t(204) },
-	{ uint8_t(204), uint8_t(80), uint8_t(204) },
-	{ uint8_t(40), uint8_t(204), uint8_t(204) },
-	{ uint8_t(209), uint8_t(209), uint8_t(209) },
+	{ uint8_t(94), uint8_t(92), uint8_t(100) },
+	{ uint8_t(255), uint8_t(74), uint8_t(54) },
+	{ uint8_t(28), uint8_t(223), uint8_t(113) },
+	{ uint8_t(244), uint8_t(185), uint8_t(22) },
+	{ uint8_t(18), uint8_t(122), uint8_t(249) },
+	{ uint8_t(223), uint8_t(63), uint8_t(241) },
+	{ uint8_t(32), uint8_t(214), uint8_t(241) },
+	{ uint8_t(255), uint8_t(255), uint8_t(255) },
 
 	// xterm colours
 
