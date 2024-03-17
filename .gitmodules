@@ -9,3 +9,6 @@
 [submodule "libmgui"]
 	path = libmgui
 	url = git@github.com:mhekkel/libmgui.git
+[submodule "libzeep"]
+	path = libzeep
+	url = git@github.com:mhekkel/libzeep.git

@@ -38,8 +38,6 @@
 #include "MTerminalChannel.hpp"
 #include "MUnicode.hpp"
 
-#include <boost/format.hpp>
-
 #include <pinch.hpp>
 
 #include <deque>
@@ -88,10 +86,6 @@ class MTerminalView : public MCanvas
 	void Closed();
 
 	void SendCommand(std::string inData);
-	void SendCommand(const boost::format &inData)
-	{
-		SendCommand(inData.str());
-	}
 	
 	void SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY, uint32_t inModifiers);
 

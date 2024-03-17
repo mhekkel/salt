@@ -29,60 +29,25 @@ project(salt VERSION 4.0.0 LANGUAGES C CXX)
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-option(USE_BOOST_ASIO "Use the asio library from Boost instead of the non-boost version" ON)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
+	set(CMAKE_CXX_FLAGS
+		"${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-multichar"
+	)
+elseif(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+endif()
+
+option(USE_BOOST_ASIO "Use the asio library from Boost instead of the non-boost version" OFF)
+
+set(ZEEP_USE_BOOST_ASIO OFF)
 
 include(GNUInstallDirs)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
 include(CMakePackageConfigHelpers)
-include(FindFilesystem)
 include(FindPkgConfig)
 include(GenerateExportHeader)
-
-set(CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES Clang AND CMAKE_CXX_COMPILER_VERSION LESS 16.0.0)
-	if(WIN32)
-		set(pinch_compile_flags "/clang:-fcoroutines")
-	else()
-		set(pinch_compile_flags "-fcoroutines")
-	endif()
-elseif(MSVC)
-	check_include_file_cxx("coroutine" has_coroutine "/std:c++latest")
-
-	if(NOT has_coroutine)
-		message(STATUS "Try <experimental/coroutine> (Coroutines TS) instead of <coroutine> ...")
-		check_include_file_cxx("experimental/coroutine" has_coroutine_ts "/std:c++17")
-	endif()
-
-	# has coroutine headers?
-	if(has_coroutine)
-		set(pinch_compile_flags "/std:c++latest")
-	elseif(has_coroutine_ts)
-		set(pinch_compile_flags "/std:c++17")
-	else()
-		message(FATAL_ERROR "There are no headers for C++ Coroutines")
-	endif()
-elseif(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-	#
-	# expect GCC 10 or later
-	#
-	check_include_file_cxx("coroutine" has_coroutine "-fcoroutines")
-
-	if(has_coroutine)
-		set(pinch_compile_flags "-fcoroutines")
-	endif()
-endif()
-
-# support compiler options for coroutine?
-check_cxx_compiler_flag("${pinch_compile_flags}" support_coroutines)
-
-if(NOT support_coroutines)
-	message(FATAL_ERROR "The compiler doesn't support C++ Coroutines")
-endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${pinch_compile_flags}")
 
@@ -90,35 +55,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-multichar")
 elseif(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-endif()
-
-if(MSVC)
-	# make msvc standards compliant...
-	add_compile_options(/permissive-)
-
-	macro(get_WIN32_WINNT version)
-		if(CMAKE_SYSTEM_VERSION)
-			set(ver ${CMAKE_SYSTEM_VERSION})
-			string(REGEX MATCH "^([0-9]+).([0-9])" ver ${ver})
-			string(REGEX MATCH "^([0-9]+)" verMajor ${ver})
-
-			# Check for Windows 10, b/c we'll need to convert to hex 'A'.
-			if("${verMajor}" MATCHES "10")
-				set(verMajor "A")
-				string(REGEX REPLACE "^([0-9]+)" ${verMajor} ver ${ver})
-			endif()
-
-			# Remove all remaining '.' characters.
-			string(REPLACE "." "" ver ${ver})
-
-			# Prepend each digit with a zero.
-			string(REGEX REPLACE "([0-9A-Z])" "0\\1" ver ${ver})
-			set(${version} "0x${ver}")
-		endif()
-	endmacro()
-
-	get_WIN32_WINNT(ver)
-	add_definitions(-D_WIN32_WINNT=${ver})
 endif()
 
 # add_compile_definitions(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
@@ -145,14 +81,14 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-find_package(Filesystem REQUIRED)
-
 # find_package(pinch 1.1 REQUIRED)
+
 add_subdirectory(libpinch EXCLUDE_FROM_ALL)
 add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
 add_subdirectory(libmgui EXCLUDE_FROM_ALL)
+add_subdirectory(libzeep EXCLUDE_FROM_ALL)
 
-find_package(zeep 5.1.6 REQUIRED)
+# find_package(zeep 5.1.6 REQUIRED)
 
 find_library(DL dl REQUIRED)
 find_library(UTIL util REQUIRED)

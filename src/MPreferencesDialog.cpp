@@ -40,13 +40,10 @@
 
 #include <zeep/unicode-support.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <set>
 #include <sstream>
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 MPreferencesDialog *MPreferencesDialog::sInstance;
 MEventOut<void()> MPreferencesDialog::ePreferencesChanged;
@@ -269,17 +266,20 @@ void MPreferencesDialog::Apply()
 	{
 		bool ok = true;
 
-		std::set<std::string> allowed;
-		ba::split(allowed, alg.def, ba::is_any_of(","));
+		std::vector<std::string> allowed;
+		zeep::split(allowed, alg.def, ",");
 
-		vector<string> v;
+		std::sort(allowed.begin(), allowed.end());
+		allowed.erase(std::unique(allowed.begin(), allowed.end()), allowed.end());
+
+		std::vector<string> v;
 		string s = GetText(alg.conf);
-		ba::split(v, s, ba::is_any_of(","));
+		zeep::split(v, s, ",");
 
 		for (auto &a : v)
 		{
-			ba::trim(a);
-			if (allowed.count(a) == 0)
+			zeep::trim(a);
+			if (std::find(allowed.begin(), allowed.end(), a) == allowed.end())
 			{
 				DisplayAlert(this, "algo-unsupported", { alg.desc, a });
 				ok = false;

@@ -223,6 +223,29 @@ struct MPFK
 };
 
 // --------------------------------------------------------------------
+// Too bad the format library isn't finished yet
+
+class MFormat
+{
+  public:
+	template<typename... Arguments>
+	MFormat(const char *fmt, Arguments ...args)
+	{
+		m_str.reserve(255);
+		auto n = snprintf(m_str.data(), 255, fmt, args...);
+		m_str.resize(n);
+	}
+
+	operator std::string() const
+	{
+		return m_str;
+	}
+
+  private:
+	std::string m_str;
+};
+
+// --------------------------------------------------------------------
 // The MTerminalView class.
 
 string MTerminalView::sSelectBuffer;
@@ -294,7 +317,7 @@ MTerminalView::MTerminalView(const string &inID, MRect inBounds,
 	//
 	AdjustScrollbar(0);
 
-	string desc = (boost::format("%dx%d") % mTerminalWidth % mTerminalHeight).str();
+	string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
 	mStatusbar->SetStatusText(2, desc, false);
 
 	// and add this to the list of open terminals
@@ -473,7 +496,7 @@ void MTerminalView::StatusPartClicked(uint32_t inPart, MRect)
 
 	if (not info.empty())
 	{
-		mStatusInfo = (mStatusInfo + 1) % info.size();
+		mStatusInfo = (mStatusInfo + 1, info).size();
 		mStatusbar->SetStatusText(1, info[mStatusInfo], false);
 	}
 }
@@ -622,7 +645,7 @@ void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inR
 
 	if (mStatusbar != nullptr)
 	{
-		string desc = (boost::format("%dx%d") % mTerminalWidth % mTerminalHeight).str();
+		string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
 		mStatusbar->SetStatusText(2, desc, false);
 	}
 
@@ -985,9 +1008,7 @@ void MTerminalView::Draw()
 		if (mDECSSDT == 1)
 		{
 			// write default status line
-			text = (boost::format(" 1 (%03.3d,%03.3d)") %
-					(mCursor.y + 1) % (mCursor.x + 1))
-			           .str();
+			text = MFormat(" 1 (%03.3d,%03.3d)", mCursor.y + 1, mCursor.x + 1);
 
 			string trailing = "Printer: None          Network: ";
 			trailing += (mTerminalChannel->IsOpen() ? "Connected    " : "Not Connected");
@@ -1137,9 +1158,6 @@ void MTerminalView::Draw()
 				swap(textColorIx, backColorIx);
 			}
 
-			if (st & kStyleBlink and mBlinkOn)
-				textColorIx = backColorIx;
-
 			MColor textC, backC;
 
 			switch (textColorIx)
@@ -1179,6 +1197,9 @@ void MTerminalView::Draw()
 
 			if (textColorIx < 16)
 				textC = textC.Distinct(backC);
+
+			if (st & kStyleBlink and mBlinkOn)
+				textC = backC;
 
 			// wow, quite a few conditions:
 			bool drawCaret = mCursor.y == lineNr and mCursor.x == c and
@@ -1339,7 +1360,7 @@ void MTerminalView::Idle(double inTime)
 
 	//	if (mBuffer->IsDirty())
 	//	{
-	//		string desc = (boost::format("%d,%d") % (mCursor.x + 1) % (mCursor.y + 1)).str();
+	//		string desc = (MFormat("%d,%d", mCursor.x + 1, mCursor.y + 1));
 	//		mStatusbar->SetStatusText(3, desc, false);
 	//	}
 
@@ -3761,13 +3782,13 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 					SendCommand("\033[0n");
 					break; // terminal OK
 				case 6:
-					SendCommand(boost::format("\033[%d;%dR") % (mCursor.y + 1) % (mCursor.x + 1));
+					SendCommand(MFormat("\033[%d;%dR", mCursor.y + 1, mCursor.x + 1));
 					break;
 				case 15:
 					SendCommand("\033[?13n");
 					break; // we have no printer
 				case 25:
-					SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
+					SendCommand(MFormat("\033[?2%dn", mPFK != nullptr and mPFK->locked));
 					break;
 				// TODO: Find out the keyboard layout
 				case 26:
@@ -3780,13 +3801,13 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 			switch (GetParam(0, 0))
 			{
 				case 6:
-					SendCommand(boost::format("\033[?%d;%d;1R") % (mCursor.y + 1) % (mCursor.x + 1));
+					SendCommand(MFormat("\033[?%d;%d;1R", mCursor.y + 1, mCursor.x + 1));
 					break;
 				case 15:
 					SendCommand("\033[?11n");
 					break;
 				case 25:
-					SendCommand(boost::format("\033[?2%dn") % (mPFK != nullptr and mPFK->locked));
+					SendCommand(MFormat("\033[?2%dn", mPFK != nullptr and mPFK->locked));
 					break;
 				case 26:
 					SendCommand("\033[?27;1n");
@@ -4088,7 +4109,7 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 			break;
 		// DECREQTPARM -- no comment
 		case eDECREQTPARM:
-			SendCommand((boost::format("\033[%d;1;1;128;128;1;0x") % (mArgs[0] + 2)).str());
+			SendCommand((MFormat("\033[%d;1;1;128;128;1;0x", mArgs[0] + 2)));
 			break;
 		// XTERMEMK -- Reset XTerm modify keys
 		case eXTERMEMK:
@@ -4386,21 +4407,21 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 			break;
 		// DECRQDE -- Request displayed extent
 		case eDECRQDE:
-			SendCommand(boost::format("\033[%d;%d;1;1;1\"w") % mTerminalHeight % mTerminalWidth);
+			SendCommand(MFormat("\033[%d;%d;1;1;1\"w", mTerminalHeight, mTerminalWidth));
 			break;
 
 		// DECRQMANSI -- Request mode ANSI
 		case eDECRQMANSI:
 		{
 			int p = GetParam(0, 0);
-			SendCommand(boost::format("\033[%d;%d$y") % p % (GetMode(p, true) ? 1 : 2));
+			SendCommand(MFormat("\033[%d;%d$y", p, GetMode(p, true) ? 1 : 2));
 			break;
 		}
 		// DECRQMDEC -- Request mode DEC Private
 		case eDECRQMDEC:
 		{
 			int p = GetParam(0, 0);
-			SendCommand(boost::format("\033[?%d;%d$y") % p % (GetMode(p, false) ? 1 : 2));
+			SendCommand(MFormat("\033[?%d;%d$y", p, GetMode(p, false) ? 1 : 2));
 			break;
 		}
 		// DECRQPSR -- Request presentation state
@@ -4410,8 +4431,20 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 				case 1: /* DECCIR */
 				{
 					MStyle st = mCursor.style;
-					SendCommand(boost::format("\033P1$u%d;%d;%d;%c;%c;%c;%d;%d;%c;%c%c%c%c\033\\") % (mCursor.y + 1) % (mCursor.x + 1) % 1 % char(0x40 + (st & kStyleInverse ? 8 : 0) + (st & kStyleBlink ? 4 : 0) + (st & kStyleUnderline ? 2 : 0) + (st & kStyleBold ? 1 : 0)) % char(0x40 + (st & kUnerasable ? 1 : 0)) % char(0x40 + (mCursor.DECAWM ? 8 : 0) + (mCursor.SS == 3 ? 4 : 0) + (mCursor.SS == 2 ? 2 : 0) + (mCursor.DECOM ? 1 : 0)) % mCursor.CSGL % mCursor.CSGR % char(0x5f) // pffft, not sure about this one... FIXME
-								% mCursor.charSetGSel[0] % mCursor.charSetGSel[1] % mCursor.charSetGSel[2] % mCursor.charSetGSel[3]);
+					SendCommand(MFormat("\033P1$u%d;%d;%d;%c;%c;%c;%d;%d;%c;%c%c%c%c\033\\",
+						mCursor.y + 1,
+						mCursor.x + 1,
+						1,
+						char(0x40 + (st & kStyleInverse ? 8 : 0) + (st & kStyleBlink ? 4 : 0) + (st & kStyleUnderline ? 2 : 0) + (st & kStyleBold ? 1 : 0)),
+						char(0x40 + (st & kUnerasable ? 1 : 0)),
+						char(0x40 + (mCursor.DECAWM ? 8 : 0) + (mCursor.SS == 3 ? 4 : 0) + (mCursor.SS == 2 ? 2 : 0) + (mCursor.DECOM ? 1 : 0)),
+						mCursor.CSGL,
+						mCursor.CSGR,
+						char(0x5f), // pffft, not sure about this one... FIXME
+						mCursor.charSetGSel[0],
+						mCursor.charSetGSel[1],
+						mCursor.charSetGSel[2],
+						mCursor.charSetGSel[3]));
 					break;
 				}
 				case 2: /* DECTABSR */
@@ -4502,14 +4535,14 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 					break;
 				case 13:
 					GetWindow()->GetWindowPosition(r);
-					SendCommand(boost::format("\033[3;%d;%dt") % r.x % r.y);
+					SendCommand(MFormat("\033[3;%d;%dt", r.x, r.y));
 					break;
 				case 14:
 					GetWindow()->GetBounds(r);
-					SendCommand(boost::format("\033[4;%d;%dt") % r.width % r.height);
+					SendCommand(MFormat("\033[4;%d;%dt", r.width, r.height));
 					break;
 				case 18:
-					SendCommand(boost::format("\033[8;%d;%dt") % mTerminalWidth % mTerminalHeight);
+					SendCommand(MFormat("\033[8;%d;%dt", mTerminalWidth, mTerminalHeight));
 					break;
 				case 20:
 					SendCommand("\033]L\033\\");
@@ -4843,44 +4876,44 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 				if (mCursor.style.GetBackColor() != kXTermColorNone)
 					sgr.push_back(std::to_string(40 + mCursor.style.GetBackColor()));
 
-				response = (boost::format("\033P1$r%s") % zeep::join(sgr, ";")).str();
+				response = MFormat("\033P1$r%s", zeep::join(sgr, ";").c_str());
 			}
 			//			else if (mDECRQSS == ",|")	// DECAC - Assign Color
 			//			else if (mDECRQSS == ",}")	// DECATC - Alternate Text Color
 			else if (mDECRQSS == "$}") // DECSASD - Select Active Status Display
 				response = "\033P1$r0}";
 			else if (mDECRQSS == "*x") // DECSACE - Select Attribute Change Extent
-				response = (boost::format("\033P1$r%d") % (mDECSACE ? 2 : 1)).str();
+				response = MFormat("\033P1$r%d", mDECSACE ? 2 : 1);
 			else if (mDECRQSS == "\"q") // DECSCA - Set Character Attribute
 				response = mCursor.style & kUnerasable ? "\033P1$r1" : "\033P1$r0";
 			else if (mDECRQSS == "$|") // DECSCPP - Set Columns Per Page
-				response = (boost::format("\033P1$r%d") % mTerminalWidth).str();
+				response = MFormat("\033P1$r%d", mTerminalWidth);
 			//			else if (mDECRQSS == "*r")	// DECSCS - Select Communication Speed
 			//			else if (mDECRQSS == "*u")	// DECSCP - Select Communication Port
 			else if (mDECRQSS == "\"p") // DECSCL - Set Conformance Level
 			{
 				if (mDECSCL >= 2)
-					response = (boost::format("\033P1$r%d;%d") % mDECSCL % (mS8C1T ? 0 : 1)).str();
+					response = MFormat("\033P1$r%d;%d", mDECSCL, mS8C1T ? 0 : 1);
 				else
 					response = "\033P1$r61";
 			}
 			else if (mDECRQSS == " q") // DECSCUSR - Set Cursor Style
 			{
 				int cs = mCursor.block ? (mCursor.blink ? 1 : 2) : (mCursor.blink ? 3 : 4);
-				response = (boost::format("\033P1$r%d") % cs).str();
+				response = MFormat("\033P1$r%d", cs);
 			}
 			//			else if (mDECRQSS == ")p")	// DECSDPT - Select Digital Printed Data Type
 			//			else if (mDECRQSS == "$q")	// DECSDDT - Select Disconnect Delay Time
 			//			else if (mDECRQSS == "*s")	// DECSFC - Select Flow Control Type
 			//			else if (mDECRQSS == " r")	// DECSKCV - Set Key Click Volume
 			else if (mDECRQSS == "s") // DECSLRM - Set Left and Right Margins
-				response = (boost::format("\033P1$r%d;%d") % (mMarginLeft + 1) % (mMarginRight + 1)).str();
+				response = MFormat("\033P1$r%d;%d", mMarginLeft + 1, mMarginRight + 1);
 			else if (mDECRQSS == "t") // DECSLPP - Set Lines Per Page
-				response = (boost::format("\033P1$r%d") % mTerminalHeight).str();
+				response = MFormat("\033P1$r%d", mTerminalHeight);
 			//			else if (mDECRQSS == " v")	// DECSLCK - Set Lock Key Style
 			//			else if (mDECRQSS == " u")	// DECSMBV - Set Margin Bell Volume
 			else if (mDECRQSS == "*|") // DECSNLS - Set Number of Lines per Screen
-				response = (boost::format("\033P1$r%d") % mTerminalHeight).str();
+				response = MFormat("\033P1$r%d", mTerminalHeight);
 			//			else if (mDECRQSS == ",x")	// DECSPMA - Session Page Memory Allocation
 			//			else if (mDECRQSS == "+w")	// DECSPP - Set Port Parameter
 			//			else if (mDECRQSS == "$s")	// DECSPRTT - Select Printer Type
@@ -4888,9 +4921,9 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 			//			else if (mDECRQSS == " p")	// DECSSCLS - Set Scroll Speed
 			//			else if (mDECRQSS == "p")	// DECSSL - Select Set-Up Language
 			else if (mDECRQSS == "$~") // DECSSDT - Set Status Line Type
-				response = (boost::format("\033P1$r%d") % mDECSSDT).str();
+				response = MFormat("\033P1$r%d", mDECSSDT);
 			else if (mDECRQSS == "r") // DECSTBM - Set Top and Bottom Margins
-				response = (boost::format("\033P1$r%d;%d") % (mMarginTop + 1) % (mMarginBottom + 1)).str();
+				response = MFormat("\033P1$r%d;%d", mMarginTop + 1, mMarginBottom + 1);
 			//			else if (mDECRQSS == "\"u")	// DECSTRL - Set Transmit Rate Limit
 			//			else if (mDECRQSS == " t")	// DECSWBV - Set Warning Bell Volume
 			//			else if (mDECRQSS == ",{")	// DECSZS - Select Zero Symbol
