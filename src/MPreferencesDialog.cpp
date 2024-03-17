@@ -144,7 +144,7 @@ MPreferencesDialog::MPreferencesDialog()
 	vector<string> envs;
 	Preferences::GetArray("env", envs);
 	for (const string &s : envs)
-		env << s << endl;
+		env << s << '\n';
 	SetText("env", env.str());
 
 	SetText("enc", Preferences::GetString("enc", pinch::kEncryptionAlgorithms));

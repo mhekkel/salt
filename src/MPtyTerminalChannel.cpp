@@ -159,35 +159,35 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	fd = open("/dev/tty", O_RDWR | O_NOCTTY);
 	if (fd >= 0)
 	{
-		cerr << "Failed to disconnect from controlling tty." << endl;
+		cerr << "Failed to disconnect from controlling tty.\n";
 		close(fd);
 	}
 
 	/* Make it our controlling tty. */
 	if (ioctl(inTtyFD, TIOCSCTTY, NULL) < 0)
-		cerr << "ioctl(TIOCSCTTY): " << strerror(errno) << endl;
+		cerr << "ioctl(TIOCSCTTY): " << strerror(errno) << '\n';
 
 	fd = open(mTtyName.c_str(), O_RDWR);
 	if (fd < 0)
-		cerr << mTtyName << ": " << strerror(errno) << endl;
+		cerr << mTtyName << ": " << strerror(errno) << '\n';
 	else
 		close(fd);
 
 	/* Verify that we now have a controlling tty. */
 	fd = open("/dev/tty", O_WRONLY);
 	if (fd < 0)
-		cerr << "open /dev/tty failed - could not set controlling tty: " << strerror(errno) << endl;
+		cerr << "open /dev/tty failed - could not set controlling tty: " << strerror(errno) << '\n';
 	else
 		close(fd);
 
 	// redirect stdin/stdout/stderr from the pseudo tty
 
 	if (dup2(inTtyFD, STDIN_FILENO) < 0)
-		cerr << "dup2 stdin: " << strerror(errno) << endl;
+		cerr << "dup2 stdin: " << strerror(errno) << '\n';
 	if (dup2(inTtyFD, STDOUT_FILENO) < 0)
-		cerr << "dup2 stdout: " << strerror(errno) << endl;
+		cerr << "dup2 stdout: " << strerror(errno) << '\n';
 	if (dup2(inTtyFD, STDERR_FILENO) < 0)
-		cerr << "dup2 stderr: " << strerror(errno) << endl;
+		cerr << "dup2 stderr: " << strerror(errno) << '\n';
 
 	close(inTtyFD);
 
@@ -195,7 +195,7 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	struct passwd *pw = getpwuid(getuid());
 	if (pw == nullptr)
 	{
-		cerr << "user not found" << strerror(errno) << endl;
+		cerr << "user not found" << strerror(errno) << '\n';
 		exit(1);
 	}
 
@@ -204,7 +204,7 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	{
 		string line;
 		getline(motd, line);
-		cout << line << endl;
+		cout << line << '\n';
 	}
 	motd.close();
 

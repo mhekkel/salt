@@ -151,11 +151,22 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/MakeRes.pl
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
-target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib)
+target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui dl util)
 
 mrc_target_resources(salt ${RESOURCES})
 
+set(SALT_EXE ${CMAKE_INSTALL_PREFIX}/bin/salt)
+set(SALT_ICON ${CMAKE_INSTALL_PREFIX}/share/salt/icon.png)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/salt.desktop.in
+	${CMAKE_CURRENT_BINARY_DIR}/salt.desktop @ONLY)
+
 install(TARGETS salt
-	RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-)
+	RUNTIME DESTINATION bin)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/salt.desktop
+	DESTINATION share/applications )
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rsrc/Icons/appicon.png
+	RENAME icon.png
+	DESTINATION share/salt/)

@@ -219,7 +219,7 @@ void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std:
 		{
 			if (ec or version != 3)
 			{
-				std::cerr << "error sftp opening channel: " << ec.message() << std::endl;
+				std::cerr << "error sftp opening channel: " << ec.message() << '\n';
 				self->close();
 			}
 			else
@@ -228,7 +228,7 @@ void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std:
 					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
 					{
 						if (ec)
-							std::cerr << "ec: " << ec.message() << std::endl;
+							std::cerr << "ec: " << ec.message() << '\n';
 					});
 			}
 		});
@@ -243,7 +243,7 @@ void MSshTerminalChannel::UploadFile(const std::string &remotepath, const std::s
 		{
 			if (ec or version != 3)
 			{
-				std::cerr << "error sftp opening channel: " << ec.message() << std::endl;
+				std::cerr << "error sftp opening channel: " << ec.message() << '\n';
 				self->close();
 			}
 			else
@@ -252,7 +252,7 @@ void MSshTerminalChannel::UploadFile(const std::string &remotepath, const std::s
 					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
 					{
 						if (ec)
-							std::cerr << "ec: " << ec.message() << std::endl;
+							std::cerr << "ec: " << ec.message() << '\n';
 					});
 			}
 		});

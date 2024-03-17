@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Salt Terminal
+Comment=Alternative command line and SSH terminal
+Comment[nl]=Alternatieve opdracht prompt en SSH terminal
+TryExec=salt
+Exec=@SALT_EXE@ %u
+Icon=@SALT_ICON@
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;
+Keywords=ssh;shell;prompt;command;commandline;cmd;
+MimeType=x-scheme-handler/ssh
+Actions=Connect;
+
+[Desktop Action Connect]
+Name=Open Connection
+Name[nl]=Verbind met server
+Exec=@SALT_EXE@ -c

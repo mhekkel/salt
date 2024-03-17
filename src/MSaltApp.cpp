@@ -57,7 +57,6 @@
 # pragma comment(lib, "libz")
 #endif
 
-using namespace std;
 namespace fs = std::filesystem;
 
 const char
@@ -119,7 +118,7 @@ int MSaltApp::RunEventLoop()
 		}
 		catch (const std::exception &ex)
 		{
-			std::cerr << "Exception in io_context thread: " << ex.what() << std::endl;
+			std::cerr << "Exception in io_context thread: " << ex.what() << '\n';
 		} });
 
 	return MApplication::RunEventLoop();
@@ -135,9 +134,9 @@ void MSaltApp::Initialise()
 #endif
 
 	// recent menu
-	vector<string> recent;
+	std::vector<std::string> recent;
 	Preferences::GetArray("recent-sessions", recent);
-	for (const string &r : recent)
+	for (const std::string &r : recent)
 	{
 		if (std::regex_match(r, kRecentRE))
 			mRecent.push_back(r);
@@ -153,12 +152,12 @@ void MSaltApp::Initialise()
 			known_hosts.load_host_file(host_file);
 	}
 
-	vector<string> knownHosts;
+	std::vector<std::string> knownHosts;
 	Preferences::GetArray("known-hosts", knownHosts);
 
 	std::regex rx("^(\\S+) (\\S+) (.+)");
 
-	for (const string &known : knownHosts)
+	for (const std::string &known : knownHosts)
 	{
 		std::smatch m;
 		if (std::regex_match(known, m, rx))
@@ -180,7 +179,7 @@ void MSaltApp::Initialise()
 
 void MSaltApp::SaveGlobals()
 {
-	vector<string> recent(mRecent.begin(), mRecent.end());
+	std::vector<std::string> recent(mRecent.begin(), mRecent.end());
 	Preferences::SetArray("recent-sessions", recent);
 
 	// save new format of known hosts
@@ -312,7 +311,7 @@ void MSaltApp::UpdateWindowMenu(MMenu *inMenu)
 	MTerminalWindow *term = MTerminalWindow::GetFirstTerminal();
 	while (term != nullptr)
 	{
-		string label = term->GetTitle();
+		std::string label = term->GetTitle();
 		inMenu->AppendItem(label, cmd_SelectWindowFromMenu);
 		term = term->GetNextTerminal();
 	}
@@ -324,7 +323,7 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 
-	for (const string &recent : mRecent)
+	for (const std::string &recent : mRecent)
 	{
 		std::smatch m;
 
@@ -355,19 +354,19 @@ void MSaltApp::UpdateTOTPMenu(MMenu *inMenu)
 {
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 
-	vector<string> totp;
+	std::vector<std::string> totp;
 	Preferences::GetArray("totp", totp);
-	const regex rx("(.+);[A-Z2-7]+");
+	const std::regex rx("(.+);[A-Z2-7]+");
 
 	for (auto p : totp)
 	{
-		smatch m;
+		std::smatch m;
 		if (regex_match(p, m, rx))
 			inMenu->AppendItem(m[1].str(), cmd_EnterTOTP);
 	}
 }
 
-void MSaltApp::AddRecent(const string &inRecent)
+void MSaltApp::AddRecent(const std::string &inRecent)
 {
 	if (std::regex_match(inRecent, kRecentRE))
 	{
@@ -376,30 +375,30 @@ void MSaltApp::AddRecent(const string &inRecent)
 		if (mRecent.size() > 10)
 			mRecent.pop_back();
 
-		vector<string> recent_v(mRecent.begin(), mRecent.end());
+		std::vector<std::string> recent_v(mRecent.begin(), mRecent.end());
 		Preferences::SetArray("recent-sessions", recent_v);
 	}
 }
 
-void MSaltApp::OpenRecent(const string &inRecent)
+void MSaltApp::OpenRecent(const std::string &inRecent)
 {
 	std::smatch m;
 
 	if (std::regex_match(inRecent, m, kRecentRE))
 	{
-		string user = m[1];
-		string host = m[2];
+		std::string user = m[1];
+		std::string host = m[2];
 		uint16_t port = m[3].matched ? std::stoi(m[3]) : 22;
-		string command = m[6];
+		std::string command = m[6];
 
 		MWindow *w;
 
 		if (m[5].matched)
 		{
-			string proxy_user = m[4];
-			string proxy_host = m[5];
+			std::string proxy_user = m[4];
+			std::string proxy_host = m[5];
 			uint16_t proxy_port = m[6].matched ? std::stoi(m[6]) : 22;
-			string proxy_cmd = m[7];
+			std::string proxy_cmd = m[7];
 
 			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(
 				user, host, port, proxy_user, proxy_host, proxy_port, proxy_cmd);
@@ -418,7 +417,7 @@ void MSaltApp::OpenRecent(const string &inRecent)
 void MSaltApp::DoAbout()
 {
 	// TODO: fix package version string
-	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, to_string(kBuildNumber), kRevisionDate });
+	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, std::to_string(kBuildNumber), kRevisionDate });
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
@@ -439,7 +438,7 @@ void MSaltApp::DoQuit()
 
 	mConnectionPool.disconnect_all();
 
-	vector<MWindow *> windows;
+	std::vector<MWindow *> windows;
 
 	for (MWindow *w = MWindow::GetFirstWindow(); w != nullptr; w = w->GetNextWindow())
 		windows.push_back(w);
@@ -456,31 +455,32 @@ void MSaltApp::DoNew()
 	w->Select();
 }
 
-void MSaltApp::Open(const string &inFile)
+void MSaltApp::Execute(const std::string &inCommand,
+	const std::vector<std::string> &inArguments)
 {
-	// Check to see if inFile is a command to execute
-
-	if (inFile.front() == '/')
-	{
-		MWindow *w = MTerminalWindow::Create();
-		w->Select();
-	}
-	else
+	if (inCommand == "New")
+		DoNew();
+	else if (inCommand == "Connect")
+		ProcessCommand('Conn', nullptr, 0, 0);
+	else if (inCommand == "Open")
 	{
 		std::regex re("^(?:ssh://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?$");
 		std::smatch m;
 
-		if (std::regex_match(inFile, m, re))
+		if (std::regex_match(inArguments.front(), m, re))
 		{
-			string user = m[1];
-			string host = m[3];
+			std::string user = m[1];
+			std::string host = m[3];
 			uint16_t port = m[4].matched ? std::stoi(m[4]) : 22;
-			string command;
+			std::string command;
 
 			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
 			MWindow *w = MTerminalWindow::Create(user, host, port, command, connection);
 			w->Select();
 		}
+	}
+	else if (inCommand == "Exec")
+	{
 	}
 }
 
@@ -488,13 +488,13 @@ void MSaltApp::Open(const string &inFile)
 
 # include <gtk/gtk.h>
 
-void MApplication::Install(const string &inPrefix)
+void MApplication::Install(const std::string &inPrefix)
 {
 	if (getuid() != 0)
-		throw runtime_error("You must be root to be able to install salt");
+		throw std::runtime_error("You must be root to be able to install salt");
 
 	if (not fs::exists(gExecutablePath))
-		throw runtime_error(string("I don't seem to exist...?") + gExecutablePath.string());
+		throw std::runtime_error(std::string("I don't seem to exist...?") + gExecutablePath.string());
 
 	fs::path prefix(inPrefix);
 	if (prefix.empty())
@@ -503,19 +503,19 @@ void MApplication::Install(const string &inPrefix)
 	// copy the executable to the appropriate destination
 	if (not fs::exists(prefix / "bin"))
 	{
-		cout << "Creating directory " << (prefix / "bin") << endl;
+		std::cout << "Creating directory " << (prefix / "bin") << '\n';
 		fs::create_directories(prefix / "bin");
 	}
 	fs::path exeDest = prefix / "bin" / "salt";
 
 	if (not fs::exists(prefix / "share" / "salt"))
 	{
-		cout << "Creating directory " << (prefix / "share" / "salt") << endl;
+		std::cout << "Creating directory " << (prefix / "share" / "salt") << '\n';
 		fs::create_directories(prefix / "share" / "salt");
 	}
 	fs::path iconDest = prefix / "share" / "salt" / "icon.png";
 
-	cout << "copying " << gExecutablePath.string() << " to " << exeDest.string() << endl;
+	std::cout << "copying " << gExecutablePath.string() << " to " << exeDest.string() << '\n';
 
 	if (fs::exists(exeDest))
 		fs::remove(exeDest);
@@ -530,9 +530,9 @@ void MApplication::Install(const string &inPrefix)
 	mrsrc::rsrc icon("Icons/appicon.png");
 
 	if (not rsrc)
-		throw runtime_error("salt.desktop file could not be created, missing data");
+		throw std::runtime_error("salt.desktop file could not be created, missing data");
 
-	string desktop(rsrc.data(), rsrc.size());
+	std::string desktop(rsrc.data(), rsrc.size());
 	zeep::replace_all(desktop, "__EXE__", exeDest.string());
 	zeep::replace_all(desktop, "__ICON__", iconDest.string());
 
@@ -551,21 +551,21 @@ void MApplication::Install(const string &inPrefix)
 
 	if (not fs::exists(applicationsDir))
 	{
-		cout << "Creating directory " << applicationsDir << endl;
+		std::cout << "Creating directory " << applicationsDir << '\n';
 		fs::create_directories(applicationsDir);
 	}
 
-	cout << "writing icon file " << iconDest << endl;
+	std::cout << "writing icon file " << iconDest << '\n';
 
 	desktopFile = applicationsDir / "salt.desktop";
-	cout << "writing desktop file " << desktopFile << endl;
+	std::cout << "writing desktop file " << desktopFile << '\n';
 
-	std::ofstream file(desktopFile, ios::trunc);
+	std::ofstream file(desktopFile, std::ios::trunc);
 	file << desktop;
 	file.close();
 
-	cout << "writing icon file " << iconDest << endl;
-	file.open(iconDest, ios::trunc | ios::binary);
+	std::cout << "writing icon file " << iconDest << '\n';
+	file.open(iconDest, std::ios::trunc | std::ios::binary);
 	file.write(icon.data(), icon.size());
 	file.close();
 
@@ -586,12 +586,12 @@ int main(int argc, char *const argv[])
 
 	auto &config = mcfp::config::instance();
 
-	config.init("usage: salt [options] [url-to-open]",
+	config.init("usage: salt [options] [-- program [args...]]",
 		mcfp::make_option("help,h", "Display this message"),
 		mcfp::make_option("version", "Show version number"),
 		mcfp::make_option("verbose", "More verbose"),
-		mcfp::make_option("connect,c", "Show connect dialog"),
-		mcfp::make_option<std::string>("exec,e", "Execute command"),
+		mcfp::make_option<std::string>("connect,c", "Connect to remote host"),
+		mcfp::make_option("select-host", "Show connection dialog"),
 		mcfp::make_option("install,i", "Install the application"),
 		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
 
@@ -602,19 +602,19 @@ int main(int argc, char *const argv[])
 	config.parse(argc, argv, ec);
 	if (ec)
 	{
-		std::cerr << ec.message() << std::endl;
+		std::cerr << ec.message() << '\n';
 		exit(1);
 	}
 
 	if (config.has("help"))
 	{
-		cerr << config << endl;
+		std::cerr << config << '\n';
 		exit(0);
 	}
 
 	if (config.has("version"))
 	{
-		write_version_string(cout, config.has("verbose"));
+		write_version_string(std::cout, config.has("verbose"));
 		exit(0);
 	}
 
@@ -622,19 +622,28 @@ int main(int argc, char *const argv[])
 	{
 		gExecutablePath = fs::canonical(argv[0]);
 
-		string prefix = config.get<std::string>("prefix");
+		std::string prefix = config.get<std::string>("prefix");
 		MApplication::Install(prefix);
 		exit(0);
 	}
 
-	if (config.has("connect"))
-		return MApplication::Main({ "Connect" });
-	else if (config.has("exec"))
+	std::string command;
+	std::vector<std::string> args;
+
+	if (config.has("select-host"))
+		command = "Connect";
+	else if (config.has("connect"))
 	{
-		return MApplication::Main({ "Exec", config.get("exec") });
+		command = "Open";
+		args.emplace_back(config.get("connect"));
 	}
 	else if (config.operands().empty())
-		return MApplication::Main({ "New" });
+		command = "New";
 	else
-		return MApplication::Main({ "Open", config.operands().front() });
+	{
+		command = "Execute";
+		args = config.operands();
+	}
+
+	return MApplication::Main(command, args);
 }

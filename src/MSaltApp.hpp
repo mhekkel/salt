@@ -74,7 +74,10 @@ class MSaltApp : public MApplication
 	~MSaltApp();
 
 	virtual void DoNew();
-	virtual void Open(const std::string &inURL);
+	// virtual void Open(const std::string &inURL);
+
+	virtual void Execute(const std::string &inCommand,
+		const std::vector<std::string> &inArguments);
 
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);

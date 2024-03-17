@@ -483,7 +483,7 @@ void MHTTPProxyImpl::log_request(const std::string &client, const zh::request &r
 				   << reply.size() << ' '
 				   << '"' << referer << '"' << ' '
 				   << '"' << userAgent << '"'
-				   << std::endl;
+				   << '\n';
 		}
 	}
 	catch (...)
@@ -494,17 +494,17 @@ void MHTTPProxyImpl::log_request(const std::string &client, const zh::request &r
 void MHTTPProxyImpl::log_error(const std::exception &e)
 {
 #if DEBUG
-	std::cerr << "ERROR (ex): " << e.what() << std::endl;
+	std::cerr << "ERROR (ex): " << e.what() << '\n';
 #endif
 
 	if (m_log)
-		*m_log << "ERROR: " << e.what() << std::endl;
+		*m_log << "ERROR: " << e.what() << '\n';
 }
 
 void MHTTPProxyImpl::log_error(const std::error_code &ec)
 {
 #if DEBUG
-	std::cerr << "ERROR (ec): " << ec.message() << std::endl;
+	std::cerr << "ERROR (ec): " << ec.message() << '\n';
 #endif
 
 	if (m_log and
@@ -512,7 +512,7 @@ void MHTTPProxyImpl::log_error(const std::error_code &ec)
 		ec != pinch::error::make_error_code(pinch::error::connection_lost) and
 		ec != asio_ns::error::make_error_code(asio_ns::error::eof))
 	{
-		*m_log << "ERROR: " << ec.message() << std::endl;
+		*m_log << "ERROR: " << ec.message() << '\n';
 	}
 }
 
