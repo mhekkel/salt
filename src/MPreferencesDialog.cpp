@@ -125,7 +125,17 @@ MPreferencesDialog::MPreferencesDialog()
 
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID("back-color"));
 	if (swatch != nullptr)
+	{
 		AddRoute(swatch->eColorPreview, ePreviewColor);
+		swatch->SetPalette({
+			MColor("#0f290e"),
+			MColor("#353535"),
+			MColor("#192039"),
+			MColor("#FFF3CF"),
+			kWhite,
+			kBlack
+		});
+	}
 
 	SetChecked("audible-beep", Preferences::GetBoolean("audible-beep", true));
 	SetChecked("graphical-beep", Preferences::GetBoolean("graphical-beep", true));
