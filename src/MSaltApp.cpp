@@ -451,7 +451,7 @@ void MSaltApp::DoQuit()
 
 void MSaltApp::DoNew()
 {
-	MWindow *w = MTerminalWindow::Create();
+	MWindow *w = MTerminalWindow::Create({});
 	w->Select();
 }
 
@@ -479,8 +479,10 @@ void MSaltApp::Execute(const std::string &inCommand,
 			w->Select();
 		}
 	}
-	else if (inCommand == "Exec")
+	else if (inCommand == "Execute")
 	{
+		MWindow *w = MTerminalWindow::Create(inArguments);
+		w->Select();
 	}
 }
 

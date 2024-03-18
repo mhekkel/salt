@@ -7,9 +7,9 @@
  * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer
+ *    std::list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
+ *    this std::list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -57,8 +57,6 @@
 #include <cmath>
 #include <map>
 
-using namespace std;
-
 namespace
 {
 
@@ -97,7 +95,7 @@ const char
 	kVT420Attributes[] = "\033[?64;1;2;6;8;9c";
 //	kVT520Attributes[] = "\033[?65;1;2;6;8;9c";
 
-const string
+const std::string
 	kCSI("\033["),
 	kSS3("\033O"),
 	kDCS("\033P");
@@ -119,7 +117,7 @@ double
 MColor
 	sSelectionColor;
 
-string
+std::string
 	kControlBreakMessage("Hello, world!");
 
 enum MCtrlChr : uint8_t
@@ -219,7 +217,7 @@ struct MPFK
 {
 	bool clear;
 	bool locked;
-	map<uint32_t, string> key;
+	std::map<uint32_t, std::string> key;
 };
 
 // --------------------------------------------------------------------
@@ -248,12 +246,12 @@ class MFormat
 // --------------------------------------------------------------------
 // The MTerminalView class.
 
-string MTerminalView::sSelectBuffer;
-list<MTerminalView *> MTerminalView::sTerminalList;
+std::string MTerminalView::sSelectBuffer;
+std::list<MTerminalView *> MTerminalView::sTerminalList;
 
-MTerminalView::MTerminalView(const string &inID, MRect inBounds,
+MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	MStatusbar *inStatusbar, MScrollbar *inScrollbar, MSearchPanel *inSearchPanel,
-	MTerminalChannel *inTerminalChannel, const string &inSSHCommand)
+	MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
 	: MCanvas(inID, inBounds, false, false)
 	, eScroll(this, &MTerminalView::Scroll)
 	, eSearch(this, &MTerminalView::FindNext)
@@ -265,7 +263,7 @@ MTerminalView::MTerminalView(const string &inID, MRect inBounds,
 	, mScrollbar(inScrollbar)
 	, mSearchPanel(inSearchPanel)
 	, mTerminalChannel(inTerminalChannel)
-	, mSSHCommand(inSSHCommand)
+	, mArgv(inArgv)
 	, mTerminalWidth(80)
 	, mTerminalHeight(24)
 	, mScreenBuffer(mTerminalWidth, mTerminalHeight, true)
@@ -292,7 +290,7 @@ MTerminalView::MTerminalView(const string &inID, MRect inBounds,
 #if DEBUG
 	mDebugUpdate = false;
 #endif
-	string encoding = Preferences::GetString("default-encoding", "utf-8");
+	std::string encoding = Preferences::GetString("default-encoding", "utf-8");
 	if (encoding == "utf-8")
 		mEncoding = kEncodingUTF8;
 	else if (encoding == "iso-8859-1")
@@ -317,10 +315,10 @@ MTerminalView::MTerminalView(const string &inID, MRect inBounds,
 	//
 	AdjustScrollbar(0);
 
-	string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
+	std::string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
 	mStatusbar->SetStatusText(2, desc, false);
 
-	// and add this to the list of open terminals
+	// and add this to the std::list of open terminals
 	sTerminalList.push_back(this);
 }
 
@@ -331,6 +329,7 @@ MTerminalView::~MTerminalView()
 	delete mPFK;
 	delete mNewPFK;
 
+	RemoveRoute(eIdle, gApp->eIdle);
 	RemoveRoute(eAnimate, mAnimationManager->eAnimate);
 
 	delete mAnimationManager;
@@ -357,14 +356,14 @@ void MTerminalView::Open()
 		bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
 
 	// set some environment variables
-	vector<string> env;
+	std::vector<std::string> env;
 	Preferences::GetArray("env", env);
 
 	mTerminalChannel->Open(
 		Preferences::GetString("terminal-type", "xterm-256color"),
 		Preferences::GetBoolean("forward-ssh-agent", true),
 		Preferences::GetBoolean("forward-x11", true),
-		mSSHCommand, env,
+		mArgv, env,
 		[this](const std::error_code &ec)
 		{
 			this->HandleOpened(ec);
@@ -376,6 +375,13 @@ void MTerminalView::Close()
 	mTerminalChannel->Close();
 	mTerminalChannel->Release();
 	mTerminalChannel = nullptr;
+
+	RemoveRoute(MSaltApp::instance().eIdle, eIdle);
+	RemoveRoute(MPreferencesDialog::ePreferencesChanged, ePreferencesChanged);
+	RemoveRoute(MPreferencesDialog::eColorPreview, ePreviewColor);
+	RemoveRoute(mStatusbar->ePartClicked, eStatusPartClicked);
+	RemoveRoute(mSearchPanel->eSearch, eSearch);
+	RemoveRoute(mAnimationManager->eAnimate, eAnimate);
 }
 
 void MTerminalView::Destroy()
@@ -527,7 +533,7 @@ void MTerminalView::Reset()
 {
 	mS8C1T = false;
 
-	mTabStops = vector<bool>(mTerminalWidth, false);
+	mTabStops = std::vector<bool>(mTerminalWidth, false);
 	for (int32_t i = 8; i < mTerminalWidth; i += 8)
 		mTabStops[i] = true;
 
@@ -639,13 +645,13 @@ void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inR
 	int32_t anchor = GetTopLine();
 	mBuffer->Resize(inColumns, inRows, anchor);
 
-	mTabStops = vector<bool>(mTerminalWidth, false);
+	mTabStops = std::vector<bool>(mTerminalWidth, false);
 	for (int32_t i = 8; i < mTerminalWidth; i += 8)
 		mTabStops[i] = true;
 
 	if (mStatusbar != nullptr)
 	{
-		string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
+		std::string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
 		mStatusbar->SetStatusText(2, desc, false);
 	}
 
@@ -828,8 +834,8 @@ void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 
 	if (mMouseClick == eWaitClick)
 	{
-		if (abs(mLastMouseX - inX) > 1 or
-			abs(mLastMouseY - inY) > 1 or
+		if (std::abs(mLastMouseX - inX) > 1 or
+			std::abs(mLastMouseY - inY) > 1 or
 			GetLocalTime() > mLastMouseDown + 0.1)
 		{
 			mMouseClick = eSingleClick;
@@ -916,7 +922,7 @@ void MTerminalView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32
 	if (inDeltaY != 0)
 	{
 		if (mMouseMode == eTrackMouseNone)
-			for (int i = 0; i < 2 * abs(inDeltaY); ++i)
+			for (int i = 0; i < 2 * std::abs(inDeltaY); ++i)
 				Scroll(inDeltaY > 0 ? kScrollLineUp : kScrollLineDown);
 		else
 			SendMouseCommand(inDeltaY > 0 ? 64 : 65, inX, inY, inModifiers);
@@ -938,9 +944,9 @@ void MTerminalView::Draw()
 	bool blockSelection;
 	mBuffer->GetSelection(selLine1, selCol1, selLine2, selCol2, blockSelection);
 	if (selLine1 > selLine2)
-		swap(selLine1, selLine2);
+		std::swap(selLine1, selLine2);
 	if (selCol1 > selCol2 and selLine1 == selLine2)
-		swap(selCol1, selCol2);
+		std::swap(selCol1, selCol2);
 
 	MDevice dev(this);
 	dev.SetReplaceUnknownCharacters(true);
@@ -994,7 +1000,7 @@ void MTerminalView::Draw()
 	// fill text layout with a line of spaces
 	// otherwise, it is more difficult to draw background
 	// colors once we have
-	string text(mTerminalWidth, ' ');
+	std::string text(mTerminalWidth, ' ');
 	dev.SetText(text);
 
 	float x, y;
@@ -1010,11 +1016,11 @@ void MTerminalView::Draw()
 			// write default status line
 			text = MFormat(" 1 (%03.3d,%03.3d)", mCursor.y + 1, mCursor.x + 1);
 
-			string trailing = "Printer: None          Network: ";
+			std::string trailing = "Printer: None          Network: ";
 			trailing += (mTerminalChannel->IsOpen() ? "Connected    " : "Not Connected");
 
 			if (text.length() + trailing.length() < static_cast<size_t>(mTerminalWidth))
-				text += string(mTerminalWidth - text.length() - trailing.length(), ' ');
+				text += std::string(mTerminalWidth - text.length() - trailing.length(), ' ');
 			text += trailing;
 
 			bool savedDECSSAD = mDECSASD;
@@ -1059,10 +1065,10 @@ void MTerminalView::Draw()
 		else if (line.IsDoubleWidth())
 			dev.SetScale(2.0, 1.0, x, y);
 
-		vector<MColor> colors;
-		vector<uint32_t> colorIndex, colorOffset;
-		vector<uint32_t> backColorIndex, backColorOffset;
-		vector<uint32_t> styleValue, styleOffset;
+		std::vector<MColor> colors;
+		std::vector<uint32_t> colorIndex, colorOffset;
+		std::vector<uint32_t> backColorIndex, backColorOffset;
+		std::vector<uint32_t> styleValue, styleOffset;
 
 		auto pushColor = [&](MColor c, bool back, uint32_t offset)
 		{
@@ -1109,7 +1115,7 @@ void MTerminalView::Draw()
 					sc1 = selCol1;
 					sc2 = selCol2;
 					if (sc1 > sc2)
-						swap(sc1, sc2);
+						std::swap(sc1, sc2);
 				}
 				else
 				{
@@ -1163,7 +1169,7 @@ void MTerminalView::Draw()
 			if (((st & kStyleInverse) xor mDECSCNM) or
 				(lineNr == mTerminalHeight and (st & kStyleInverse) == 0))
 			{
-				swap(textColorIx, backColorIx);
+				std::swap(textColorIx, backColorIx);
 			}
 
 			MColor textC, backC;
@@ -1325,7 +1331,7 @@ void MTerminalView::Idle(double inTime)
 
 	if (not mInputBuffer.empty() and
 		(mNextSmoothScroll == 0 or
-			(abs(mNextSmoothScroll) <= GetLocalTime())))
+			(std::abs(mNextSmoothScroll) <= GetLocalTime())))
 	{
 		mScrollForwardCount = 0;
 		int32_t topLine = GetTopLine();
@@ -1349,7 +1355,7 @@ void MTerminalView::Idle(double inTime)
 		AdjustScrollbar(topLine);
 	}
 
-	if (abs(inTime - mLastBlink) >= 0.66)
+	if (std::abs(inTime - mLastBlink) >= 0.66)
 	{
 		mBlinkOn = not mBlinkOn;
 		mLastBlink = GetLocalTime();
@@ -1368,7 +1374,7 @@ void MTerminalView::Idle(double inTime)
 
 	//	if (mBuffer->IsDirty())
 	//	{
-	//		string desc = (MFormat("%d,%d", mCursor.x + 1, mCursor.y + 1));
+	//		std::string desc = (MFormat("%d,%d", mCursor.x + 1, mCursor.y + 1));
 	//		mStatusbar->SetStatusText(3, desc, false);
 	//	}
 
@@ -1379,9 +1385,9 @@ void MTerminalView::Idle(double inTime)
 		GetWindow()->SetTitle(std::exchange(mSetWindowTitle, ""));
 }
 
-string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
+std::string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
 {
-	string text;
+	std::string text;
 
 	if (inKeyCode == kBackspaceKeyCode)
 		text = mDECBKM ? BS : DEL;
@@ -1428,9 +1434,9 @@ string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
 	return text;
 }
 
-string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers)
+std::string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers)
 {
-	string text;
+	std::string text;
 
 	switch (inKeyCode)
 	{
@@ -1513,9 +1519,9 @@ string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers)
 	return text;
 }
 
-string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
+std::string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
 {
-	string text;
+	std::string text;
 
 	switch (inKeyCode)
 	{
@@ -1600,7 +1606,7 @@ string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
 
 	if (text.empty())
 	{
-		string suffix = (inModifiers & kShiftKey) ? ";2~" : "~";
+		std::string suffix = (inModifiers & kShiftKey) ? ";2~" : "~";
 
 		if ((inModifiers & kOptionKey) == 0)
 		{
@@ -1697,9 +1703,9 @@ string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers)
 	return text;
 }
 
-string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
+std::string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers)
 {
-	string text;
+	std::string text;
 
 	char modN =
 		(inModifiers & kShiftKey ? 1 : 0) +
@@ -1964,7 +1970,7 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 			}
 		}
 
-		string text;
+		std::string text;
 
 		// VT220, device control strings
 		if (inModifiers == (mUDKWithShift ? kShiftKey : 0) and
@@ -2027,18 +2033,18 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 	return handled;
 }
 
-void MTerminalView::HandleMessage(const string &inMessage, const string &inLanguage)
+void MTerminalView::HandleMessage(const std::string &inMessage, const std::string &inLanguage)
 {
 	mInputBuffer.insert(mInputBuffer.end(), inMessage.begin(), inMessage.end());
 
-	string tail("\r\n");
+	std::string tail("\r\n");
 
 	mInputBuffer.insert(mInputBuffer.end(), tail.begin(), tail.end());
 
 	Invalidate();
 }
 
-bool MTerminalView::HandleCharacter(const string &inText, bool inRepeat)
+bool MTerminalView::HandleCharacter(const std::string &inText, bool inRepeat)
 {
 	// shortcut
 	if (inRepeat and mDECARM == false)
@@ -2129,7 +2135,7 @@ struct DisallowedChar
 	{ "DEL", 0x7F }
 };
 
-bool MTerminalView::PastePrimaryBuffer(const string &inText)
+bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 {
 	bool result = false;
 
@@ -2298,7 +2304,7 @@ bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint
 
 		case cmd_Paste:
 		{
-			string text;
+			std::string text;
 			bool block;
 			MClipboard::Instance().GetData(text, block);
 			handled = PastePrimaryBuffer(text);
@@ -2395,7 +2401,7 @@ bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint
 
 void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 {
-	vector<string> totp;
+	std::vector<std::string> totp;
 	Preferences::GetArray("totp", totp);
 
 	// silently break on errors
@@ -2405,10 +2411,10 @@ void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 			break;
 
 		auto s = totp[inItemIndex].rfind(';');
-		if (s == string::npos)
+		if (s == std::string::npos)
 			break;
 
-		string hash = totp[inItemIndex].substr(s + 1, string::npos);
+		std::string hash = totp[inItemIndex].substr(s + 1, std::string::npos);
 
 		auto h = zeep::decode_base32(hash);
 
@@ -2431,8 +2437,8 @@ void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 		truncated &= 0x7fffffff;
 		truncated %= 1000000;
 
-		stringstream ss;
-		ss << fixed << setw(6) << setfill('0') << truncated;
+		std::stringstream ss;
+		ss << std::fixed << std::setw(6) << std::setfill('0') << truncated;
 
 		mTerminalChannel->SendData(ss.str());
 
@@ -2451,7 +2457,7 @@ void MTerminalView::FindNext(MSearchDirection inSearchDirection)
 
 	bool wrapped = false, found;
 	bool ignoreCase = mSearchPanel->GetIgnoreCase();
-	string what = mSearchPanel->GetSearchString();
+	std::string what = mSearchPanel->GetSearchString();
 
 	if (inSearchDirection == searchDown)
 	{
@@ -2683,7 +2689,7 @@ void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 		ResizeTerminal(w, h, false, false);
 }
 
-void MTerminalView::SendCommand(string inData)
+void MTerminalView::SendCommand(std::string inData)
 {
 	if (mTerminalChannel->IsOpen())
 	{
@@ -2778,13 +2784,26 @@ void MTerminalView::Closed()
 	mBlinkOn = true;
 	Invalidate();
 	const char kReconnectMsg[] = "\r\nPress enter or space to reconnect\r\n";
-	string reconnectMsg = _(kReconnectMsg);
+	std::string reconnectMsg = _(kReconnectMsg);
 	mInputBuffer.insert(mInputBuffer.end(), reconnectMsg.begin(), reconnectMsg.end());
 
 	mStatusbar->SetStatusText(1, "", false);
 
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
 	storyboard->AddTransition(mDisabledFactor, 1, 1, "acceleration-decelleration");
+
+	if (not mArgv.empty())
+	{
+		storyboard->AddFinishedCallback([w=GetWindow()]()
+		{
+			static_cast<MSaltApp*>(gApp)->execute([w]()
+			{
+				if (MWindow::WindowExists(w))
+					w->ProcessCommand(cmd_Close, nullptr, 0, 0);
+			});
+		});
+	}
+
 	mAnimationManager->Schedule(storyboard);
 }
 
@@ -2792,7 +2811,7 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 {
 	if (ec)
 	{
-		const string &msg = ec.message();
+		const std::string &msg = ec.message();
 		mInputBuffer.insert(mInputBuffer.end(), msg.begin(), msg.end());
 
 		Closed();
@@ -2813,11 +2832,11 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 	}
 }
 
-void MTerminalView::HandleReceived(const std::error_code &ec, streambuf &inData)
+void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &inData)
 {
 	if (ec)
 	{
-		const string &msg = ec.message();
+		const std::string &msg = ec.message();
 		mInputBuffer.insert(mInputBuffer.end(), msg.begin(), msg.end());
 
 		Closed();
@@ -3094,7 +3113,7 @@ void MTerminalView::Emulate()
 				mLastChar = 0;
 			mLastCtrl = true;
 
-			// shortcut, do not process control code if in a DCS or OSC string
+			// shortcut, do not process control code if in a DCS or OSC std::string
 			if (ch != ESC)
 			{
 				switch (mEscState)
@@ -3155,8 +3174,8 @@ void MTerminalView::Emulate()
 					break;
 
 				case ESC:
-					// If we're processing an escape string and then receive an escape
-					// this can either mean the beginning of a new escape string cancelling
+					// If we're processing an escape std::string and then receive an escape
+					// this can either mean the beginning of a new escape std::string cancelling
 					// the previous, or it may be the start of a ST or BEL sequence.
 					// The latter can only occur when 8 bit controls are in use.
 
@@ -3266,7 +3285,7 @@ void MTerminalView::Emulate()
 				continue;
 			}
 
-			// OK, so we're in the middle of an escape string
+			// OK, so we're in the middle of an escape std::string
 			switch (mEscState)
 			{
 				case eESC_SEEN:
@@ -3317,7 +3336,7 @@ void MTerminalView::Emulate()
 					assert(false); // now what?
 			}
 
-			continue; // ignore anything else, we're in an escape string
+			continue; // ignore anything else, we're in an escape std::string
 		}
 
 		mLastCtrl = false;
@@ -3326,7 +3345,7 @@ void MTerminalView::Emulate()
 		// this character to the screen.
 		unicode uc = ch;
 
-		// if it is an ascii character, map it using GL
+		// if it is an ascii character, std::map it using GL
 		if (ch >= 32 and ch < 127) // GL
 		{
 			int set = mCursor.CSGL;
@@ -3628,7 +3647,7 @@ void MTerminalView::EscapeStart(uint8_t inChar)
 			break;
 		case '^': /* privacy message */
 			break;
-		case 'X': /* Start of string */
+		case 'X': /* Start of std::string */
 			break;
 
 		default: /* ignore */
@@ -4308,7 +4327,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 			if (w == 0 or h == 0)
 				break;
 
-			vector<MChar> buffer(mTerminalWidth * mTerminalHeight);
+			std::vector<MChar> buffer(mTerminalWidth * mTerminalHeight);
 			uint32_t i = 0;
 			mBuffer->ForeachInRectangle(t, l, b, r,
 				[&i, &buffer](MChar &inChar, int32_t inLine, int32_t inColumn)
@@ -4457,7 +4476,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 				}
 				case 2: /* DECTABSR */
 				{
-					vector<string> ts;
+					std::vector<std::string> ts;
 					for (int i = 0; i < mTerminalWidth; ++i)
 						if (mTabStops[i])
 							ts.push_back(std::to_string(i + 1));
@@ -4556,7 +4575,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 					SendCommand("\033]L\033\\");
 					break;
 				case 21:
-					SendCommand(string("\033]l") + GetWindow()->GetTitle() + "\033\\");
+					SendCommand(std::string("\033]l") + GetWindow()->GetTitle() + "\033\\");
 					break;
 				default:
 				{
@@ -4818,7 +4837,7 @@ void MTerminalView::CommitPFK()
 {
 	for (auto k : mNewPFK->key)
 	{
-		string s;
+		std::string s;
 		for (uint32_t i = 0; i < k.second.length(); i += 2)
 		{
 			char c1 = tolower(k.second[i]);
@@ -4864,11 +4883,11 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 			CommitPFK();
 		else if (not mDECRQSS.empty() and mDECSCL >= 4)
 		{
-			string response("\033P0$r");
+			std::string response("\033P0$r");
 
 			if (mDECRQSS == "m") // SGR - Set Graphic Rendition
 			{
-				vector<string> sgr;
+				std::vector<std::string> sgr;
 				if (mCursor.style & kStyleBold)
 					sgr.push_back("1");
 				if (mCursor.style & kStyleUnderline)
@@ -5149,7 +5168,7 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 			case 10:
 				if (mArgString == "?")
 				{
-					string textColor = mTerminalColors[eText].hex();
+					std::string textColor = mTerminalColors[eText].hex();
 
 					SendCommand(
 						"\033]11;rgb:" +
@@ -5158,14 +5177,14 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 						textColor.substr(5, 2) + textColor.substr(5, 2) +
 						"\033\\");
 
-					PRINT(("Request for text colour"));
+					// PRINT(("Request for text colour"));
 				}
 				break;
 
 			case 11:
 				if (mArgString == "?")
 				{
-					string backColor = mTerminalColors[eBack].hex();
+					std::string backColor = mTerminalColors[eBack].hex();
 
 					SendCommand(
 						"\033]11;rgb:" +
@@ -5174,7 +5193,7 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 						backColor.substr(5, 2) + backColor.substr(5, 2) +
 						"\033\\");
 
-					PRINT(("Request for background colour"));
+					// PRINT(("Request for background colour"));
 				}
 				break;
 
@@ -5184,7 +5203,7 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 				if (mArgString.length() > 2 and mArgString[1] == ';' and mArgString[0] == 'c')
 				{
 					if (mArgString[2] == '?')
-						SendCommand("\033]52;c;\033\\"); // empty string as reply, sorry
+						SendCommand("\033]52;c;\033\\"); // empty std::string as reply, sorry
 					else
 					{
 						auto s = zeep::decode_base64({ mArgString.data() + 2, mArgString.length() - 2 });
@@ -5390,7 +5409,7 @@ void MTerminalView::Beep()
 	double now = GetLocalTime();
 	bool beeped = false;
 
-	if (mGraphicalBeep and abs(now - mLastBeep) > 0.25)
+	if (mGraphicalBeep and std::abs(now - mLastBeep) > 0.25)
 	{
 		if (mAnimationManager->Update())
 			PRINT(("duh"));
@@ -5403,7 +5422,7 @@ void MTerminalView::Beep()
 		beeped = true;
 	}
 
-	if (mAudibleBeep and abs(now - mLastBeep) > 0.5)
+	if (mAudibleBeep and std::abs(now - mLastBeep) > 0.5)
 	{
 		PlaySound("warning");
 		beeped = true;

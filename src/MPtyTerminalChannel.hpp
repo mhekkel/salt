@@ -47,7 +47,7 @@ class MPtyTerminalChannel : public MTerminalChannel
 
 	virtual void Open(const std::string &inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
-		const std::string &inCommand, const std::vector<std::string> &env,
+		const std::vector<std::string> &inArgv, const std::vector<std::string> &env,
 		const OpenCallback &inOpenCallback);
 
 	virtual void Close();
@@ -65,7 +65,8 @@ class MPtyTerminalChannel : public MTerminalChannel
 	}
 
   private:
-	void Exec(const std::string &inCommand, const std::string &inTerminalType, int inTtyFD);
+	void Execute(const std::vector<std::string> &inArgv,
+		const std::string &inTerminalType, int inTtyFD);
 
 	struct ChangeWindowsSizeCommand
 	{

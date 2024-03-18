@@ -82,7 +82,7 @@ class MSshTerminalChannel : public MTerminalChannel
 
 	virtual void Open(const string &inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
-		const string &inCommand, const vector<string> &env,
+		const std::vector<std::string> &inArgv, const vector<string> &env,
 		const OpenCallback &inOpenCallback);
 
 	virtual void Close();
@@ -144,7 +144,7 @@ void MSshTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 
 void MSshTerminalChannel::Open(const string &inTerminalType,
 	bool inForwardAgent, bool inForwardX11,
-	const string &inCommand, const vector<string> &env,
+	const std::vector<std::string> &inArgv, const vector<string> &env,
 	const OpenCallback &inOpenCallback)
 {
 	// env is ignored anyway...
@@ -167,7 +167,7 @@ void MSshTerminalChannel::Open(const string &inTerminalType,
 		});
 
 	mChannel->open_with_pty(mTerminalWidth, mTerminalHeight,
-		inTerminalType, inForwardAgent, inForwardX11, inCommand, std::move(cb));
+		inTerminalType, inForwardAgent, inForwardX11, inArgv.empty() ? "" : inArgv.front(), std::move(cb));
 }
 
 void MSshTerminalChannel::Close()

@@ -53,7 +53,7 @@ class MTerminalView : public MCanvas
 {
   public:
 	MTerminalView(const std::string &inID, MRect inBounds, MStatusbar *inStatusbar, MScrollbar *inScrollbar,
-		MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::string &inSSHCommand);
+		MSearchPanel *inSearchPanel, MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv);
 
 	~MTerminalView() override;
 
@@ -133,7 +133,7 @@ class MTerminalView : public MCanvas
 	MSearchPanel *mSearchPanel;
 
 	MTerminalChannel *mTerminalChannel;
-	std::string mSSHCommand;
+	std::vector<std::string> mArgv;
 	int32_t mTerminalWidth, mTerminalHeight;
 
 	MTerminalBuffer mScreenBuffer, mAlternateBuffer, mStatusLineBuffer;

@@ -49,16 +49,14 @@
 #include <zeep/crypto.hpp>
 #include <zeep/unicode-support.hpp>
 
-using namespace std;
-
 // ------------------------------------------------------------------
 //
 
 class MSshTerminalWindow : public MTerminalWindow
 {
   public:
-	MSshTerminalWindow(const string &inUser, const string &inHost, uint16_t inPort,
-		const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
+	MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
+		const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
 	MTerminalWindow *Clone(MTerminalWindow *)
 	{
@@ -70,8 +68,8 @@ class MSshTerminalWindow : public MTerminalWindow
 
   protected:
 	std::string Password();
-	std::vector<std::string> Credentials(const string &name, const string &instruction,
-		const std::string &lang, const vector<pinch::prompt> &prompts);
+	std::vector<std::string> Credentials(const std::string &name, const std::string &instruction,
+		const std::string &lang, const std::vector<pinch::prompt> &prompts);
 	pinch::host_key_reply AcceptHostKey(const std::string &inHost,
 		const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
 
@@ -79,18 +77,18 @@ class MSshTerminalWindow : public MTerminalWindow
 
 	std::shared_ptr<pinch::basic_connection>
 		mConnection;
-	string mUser, mServer;
+	std::string mUser, mServer;
 	uint16_t mPort;
-	string mSSHCommand;
+	std::string mSSHCommand;
 	pinch::channel_ptr mKeyDropper;
 
 	// // callbacks
 	// pinch::accept_host_key_handler_type mValidateHostCB;
 };
 
-MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHost, uint16_t inPort,
-	const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
-	: MTerminalWindow(MTerminalChannel::Create(inConnection), inSSHCommand)
+MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
+	const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
+	: MTerminalWindow(MTerminalChannel::Create(inConnection), { inSSHCommand })
 	, mConnection(inConnection)
 	, mUser(inUser)
 	, mServer(inHost)
@@ -109,7 +107,7 @@ MSshTerminalWindow::MSshTerminalWindow(const string &inUser, const string &inHos
 	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4));
 	mConnection->set_accept_host_key_handler(std::bind(&MSshTerminalWindow::AcceptHostKey, this, _1, _2, _3, _4));
 
-	stringstream title;
+	std::stringstream title;
 	title << mUser << '@' << mServer;
 	if (mPort != 22)
 		title << ':' << mPort;
@@ -196,7 +194,7 @@ std::string MSshTerminalWindow::Password()
 {
 	std::string result;
 
-	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
+	std::unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
 		{ result = pw; }));
 	bool ok = dlog->ShowModal(this);
 	dlog.release();
@@ -204,12 +202,12 @@ std::string MSshTerminalWindow::Password()
 	return ok ? result : "";
 }
 
-std::vector<std::string> MSshTerminalWindow::Credentials(const string &name, const string &instruction,
-	const std::string &lang, const vector<pinch::prompt> &prompts)
+std::vector<std::string> MSshTerminalWindow::Credentials(const std::string &name, const std::string &instruction,
+	const std::string &lang, const std::vector<pinch::prompt> &prompts)
 {
 	std::vector<std::string> result;
 
-	unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
+	std::unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
 		name, instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
 		prompts, this, [&result](const std::vector<std::string> &r)
 		{ result = r; }));
@@ -219,8 +217,8 @@ std::vector<std::string> MSshTerminalWindow::Credentials(const string &name, con
 	return ok ? result : std::vector<std::string>{};
 }
 
-pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const string &inHost, const string &inAlgorithm,
-	const vector<uint8_t> &inHostKey, pinch::host_key_state inState)
+pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const std::string &inHost, const std::string &inAlgorithm,
+	const std::vector<uint8_t> &inHostKey, pinch::host_key_state inState)
 {
 	pinch::host_key_reply result = pinch::host_key_reply::reject;
 	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
@@ -228,7 +226,7 @@ pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const string &inHost, co
 	std::string value = zeep::encode_base64(hsv);
 	std::string H = zeep::md5(hsv);
 
-	string fingerprint;
+	std::string fingerprint;
 
 	for (auto b : H)
 	{
@@ -268,21 +266,21 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 {
 	// create the public key
 	auto b = inKeyToDrop.get_blob();
-	string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
+	std::string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
 
 	// create a command
 	zeep::replace_all(blob, "\n", "");
-	string publickey = inKeyToDrop.get_type() + ' ' + blob + ' ' + inKeyToDrop.get_comment();
+	std::string publickey = inKeyToDrop.get_type() + ' ' + blob + ' ' + inKeyToDrop.get_comment();
 	zeep::replace_all(publickey, "'", "'\\''");
 
-	string command =
-		string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
-	string comment = inKeyToDrop.get_comment();
+	std::string command =
+		std::string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
+	std::string comment = inKeyToDrop.get_comment();
 
 	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
 
 	mKeyDropper.reset(new pinch::exec_channel(
-		mConnection, command, [this, comment](const string &, int status)
+		mConnection, command, [this, comment](const std::string &, int status)
 		{
 		if (status == 0)
 			DisplayAlert(this, "installed-public-key", {comment, this->mServer});
@@ -299,6 +297,7 @@ void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
 class MPtyTerminalWindow : public MTerminalWindow
 {
   public:
+	MPtyTerminalWindow(const std::vector<std::string> &inArgv);
 	MPtyTerminalWindow(MPtyTerminalWindow *inOriginal = nullptr);
 
 	MTerminalWindow *Clone(MTerminalWindow *inOriginal)
@@ -308,8 +307,14 @@ class MPtyTerminalWindow : public MTerminalWindow
 	}
 };
 
+MPtyTerminalWindow::MPtyTerminalWindow(const std::vector<std::string> &inArgv)
+	: MTerminalWindow(MTerminalChannel::Create(), inArgv)
+{
+	SetTitle("Salt - terminal");
+}
+
 MPtyTerminalWindow::MPtyTerminalWindow(MPtyTerminalWindow *inOriginal)
-	: MTerminalWindow(MTerminalChannel::Create(), "")
+	: MTerminalWindow(MTerminalChannel::Create(), {})
 {
 	SetTitle("Salt - terminal");
 
@@ -326,7 +331,7 @@ MPtyTerminalWindow::MPtyTerminalWindow(MPtyTerminalWindow *inOriginal)
 
 MTerminalWindow *MTerminalWindow::sFirst = nullptr;
 
-MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const string &inCommand)
+MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
 	: MWindow("Terminal", GetPrefferedBounds(),
 		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate /* | kMCustomNonClient */),
 		  "terminal-window-menu")
@@ -393,7 +398,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const stri
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
 	bounds = MRect(0, 0, w, h);
 
-	mTerminalView = new MTerminalView("terminalview", bounds, mStatusbar, mScrollbar, mSearchPanel, inTerminalChannel, inCommand);
+	mTerminalView = new MTerminalView("terminalview", bounds, mStatusbar, mScrollbar, mSearchPanel, inTerminalChannel, inArgv);
 	mTerminalView->SetBindings(true, true, true, true);
 	mTerminalView->SetLayout(ePackStart, true, true, 0);
 	hbox->AddChild(mTerminalView);
@@ -650,13 +655,13 @@ bool MTerminalWindow::ProcessCommand(
 // ------------------------------------------------------------------
 //
 
-MTerminalWindow *MTerminalWindow::Create()
+MTerminalWindow *MTerminalWindow::Create(const std::vector<std::string> &inArgv)
 {
-	return new MPtyTerminalWindow();
+	return new MPtyTerminalWindow(inArgv);
 }
 
-MTerminalWindow *MTerminalWindow::Create(const string &inUser, const string &inHost, uint16_t inPort,
-	const string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
+MTerminalWindow *MTerminalWindow::Create(const std::string &inUser, const std::string &inHost, uint16_t inPort,
+	const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
 {
 	return new MSshTerminalWindow(inUser, inHost, inPort, inSSHCommand, inConnection);
 }

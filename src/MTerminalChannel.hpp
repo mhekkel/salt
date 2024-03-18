@@ -46,8 +46,9 @@ class MTerminalChannel
 
 	virtual void Open(const std::string &inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
-		const std::string &inCommand, const std::vector<std::string> &env,
+		const std::vector<std::string> &inArgv, const std::vector<std::string> &env,
 		const OpenCallback &inOpenCallback) = 0;
+
 	virtual bool IsOpen() const = 0;
 	virtual void Close() = 0;
 

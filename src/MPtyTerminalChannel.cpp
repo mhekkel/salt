@@ -44,17 +44,15 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <cstring>
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <pty.h>
 #include <pwd.h>
 #include <stdarg.h>
-#include <string.h>
 #include <termios.h>
 #include <unistd.h>
-
-using namespace std;
 
 // --------------------------------------------------------------------
 
@@ -83,9 +81,9 @@ void MPtyTerminalChannel::SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 	}
 }
 
-void MPtyTerminalChannel::Open(const string &inTerminalType,
+void MPtyTerminalChannel::Open(const std::string &inTerminalType,
 	bool inForwardAgent, bool inForwardX11,
-	const string &inCommand, const vector<string> &env,
+	const std::vector<std::string> &inArgv, const std::vector<std::string> &env,
 	const OpenCallback &inOpenCallback)
 {
 	int ptyfd = -1, ttyfd = -1;
@@ -103,20 +101,20 @@ void MPtyTerminalChannel::Open(const string &inTerminalType,
 
 		// allocate a pty
 		if (openpty(&ptyfd, &ttyfd, nullptr, nullptr, &w) < 0)
-			throw runtime_error(strerror(errno));
+			throw std::runtime_error(strerror(errno));
 
 		mTtyName = ttyname(ttyfd);
-		mConnectionInfo = vector<string>({ mTtyName });
+		mConnectionInfo = std::vector<std::string>({ mTtyName });
 
 		mPid = fork();
 		switch (mPid)
 		{
 			case -1:
-				throw runtime_error(strerror(errno));
+				throw std::runtime_error(strerror(errno));
 
 			case 0:
 				close(ptyfd);
-				Exec(inCommand, inTerminalType, ttyfd);
+				Execute(inArgv, inTerminalType, ttyfd);
 				// does not return
 
 			default:
@@ -128,7 +126,7 @@ void MPtyTerminalChannel::Open(const string &inTerminalType,
 
 		inOpenCallback(std::error_code());
 	}
-	catch (exception &e)
+	catch (const std::exception &e)
 	{
 		mMessageCB(e.what(), "");
 
@@ -143,7 +141,7 @@ void MPtyTerminalChannel::Open(const string &inTerminalType,
 	}
 }
 
-void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminalType, int inTtyFD)
+void MPtyTerminalChannel::Execute(const std::vector<std::string> &inArgv, const std::string &inTerminalType, int inTtyFD)
 {
 	// make the pseudo tty our controlling tty
 	int fd = open("/dev/tty", O_RDWR | O_NOCTTY);
@@ -159,35 +157,35 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	fd = open("/dev/tty", O_RDWR | O_NOCTTY);
 	if (fd >= 0)
 	{
-		cerr << "Failed to disconnect from controlling tty.\n";
+		std::cerr << "Failed to disconnect from controlling tty.\n";
 		close(fd);
 	}
 
 	/* Make it our controlling tty. */
 	if (ioctl(inTtyFD, TIOCSCTTY, NULL) < 0)
-		cerr << "ioctl(TIOCSCTTY): " << strerror(errno) << '\n';
+		std::cerr << "ioctl(TIOCSCTTY): " << strerror(errno) << '\n';
 
 	fd = open(mTtyName.c_str(), O_RDWR);
 	if (fd < 0)
-		cerr << mTtyName << ": " << strerror(errno) << '\n';
+		std::cerr << mTtyName << ": " << strerror(errno) << '\n';
 	else
 		close(fd);
 
 	/* Verify that we now have a controlling tty. */
 	fd = open("/dev/tty", O_WRONLY);
 	if (fd < 0)
-		cerr << "open /dev/tty failed - could not set controlling tty: " << strerror(errno) << '\n';
+		std::cerr << "open /dev/tty failed - could not set controlling tty: " << strerror(errno) << '\n';
 	else
 		close(fd);
 
 	// redirect stdin/stdout/stderr from the pseudo tty
 
 	if (dup2(inTtyFD, STDIN_FILENO) < 0)
-		cerr << "dup2 stdin: " << strerror(errno) << '\n';
+		std::cerr << "dup2 stdin: " << strerror(errno) << '\n';
 	if (dup2(inTtyFD, STDOUT_FILENO) < 0)
-		cerr << "dup2 stdout: " << strerror(errno) << '\n';
+		std::cerr << "dup2 stdout: " << strerror(errno) << '\n';
 	if (dup2(inTtyFD, STDERR_FILENO) < 0)
-		cerr << "dup2 stderr: " << strerror(errno) << '\n';
+		std::cerr << "dup2 stderr: " << strerror(errno) << '\n';
 
 	close(inTtyFD);
 
@@ -195,23 +193,23 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	struct passwd *pw = getpwuid(getuid());
 	if (pw == nullptr)
 	{
-		cerr << "user not found" << strerror(errno) << '\n';
+		std::cerr << "user not found" << strerror(errno) << '\n';
 		exit(1);
 	}
 
-	ifstream motd("/etc/motd");
+	std::ifstream motd("/etc/motd");
 	while (motd.is_open() and not motd.eof())
 	{
-		string line;
-		getline(motd, line);
-		cout << line << '\n';
+		std::string line;
+		std::getline(motd, line);
+		std::cout << line << '\n';
 	}
 	motd.close();
 
 	// force a flush of all buffers
 	fflush(nullptr);
 
-	string shell = pw->pw_shell;
+	std::string shell = pw->pw_shell;
 	if (shell.empty())
 		shell = "/bin/sh";
 
@@ -228,8 +226,19 @@ void MPtyTerminalChannel::Exec(const string &inCommand, const string &inTerminal
 	// export TERM
 	setenv("TERM", inTerminalType.c_str(), true);
 
-	char *argv[] = { strdup(shell.c_str()), nullptr };
-	execvp(shell.c_str(), argv);
+	// char *argv[] = { strdup(shell.c_str()), nullptr };
+
+	std::vector<char *> argv;
+
+	if (inArgv.empty())
+		argv.push_back(const_cast<char *>(shell.c_str()));
+
+	for (auto &a : inArgv)
+		argv.push_back(const_cast<char *>(a.c_str()));
+
+	argv.push_back(nullptr);
+
+	execvp(argv.front(), argv.data());
 	perror("exec failed");
 	exit(1);
 }
@@ -267,16 +276,16 @@ std::filesystem::path MPtyTerminalChannel::GetCWD() const
 	return result;
 }
 
-void MPtyTerminalChannel::SendData(string &&inData)
+void MPtyTerminalChannel::SendData(std::string &&inData)
 {
-	shared_ptr<asio_ns::streambuf> buffer(new asio_ns::streambuf);
-	ostream out(buffer.get());
+	std::shared_ptr<asio_ns::streambuf> buffer(new asio_ns::streambuf);
+	std::ostream out(buffer.get());
 	out << inData;
 
 	asio_ns::async_write(mPty, *buffer, [buffer](const std::error_code &, std::size_t) {});
 }
 
-void MPtyTerminalChannel::SendSignal(const string &inSignal)
+void MPtyTerminalChannel::SendSignal(const std::string &inSignal)
 {
 }
 

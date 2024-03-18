@@ -44,7 +44,7 @@ class MTerminalChannel;
 class MTerminalWindow : public MWindow
 {
   public:
-	static MTerminalWindow *Create();
+	static MTerminalWindow *Create(const std::vector<std::string> &inArgv);
 	static MTerminalWindow *Create(const std::string &inUser, const std::string &inHost, uint16_t inPort,
 		const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
 
@@ -66,7 +66,7 @@ class MTerminalWindow : public MWindow
 	static bool IsAnyTerminalOpen();
 
   protected:
-	MTerminalWindow(MTerminalChannel *inChannel, const std::string &inCommand);
+	MTerminalWindow(MTerminalChannel *inChannel, const std::vector<std::string> &inArgv);
 
 	void ShowSearchPanel();
 	void HideSearchPanel();
