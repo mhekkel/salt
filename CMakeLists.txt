@@ -90,9 +90,6 @@ add_subdirectory(libzeep EXCLUDE_FROM_ALL)
 
 # find_package(zeep 5.1.6 REQUIRED)
 
-find_library(DL dl REQUIRED)
-find_library(UTIL util REQUIRED)
-
 # find_package(Boost COMPONENTS coroutines)
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
@@ -107,13 +104,7 @@ add_executable(salt
 	${CMAKE_SOURCE_DIR}/src/MCSICommands.hpp
 	${CMAKE_SOURCE_DIR}/src/MConnectDialog.cpp
 	${CMAKE_SOURCE_DIR}/src/MConnectDialog.hpp
-
-	# ${CMAKE_SOURCE_DIR}/src/MExploreBrowserWindow.cpp
-	# ${CMAKE_SOURCE_DIR}/src/MExploreBrowserWindow.hpp
 	${CMAKE_SOURCE_DIR}/src/MHTTPProxy.hpp
-
-	# ${CMAKE_SOURCE_DIR}/src/MLibTestApp.cpp
-	# ${CMAKE_SOURCE_DIR}/src/MLibTestApp.hpp
 	${CMAKE_SOURCE_DIR}/src/MPortForwardingDialog.cpp
 	${CMAKE_SOURCE_DIR}/src/MPortForwardingDialog.hpp
 	${CMAKE_SOURCE_DIR}/src/MPreferencesDialog.hpp
@@ -152,7 +143,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui dl util)
+target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui)
 
 mrc_target_resources(salt ${RESOURCES})
 

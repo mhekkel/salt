@@ -59,6 +59,9 @@
 
 //	eDECAUPSS =		'****', 	// Assign user-preferred supplemental set
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmultichar"
+
 enum MCSICmd : uint32_t
 {
 	eCBT = 'Z',       // Cursor Backward Tabulation
@@ -213,6 +216,8 @@ enum MCSICmd : uint32_t
 //	eDECKPM =		'****', 	// Key position mode
 //	eDECNKM =		'****', 	// Numeric keypad mode
 //	eDECVSSM =		'****', 	// Vertical split-screen mode
+
+#pragma GCC diagnostic pop
 
 #if DEBUG
 

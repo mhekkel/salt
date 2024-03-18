@@ -40,9 +40,11 @@
 
 #include <pinch.hpp>
 
+#include <chrono>
 #include <deque>
 #include <list>
 #include <map>
+#include <optional>
 
 class MStatusbar;
 class MScrollbar;
@@ -215,9 +217,9 @@ class MTerminalView : public MCanvas
 	MRect GetCharacterBounds(uint32_t inLine, uint32_t inColumn);
 	bool GetCharacterForPosition(int32_t inX, int32_t inY, int32_t &outLine, int32_t &outColumn);
 
-	void Idle(double inTime);
+	void Idle();
 
-	MEventIn<void(double)> eIdle;
+	MEventIn<void()> eIdle;
 
 	std::deque<char> mInputBuffer;
 	bool mBracketedPaste = true;
@@ -319,10 +321,13 @@ class MTerminalView : public MCanvas
 	std::string mDECRQSS;
 
 	// some other state information
-	double mLastBeep;
+	std::chrono::system_clock::time_point mLastBeep;
 	bool mBlockCursor, mBlinkCursor, mBlinkOn;
-	double mLastBlink, mNextSmoothScroll;
+	std::chrono::system_clock::time_point mLastBlink;
 	int32_t mScrollForwardCount;
+
+	std::optional<std::chrono::system_clock::time_point> mNextSmoothScroll;
+	bool mScrollForward;
 
 	enum
 	{
@@ -334,7 +339,7 @@ class MTerminalView : public MCanvas
 		eTrackClick
 	} mMouseClick;
 	bool mMouseBlockSelect;
-	double mLastMouseDown;
+	std::chrono::system_clock::time_point mLastMouseDown;
 	int32_t mLastMouseX, mLastMouseY;
 	int32_t mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol;
 

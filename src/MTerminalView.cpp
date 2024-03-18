@@ -54,6 +54,7 @@
 #include <zeep/crypto.hpp>
 #include <zeep/unicode-support.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <map>
 
@@ -103,8 +104,8 @@ const std::string
 uint32_t
 	kBorderWidth = 4;
 
-double
-	kSmoothScrollDelay = 0.083333;
+std::chrono::system_clock::duration
+	kSmoothScrollDelay = std::chrono::milliseconds(25);
 
 // enum {
 //	kTextColor,
@@ -226,8 +227,8 @@ struct MPFK
 class MFormat
 {
   public:
-	template<typename... Arguments>
-	MFormat(const char *fmt, Arguments ...args)
+	template <typename... Arguments>
+	MFormat(const char *fmt, Arguments... args)
 	{
 		m_str.reserve(255);
 		auto n = snprintf(m_str.data(), 255, fmt, args...);
@@ -502,7 +503,7 @@ void MTerminalView::StatusPartClicked(uint32_t inPart, MRect)
 
 	if (not info.empty())
 	{
-		mStatusInfo = (mStatusInfo + 1, info).size();
+		mStatusInfo = (mStatusInfo + 1) % info.size();
 		mStatusbar->SetStatusText(1, info[mStatusInfo], false);
 	}
 }
@@ -576,7 +577,7 @@ void MTerminalView::Reset()
 	mDECVSSM = false;
 
 	mCursor.saved = false;
-	mNextSmoothScroll = 0;
+	mNextSmoothScroll.reset();
 
 	mDECSACE = false;
 
@@ -781,7 +782,7 @@ void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, u
 			case 1:
 				mMouseClick = eWaitClick;
 				mMouseBlockSelect = inModifiers & kControlKey;
-				mLastMouseDown = GetLocalTime();
+				mLastMouseDown = std::chrono::system_clock::now();
 				mLastMouseX = inX;
 				mLastMouseY = inY;
 				break;
@@ -821,6 +822,8 @@ void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, u
 
 void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
+	using namespace std::chrono_literals;
+
 	if (mMouseClick == eTrackClick)
 	{
 		if (mMouseMode >= eTrackMouseCellMotionTracking)
@@ -836,7 +839,7 @@ void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 	{
 		if (std::abs(mLastMouseX - inX) > 1 or
 			std::abs(mLastMouseY - inY) > 1 or
-			GetLocalTime() > mLastMouseDown + 0.1)
+			std::chrono::system_clock::now() > mLastMouseDown + 100ms)
 		{
 			mMouseClick = eSingleClick;
 
@@ -1324,27 +1327,36 @@ void MTerminalView::AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers)
 	SetCursor(eNormalCursor);
 }
 
-void MTerminalView::Idle(double inTime)
+void MTerminalView::Idle()
 {
+	using namespace std::chrono_literals;
+
+	auto now = std::chrono::system_clock::now();
+
 	bool update = false;
 	int32_t savedCursorX = mCursor.x, savedCursorY = mCursor.y;
 
 	if (not mInputBuffer.empty() and
-		(mNextSmoothScroll == 0 or
-			(std::abs(mNextSmoothScroll) <= GetLocalTime())))
+		(not mNextSmoothScroll.has_value() or *mNextSmoothScroll < now))
 	{
 		mScrollForwardCount = 0;
 		int32_t topLine = GetTopLine();
 
-		if (mNextSmoothScroll < 0)
-			mBuffer->ScrollBackward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
-		else if (mNextSmoothScroll > 0)
+		if (mNextSmoothScroll.has_value())
 		{
-			mBuffer->ScrollForward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
-			++mScrollForwardCount;
+			if (mScrollForward)
+			{
+				mBuffer->ScrollForward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
+				++mScrollForwardCount;
+			}
+			else
+			{
+				mBuffer->ScrollBackward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
+			}
+
+			mNextSmoothScroll.reset();
 		}
 
-		mNextSmoothScroll = 0;
 		bool scrolled = mScrollbar->GetValue() < mScrollbar->GetMaxValue();
 
 		Emulate();
@@ -1355,10 +1367,10 @@ void MTerminalView::Idle(double inTime)
 		AdjustScrollbar(topLine);
 	}
 
-	if (std::abs(inTime - mLastBlink) >= 0.66)
+	if (now - mLastBlink >= 660ms)
 	{
 		mBlinkOn = not mBlinkOn;
-		mLastBlink = GetLocalTime();
+		mLastBlink = now;
 		update = IsActive() and mTerminalChannel->IsOpen();
 	}
 
@@ -1367,7 +1379,7 @@ void MTerminalView::Idle(double inTime)
 		if (savedCursorX != mCursor.x or savedCursorY != mCursor.y)
 		{
 			mBlinkOn = true;
-			mLastBlink = GetLocalTime();
+			mLastBlink = now;
 			update = true;
 		}
 	}
@@ -2019,7 +2031,7 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 
 	if (handled)
 	{
-		mLastBlink = 0;
+		mLastBlink = {};
 		mBlinkOn = true;
 
 		if (mBuffer->IsDirty())
@@ -2076,7 +2088,7 @@ bool MTerminalView::HandleCharacter(const std::string &inText, bool inRepeat)
 			Scroll(kScrollToEnd);
 		}
 
-		mLastBlink = 0;
+		mLastBlink = {};
 		mBlinkOn = true;
 
 		if (mBuffer->IsDirty())
@@ -2180,7 +2192,7 @@ bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 			Scroll(kScrollToEnd);
 		}
 
-		mLastBlink = 0;
+		mLastBlink = {};
 		mBlinkOn = true;
 
 		if (mBuffer->IsDirty())
@@ -2768,8 +2780,10 @@ void MTerminalView::Opened()
 	// EraseInDisplay(2);
 	Invalidate();
 
+	using namespace std::chrono_literals;
+
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
-	storyboard->AddTransition(mDisabledFactor, 0, 0.1, "acceleration-decelleration");
+	storyboard->AddTransition(mDisabledFactor, 0, 100ms, "acceleration-decelleration");
 	mAnimationManager->Schedule(storyboard);
 }
 
@@ -2789,19 +2803,18 @@ void MTerminalView::Closed()
 
 	mStatusbar->SetStatusText(1, "", false);
 
+	using namespace std::chrono_literals;
+
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
-	storyboard->AddTransition(mDisabledFactor, 1, 1, "acceleration-decelleration");
+	storyboard->AddTransition(mDisabledFactor, 1, 1000ms, "acceleration-decelleration");
 
 	if (not mArgv.empty())
 	{
-		storyboard->AddFinishedCallback([w=GetWindow()]()
-		{
-			static_cast<MSaltApp*>(gApp)->execute([w]()
-			{
+		storyboard->AddFinishedCallback([w = GetWindow()]()
+			{ static_cast<MSaltApp  *>(gApp)->execute([w]()
+				  {
 				if (MWindow::WindowExists(w))
-					w->ProcessCommand(cmd_Close, nullptr, 0, 0);
-			});
-		});
+					w->ProcessCommand(cmd_Close, nullptr, 0, 0); }); });
 	}
 
 	mAnimationManager->Schedule(storyboard);
@@ -2824,7 +2837,6 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 
 		if (Preferences::GetBoolean("forward-gpg-agent", true))
 		{
-
 		}
 
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
@@ -2849,7 +2861,7 @@ void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &in
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
 			{ this->HandleReceived(ec, inData); });
 
-		Idle(0);
+		Idle();
 	}
 }
 
@@ -2869,7 +2881,10 @@ void MTerminalView::EraseInLine(uint32_t inMode, bool inSelective)
 void MTerminalView::ScrollForward()
 {
 	if (mDECSCLM)
-		mNextSmoothScroll = GetLocalTime() + kSmoothScrollDelay;
+	{
+		mNextSmoothScroll = std::chrono::system_clock::now() + kSmoothScrollDelay;
+		mScrollForward = true;
+	}
 	else
 	{
 		mBuffer->ScrollForward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
@@ -2880,7 +2895,10 @@ void MTerminalView::ScrollForward()
 void MTerminalView::ScrollBackward()
 {
 	if (mDECSCLM)
-		mNextSmoothScroll = -(GetLocalTime() + kSmoothScrollDelay);
+	{
+		mNextSmoothScroll = std::chrono::system_clock::now() + kSmoothScrollDelay;
+		mScrollForward = false;
+	}
 	else
 		mBuffer->ScrollBackward(mMarginTop, mMarginBottom, mMarginLeft, mMarginRight);
 }
@@ -3086,317 +3104,318 @@ void MTerminalView::Emulate()
 	while (not mInputBuffer.empty())
 	{
 		// break on a smooth scroll event
-		if (mNextSmoothScroll != 0)
+		if (mNextSmoothScroll.has_value())
 			break;
+	
 
 #if DEBUG
-		if (mDebugUpdate and mBuffer->IsDirty())
-		{
-			Invalidate();
-			GetWindow()->UpdateNow();
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
+	if (mDebugUpdate and mBuffer->IsDirty())
+	{
+		Invalidate();
+		GetWindow()->UpdateNow();
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
 #endif
-		// process bytes. We try to keep this code UTF-8 savvy
-		uint8_t ch = mInputBuffer.front();
-		mInputBuffer.pop_front();
+	// process bytes. We try to keep this code UTF-8 savvy
+	uint8_t ch = mInputBuffer.front();
+	mInputBuffer.pop_front();
 
-		// start by testing if this byte is a control code
-		// The C1 control codes are never leading bytes in a UTF-8
-		// sequence and so we can easily check for them here.
+	// start by testing if this byte is a control code
+	// The C1 control codes are never leading bytes in a UTF-8
+	// sequence and so we can easily check for them here.
 
-		if (ch < 0x20 or ch == 0x7f or // a C0 control code
-		                               // or a C1 control code
-			(mDECSCL >= 2 and mS8C1T and (ch & 0xe0) == 0x80))
+	if (ch < 0x20 or ch == 0x7f or // a C0 control code
+	                               // or a C1 control code
+		(mDECSCL >= 2 and mS8C1T and (ch & 0xe0) == 0x80))
+	{
+		if (mLastCtrl)
+			mLastChar = 0;
+		mLastCtrl = true;
+
+		// shortcut, do not process control code if in a DCS or OSC std::string
+		if (ch != ESC)
 		{
-			if (mLastCtrl)
-				mLastChar = 0;
-			mLastCtrl = true;
-
-			// shortcut, do not process control code if in a DCS or OSC std::string
-			if (ch != ESC)
+			switch (mEscState)
 			{
+				case eDCS:
+					EscapeDCS(ch);
+					continue;
+				case eOSC:
+					EscapeOSC(ch);
+					continue;
+				default:
+					break;
+			}
+		}
+
+		switch (ch)
+		{
+			case ENQ:
+			{
+				std::string answer_back = Preferences::GetString("answer-back", "salt");
+				for (auto p = answer_back.find_first_of("\r\n"); p != std::string::npos; p = answer_back.find_first_of("\n\r", p))
+					answer_back.erase(answer_back.begin() + p);
+				mTerminalChannel->SendData(answer_back);
+				break;
+			}
+
+			case BEL:
+				if (mEscState == eOSC)
+					EscapeOSC(ch);
+				else
+					Beep();
+				break;
+
+			case BS:
+				MoveCursor(kMoveLeft);
+				break;
+			case HT:
+				MoveCursor(kMoveHT);
+				break;
+			case LF:
+			case VT:
+			case FF:
+				MoveCursor(mLNM ? kMoveCRLF : kMoveLF);
+				break;
+			case CR:
+				MoveCursor(kMoveCR);
+				break;
+			case SO:
+				mCursor.CSGL = 1;
+				break;
+			case SI:
+				mCursor.CSGL = 0;
+				break;
+			case SUB:
+				WriteChar(0x00bf /*¿*/); // fall through
+			case CAN:
+				mEscState = eESC_NONE;
+				break;
+
+			case ESC:
+				// If we're processing an escape std::string and then receive an escape
+				// this can either mean the beginning of a new escape std::string cancelling
+				// the previous, or it may be the start of a ST or BEL sequence.
+				// The latter can only occur when 8 bit controls are in use.
+
+				if (mDECSCL >= 2 and mS8C1T)
+					mEscState = eESC_SEEN;
+				else
+				{
+					switch (mEscState)
+					{
+						case eDCS:
+							mEscState = eDCS_ESC;
+							break;
+						case eOSC:
+							mEscState = eOSC_ESC;
+							break;
+						case ePM:
+							mEscState = ePM_ESC;
+							break;
+						case eAPC:
+							mEscState = eAPC_ESC;
+							break;
+						default:
+							mEscState = eESC_SEEN;
+							break;
+					}
+				}
+				break;
+
+			case IND:
+				MoveCursor(kMoveIND);
+				break;
+			case NEL:
+				MoveCursor(kMoveCRLF);
+				break;
+			case HTS:
+				SetTabstop();
+				break;
+			case RI:
+				MoveCursor(kMoveRI);
+				break;
+			case SS2:
+				mCursor.SS = 2;
+				break;
+			case SS3:
+				mCursor.SS = 3;
+				break;
+			case DCS:
+				mPFKKeyNr = 0;
+				mEscState = eDCS;
+				break;
+			case OSC:
+				mEscState = eOSC;
+				break;
+			case CSI:
+				mEscState = eCSI;
+				break;
+			case PM:
+				mEscState = ePM;
+				break;
+
+			case ST:
 				switch (mEscState)
 				{
 					case eDCS:
 						EscapeDCS(ch);
-						continue;
+						break;
 					case eOSC:
 						EscapeOSC(ch);
-						continue;
+						break;
+					case ePM:
+						mEscState = eESC_NONE;
+						break;
+					case eAPC:
+						mEscState = eESC_NONE;
+						break;
 					default:
 						break;
 				}
-			}
+				break;
 
-			switch (ch)
+			default: /* ignore */
+				break;
+		}
+
+		continue;
+	}
+
+	// If we're processing an escape sequence, feed the byte to the processor.
+
+	if (mEscState != eESC_NONE)
+	{
+		if (mEscState == eDCS_ESC or mEscState == ePM_ESC or mEscState == eAPC_ESC or mEscState == eOSC_ESC)
+		{
+			if (ch == '\\')
 			{
-				case ENQ:
-				{
-					std::string answer_back = Preferences::GetString("answer-back", "salt");
-					for (auto p = answer_back.find_first_of("\r\n"); p != std::string::npos; p = answer_back.find_first_of("\n\r", p))
-						answer_back.erase(answer_back.begin() + p);
-					mTerminalChannel->SendData(answer_back);
-					break;
-				}
-
-				case BEL:
-					if (mEscState == eOSC)
-						EscapeOSC(ch);
-					else
-						Beep();
-					break;
-
-				case BS:
-					MoveCursor(kMoveLeft);
-					break;
-				case HT:
-					MoveCursor(kMoveHT);
-					break;
-				case LF:
-				case VT:
-				case FF:
-					MoveCursor(mLNM ? kMoveCRLF : kMoveLF);
-					break;
-				case CR:
-					MoveCursor(kMoveCR);
-					break;
-				case SO:
-					mCursor.CSGL = 1;
-					break;
-				case SI:
-					mCursor.CSGL = 0;
-					break;
-				case SUB:
-					WriteChar(0x00bf /*¿*/); // fall through
-				case CAN:
-					mEscState = eESC_NONE;
-					break;
-
-				case ESC:
-					// If we're processing an escape std::string and then receive an escape
-					// this can either mean the beginning of a new escape std::string cancelling
-					// the previous, or it may be the start of a ST or BEL sequence.
-					// The latter can only occur when 8 bit controls are in use.
-
-					if (mDECSCL >= 2 and mS8C1T)
-						mEscState = eESC_SEEN;
-					else
-					{
-						switch (mEscState)
-						{
-							case eDCS:
-								mEscState = eDCS_ESC;
-								break;
-							case eOSC:
-								mEscState = eOSC_ESC;
-								break;
-							case ePM:
-								mEscState = ePM_ESC;
-								break;
-							case eAPC:
-								mEscState = eAPC_ESC;
-								break;
-							default:
-								mEscState = eESC_SEEN;
-								break;
-						}
-					}
-					break;
-
-				case IND:
-					MoveCursor(kMoveIND);
-					break;
-				case NEL:
-					MoveCursor(kMoveCRLF);
-					break;
-				case HTS:
-					SetTabstop();
-					break;
-				case RI:
-					MoveCursor(kMoveRI);
-					break;
-				case SS2:
-					mCursor.SS = 2;
-					break;
-				case SS3:
-					mCursor.SS = 3;
-					break;
-				case DCS:
-					mPFKKeyNr = 0;
-					mEscState = eDCS;
-					break;
-				case OSC:
-					mEscState = eOSC;
-					break;
-				case CSI:
-					mEscState = eCSI;
-					break;
-				case PM:
-					mEscState = ePM;
-					break;
-
-				case ST:
-					switch (mEscState)
-					{
-						case eDCS:
-							EscapeDCS(ch);
-							break;
-						case eOSC:
-							EscapeOSC(ch);
-							break;
-						case ePM:
-							mEscState = eESC_NONE;
-							break;
-						case eAPC:
-							mEscState = eESC_NONE;
-							break;
-						default:
-							break;
-					}
-					break;
-
-				default: /* ignore */
-					break;
+				if (mEscState == eDCS_ESC)
+					EscapeDCS(ST);
+				else if (mEscState == eOSC_ESC)
+					EscapeOSC(ST);
+				mEscState = eESC_NONE;
 			}
+			else if (mDECANM)
+				EscapeStart(ch);
+			else
+				EscapeVT52(ch);
 
 			continue;
 		}
 
-		// If we're processing an escape sequence, feed the byte to the processor.
-
-		if (mEscState != eESC_NONE)
+		// OK, so we're in the middle of an escape std::string
+		switch (mEscState)
 		{
-			if (mEscState == eDCS_ESC or mEscState == ePM_ESC or mEscState == eAPC_ESC or mEscState == eOSC_ESC)
-			{
-				if (ch == '\\')
-				{
-					if (mEscState == eDCS_ESC)
-						EscapeDCS(ST);
-					else if (mEscState == eOSC_ESC)
-						EscapeOSC(ST);
-					mEscState = eESC_NONE;
-				}
-				else if (mDECANM)
+			case eESC_SEEN:
+				if (mDECANM)
 					EscapeStart(ch);
 				else
 					EscapeVT52(ch);
+				break;
 
-				continue;
-			}
+			case eCSI:
+				EscapeCSI(ch);
+				break;
+			case eOSC:
+				EscapeOSC(ch);
+				break;
+			case eDCS:
+				EscapeDCS(ch);
+				break;
+			case ePM: /* ignore */
+				break;
 
-			// OK, so we're in the middle of an escape std::string
-			switch (mEscState)
-			{
-				case eESC_SEEN:
-					if (mDECANM)
-						EscapeStart(ch);
-					else
-						EscapeVT52(ch);
-					break;
+			case eAPC:
+				EscapeAPC(ch);
+				break;
 
-				case eCSI:
-					EscapeCSI(ch);
-					break;
-				case eOSC:
-					EscapeOSC(ch);
-					break;
-				case eDCS:
-					EscapeDCS(ch);
-					break;
-				case ePM: /* ignore */
-					break;
+			case eSELECT_CHAR_SET:
+				SelectCharSet(ch);
+				break;
+			case eSELECT_CTRL_TRANSM:
+				SelectControlTransmission(ch);
+				break;
+			case eSELECT_DOUBLE:
+				SelectDouble(ch);
+				break;
 
-				case eAPC:
-					EscapeAPC(ch);
-					break;
+			// special VT52 handling
+			case eVT52_LINE:
+				mArgs.push_back(ch - US);
+				mEscState = eVT52_COLUMN;
+				break;
 
-				case eSELECT_CHAR_SET:
-					SelectCharSet(ch);
-					break;
-				case eSELECT_CTRL_TRANSM:
-					SelectControlTransmission(ch);
-					break;
-				case eSELECT_DOUBLE:
-					SelectDouble(ch);
-					break;
+			case eVT52_COLUMN:
+				MoveCursorTo((ch - US) - 1, mArgs[0] - 1);
+				mEscState = eESC_NONE;
+				break;
 
-				// special VT52 handling
-				case eVT52_LINE:
-					mArgs.push_back(ch - US);
-					mEscState = eVT52_COLUMN;
-					break;
-
-				case eVT52_COLUMN:
-					MoveCursorTo((ch - US) - 1, mArgs[0] - 1);
-					mEscState = eESC_NONE;
-					break;
-
-				default:
-					assert(false); // now what?
-			}
-
-			continue; // ignore anything else, we're in an escape std::string
+			default:
+				assert(false); // now what?
 		}
 
-		mLastCtrl = false;
+		continue; // ignore anything else, we're in an escape std::string
+	}
 
-		// No control character and no escape sequence, so we have to write
-		// this character to the screen.
-		unicode uc = ch;
+	mLastCtrl = false;
 
-		// if it is an ascii character, std::map it using GL
-		if (ch >= 32 and ch < 127) // GL
+	// No control character and no escape sequence, so we have to write
+	// this character to the screen.
+	unicode uc = ch;
+
+	// if it is an ascii character, std::map it using GL
+	if (ch >= 32 and ch < 127) // GL
+	{
+		int set = mCursor.CSGL;
+		if (mCursor.SS != 0)
+			set = mCursor.SS;
+		uc = mCursor.charSetG[set][ch - 32];
+	}
+	else // GR
+	{    // no ascii, see if NRC is in use
+		if (mDECNRCM)
 		{
-			int set = mCursor.CSGL;
+			int set = mCursor.CSGR;
 			if (mCursor.SS != 0)
 				set = mCursor.SS;
-			uc = mCursor.charSetG[set][ch - 32];
+			uc = mCursor.charSetG[set][ch - 32 - 128];
 		}
-		else // GR
-		{    // no ascii, see if NRC is in use
-			if (mDECNRCM)
+		else // no NRC, maybe the data should be interpreted as UTF-8
+		{
+			if (mEncoding == kEncodingUTF8)
 			{
-				int set = mCursor.CSGR;
-				if (mCursor.SS != 0)
-					set = mCursor.SS;
-				uc = mCursor.charSetG[set][ch - 32 - 128];
+				uint32_t len = 1;
+				if ((ch & 0x0E0) == 0x0C0)
+					len = 2;
+				else if ((ch & 0x0F0) == 0x0E0)
+					len = 3;
+				else if ((ch & 0x0F8) == 0x0F0)
+					len = 4;
+
+				// be safe, in case the text in the buffer is too short for a valid UTF-8 character
+				// just wait until we receive some more.
+				mInputBuffer.push_front(ch);
+				if (mInputBuffer.size() < len)
+					break;
+
+				static MEncodingTraits<kEncodingUTF8> traits;
+				traits.ReadUnicode(mInputBuffer.begin(), len, uc);
+
+				while (len-- > 0)
+					mInputBuffer.pop_front();
 			}
-			else // no NRC, maybe the data should be interpreted as UTF-8
-			{
-				if (mEncoding == kEncodingUTF8)
-				{
-					uint32_t len = 1;
-					if ((ch & 0x0E0) == 0x0C0)
-						len = 2;
-					else if ((ch & 0x0F0) == 0x0E0)
-						len = 3;
-					else if ((ch & 0x0F8) == 0x0F0)
-						len = 4;
-
-					// be safe, in case the text in the buffer is too short for a valid UTF-8 character
-					// just wait until we receive some more.
-					mInputBuffer.push_front(ch);
-					if (mInputBuffer.size() < len)
-						break;
-
-					static MEncodingTraits<kEncodingUTF8> traits;
-					traits.ReadUnicode(mInputBuffer.begin(), len, uc);
-
-					while (len-- > 0)
-						mInputBuffer.pop_front();
-				}
-				else
-					uc = MUnicodeMapping::GetUnicode(kEncodingISO88591, ch);
-			}
+			else
+				uc = MUnicodeMapping::GetUnicode(kEncodingISO88591, ch);
 		}
-
-		// reset the single shift code
-		mCursor.SS = 0;
-
-		// and write the final unicode to the screen
-		WriteChar(uc);
 	}
+
+	// reset the single shift code
+	mCursor.SS = 0;
+
+	// and write the final unicode to the screen
+	WriteChar(uc);
+}
 }
 
 inline uint32_t MTerminalView::GetParam(uint32_t inParamNr, uint32_t inDefault)
@@ -5406,23 +5425,25 @@ void MTerminalView::Animate()
 
 void MTerminalView::Beep()
 {
-	double now = GetLocalTime();
+	using namespace std::chrono_literals;
+
+	auto now = std::chrono::system_clock::now();
 	bool beeped = false;
 
-	if (mGraphicalBeep and std::abs(now - mLastBeep) > 0.25)
+	if (mGraphicalBeep and now - mLastBeep > 250ms)
 	{
 		if (mAnimationManager->Update())
 			PRINT(("duh"));
 
 		MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
-		storyboard->AddTransition(mGraphicalBeep, 0.75, 0.075, "acceleration-decelleration");
-		storyboard->AddTransition(mGraphicalBeep, 0.00, 0.075, "acceleration-decelleration");
+		storyboard->AddTransition(mGraphicalBeep, 0.75, 75ms, "acceleration-decelleration");
+		storyboard->AddTransition(mGraphicalBeep, 0.00, 75ms, "acceleration-decelleration");
 		mAnimationManager->Schedule(storyboard);
 
 		beeped = true;
 	}
 
-	if (mAudibleBeep and std::abs(now - mLastBeep) > 0.5)
+	if (mAudibleBeep and now - mLastBeep > 500ms)
 	{
 		PlaySound("warning");
 		beeped = true;
