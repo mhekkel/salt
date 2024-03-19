@@ -30,12 +30,8 @@
 #pragma once
 
 #include "MApplication.hpp"
+#include "MConnectDialog.hpp"
 #include "MTypes.hpp"
-
-#if defined(_MSC_VER)
-#pragma comment(lib, "libzeep")
-#pragma comment(lib, "cryptlib")
-#endif
 
 #include <pinch.hpp>
 
@@ -62,8 +58,6 @@ const uint32_t
 	cmd_AddNewTOTPHash = '+otp',
 	cmd_EnterTOTP = 'totp';
 
-class MWindow;
-
 // ===========================================================================
 
 class MSaltApp : public MApplication
@@ -82,8 +76,8 @@ class MSaltApp : public MApplication
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
-	void AddRecent(const std::string &inRecent);
-	void OpenRecent(const std::string &inRecent);
+	void AddRecent(const ConnectInfo &inRecent);
+	void OpenRecent(const ConnectInfo &inRecent);
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
 
@@ -134,7 +128,7 @@ class MSaltApp : public MApplication
 	asio_ns::execution_context *mExContext = &mIOContext;
 	std::thread mIOContextThread;
 
-	std::deque<std::string> mRecent;
+	std::deque<ConnectInfo> mRecent;
 	pinch::connection_pool mConnectionPool;
 };
 

@@ -90,12 +90,6 @@ add_subdirectory(libzeep EXCLUDE_FROM_ALL)
 
 # find_package(zeep 5.1.6 REQUIRED)
 
-# find_package(Boost COMPONENTS coroutines)
-pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
-
-# The salt executable
-add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
-
 add_executable(salt
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.cpp
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.hpp

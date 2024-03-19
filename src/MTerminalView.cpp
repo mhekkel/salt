@@ -2808,14 +2808,14 @@ void MTerminalView::Closed()
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
 	storyboard->AddTransition(mDisabledFactor, 1, 1000ms, "acceleration-decelleration");
 
-	if (not mArgv.empty())
-	{
-		storyboard->AddFinishedCallback([w = GetWindow()]()
-			{ static_cast<MSaltApp  *>(gApp)->execute([w]()
-				  {
-				if (MWindow::WindowExists(w))
-					w->ProcessCommand(cmd_Close, nullptr, 0, 0); }); });
-	}
+	// if (not mArgv.empty())
+	// {
+	// 	storyboard->AddFinishedCallback([w = GetWindow()]()
+	// 		{ static_cast<MSaltApp  *>(gApp)->execute([w]()
+	// 			  {
+	// 			if (MWindow::WindowExists(w))
+	// 				w->ProcessCommand(cmd_Close, nullptr, 0, 0); }); });
+	// }
 
 	mAnimationManager->Schedule(storyboard);
 }

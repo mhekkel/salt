@@ -42,21 +42,92 @@
 #include <fstream>
 #include <regex>
 
-using namespace std;
 namespace fs = std::filesystem;
 
 namespace
 {
 
-#define USER "(?:([-$_.+!*'(),[:alnum:];?&=]+)@)?"
-#define HOST "([-[:alnum:].]+(?::\\d+)?)"
+#define USER "(?:([-$_.+!*'(),a-zA-Z0-9;?&=]+)@)?"
+#define HOST "([-a-zA-Z0-9.]+)"
+#define PORT R"((?::(\d+))?)"
 
-const std::regex
-	kServerPortRE("^([-[:alnum:].]+):(\\d+)$"),
-	//	kSessionRE("^(?:([-$_.+!*'(),[:alnum:];?&=]+)@)?([-[:alnum:].]+(?::\\d+)?)(?:;(.+))?$"),
-	kRecentRE("^" USER HOST "(?:;" USER HOST ";(.+))?(?: >> (.+))?$"),
-	kProxyRE("^" USER HOST ";(.+)$");
+#define CONNECT_INFO_BASE USER HOST PORT
+#define PROXY_INFO CONNECT_INFO_BASE R"((?:;(.+))?)"
+#define CONNECT_INFO CONNECT_INFO_BASE "(?: via " PROXY_INFO ")?"
+
+const std::regex kRecentRX(CONNECT_INFO);
+const std::regex kProxyRX(PROXY_INFO);
 } // namespace
+
+// --------------------------------------------------------------------
+
+std::ostream &operator<<(std::ostream &os, const ConnectInfoBase &c)
+{
+	if (not c.user.empty())
+		os << c.user << '@';
+	os << c.host;
+	if (c.port != 0 and c.port != 22)
+		os << ':' << c.port;
+	return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const ProxyInfo &c)
+{
+	os << static_cast<const ConnectInfoBase &>(c);
+	if (not c.command.empty())
+		os << ';' << c.command;
+	return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const ConnectInfo &c)
+{
+	os << static_cast<const ConnectInfoBase &>(c);
+	if (c.proxy.has_value())
+		os << " via " << c.proxy.value();
+	
+	return os;
+}
+
+std::string ConnectInfo::DisplayString() const
+{
+	std::stringstream os;
+	if (not user.empty())
+		os << user << '@';
+	os << host;
+
+	if (proxy.has_value())
+		os << " (via " << proxy->host << ")";
+
+	return os.str();
+}
+
+ConnectInfo ConnectInfo::parse(const std::string &s)
+{
+	ConnectInfo ci{};
+
+	std::smatch m;
+	if (std::regex_match(s, m, kRecentRX))
+	{
+		ci.user = m[1];
+		ci.host = m[2];
+		if (m[3].matched)
+			ci.port = std::stoi(m[3]);
+		if (m[5].matched)
+		{
+			ProxyInfo pi;
+			pi.user = m[4];
+			pi.host = m[5];
+			if (m[6].matched)
+				pi.port = std::stoi(m[6]);
+			pi.command = m[7];
+			ci.proxy = pi;
+		}
+	}
+
+	return ci;
+}
+
+// --------------------------------------------------------------------
 
 MConnectDialog::MConnectDialog()
 	: MDialog("connect-dialog")
@@ -71,16 +142,24 @@ MConnectDialog::MConnectDialog()
 	// SetEnabled("proxy-command", false);
 
 	std::smatch m;
-	vector<string> ss, hosts;
+	std::vector<std::string> ss, hosts;
 
 	Preferences::GetArray("recent-proxies", ss);
 
-	for (string &s : ss)
+	for (auto &s : ss)
 	{
-		if (std::regex_match(s, m, kProxyRE))
+		if (std::regex_match(s, m, kProxyRX))
 		{
 			hosts.push_back(m[2]);
-			mRecentProxies.push_back(s);
+
+			ProxyInfo pi;
+			pi.user = m[1];
+			pi.host = m[2];
+			if (m[3].matched)
+				pi.port = std::stoi(m[3]);
+			pi.command = m[4];
+
+			mRecentProxies.push_back(pi);
 		}
 	}
 
@@ -88,25 +167,24 @@ MConnectDialog::MConnectDialog()
 
 	hosts.clear();
 
-	Preferences::GetArray("recent-sessions", ss);
-	for (string &s : ss)
+	std::vector<std::string> sa;
+	Preferences::GetArray("recent-sessions", sa);
+
+	for (auto &s : sa)
 	{
-		if (std::regex_match(s, m, kRecentRE))
-		{
-			if (m[4].matched)
-				hosts.push_back(m[2].str() + " via " + m[4].str());
-			else
-				hosts.push_back(m[2]);
-			mRecentSessions.push_back(s);
-		}
+		mRecentSessions.push_back(ConnectInfo::parse(s));
+		hosts.emplace_back(mRecentSessions.back().host);
 	}
 
 	if (not hosts.empty())
 	{
 		SetChoices("host", hosts);
 		SetText("host", hosts.front());
-		SelectRecent(hosts.front());
+		// SelectRecent(hosts.front());
 	}
+
+	if (not mRecentSessions.empty())
+		SelectRecent(mRecentSessions.front());
 
 	Show(nullptr);
 	SetFocus("host");
@@ -115,7 +193,20 @@ MConnectDialog::MConnectDialog()
 		CheckboxChanged("use-proxy", true);
 }
 
-void MConnectDialog::ButtonClicked(const string &inID)
+std::vector<ConnectInfo> MConnectDialog::GetRecentHosts()
+{
+	std::vector<std::string> sa;
+	Preferences::GetArray("recent-sessions", sa);
+
+	std::vector<ConnectInfo> result;
+
+	for (auto &s : sa)
+		result.push_back(ConnectInfo::parse(s));
+	
+	return result;
+}
+
+void MConnectDialog::ButtonClicked(const std::string &inID)
 {
 	//	if (inID == "more-expander")
 	//		SetVisible("more-box", IsOpen("more-expander"));
@@ -125,12 +216,12 @@ void MConnectDialog::ButtonClicked(const string &inID)
 			{
 				std::ifstream file(pemFile);
 				if (not file.is_open())
-					throw runtime_error("Could not open private key file");
+					throw std::runtime_error("Could not open private key file");
 
-				string key;
+				std::string key;
 				for (;;)
 				{
-					string line;
+					std::string line;
 					getline(file, line);
 					if (line.empty() and file.eof())
 						break;
@@ -156,145 +247,125 @@ bool MConnectDialog::OKClicked()
 {
 	MWindow *w = nullptr;
 
-	string host = GetText("host");
+	
 
-	auto via = host.find(" via ");
-	if (via != std::string::npos)
-		host = host.substr(0, via);
+	// std::string host = GetText("host");
 
-	string user = GetText("user");
-	string port = "22";
-	string command = GetText("ssh-command");
+	// auto via = host.find(" via ");
+	// if (via != std::string::npos)
+	// 	host = host.substr(0, via);
 
-	string recent;
+	// std::string user = GetText("user");
+	// std::string port = "22";
+	// std::string command = GetText("ssh-command");
 
-	for (;;)
-	{
-		if (host.empty())
-			break;
+	// std::string recent;
 
-		recent = user + '@' + host;
+	// for (;;)
+	// {
+	// 	if (host.empty())
+	// 		break;
 
-		std::smatch m;
-		if (std::regex_match(host, m, kServerPortRE))
-		{
-			port = m[2];
-			host = m[1];
-		}
+	// 	recent = user + '@' + host;
 
-		if (host.empty() or user.empty())
-			break;
+	// 	std::smatch m;
+	// 	if (std::regex_match(host, m, kServerPortRE))
+	// 	{
+	// 		port = m[2];
+	// 		host = m[1];
+	// 	}
 
-		pinch::connection_pool &pool(static_cast<MSaltApp *>(gApp)->GetConnectionPool());
+	// 	if (host.empty() or user.empty())
+	// 		break;
 
-		if (not IsChecked("use-proxy"))
-		{
-			auto connection = pool.get(user, host, std::stoi(port));
-			w = MTerminalWindow::Create(user, host, std::stoi(port), command, connection);
-			break;
-		}
+	// 	pinch::connection_pool &pool(static_cast<MSaltApp *>(gApp)->GetConnectionPool());
 
-		string proxy_host = GetText("proxy-host");
-		string proxy_user = GetText("proxy-user");
-		string proxy_port = "22";
-		string proxy_cmd = GetText("proxy-command");
+	// 	if (not IsChecked("use-proxy"))
+	// 	{
+	// 		auto connection = pool.get(user, host, std::stoi(port));
+	// 		w = MTerminalWindow::Create(user, host, std::stoi(port), command, connection);
+	// 		break;
+	// 	}
 
-		string proxy = proxy_user + '@' + proxy_host + ';' + proxy_cmd;
-		recent = recent + ';' + proxy;
+	// 	string proxy_host = GetText("proxy-host");
+	// 	string proxy_user = GetText("proxy-user");
+	// 	string proxy_port = "22";
+	// 	string proxy_cmd = GetText("proxy-command");
 
-		if (std::regex_match(proxy_host, m, kServerPortRE))
-		{
-			proxy_port = m[2];
-			proxy_host = m[1];
-		}
+	// 	string proxy = proxy_user + '@' + proxy_host + ';' + proxy_cmd;
+	// 	recent = recent + ';' + proxy;
 
-		if (proxy_host.empty() or proxy_user.empty())
-			break;
+	// 	if (std::regex_match(proxy_host, m, kServerPortRE))
+	// 	{
+	// 		proxy_port = m[2];
+	// 		proxy_host = m[1];
+	// 	}
 
-		std::shared_ptr<pinch::basic_connection> connection(
-			pool.get(user, host, std::stoi(port),
-				proxy_user, proxy_host, std::stoi(proxy_port), proxy_cmd));
+	// 	if (proxy_host.empty() or proxy_user.empty())
+	// 		break;
 
-		w = MTerminalWindow::Create(user, host, std::stoi(port), command, connection);
+	// 	std::shared_ptr<pinch::basic_connection> connection(
+	// 		pool.get(user, host, std::stoi(port),
+	// 			proxy_user, proxy_host, std::stoi(proxy_port), proxy_cmd));
 
-		// store this recent proxy
-		vector<string> ss;
-		Preferences::GetArray("recent-proxies", ss);
-		ss.erase(remove(ss.begin(), ss.end(), proxy), ss.end());
-		ss.insert(ss.begin(), proxy);
-		if (ss.size() > 10)
-			ss.erase(ss.begin() + 10, ss.end());
-		Preferences::SetArray("recent-proxies", ss);
+	// 	w = MTerminalWindow::Create(user, host, std::stoi(port), command, connection);
 
-		break;
-	}
+	// 	// store this recent proxy
+	// 	vector<string> ss;
+	// 	Preferences::GetArray("recent-proxies", ss);
+	// 	ss.erase(remove(ss.begin(), ss.end(), proxy), ss.end());
+	// 	ss.insert(ss.begin(), proxy);
+	// 	if (ss.size() > 10)
+	// 		ss.erase(ss.begin() + 10, ss.end());
+	// 	Preferences::SetArray("recent-proxies", ss);
 
-	if (w == nullptr)
-		PlaySound("warning");
-	else
-	{
-		w->Select();
+	// 	break;
+	// }
 
-		if (not command.empty())
-			static_cast<MSaltApp *>(gApp)->AddRecent(recent + " >> " + command);
-		else
-			static_cast<MSaltApp *>(gApp)->AddRecent(recent);
-	}
+	// if (w == nullptr)
+	// 	PlaySound("warning");
+	// else
+	// {
+	// 	w->Select();
+
+	// 	if (not command.empty())
+	// 		static_cast<MSaltApp *>(gApp)->AddRecent(recent + " >> " + command);
+	// 	else
+	// 		static_cast<MSaltApp *>(gApp)->AddRecent(recent);
+	// }
 
 	return w != nullptr;
 }
 
-void MConnectDialog::TextChanged(const string &inID, const string &inText)
+void MConnectDialog::TextChanged(const std::string &inID, const std::string &inText)
 {
 	if (inID == "host")
-		SelectRecent(inText);
-	else if (inID == "proxy-host")
-		SelectProxy(inText);
+		SelectRecent(ConnectInfo::parse(inText));
+	// else if (inID == "proxy-host")
+	// 	SelectProxy(inText);
 }
 
-void MConnectDialog::SelectRecent(const string &inRecent)
+void MConnectDialog::SelectRecent(const ConnectInfo &inRecent)
 {
-	std::string host, proxy;
-	auto v = inRecent.find(" via ");
-	if (v != std::string::npos)
+	for (auto &recent : mRecentSessions)
 	{
-		host = inRecent.substr(0, v);
-		proxy = inRecent.substr(v + 5);
-	}
-	else
-		host = inRecent;
-
-	for (const string &recent : mRecentSessions)
-	{
-		std::smatch m;
-		if (not std::regex_match(recent, m, kRecentRE))
+		if (inRecent.host != recent.host or inRecent.proxy != recent.proxy)
 			continue;
 
-		if (m[2] != host or (proxy.empty() == false and (m[4].matched and m[4] != proxy)))
-			continue;
-
-		SetText("user", m[1]);
+		SetText("user", recent.user);
 
 		bool expand = false;
 
-		if (m[6].matched)
+		if (recent.proxy.has_value())
 		{
 			expand = true;
-			SetText("ssh-command", m[6]);
-		}
-		else
-			SetText("ssh-command", "");
-
-		// proxied?
-		if (m[4].matched)
-		{
-			expand = true;
+			SetText("ssh-command", recent.proxy->command);
 
 			SetChecked("use-proxy", true);
 
-			SetText("proxy-user", m[3]);
-			SetText("proxy-host", m[4]);
-			SetText("proxy-command", m[5]);
+			SetText("proxy-user", recent.proxy->user);
+			SetText("proxy-host", recent.proxy->host);
+			SetText("proxy-command", recent.proxy->command);
 
 			SetEnabled("proxy-user", true);
 			SetEnabled("proxy-host", true);
@@ -302,6 +373,7 @@ void MConnectDialog::SelectRecent(const string &inRecent)
 		}
 		else
 		{
+			SetText("ssh-command", "");
 			SetChecked("use-proxy", false);
 			SetEnabled("proxy-user", false);
 			SetEnabled("proxy-host", false);
@@ -309,15 +381,13 @@ void MConnectDialog::SelectRecent(const string &inRecent)
 		}
 
 		SetOpen("more-expander", expand);
-		//			SetVisible("more-box", expand);
-
 		break;
 	}
 }
 
-void MConnectDialog::SelectProxy(const string &inProxy)
+void MConnectDialog::SelectProxy(const ProxyInfo &inProxy)
 {
-	if (inProxy.empty())
+	if (not inProxy)
 	{
 		SetChecked("use-proxy", false);
 		SetEnabled("proxy-user", false);
@@ -330,26 +400,12 @@ void MConnectDialog::SelectProxy(const string &inProxy)
 		SetEnabled("proxy-host", true);
 		SetEnabled("proxy-command", true);
 
-		string proxy_user, proxy_command /* = "/usr/bin/nc %h %p" */;
-
-		for (string &recent : mRecentProxies)
-		{
-			std::smatch m;
-			if (std::regex_match(recent, m, kProxyRE) and m[2] == inProxy)
-			{ // we have a recent match for this host
-				// automatically fill in the user
-				proxy_user = m[1];
-				proxy_command = m[3];
-				break;
-			}
-		}
-
-		SetText("proxy-user", proxy_user);
-		SetText("proxy-command", proxy_command);
+		SetText("proxy-user", inProxy.user);
+		SetText("proxy-command", inProxy.command);
 	}
 }
 
-void MConnectDialog::CheckboxChanged(const string &inID, bool inValue)
+void MConnectDialog::CheckboxChanged(const std::string &inID, bool inValue)
 {
 	if (inID == "use-proxy")
 	{

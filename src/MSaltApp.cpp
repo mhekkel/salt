@@ -134,13 +134,8 @@ void MSaltApp::Initialise()
 #endif
 
 	// recent menu
-	std::vector<std::string> recent;
-	Preferences::GetArray("recent-sessions", recent);
-	for (const std::string &r : recent)
-	{
-		if (std::regex_match(r, kRecentRE))
-			mRecent.push_back(r);
-	}
+	for (auto &r : MConnectDialog::GetRecentHosts())
+		mRecent.push_back(r);
 
 	// known hosts
 	auto &known_hosts = pinch::known_hosts::instance();
@@ -179,8 +174,13 @@ void MSaltApp::Initialise()
 
 void MSaltApp::SaveGlobals()
 {
-	std::vector<std::string> recent(mRecent.begin(), mRecent.end());
-	Preferences::SetArray("recent-sessions", recent);
+	// std::vector<std::string> recent(mRecent.begin(), mRecent.end());
+	// Preferences::SetArray("recent-sessions", recent);
+
+	std::vector<std::string> recent_v;
+	std::transform(mRecent.begin(), mRecent.end(), std::back_inserter(recent_v),
+		[](const ConnectInfo &ci) { return ci.str(); });
+	Preferences::SetArray("recent-sessions", recent_v);
 
 	// save new format of known hosts
 	std::ofstream known_host_file(gPrefsDir / "known_hosts");
@@ -323,22 +323,8 @@ void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
 
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 
-	for (const std::string &recent : mRecent)
-	{
-		std::smatch m;
-
-		if (std::regex_match(recent, m, kRecentRE))
-		{
-			std::string label = m[1].str() + "@"s + m[2].str() +
-			                    (m[3].matched ? (":"s + m[3].str()) : "");
-
-			if (m[5].matched)
-				label += " (via " + m[4].str() + "@"s + m[5].str() +
-				         (m[6].matched ? (":"s + m[6].str()) : "") + ")";
-
-			inMenu->AppendItem(label, cmd_OpenRecentSession);
-		}
-	}
+	for (auto &recent : mRecent)
+		inMenu->AppendItem(recent.DisplayString(), cmd_OpenRecentSession);
 }
 
 void MSaltApp::UpdatePublicKeyMenu(MMenu *inMenu)
@@ -366,52 +352,28 @@ void MSaltApp::UpdateTOTPMenu(MMenu *inMenu)
 	}
 }
 
-void MSaltApp::AddRecent(const std::string &inRecent)
+void MSaltApp::AddRecent(const ConnectInfo &inRecent)
 {
-	if (std::regex_match(inRecent, kRecentRE))
-	{
-		mRecent.erase(remove(mRecent.begin(), mRecent.end(), inRecent), mRecent.end());
-		mRecent.push_front(inRecent);
-		if (mRecent.size() > 10)
-			mRecent.pop_back();
+	mRecent.erase(remove(mRecent.begin(), mRecent.end(), inRecent), mRecent.end());
+	mRecent.push_front(inRecent);
+	if (mRecent.size() > 10)
+		mRecent.pop_back();
 
-		std::vector<std::string> recent_v(mRecent.begin(), mRecent.end());
-		Preferences::SetArray("recent-sessions", recent_v);
-	}
+	std::vector<std::string> recent_v;
+	std::transform(mRecent.begin(), mRecent.end(), std::back_inserter(recent_v),
+		[](const ConnectInfo &ci) { return ci.str(); });
+	Preferences::SetArray("recent-sessions", recent_v);
 }
 
-void MSaltApp::OpenRecent(const std::string &inRecent)
+void MSaltApp::OpenRecent(const ConnectInfo &inRecent)
 {
-	std::smatch m;
-
-	if (std::regex_match(inRecent, m, kRecentRE))
-	{
-		std::string user = m[1];
-		std::string host = m[2];
-		uint16_t port = m[3].matched ? std::stoi(m[3]) : 22;
-		std::string command = m[6];
-
-		MWindow *w;
-
-		if (m[5].matched)
-		{
-			std::string proxy_user = m[4];
-			std::string proxy_host = m[5];
-			uint16_t proxy_port = m[6].matched ? std::stoi(m[6]) : 22;
-			std::string proxy_cmd = m[7];
-
-			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(
-				user, host, port, proxy_user, proxy_host, proxy_port, proxy_cmd);
-			w = MTerminalWindow::Create(host, user, port, command, connection);
-		}
-		else
-		{
-			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
-			w = MTerminalWindow::Create(host, user, port, command, connection);
-		}
-
-		w->Select();
-	}
+	auto connection = inRecent.proxy.has_value() ?
+		mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port,
+			inRecent.proxy->user, inRecent.proxy->host, inRecent.proxy->port, inRecent.proxy->command) :
+		mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port);
+		
+	auto w = MTerminalWindow::Create(inRecent.host, inRecent.user, inRecent.port, "", connection);
+	w->Select();
 }
 
 void MSaltApp::DoAbout()

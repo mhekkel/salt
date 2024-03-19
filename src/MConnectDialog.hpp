@@ -31,6 +31,52 @@
 
 #include "MDialog.hpp"
 
+#include <optional>
+
+struct ConnectInfoBase
+{
+	std::string host;
+	std::string user;
+	uint16_t port = 22;
+
+	auto operator<=>(const ConnectInfoBase &) const noexcept = default;
+
+	friend std::ostream &operator<<(std::ostream &os, const ConnectInfoBase &c);
+
+	explicit operator bool() const
+	{
+		return not host.empty();
+	}
+};
+
+struct ProxyInfo : public ConnectInfoBase
+{
+	std::string command;
+
+	auto operator<=>(const ProxyInfo &) const noexcept = default;
+
+	friend std::ostream &operator<<(std::ostream &os, const ProxyInfo &c);
+};
+
+struct ConnectInfo : public ConnectInfoBase
+{
+	std::optional<ProxyInfo> proxy;
+
+	auto operator<=>(const ConnectInfo &) const noexcept = default;
+
+	std::string str() const
+	{
+		return (std::ostringstream() << *this).str();
+	}
+
+	std::string DisplayString() const;
+	static ConnectInfo parse(const std::string &s);
+
+	friend std::ostream &operator<<(std::ostream &os, const ConnectInfo &c);
+};
+
+// --------------------------------------------------------------------
+
 class MConnectDialog : public MDialog
 {
   public:
@@ -43,9 +89,12 @@ class MConnectDialog : public MDialog
 	virtual void CheckboxChanged(const std::string &inID, bool inValue);
 	virtual void ButtonClicked(const std::string &inID);
 
-  private:
-	void SelectProxy(const std::string &inProxy);
-	void SelectRecent(const std::string &inRecent);
+	static std::vector<ConnectInfo> GetRecentHosts();
 
-	std::vector<std::string> mRecentSessions, mRecentProxies;
+  private:
+	void SelectProxy(const ProxyInfo &inProxy);
+	void SelectRecent(const ConnectInfo &inRecent);
+
+	std::vector<ConnectInfo> mRecentSessions;
+	std::vector<ProxyInfo> mRecentProxies;
 };
