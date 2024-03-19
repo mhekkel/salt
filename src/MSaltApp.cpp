@@ -218,7 +218,7 @@ bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t 
 
 		case cmd_OpenRecentSession:
 			if (inItemIndex - 2 < mRecent.size())
-				OpenRecent(*(mRecent.begin() + inItemIndex - 2));
+				Open(*(mRecent.begin() + inItemIndex - 2));
 			break;
 
 		case cmd_ClearRecentSessions:
@@ -365,15 +365,17 @@ void MSaltApp::AddRecent(const ConnectInfo &inRecent)
 	Preferences::SetArray("recent-sessions", recent_v);
 }
 
-void MSaltApp::OpenRecent(const ConnectInfo &inRecent)
+void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
 {
 	auto connection = inRecent.proxy.has_value() ?
 		mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port,
 			inRecent.proxy->user, inRecent.proxy->host, inRecent.proxy->port, inRecent.proxy->command) :
 		mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port);
 		
-	auto w = MTerminalWindow::Create(inRecent.host, inRecent.user, inRecent.port, "", connection);
+	auto w = MTerminalWindow::Create(inRecent.host, inRecent.user, inRecent.port, inCommand, connection);
 	w->Select();
+
+	AddRecent(inRecent);
 }
 
 void MSaltApp::DoAbout()

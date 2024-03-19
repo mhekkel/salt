@@ -77,7 +77,7 @@ class MSaltApp : public MApplication
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
 	void AddRecent(const ConnectInfo &inRecent);
-	void OpenRecent(const ConnectInfo &inRecent);
+	void Open(const ConnectInfo &inRecent, const std::string &inCommand = {});
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
 

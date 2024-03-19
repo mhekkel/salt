@@ -39,6 +39,11 @@ struct ConnectInfoBase
 	std::string user;
 	uint16_t port = 22;
 
+	std::string HostAndPortString() const
+	{
+		return port == 22 ? host : host + ':' + std::to_string(port);
+	}
+
 	auto operator<=>(const ConnectInfoBase &) const noexcept = default;
 
 	friend std::ostream &operator<<(std::ostream &os, const ConnectInfoBase &c);
@@ -82,12 +87,14 @@ class MConnectDialog : public MDialog
   public:
 	MConnectDialog();
 
-	virtual bool CancelClicked();
-	virtual bool OKClicked();
+	bool CancelClicked() override;
+	bool OKClicked() override;
 
-	virtual void TextChanged(const std::string &inID, const std::string &inText);
-	virtual void CheckboxChanged(const std::string &inID, bool inValue);
-	virtual void ButtonClicked(const std::string &inID);
+	// void TextChanged(const std::string &inID, const std::string &inText) override;
+	void ValueChanged(const std::string &inID, int32_t inValue) override;
+
+	void CheckboxChanged(const std::string &inID, bool inValue) override;
+	void ButtonClicked(const std::string &inID) override;
 
 	static std::vector<ConnectInfo> GetRecentHosts();
 
