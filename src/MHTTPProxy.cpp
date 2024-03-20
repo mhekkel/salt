@@ -51,8 +51,6 @@ using json = zeep::json::element;
 
 // --------------------------------------------------------------------
 
-using namespace boost::posix_time;
-
 using asio_ns::ip::tcp;
 
 class proxy_controller;

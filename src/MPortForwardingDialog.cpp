@@ -81,7 +81,7 @@ bool MPortForwardingDialog::OKClicked()
 
 		result = true;
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		DisplayError(e);
 	}
@@ -115,7 +115,7 @@ bool MSOCKS5ProxyDialog::OKClicked()
 		Preferences::SetString("socks5-proxy-port", std::to_string(listenPort));
 		result = true;
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		DisplayError(e);
 	}
@@ -177,7 +177,7 @@ bool MHTTPProxyDialog::OKClicked()
 
 		result = true;
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		DisplayError(e);
 	}

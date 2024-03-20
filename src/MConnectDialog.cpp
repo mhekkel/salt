@@ -133,43 +133,31 @@ ConnectInfo ConnectInfo::parse(const std::string &s)
 MConnectDialog::MConnectDialog()
 	: MDialog("connect-dialog")
 {
-	//	SetVisible("more-box", false);
 	SetOpen("more-expander", false);
-	// SetText("proxy-command", "/usr/bin/nc %h %p");
-
-	// SetChecked("use-proxy", false);
-	// SetEnabled("proxy-user", false);
-	// SetEnabled("proxy-host", false);
-	// SetEnabled("proxy-command", false);
 
 	std::smatch m;
-	std::vector<std::string> ss, hosts;
+	std::vector<std::string> hosts;
 
-	Preferences::GetArray("recent-proxies", ss);
-
-	for (auto &s : ss)
+	for (auto &s : Preferences::GetArray("recent-proxies"))
 	{
-		if (std::regex_match(s, m, kProxyRX))
-		{
-			hosts.push_back(m[2]);
+		if (not std::regex_match(s, m, kProxyRX))
+			continue;
 
-			ProxyInfo pi;
-			pi.user = m[1];
-			pi.host = m[2];
-			if (m[3].matched)
-				pi.port = std::stoi(m[3]);
-			pi.command = m[4];
+		hosts.push_back(m[2]);
 
-			mRecentProxies.push_back(pi);
-		}
+		ProxyInfo pi;
+		pi.user = m[1];
+		pi.host = m[2];
+		if (m[3].matched)
+			pi.port = std::stoi(m[3]);
+		pi.command = m[4];
+
+		mRecentProxies.push_back(pi);
 	}
 
 	SetChoices("proxy-host", hosts);
 
 	hosts.clear();
-
-	std::vector<std::string> sa;
-	Preferences::GetArray("recent-sessions", sa);
 
 	mRecentSessions = GetRecentHosts();
 
@@ -190,12 +178,9 @@ MConnectDialog::MConnectDialog()
 
 std::vector<ConnectInfo> MConnectDialog::GetRecentHosts()
 {
-	std::vector<std::string> sa;
-	Preferences::GetArray("recent-sessions", sa);
-
 	std::vector<ConnectInfo> result;
 
-	for (auto &s : sa)
+	for (auto &s : Preferences::GetArray("recent-sessions"))
 		result.push_back(ConnectInfo::parse(s));
 
 	return result;
@@ -207,6 +192,7 @@ void MConnectDialog::ButtonClicked(const std::string &inID)
 	//		SetVisible("more-box", IsOpen("more-expander"));
 	//	else
 	if (inID == "priv-key")
+	{
 		MFileDialogs::ChooseOneFile(this, [this](std::filesystem::path pemFile)
 			{
 				std::ifstream file(pemFile);
@@ -226,6 +212,7 @@ void MConnectDialog::ButtonClicked(const std::string &inID)
 				pinch::ssh_agent::instance().add(key, pemFile.filename().string(),
 					MAuthDialog::RequestSimplePassword(_("Adding Private Key"),
 						FormatString("Please enter password for the private key ^0", pemFile.filename().string()), this)); });
+	}
 	else
 		MDialog::ButtonClicked(inID);
 }
@@ -289,19 +276,11 @@ bool MConnectDialog::OKClicked()
 
 void MConnectDialog::ValueChanged(const std::string &inID, int32_t inValue)
 {
-	if (inID == "host")
+	if (inID == "host" and inValue >= 0 and inValue < mRecentSessions.size())
 		SelectRecent(mRecentSessions.at(inValue));
-	else if (inID == "proxy-host")
+	else if (inID == "proxy-host" and inValue >= 0 and inValue <= mRecentProxies.size())
 		SelectProxy(mRecentProxies.at(inValue));
 }
-
-// void MConnectDialog::TextChanged(const std::string &inID, const std::string &inText)
-// {
-// 	// if (inID == "host")
-// 	// 	SelectRecent(ConnectInfo::parse(inText));
-// 	// else if (inID == "proxy-host")
-// 	// 	SelectProxy(inText);
-// }
 
 void MConnectDialog::SelectRecent(const ConnectInfo &inRecent)
 {
@@ -311,25 +290,19 @@ void MConnectDialog::SelectRecent(const ConnectInfo &inRecent)
 			continue;
 
 		SetText("user", recent.user);
-		SetText("host", recent.HostAndPortString());
+		if (GetText("host") != recent.HostAndPortString())
+			SetText("host", recent.HostAndPortString());
 
 		bool expand = false;
 
 		if (recent.proxy.has_value())
 		{
 			expand = true;
-			// SetText("ssh-command", recent.proxy->command);
-
 			SetChecked("use-proxy", true);
-
 			SelectProxy(recent.proxy.value());
 		}
 		else
-		{
-			// SetText("ssh-command", "");
-
 			SelectProxy({});
-		}
 
 		SetOpen("more-expander", expand);
 		break;

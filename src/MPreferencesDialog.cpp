@@ -102,8 +102,7 @@ MPreferencesDialog::MPreferencesDialog()
 
 	SetChecked("forward-gpg-agent", Preferences::GetBoolean("forward-gpg-agent", true));
 
-	std::vector<std::string> dpc;
-	Preferences::GetArray("disallowed-paste-characters", dpc);
+	auto dpc = Preferences::GetArray("disallowed-paste-characters");
 	if (dpc.empty())
 	{
 		dpc = std::vector<std::string>{ "BS", "DEL", "ENQ", "EOT", "ESC", "NUL" };
@@ -141,9 +140,8 @@ MPreferencesDialog::MPreferencesDialog()
 	SetChecked("graphical-beep", Preferences::GetBoolean("graphical-beep", true));
 
 	stringstream env;
-	vector<string> envs;
-	Preferences::GetArray("env", envs);
-	for (const string &s : envs)
+	
+	for (const string &s : Preferences::GetArray("env"))
 		env << s << '\n';
 	SetText("env", env.str());
 

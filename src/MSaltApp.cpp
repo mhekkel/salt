@@ -147,12 +147,9 @@ void MSaltApp::Initialise()
 			known_hosts.load_host_file(host_file);
 	}
 
-	std::vector<std::string> knownHosts;
-	Preferences::GetArray("known-hosts", knownHosts);
-
 	std::regex rx("^(\\S+) (\\S+) (.+)");
 
-	for (const std::string &known : knownHosts)
+	for (const std::string &known : Preferences::GetArray("known-hosts"))
 	{
 		std::smatch m;
 		if (std::regex_match(known, m, rx))
@@ -340,11 +337,9 @@ void MSaltApp::UpdateTOTPMenu(MMenu *inMenu)
 {
 	inMenu->RemoveItems(2, inMenu->CountItems() - 2);
 
-	std::vector<std::string> totp;
-	Preferences::GetArray("totp", totp);
 	const std::regex rx("(.+);[A-Z2-7]+");
 
-	for (auto p : totp)
+	for (auto &p : Preferences::GetArray("totp"))
 	{
 		std::smatch m;
 		if (regex_match(p, m, rx))

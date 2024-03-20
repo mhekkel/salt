@@ -37,6 +37,8 @@
 
 #include <cmath>
 
+// --------------------------------------------------------------------
+
 MAuthDialog::MAuthDialog(const std::string &inTitle, MWindow *inParent)
 	: MDialog("auth-dialog")
 	, mParent(inParent)
@@ -128,7 +130,7 @@ std::function<bool(std::string &)> MAuthDialog::RequestSimplePassword(
 				{ outPassword = pw; });
 			result = dlog->ShowModal(inParent);
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			DisplayError(e);
 		}

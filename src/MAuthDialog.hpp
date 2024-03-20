@@ -35,6 +35,8 @@
 
 #include <pinch.hpp>
 
+// --------------------------------------------------------------------
+
 class MAuthDialog : public MDialog
 {
   public:

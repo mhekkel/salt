@@ -38,8 +38,6 @@
 
 #include "mrsrc.hpp"
 
-using namespace std;
-
 class MImageButton : public MCanvas
 {
   public:
@@ -74,7 +72,7 @@ MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *
 {
 	mrsrc::rsrc rsrc(inImageResource);
 	if (not rsrc)
-		throw runtime_error("resource not found");
+		throw std::runtime_error("resource not found");
 
 	MBitmap buttons(rsrc.data(), rsrc.size());
 	mCloseButtonBitmaps[0] = MBitmap(buttons, MRect{ 0, 0, 16, 16 });
@@ -158,7 +156,7 @@ void MImageButton::MouseExit()
 
 // --------------------------------------------------------------------
 
-MSearchPanel::MSearchPanel(const string &inID, MRect inBounds)
+MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	: MBoxControl(inID, inBounds, true)
 	, eClose(this, &MSearchPanel::Close)
 	, eFindBtn(this, &MSearchPanel::FindBtn)
@@ -167,7 +165,7 @@ MSearchPanel::MSearchPanel(const string &inID, MRect inBounds)
 	MDevice dev;
 	dev.SetFont("Segoe UI 9");
 
-	string captionString(_("Find:"));
+	std::string captionString(_("Find:"));
 	dev.SetText(captionString);
 	uint32_t captionWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
@@ -203,7 +201,7 @@ MSearchPanel::MSearchPanel(const string &inID, MRect inBounds)
 	AddChild(mTextBox);
 	mTextBox->SetText(Preferences::GetString("find-recent", ""));
 
-	string label(_("Case sensitive"));
+	std::string label(_("Case sensitive"));
 	dev.SetText(label);
 	uint32_t labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
@@ -291,7 +289,7 @@ bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool 
 	return result;
 }
 
-string MSearchPanel::GetSearchString() const
+std::string MSearchPanel::GetSearchString() const
 {
 	return mTextBox->GetText();
 }

@@ -357,14 +357,12 @@ void MTerminalView::Open()
 		bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
 
 	// set some environment variables
-	std::vector<std::string> env;
-	Preferences::GetArray("env", env);
 
 	mTerminalChannel->Open(
 		Preferences::GetString("terminal-type", "xterm-256color"),
 		Preferences::GetBoolean("forward-ssh-agent", true),
 		Preferences::GetBoolean("forward-x11", true),
-		mArgv, env,
+		mArgv, Preferences::GetArray("env"),
 		[this](const std::error_code &ec)
 		{
 			this->HandleOpened(ec);
@@ -2157,8 +2155,7 @@ bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 	{
 		// clean up the text to be pasted
 
-		std::vector<std::string> dpc;
-		Preferences::GetArray("disallowed-paste-characters", dpc);
+		auto dpc = Preferences::GetArray("disallowed-paste-characters");
 		if (dpc.empty())
 		{
 			dpc = std::vector<std::string>{ "BS", "DEL", "ENQ", "EOT", "ESC", "NUL" };
@@ -2413,8 +2410,7 @@ bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint
 
 void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 {
-	std::vector<std::string> totp;
-	Preferences::GetArray("totp", totp);
+	auto totp = Preferences::GetArray("totp");
 
 	// silently break on errors
 	for (;;)

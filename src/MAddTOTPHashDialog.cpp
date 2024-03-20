@@ -35,8 +35,6 @@
 
 #include <zeep/crypto.hpp>
 
-using namespace std;
-
 // --------------------------------------------------------------------
 
 MAddTOTPHashDialog::MAddTOTPHashDialog()
@@ -54,28 +52,27 @@ bool MAddTOTPHashDialog::OKClicked()
 
 	try
 	{
-		string name = GetText("name");
+		std::string name = GetText("name");
 		if (name.empty())
-			throw runtime_error("Empty name");
+			throw std::runtime_error("Empty name");
 
-		string hash = GetText("hash");
+		std::string hash = GetText("hash");
 		if (hash.empty())
-			throw runtime_error("Empty hash");
+			throw std::runtime_error("Empty hash");
 
 		// validate hash
 
 		std::string b = zeep::decode_base32(hash);
 		if (b.length() < 8) // or (size % 8) != 0)
-			throw runtime_error("invalid hash");
+			throw std::runtime_error("invalid hash");
 
-		vector<string> totp;
-		Preferences::GetArray("totp", totp);
+		auto totp = Preferences::GetArray("totp");
 		totp.push_back(name + ";" + hash);
 		Preferences::SetArray("totp", totp);
 
 		result = true;
 	}
-	catch (const exception &ex)
+	catch (const std::exception &ex)
 	{
 		DisplayError(ex);
 	}
