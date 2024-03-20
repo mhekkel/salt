@@ -51,6 +51,7 @@ class MTerminalWindow : public MWindow
 	virtual MTerminalWindow *Clone(MTerminalWindow *inOriginal) = 0;
 
 	void Mapped() override;
+	void FocusTerminalView();
 
 	static MTerminalWindow *GetFirstTerminal() { return sFirst; }
 	MTerminalWindow *GetNextTerminal() { return mNext; }

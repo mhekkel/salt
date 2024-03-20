@@ -443,6 +443,11 @@ void MTerminalWindow::Mapped()
 	mTerminalView->SetFocus();
 }
 
+void MTerminalWindow::FocusTerminalView()
+{
+	mTerminalView->SetFocus();
+}
+
 MRect MTerminalWindow::GetPreferredBounds()
 {
 	uint32_t w, h;

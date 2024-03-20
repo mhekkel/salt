@@ -69,9 +69,6 @@ class MSearchPanel : public MBoxControl
 	MEventIn<void(const std::string &)> eFindBtn;
 	void FindBtn(const std::string &);
 
-	// MEventIn<void(uint32_t, uint32_t)> eKeyDown;
-	// void KeyDown(uint32_t, uint32_t);
-
 	MEdittext *mTextBox;
 	MCheckbox *mCaseSensitive;
 };

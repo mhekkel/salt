@@ -35,6 +35,7 @@
 #include "MPreferences.hpp"
 #include "MSound.hpp"
 #include "MStrings.hpp"
+#include "MTerminalWindow.hpp"
 
 #include "mrsrc.hpp"
 
@@ -289,6 +290,11 @@ bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool 
 		
 		case kDownArrowKeyCode:
 			eSearch(searchDown);
+			break;
+
+		case kTabKeyCode:
+			if (auto w = dynamic_cast<MTerminalWindow *>(GetWindow()); w != nullptr)
+				w->FocusTerminalView();
 			break;
 
 		default:
