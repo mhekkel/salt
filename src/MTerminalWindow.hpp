@@ -50,18 +50,18 @@ class MTerminalWindow : public MWindow
 
 	virtual MTerminalWindow *Clone(MTerminalWindow *inOriginal) = 0;
 
-	virtual void Mapped();
+	void Mapped() override;
 
 	static MTerminalWindow *GetFirstTerminal() { return sFirst; }
 	MTerminalWindow *GetNextTerminal() { return mNext; }
 
-	virtual ~MTerminalWindow();
+	~MTerminalWindow() override;
 
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
+	bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked) override;
+	bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers) override;
 
-	virtual bool AllowClose(bool inLogOff);
-	virtual void Close();
+	bool AllowClose(bool inLogOff) override;
+	void Close() override;
 
 	static bool IsAnyTerminalOpen();
 
@@ -71,10 +71,7 @@ class MTerminalWindow : public MWindow
 	void ShowSearchPanel();
 	void HideSearchPanel();
 
-	MEventIn<void()> eAnimate;
-	void Animate();
-
-	static MRect GetPrefferedBounds();
+	static MRect GetPreferredBounds();
 
 	static MTerminalWindow *sFirst;
 
@@ -84,6 +81,4 @@ class MTerminalWindow : public MWindow
 	MSearchPanel *mSearchPanel;
 	MTerminalView *mTerminalView;
 	MTerminalWindow *mNext;
-	MAnimationManager *mAnimationManager;
-	MAnimationVariable *mAnimationVariable;
 };

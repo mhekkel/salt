@@ -1302,24 +1302,6 @@ void MTerminalView::Draw()
 	mBuffer->SetDirty(false);
 }
 
-void MTerminalView::ActivateSelf()
-{
-	MView::ActivateSelf();
-	Invalidate();
-
-	if (not sTerminalList.empty() and sTerminalList.front() != this)
-	{
-		sTerminalList.erase(remove(sTerminalList.begin(), sTerminalList.end(), this), sTerminalList.end());
-		sTerminalList.push_front(this);
-	}
-}
-
-void MTerminalView::DeactivateSelf()
-{
-	MView::ActivateSelf();
-	Invalidate();
-}
-
 void MTerminalView::AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	SetCursor(eNormalCursor);
@@ -2814,6 +2796,11 @@ void MTerminalView::Closed()
 	// }
 
 	mAnimationManager->Schedule(storyboard);
+}
+
+bool MTerminalView::IsActive()
+{
+	return IsFocus();
 }
 
 void MTerminalView::HandleOpened(const std::error_code &ec)

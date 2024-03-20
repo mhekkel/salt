@@ -52,9 +52,6 @@ class MImageButton : public MCanvas
 	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void MouseExit();
 
-	virtual void ActivateSelf() { Invalidate(); }
-	virtual void DeactivateSelf() { Invalidate(); }
-
   private:
 	enum MMouseStateForCloseButton
 	{
@@ -252,6 +249,11 @@ void MSearchPanel::Close()
 	ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
 }
 
+void MSearchPanel::SetFocus()
+{
+	mTextBox->SetFocus();
+}
+
 void MSearchPanel::FindBtn(const std::string &inID)
 {
 	if (inID == "find-next")
@@ -279,6 +281,14 @@ bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool 
 
 		case kEscapeKeyCode:
 			Close();
+			break;
+
+		case kUpArrowKeyCode:
+			eSearch(searchUp);
+			break;
+		
+		case kDownArrowKeyCode:
+			eSearch(searchDown);
 			break;
 
 		default:

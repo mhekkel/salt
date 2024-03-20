@@ -332,18 +332,12 @@ MPtyTerminalWindow::MPtyTerminalWindow(MPtyTerminalWindow *inOriginal)
 MTerminalWindow *MTerminalWindow::sFirst = nullptr;
 
 MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
-	: MWindow("Terminal", GetPrefferedBounds(),
+	: MWindow("Terminal", GetPreferredBounds(),
 		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate /* | kMCustomNonClient */),
 		  "terminal-window-menu")
-	, eAnimate(this, &MTerminalWindow::Animate)
 	, mChannel(inTerminalChannel)
 	, mNext(nullptr)
-	, mAnimationManager(new MAnimationManager())
-	, mAnimationVariable(mAnimationManager->CreateVariable(0, 0, kSearchPanelHeight))
 {
-	// animations
-	AddRoute(eAnimate, mAnimationManager->eAnimate);
-
 	// create views
 	MRect bounds;
 
@@ -404,11 +398,6 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	hbox->AddChild(mTerminalView);
 	AddRoute(mTerminalView->eScroll, mScrollbar->eScroll);
 
-	//	SetFocus(mTerminalView);
-	SetLatentFocus(mTerminalView);
-
-	// and now resize the search panel...
-	//	Animate();
 	mSearchPanel->Hide();
 
 	if (Preferences::GetBoolean("show-status-bar", true) == false)
@@ -441,23 +430,20 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	delete mAnimationVariable;
-	delete mAnimationManager;
-
 	RemoveWindowFromWindowList(this);
 
 	// Time to quit?
-	if (sFirst == nullptr)	
+	if (sFirst == nullptr)
 		gApp->DoQuit();
 }
 
 void MTerminalWindow::Mapped()
 {
-	//	mTerminalView->ResizeTerminal(80, 24);
 	mTerminalView->Open();
+	mTerminalView->SetFocus();
 }
 
-MRect MTerminalWindow::GetPrefferedBounds()
+MRect MTerminalWindow::GetPreferredBounds()
 {
 	uint32_t w, h;
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
@@ -468,48 +454,13 @@ MRect MTerminalWindow::GetPrefferedBounds()
 void MTerminalWindow::ShowSearchPanel()
 {
 	mSearchPanel->Show();
-
-	//	(void)mAnimationManager->Update();
-	//
-	//	MStoryboard* storyboard = mAnimationManager->CreateStoryboard();
-	//	storyboard->AddTransition(mAnimationVariable, kSearchPanelHeight, 0.25,
-	//		"acceleration-decelleration");
-	//	mAnimationManager->Schedule(storyboard);
+	mSearchPanel->SetFocus();
 }
 
 void MTerminalWindow::HideSearchPanel()
 {
 	mSearchPanel->Hide();
-
-	//	MStoryboard* storyboard = mAnimationManager->CreateStoryboard();
-	//	storyboard->AddTransition(mAnimationVariable, 0, 0.25,
-	//		"acceleration-decelleration");
-	//	mAnimationManager->Schedule(storyboard);
-
 	mTerminalView->SetFocus();
-}
-
-void MTerminalWindow::Animate()
-{
-	//	ResizeSearchPanelTo(static_cast<uint32_t>(mAnimationVariable->GetValue()));
-
-	MRect frame;
-	mSearchPanel->GetFrame(frame);
-
-	uint32_t newHeight = static_cast<uint32_t>(mAnimationVariable->GetValue());
-
-	int32_t delta = newHeight - frame.height;
-
-	mSearchPanel->ResizeFrame(0, delta);
-	mTerminalView->ResizeFrame(0, -delta);
-	mTerminalView->MoveFrame(0, delta);
-	mScrollbar->ResizeFrame(0, -delta);
-	mScrollbar->MoveFrame(0, delta);
-
-	if (newHeight >= kSearchPanelHeight)
-		mSearchPanel->GetTextBox()->SetFocus();
-
-	ResizeWindow(0, delta);
 }
 
 bool MTerminalWindow::IsAnyTerminalOpen()
@@ -540,9 +491,7 @@ bool MTerminalWindow::AllowClose(bool inLogOff)
 
 void MTerminalWindow::Close()
 {
-	mAnimationManager->Stop();
 	mTerminalView->Destroy();
-
 	MWindow::Close();
 }
 

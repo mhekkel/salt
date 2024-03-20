@@ -181,7 +181,11 @@ std::vector<ConnectInfo> MConnectDialog::GetRecentHosts()
 	std::vector<ConnectInfo> result;
 
 	for (auto &s : Preferences::GetArray("recent-sessions"))
-		result.push_back(ConnectInfo::parse(s));
+	{
+		auto ci = ConnectInfo::parse(s);
+		if (ci)
+			result.push_back(std::move(ci));
+	}
 
 	return result;
 }
