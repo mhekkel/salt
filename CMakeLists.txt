@@ -134,6 +134,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Dialogs
 	${CMAKE_SOURCE_DIR}/rsrc/strings.xml.nl
 	${CMAKE_SOURCE_DIR}/rsrc/MakeRes.pl
+	${CMAKE_SOURCE_DIR}/rsrc/Sounds
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
