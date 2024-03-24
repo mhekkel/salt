@@ -367,7 +367,7 @@ void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
 			inRecent.proxy->user, inRecent.proxy->host, inRecent.proxy->port, inRecent.proxy->command) :
 		mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port);
 		
-	auto w = MTerminalWindow::Create(inRecent.host, inRecent.user, inRecent.port, inCommand, connection);
+	auto w = MTerminalWindow::Create(inRecent.user, inRecent.host, inRecent.port, inCommand, connection);
 	w->Select();
 
 	AddRecent(inRecent);
