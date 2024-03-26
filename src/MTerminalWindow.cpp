@@ -355,7 +355,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	bounds.height = kSearchPanelHeight;
 	mSearchPanel = new MSearchPanel("searchpanel", bounds);
 	mSearchPanel->SetBindings(true, true, true, false);
-	mSearchPanel->SetLayout(false, MRect{});
+	// mSearchPanel->SetLayout(false, MRect{});
 	AddChild(mSearchPanel);
 
 	// create status bar
@@ -377,7 +377,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	// hbox: force correct autolayout in Gtk
 	MBoxControl *hbox = new MBoxControl("hbox", bounds, true, false, true, true, 0, 0);
-	hbox->SetLayout(true, MRect{});
+	hbox->SetLayout(true, true, 0);
 	AddChild(hbox);
 
 	// create scrollbar
@@ -388,13 +388,8 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	bounds.width = kScrollbarWidth;
 	mScrollbar = new MScrollbar("scrollbar", bounds);
 	mScrollbar->SetBindings(false, true, true, true);
-	mScrollbar->SetLayout(false, MRect{});
-
-	// create terminal view
-	//	bounds = GetBounds();
-	//	bounds.y += kSearchPanelHeight;
-	//	bounds.height -= statusbarHeight + kSearchPanelHeight;
-	//	bounds.width -= kScrollbarWidth;
+	hbox->AddChild(mScrollbar);
+	// mScrollbar->SetLayout(false, MRect{});
 
 	uint32_t w, h;
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
@@ -402,10 +397,9 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	mTerminalView = new MTerminalView("terminalview", bounds, mStatusbar, mScrollbar, mSearchPanel, inTerminalChannel, inArgv);
 	mTerminalView->SetBindings(true, true, true, true);
-	mTerminalView->SetLayout(true, MRect{});
+	mTerminalView->SetLayout(true, true, 0);
 
-	hbox->AddChild(mTerminalView);
-	hbox->AddChild(mScrollbar);
+	hbox->AddChild(mTerminalView, mScrollbar);
 
 	AddRoute(mTerminalView->eScroll, mScrollbar->eScroll);
 

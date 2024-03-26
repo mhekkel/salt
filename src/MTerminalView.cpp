@@ -719,198 +719,198 @@ bool MTerminalView::GetCharacterForPosition(int32_t inX, int32_t inY, int32_t &o
 	return true;
 }
 
-// void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
-// {
-// 	bool done = false;
+void MTerminalView::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
+{
+	bool done = false;
 
-// 	if (not IsFocus())
-// 		SetFocus();
+	if (not IsFocus())
+		SetFocus();
 
-// 	if (not mBuffer->IsSelectionEmpty())
-// 	{
-// 		if (inModifiers & kShiftKey and mMouseMode == eTrackMouseNone)
-// 		{
-// 			mMouseClick = eSingleClick;
+	if (not mBuffer->IsSelectionEmpty())
+	{
+		if (inModifiers & kShiftKey and mMouseMode == eTrackMouseNone)
+		{
+			mMouseClick = eSingleClick;
 
-// 			int32_t line, column;
-// 			GetCharacterForPosition(inX, inY, line, column);
+			int32_t line, column;
+			GetCharacterForPosition(inX, inY, line, column);
 
-// 			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
-// 			{
-// 				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
+			{
+				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
 
-// 				mMinSelLine = mMaxSelLine;
-// 				mMinSelCol = mMaxSelCol;
-// 			}
-// 			else
-// 			{
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
+				mMinSelLine = mMaxSelLine;
+				mMinSelCol = mMaxSelCol;
+			}
+			else
+			{
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
 
-// 				mMaxSelLine = mMinSelLine;
-// 				mMaxSelCol = mMinSelCol;
-// 			}
+				mMaxSelLine = mMinSelLine;
+				mMaxSelCol = mMinSelCol;
+			}
 
-// 			Invalidate();
-// 			done = true;
-// 		}
-// 		else
-// 		{
-// 			mBuffer->SetSelection(0, 0, 0, 0, false);
-// 			Invalidate();
-// 		}
-// 	}
+			Invalidate();
+			done = true;
+		}
+		else
+		{
+			mBuffer->SetSelection(0, 0, 0, 0, false);
+			Invalidate();
+		}
+	}
 
-// 	if (mMouseMode != eTrackMouseNone and inClickCount == 1)
-// 	{
-// 		SendMouseCommand(0, inX, inY, inModifiers);
-// 		mMouseClick = eTrackClick;
-// 		done = true;
-// 	}
+	if (mMouseMode != eTrackMouseNone and inClickCount == 1)
+	{
+		SendMouseCommand(0, inX, inY, inModifiers);
+		mMouseClick = eTrackClick;
+		done = true;
+	}
 
-// 	if (not done)
-// 	{
-// 		switch (inClickCount)
-// 		{
-// 			case 1:
-// 				mMouseClick = eWaitClick;
-// 				mMouseBlockSelect = inModifiers & kControlKey;
-// 				mLastMouseDown = std::chrono::system_clock::now();
-// 				mLastMouseX = inX;
-// 				mLastMouseY = inY;
-// 				break;
+	if (not done)
+	{
+		switch (inClickCount)
+		{
+			case 1:
+				mMouseClick = eWaitClick;
+				mMouseBlockSelect = inModifiers & kControlKey;
+				mLastMouseDown = std::chrono::system_clock::now();
+				mLastMouseX = inX;
+				mLastMouseY = inY;
+				break;
 
-// 			case 2:
-// 			{
-// 				mMouseClick = eDoubleClick;
-// 				mMouseBlockSelect = false;
+			case 2:
+			{
+				mMouseClick = eDoubleClick;
+				mMouseBlockSelect = false;
 
-// 				int32_t line, column;
-// 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-// 				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+				int32_t line, column;
+				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
 
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
-// 				Invalidate();
-// 				break;
-// 			}
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+				Invalidate();
+				break;
+			}
 
-// 			default:
-// 			{
-// 				mMouseClick = eTripleClick;
-// 				mMouseBlockSelect = false;
+			default:
+			{
+				mMouseClick = eTripleClick;
+				mMouseBlockSelect = false;
 
-// 				int32_t line, column;
-// 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-// 				mMinSelLine = mMaxSelLine = line;
-// 				mMinSelCol = 0;
-// 				mMaxSelCol = mTerminalWidth;
+				int32_t line, column;
+				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+				mMinSelLine = mMaxSelLine = line;
+				mMinSelCol = 0;
+				mMaxSelCol = mTerminalWidth;
 
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
-// 				Invalidate();
-// 				break;
-// 			}
-// 		}
-// 	}
-// }
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+				Invalidate();
+				break;
+			}
+		}
+	}
+}
 
-// void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
-// {
-// 	using namespace std::chrono_literals;
+void MTerminalView::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
+{
+	using namespace std::chrono_literals;
 
-// 	if (mMouseClick == eTrackClick)
-// 	{
-// 		if (mMouseMode >= eTrackMouseCellMotionTracking)
-// 			SendMouseCommand(32, inX, inY, inModifiers);
-// 		return;
-// 	}
+	if (mMouseClick == eTrackClick)
+	{
+		if (mMouseMode >= eTrackMouseCellMotionTracking)
+			SendMouseCommand(32, inX, inY, inModifiers);
+		return;
+	}
 
-// 	// shortcut
-// 	if (mMouseClick == eNoClick)
-// 		return;
+	// shortcut
+	if (mMouseClick == eNoClick)
+		return;
 
-// 	if (mMouseClick == eWaitClick)
-// 	{
-// 		if (std::abs(mLastMouseX - inX) > 1 or
-// 			std::abs(mLastMouseY - inY) > 1 or
-// 			std::chrono::system_clock::now() > mLastMouseDown + 100ms)
-// 		{
-// 			mMouseClick = eSingleClick;
+	if (mMouseClick == eWaitClick)
+	{
+		if (std::abs(mLastMouseX - inX) > 1 or
+			std::abs(mLastMouseY - inY) > 1 or
+			std::chrono::system_clock::now() > mLastMouseDown + 100ms)
+		{
+			mMouseClick = eSingleClick;
 
-// 			int32_t line, column;
-// 			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-// 			mMinSelLine = mMaxSelLine = line;
-// 			mMinSelCol = column;
-// 			mMaxSelCol = column + 1;
+			int32_t line, column;
+			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+			mMinSelLine = mMaxSelLine = line;
+			mMinSelCol = column;
+			mMaxSelCol = column + 1;
 
-// 			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-// 		}
-// 	}
+			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+		}
+	}
 
-// 	int32_t line, column;
-// 	GetCharacterForPosition(inX, inY, line, column);
+	int32_t line, column;
+	GetCharacterForPosition(inX, inY, line, column);
 
-// 	switch (mMouseClick)
-// 	{
-// 		case eSingleClick:
-// 			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
-// 				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-// 			else if (line > mMaxSelLine or (line == mMaxSelLine and column > mMaxSelCol))
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
-// 			else
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-// 			break;
+	switch (mMouseClick)
+	{
+		case eSingleClick:
+			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
+				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+			else if (line > mMaxSelLine or (line == mMaxSelLine and column > mMaxSelCol))
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
+			else
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+			break;
 
-// 		case eDoubleClick:
-// 		{
-// 			int32_t wl1, wc1, wl2, wc2;
-// 			mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
+		case eDoubleClick:
+		{
+			int32_t wl1, wc1, wl2, wc2;
+			mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
 
-// 			if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
-// 				mBuffer->SetSelection(wl1, wc1, mMaxSelLine, mMaxSelCol);
-// 			else if (wl2 > mMaxSelLine or (wl2 == mMaxSelLine and wc2 > mMaxSelCol))
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, wl2, wc2);
-// 			else
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
-// 			break;
-// 		}
+			if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
+				mBuffer->SetSelection(wl1, wc1, mMaxSelLine, mMaxSelCol);
+			else if (wl2 > mMaxSelLine or (wl2 == mMaxSelLine and wc2 > mMaxSelCol))
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, wl2, wc2);
+			else
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+			break;
+		}
 
-// 		case eTripleClick:
-// 		{
-// 			if (line < mMinSelLine)
-// 				mBuffer->SetSelection(line, mMinSelCol, mMaxSelLine, mMaxSelCol);
-// 			else if (line > mMaxSelLine)
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, mMaxSelCol);
-// 			else
-// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
-// 			break;
-// 		}
+		case eTripleClick:
+		{
+			if (line < mMinSelLine)
+				mBuffer->SetSelection(line, mMinSelCol, mMaxSelLine, mMaxSelCol);
+			else if (line > mMaxSelLine)
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, mMaxSelCol);
+			else
+				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+			break;
+		}
 
-// 		default:;
-// 	}
+		default:;
+	}
 
-// 	Invalidate();
-// }
+	Invalidate();
+}
 
-// void MTerminalView::MouseExit()
-// {
-// 	mMouseClick = eNoClick;
-// }
+void MTerminalView::PointerLeave()
+{
+	mMouseClick = eNoClick;
+}
 
-// void MTerminalView::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
-// {
-// 	if (mMouseMode >= eTrackMouseSendXYOnButton)
-// 		SendMouseCommand(3, inX, inY, inModifiers);
-// 	else if (not mBuffer->IsSelectionEmpty())
-// 	{
-// 		sSelectBuffer = mBuffer->GetSelectedText();
-// #if defined(_MSC_VER)
-// 		MClipboard::Instance().SetData(sSelectBuffer, mBuffer->IsSelectionBlock());
-// #else
-// 		MPrimary::Instance().SetText(sSelectBuffer);
-// #endif
-// 	}
+void MTerminalView::ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
+{
+	if (mMouseMode >= eTrackMouseSendXYOnButton)
+		SendMouseCommand(3, inX, inY, inModifiers);
+	else if (not mBuffer->IsSelectionEmpty())
+	{
+		sSelectBuffer = mBuffer->GetSelectedText();
+#if defined(_MSC_VER)
+		MClipboard::Instance().SetData(sSelectBuffer, mBuffer->IsSelectionBlock());
+#else
+		// MPrimary::Instance().SetText(sSelectBuffer);
+#endif
+	}
 
-// 	mMouseClick = eNoClick;
-// }
+	mMouseClick = eNoClick;
+}
 
 // void MTerminalView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
 // {

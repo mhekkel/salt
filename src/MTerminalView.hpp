@@ -68,11 +68,12 @@ class MTerminalView : public MCanvas
 
 	void Draw() override;
 
-	// void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers) override;
-	// void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	// void MouseExit() override;
-	// void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	// void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) override;
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+
+	// virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	virtual void PointerLeave() override;
 
 	void ShowContextMenu(int32_t inX, int32_t inY) override;
 	static void GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
