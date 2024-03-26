@@ -43,6 +43,7 @@
 #include "MStrings.hpp"
 #include "MTerminalBuffer.hpp"
 #include "MUtils.hpp"
+#include "MUnicode.hpp"
 #include "MVT220CharSets.hpp"
 #include "MWindow.hpp"
 
@@ -1898,26 +1899,28 @@ std::string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifi
 	return text;
 }
 
-bool MTerminalView::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
+bool MTerminalView::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat)
 {
 	PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
 
-	// // shortcut
-	// if (inRepeat and mDECARM == false)
-	// 	return true;
+	bool handled = true;
+	std::string text;
 
-	bool handled = false;
-
-	if (not mTerminalChannel->IsOpen())
+	for (;;)
 	{
-		if (inKeyCode == kSpaceKeyCode or inKeyCode == kReturnKeyCode)
+		// shortcut
+		if (inAutoRepeat and mDECARM == false)
+			break;
+
+		if (not mTerminalChannel->IsOpen())
 		{
-			Open();
-			handled = true;
+			if (inKeyCode == kSpaceKeyCode or inKeyCode == kReturnKeyCode)
+				Open();
+			break;
 		}
-	}
-	else
-	{
+
+		bool scrolled = false;
+
 		if ((inModifiers & (kControlKey | kOptionKey | kShiftKey)) == kShiftKey)
 		{
 			// mimic xterm behaviour
@@ -1925,19 +1928,19 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 			{
 				case kHomeKeyCode:
 					Scroll(kScrollToStart);
-					handled = true;
+					scrolled = true;
 					break;
 				case kEndKeyCode:
 					Scroll(kScrollToEnd);
-					handled = true;
+					scrolled = true;
 					break;
 				case kPageUpKeyCode:
 					Scroll(kScrollPageUp);
-					handled = true;
+					scrolled = true;
 					break;
 				case kPageDownKeyCode:
 					Scroll(kScrollPageDown);
-					handled = true;
+					scrolled = true;
 					break;
 			}
 		}
@@ -1948,16 +1951,17 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 			{
 				case kUpArrowKeyCode:
 					Scroll(kScrollLineUp);
-					handled = true;
+					scrolled = true;
 					break;
 				case kDownArrowKeyCode:
 					Scroll(kScrollLineDown);
-					handled = true;
+					scrolled = true;
 					break;
 			}
 		}
 
-		std::string text;
+		if (scrolled)
+			break;
 
 		// VT220, device control strings
 		if (inModifiers == (mUDKWithShift ? kShiftKey : 0) and
@@ -1966,42 +1970,56 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 			mPFK->key.find(inKeyCode) != mPFK->key.end())
 		{
 			text = mPFK->key[inKeyCode];
-			handled = true;
 		}
-
-		if (not handled)
-		{
-			if (mDECANM == false) // We're in VT52 mode
-				text = ProcessKeyVT52(inKeyCode, inModifiers);
-			else if (mXTermKeys)
-				text = ProcessKeyXTerm(inKeyCode, inModifiers);
-			else
-				text = ProcessKeyANSI(inKeyCode, inModifiers);
-		}
-
-		if (not handled and inKeyCode == kEscapeKeyCode and inModifiers == 0)
+		else if (mDECANM == false) // We're in VT52 mode
+			text = ProcessKeyVT52(inKeyCode, inModifiers);
+		else if (mXTermKeys)
+			text = ProcessKeyXTerm(inKeyCode, inModifiers);
+		else if (inKeyCode == kEscapeKeyCode and inModifiers == 0)
 			text = "\x1b";
+		else
+			text = ProcessKeyANSI(inKeyCode, inModifiers);
 
-		// brain dead for now
 		if (not text.empty())
+			break;
+
+		if (inUnicode >= 0x60 and inUnicode <= 0x7f and inModifiers == kControlKey)
 		{
-			mBuffer->ClearSelection();
-
-			if (mKAM)
-				Beep();
-			else
-			{
-				SendCommand(text);
-
-				if (not mSRM)
-					mInputBuffer.insert(mInputBuffer.end(), text.begin(), text.end());
-
-				// force a scroll to the bottom
-				Scroll(kScrollToEnd);
-			}
-
-			handled = true;
+			char ch = static_cast<char>(inUnicode) - 0x60;
+			text += ch;
+			break;
 		}
+
+		if ((inModifiers & ~kShiftKey) == 0 and inUnicode != 0)
+		{
+			auto i = std::back_inserter(text);
+			MEncodingTraits<kEncodingUTF8>::WriteUnicode(i, inUnicode);
+		}
+
+		handled = false;
+
+		break;
+	}
+
+	// brain dead for now
+	if (not text.empty())
+	{
+		mBuffer->ClearSelection();
+
+		if (mKAM)
+			Beep();
+		else
+		{
+			SendCommand(text);
+
+			if (not mSRM)
+				mInputBuffer.insert(mInputBuffer.end(), text.begin(), text.end());
+
+			// force a scroll to the bottom
+			Scroll(kScrollToEnd);
+		}
+
+		handled = true;
 	}
 
 	if (handled)
@@ -2015,7 +2033,7 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 		ObscureCursor();
 	}
 	else
-		handled = MCanvas::KeyPressed(inKeyCode, inModifiers/* , inRepeat */);
+		handled = MCanvas::KeyPressed(inKeyCode, inUnicode, inModifiers, inAutoRepeat);
 
 	return handled;
 }
@@ -2031,12 +2049,12 @@ void MTerminalView::HandleMessage(const std::string &inMessage, const std::strin
 	Invalidate();
 }
 
-void MTerminalView::EnterText(const std::string &inText/* , bool inRepeat */)
+void MTerminalView::EnterText(const std::string &inText /* , bool inRepeat */)
 {
-/* 	// shortcut
-	if (inRepeat and mDECARM == false)
-		return true;
- */
+	/* 	// shortcut
+	    if (inRepeat and mDECARM == false)
+	        return true;
+	 */
 	// bool handled = false;
 
 	if (not mTerminalChannel->IsOpen())
@@ -3083,316 +3101,315 @@ void MTerminalView::Emulate()
 		// break on a smooth scroll event
 		if (mNextSmoothScroll.has_value())
 			break;
-	
 
 #if DEBUG
-	if (mDebugUpdate and mBuffer->IsDirty())
-	{
-		Invalidate();
-		GetWindow()->UpdateNow();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-#endif
-	// process bytes. We try to keep this code UTF-8 savvy
-	uint8_t ch = mInputBuffer.front();
-	mInputBuffer.pop_front();
-
-	// start by testing if this byte is a control code
-	// The C1 control codes are never leading bytes in a UTF-8
-	// sequence and so we can easily check for them here.
-
-	if (ch < 0x20 or ch == 0x7f or // a C0 control code
-	                               // or a C1 control code
-		(mDECSCL >= 2 and mS8C1T and (ch & 0xe0) == 0x80))
-	{
-		if (mLastCtrl)
-			mLastChar = 0;
-		mLastCtrl = true;
-
-		// shortcut, do not process control code if in a DCS or OSC std::string
-		if (ch != ESC)
+		if (mDebugUpdate and mBuffer->IsDirty())
 		{
-			switch (mEscState)
-			{
-				case eDCS:
-					EscapeDCS(ch);
-					continue;
-				case eOSC:
-					EscapeOSC(ch);
-					continue;
-				default:
-					break;
-			}
+			Invalidate();
+			GetWindow()->UpdateNow();
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
+#endif
+		// process bytes. We try to keep this code UTF-8 savvy
+		uint8_t ch = mInputBuffer.front();
+		mInputBuffer.pop_front();
 
-		switch (ch)
+		// start by testing if this byte is a control code
+		// The C1 control codes are never leading bytes in a UTF-8
+		// sequence and so we can easily check for them here.
+
+		if (ch < 0x20 or ch == 0x7f or // a C0 control code
+		                               // or a C1 control code
+			(mDECSCL >= 2 and mS8C1T and (ch & 0xe0) == 0x80))
 		{
-			case ENQ:
+			if (mLastCtrl)
+				mLastChar = 0;
+			mLastCtrl = true;
+
+			// shortcut, do not process control code if in a DCS or OSC std::string
+			if (ch != ESC)
 			{
-				std::string answer_back = Preferences::GetString("answer-back", "salt");
-				for (auto p = answer_back.find_first_of("\r\n"); p != std::string::npos; p = answer_back.find_first_of("\n\r", p))
-					answer_back.erase(answer_back.begin() + p);
-				mTerminalChannel->SendData(answer_back);
-				break;
-			}
-
-			case BEL:
-				if (mEscState == eOSC)
-					EscapeOSC(ch);
-				else
-					Beep();
-				break;
-
-			case BS:
-				MoveCursor(kMoveLeft);
-				break;
-			case HT:
-				MoveCursor(kMoveHT);
-				break;
-			case LF:
-			case VT:
-			case FF:
-				MoveCursor(mLNM ? kMoveCRLF : kMoveLF);
-				break;
-			case CR:
-				MoveCursor(kMoveCR);
-				break;
-			case SO:
-				mCursor.CSGL = 1;
-				break;
-			case SI:
-				mCursor.CSGL = 0;
-				break;
-			case SUB:
-				WriteChar(0x00bf /*¿*/); // fall through
-			case CAN:
-				mEscState = eESC_NONE;
-				break;
-
-			case ESC:
-				// If we're processing an escape std::string and then receive an escape
-				// this can either mean the beginning of a new escape std::string cancelling
-				// the previous, or it may be the start of a ST or BEL sequence.
-				// The latter can only occur when 8 bit controls are in use.
-
-				if (mDECSCL >= 2 and mS8C1T)
-					mEscState = eESC_SEEN;
-				else
-				{
-					switch (mEscState)
-					{
-						case eDCS:
-							mEscState = eDCS_ESC;
-							break;
-						case eOSC:
-							mEscState = eOSC_ESC;
-							break;
-						case ePM:
-							mEscState = ePM_ESC;
-							break;
-						case eAPC:
-							mEscState = eAPC_ESC;
-							break;
-						default:
-							mEscState = eESC_SEEN;
-							break;
-					}
-				}
-				break;
-
-			case IND:
-				MoveCursor(kMoveIND);
-				break;
-			case NEL:
-				MoveCursor(kMoveCRLF);
-				break;
-			case HTS:
-				SetTabstop();
-				break;
-			case RI:
-				MoveCursor(kMoveRI);
-				break;
-			case SS2:
-				mCursor.SS = 2;
-				break;
-			case SS3:
-				mCursor.SS = 3;
-				break;
-			case DCS:
-				mPFKKeyNr = 0;
-				mEscState = eDCS;
-				break;
-			case OSC:
-				mEscState = eOSC;
-				break;
-			case CSI:
-				mEscState = eCSI;
-				break;
-			case PM:
-				mEscState = ePM;
-				break;
-
-			case ST:
 				switch (mEscState)
 				{
 					case eDCS:
 						EscapeDCS(ch);
-						break;
+						continue;
 					case eOSC:
 						EscapeOSC(ch);
-						break;
-					case ePM:
-						mEscState = eESC_NONE;
-						break;
-					case eAPC:
-						mEscState = eESC_NONE;
-						break;
+						continue;
 					default:
 						break;
 				}
-				break;
-
-			default: /* ignore */
-				break;
-		}
-
-		continue;
-	}
-
-	// If we're processing an escape sequence, feed the byte to the processor.
-
-	if (mEscState != eESC_NONE)
-	{
-		if (mEscState == eDCS_ESC or mEscState == ePM_ESC or mEscState == eAPC_ESC or mEscState == eOSC_ESC)
-		{
-			if (ch == '\\')
-			{
-				if (mEscState == eDCS_ESC)
-					EscapeDCS(ST);
-				else if (mEscState == eOSC_ESC)
-					EscapeOSC(ST);
-				mEscState = eESC_NONE;
 			}
-			else if (mDECANM)
-				EscapeStart(ch);
-			else
-				EscapeVT52(ch);
+
+			switch (ch)
+			{
+				case ENQ:
+				{
+					std::string answer_back = Preferences::GetString("answer-back", "salt");
+					for (auto p = answer_back.find_first_of("\r\n"); p != std::string::npos; p = answer_back.find_first_of("\n\r", p))
+						answer_back.erase(answer_back.begin() + p);
+					mTerminalChannel->SendData(answer_back);
+					break;
+				}
+
+				case BEL:
+					if (mEscState == eOSC)
+						EscapeOSC(ch);
+					else
+						Beep();
+					break;
+
+				case BS:
+					MoveCursor(kMoveLeft);
+					break;
+				case HT:
+					MoveCursor(kMoveHT);
+					break;
+				case LF:
+				case VT:
+				case FF:
+					MoveCursor(mLNM ? kMoveCRLF : kMoveLF);
+					break;
+				case CR:
+					MoveCursor(kMoveCR);
+					break;
+				case SO:
+					mCursor.CSGL = 1;
+					break;
+				case SI:
+					mCursor.CSGL = 0;
+					break;
+				case SUB:
+					WriteChar(0x00bf /*¿*/); // fall through
+				case CAN:
+					mEscState = eESC_NONE;
+					break;
+
+				case ESC:
+					// If we're processing an escape std::string and then receive an escape
+					// this can either mean the beginning of a new escape std::string cancelling
+					// the previous, or it may be the start of a ST or BEL sequence.
+					// The latter can only occur when 8 bit controls are in use.
+
+					if (mDECSCL >= 2 and mS8C1T)
+						mEscState = eESC_SEEN;
+					else
+					{
+						switch (mEscState)
+						{
+							case eDCS:
+								mEscState = eDCS_ESC;
+								break;
+							case eOSC:
+								mEscState = eOSC_ESC;
+								break;
+							case ePM:
+								mEscState = ePM_ESC;
+								break;
+							case eAPC:
+								mEscState = eAPC_ESC;
+								break;
+							default:
+								mEscState = eESC_SEEN;
+								break;
+						}
+					}
+					break;
+
+				case IND:
+					MoveCursor(kMoveIND);
+					break;
+				case NEL:
+					MoveCursor(kMoveCRLF);
+					break;
+				case HTS:
+					SetTabstop();
+					break;
+				case RI:
+					MoveCursor(kMoveRI);
+					break;
+				case SS2:
+					mCursor.SS = 2;
+					break;
+				case SS3:
+					mCursor.SS = 3;
+					break;
+				case DCS:
+					mPFKKeyNr = 0;
+					mEscState = eDCS;
+					break;
+				case OSC:
+					mEscState = eOSC;
+					break;
+				case CSI:
+					mEscState = eCSI;
+					break;
+				case PM:
+					mEscState = ePM;
+					break;
+
+				case ST:
+					switch (mEscState)
+					{
+						case eDCS:
+							EscapeDCS(ch);
+							break;
+						case eOSC:
+							EscapeOSC(ch);
+							break;
+						case ePM:
+							mEscState = eESC_NONE;
+							break;
+						case eAPC:
+							mEscState = eESC_NONE;
+							break;
+						default:
+							break;
+					}
+					break;
+
+				default: /* ignore */
+					break;
+			}
 
 			continue;
 		}
 
-		// OK, so we're in the middle of an escape std::string
-		switch (mEscState)
+		// If we're processing an escape sequence, feed the byte to the processor.
+
+		if (mEscState != eESC_NONE)
 		{
-			case eESC_SEEN:
-				if (mDECANM)
+			if (mEscState == eDCS_ESC or mEscState == ePM_ESC or mEscState == eAPC_ESC or mEscState == eOSC_ESC)
+			{
+				if (ch == '\\')
+				{
+					if (mEscState == eDCS_ESC)
+						EscapeDCS(ST);
+					else if (mEscState == eOSC_ESC)
+						EscapeOSC(ST);
+					mEscState = eESC_NONE;
+				}
+				else if (mDECANM)
 					EscapeStart(ch);
 				else
 					EscapeVT52(ch);
-				break;
 
-			case eCSI:
-				EscapeCSI(ch);
-				break;
-			case eOSC:
-				EscapeOSC(ch);
-				break;
-			case eDCS:
-				EscapeDCS(ch);
-				break;
-			case ePM: /* ignore */
-				break;
+				continue;
+			}
 
-			case eAPC:
-				EscapeAPC(ch);
-				break;
-
-			case eSELECT_CHAR_SET:
-				SelectCharSet(ch);
-				break;
-			case eSELECT_CTRL_TRANSM:
-				SelectControlTransmission(ch);
-				break;
-			case eSELECT_DOUBLE:
-				SelectDouble(ch);
-				break;
-
-			// special VT52 handling
-			case eVT52_LINE:
-				mArgs.push_back(ch - US);
-				mEscState = eVT52_COLUMN;
-				break;
-
-			case eVT52_COLUMN:
-				MoveCursorTo((ch - US) - 1, mArgs[0] - 1);
-				mEscState = eESC_NONE;
-				break;
-
-			default:
-				assert(false); // now what?
-		}
-
-		continue; // ignore anything else, we're in an escape std::string
-	}
-
-	mLastCtrl = false;
-
-	// No control character and no escape sequence, so we have to write
-	// this character to the screen.
-	unicode uc = ch;
-
-	// if it is an ascii character, std::map it using GL
-	if (ch >= 32 and ch < 127) // GL
-	{
-		int set = mCursor.CSGL;
-		if (mCursor.SS != 0)
-			set = mCursor.SS;
-		uc = mCursor.charSetG[set][ch - 32];
-	}
-	else // GR
-	{    // no ascii, see if NRC is in use
-		if (mDECNRCM)
-		{
-			int set = mCursor.CSGR;
-			if (mCursor.SS != 0)
-				set = mCursor.SS;
-			uc = mCursor.charSetG[set][ch - 32 - 128];
-		}
-		else // no NRC, maybe the data should be interpreted as UTF-8
-		{
-			if (mEncoding == kEncodingUTF8)
+			// OK, so we're in the middle of an escape std::string
+			switch (mEscState)
 			{
-				uint32_t len = 1;
-				if ((ch & 0x0E0) == 0x0C0)
-					len = 2;
-				else if ((ch & 0x0F0) == 0x0E0)
-					len = 3;
-				else if ((ch & 0x0F8) == 0x0F0)
-					len = 4;
-
-				// be safe, in case the text in the buffer is too short for a valid UTF-8 character
-				// just wait until we receive some more.
-				mInputBuffer.push_front(ch);
-				if (mInputBuffer.size() < len)
+				case eESC_SEEN:
+					if (mDECANM)
+						EscapeStart(ch);
+					else
+						EscapeVT52(ch);
 					break;
 
-				static MEncodingTraits<kEncodingUTF8> traits;
-				traits.ReadUnicode(mInputBuffer.begin(), len, uc);
+				case eCSI:
+					EscapeCSI(ch);
+					break;
+				case eOSC:
+					EscapeOSC(ch);
+					break;
+				case eDCS:
+					EscapeDCS(ch);
+					break;
+				case ePM: /* ignore */
+					break;
 
-				while (len-- > 0)
-					mInputBuffer.pop_front();
+				case eAPC:
+					EscapeAPC(ch);
+					break;
+
+				case eSELECT_CHAR_SET:
+					SelectCharSet(ch);
+					break;
+				case eSELECT_CTRL_TRANSM:
+					SelectControlTransmission(ch);
+					break;
+				case eSELECT_DOUBLE:
+					SelectDouble(ch);
+					break;
+
+				// special VT52 handling
+				case eVT52_LINE:
+					mArgs.push_back(ch - US);
+					mEscState = eVT52_COLUMN;
+					break;
+
+				case eVT52_COLUMN:
+					MoveCursorTo((ch - US) - 1, mArgs[0] - 1);
+					mEscState = eESC_NONE;
+					break;
+
+				default:
+					assert(false); // now what?
 			}
-			else
-				uc = MUnicodeMapping::GetUnicode(kEncodingISO88591, ch);
+
+			continue; // ignore anything else, we're in an escape std::string
 		}
+
+		mLastCtrl = false;
+
+		// No control character and no escape sequence, so we have to write
+		// this character to the screen.
+		unicode uc = ch;
+
+		// if it is an ascii character, std::map it using GL
+		if (ch >= 32 and ch < 127) // GL
+		{
+			int set = mCursor.CSGL;
+			if (mCursor.SS != 0)
+				set = mCursor.SS;
+			uc = mCursor.charSetG[set][ch - 32];
+		}
+		else // GR
+		{    // no ascii, see if NRC is in use
+			if (mDECNRCM)
+			{
+				int set = mCursor.CSGR;
+				if (mCursor.SS != 0)
+					set = mCursor.SS;
+				uc = mCursor.charSetG[set][ch - 32 - 128];
+			}
+			else // no NRC, maybe the data should be interpreted as UTF-8
+			{
+				if (mEncoding == kEncodingUTF8)
+				{
+					uint32_t len = 1;
+					if ((ch & 0x0E0) == 0x0C0)
+						len = 2;
+					else if ((ch & 0x0F0) == 0x0E0)
+						len = 3;
+					else if ((ch & 0x0F8) == 0x0F0)
+						len = 4;
+
+					// be safe, in case the text in the buffer is too short for a valid UTF-8 character
+					// just wait until we receive some more.
+					mInputBuffer.push_front(ch);
+					if (mInputBuffer.size() < len)
+						break;
+
+					static MEncodingTraits<kEncodingUTF8> traits;
+					traits.ReadUnicode(mInputBuffer.begin(), len, uc);
+
+					while (len-- > 0)
+						mInputBuffer.pop_front();
+				}
+				else
+					uc = MUnicodeMapping::GetUnicode(kEncodingISO88591, ch);
+			}
+		}
+
+		// reset the single shift code
+		mCursor.SS = 0;
+
+		// and write the final unicode to the screen
+		WriteChar(uc);
 	}
-
-	// reset the single shift code
-	mCursor.SS = 0;
-
-	// and write the final unicode to the screen
-	WriteChar(uc);
-}
 }
 
 inline uint32_t MTerminalView::GetParam(uint32_t inParamNr, uint32_t inDefault)

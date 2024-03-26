@@ -269,7 +269,7 @@ uint32_t MSearchPanel::GetHeight() const
 	return bounds.height;
 }
 
-bool MSearchPanel::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
+bool MSearchPanel::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat)
 {
 	bool result = true;
 	switch (inKeyCode)
@@ -297,7 +297,7 @@ bool MSearchPanel::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 			break;
 
 		default:
-			result = MBoxControl::KeyPressed(inKeyCode, inModifiers);
+			result = MBoxControl::KeyPressed(inKeyCode, inUnicode, inModifiers, inAutoRepeat);
 			break;
 	}
 

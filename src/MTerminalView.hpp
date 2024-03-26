@@ -96,7 +96,7 @@ class MTerminalView : public MCanvas
 	void HandleOpened(const std::error_code &ec);
 	void HandleReceived(const std::error_code &ec, std::streambuf &inData);
 
-	bool KeyPressed(uint32_t inKeyCode, uint32_t inModifiers/* , bool inRepeat */) override;
+	bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) override;
 	void EnterText(const std::string &inText/* , bool inRepeat */) override;
 
 	void HandleMessage(const std::string &inMessage, const std::string &inLanguage);

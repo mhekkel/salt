@@ -50,7 +50,7 @@ class MSearchPanel : public MBoxControl
 
 	virtual ~MSearchPanel();
 
-	bool KeyPressed(uint32_t inKeyCode, uint32_t inModifiers) override;
+	bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) override;
 
 	std::string GetSearchString() const;
 	bool GetIgnoreCase() const;
@@ -60,7 +60,7 @@ class MSearchPanel : public MBoxControl
 	MEventOut<void(MSearchDirection)> eSearch;
 	MEdittext *GetTextBox() const { return mTextBox; }
 
-	virtual void SetFocus();
+	void SetFocus() override;
 
   private:
 	MEventIn<void()> eClose;
