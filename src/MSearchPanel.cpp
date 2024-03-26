@@ -29,7 +29,6 @@
 
 #include "MSearchPanel.hpp"
 #include "MCanvas.hpp"
-#include "MCommands.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MPreferences.hpp"
@@ -65,7 +64,7 @@ class MImageButton : public MCanvas
 };
 
 MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *inImageResource)
-	: MCanvas(inID, inBounds, false, false)
+	: MCanvas(inID, inBounds)
 	, mMouseState(mouseOut)
 {
 	mrsrc::rsrc rsrc(inImageResource);
@@ -80,8 +79,7 @@ MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *
 
 void MImageButton::Draw()
 {
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	MDevice dev(this);
 
@@ -121,8 +119,8 @@ void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	MMouseStateForCloseButton state(mMouseState);
 
-	if (mMouseState == mouseOut)
-		TrackMouse(true, true);
+	// if (mMouseState == mouseOut)
+	// 	TrackMouse(true, true);
 
 	if (mBounds.ContainsPoint(inX, inY))
 	{
@@ -174,28 +172,28 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.x = bounds.y = (kSearchPanelHeight - 16) / 2;
 	bounds.width = bounds.height = 16;
 	MImageButton *closeButton = new MImageButton("close-button", bounds, "close.png");
-	closeButton->SetLayout(ePackStart, false, false, 8);
+	// closeButton->SetLayout(ePackStart, false, false, 8);
 	AddChild(closeButton);
 	AddRoute(eClose, closeButton->eClicked);
 
 	// caption
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.x = 32;
 	bounds.width = captionWidth;
 	bounds.y = (bounds.height - 24) / 2 + 4;
 	bounds.height = dev.GetLineHeight();
 	//	bounds.height = 24;
 	MCaption *caption = new MCaption("search-caption", bounds, captionString);
-	caption->SetLayout(ePackStart, false, false, 4);
+	// caption->SetLayout(ePackStart, false, false, 4);
 	AddChild(caption);
 
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.x = 32 + captionWidth + 4;
 	bounds.width = 200;
 	bounds.y = (bounds.height - 24) / 2 + 0;
 	bounds.height = 24;
 	mTextBox = new MEdittext("searchstring", bounds);
-	mTextBox->SetLayout(ePackStart, true, true, 4);
+	// mTextBox->SetLayout(ePackStart, true, true, 4);
 	AddChild(mTextBox);
 	mTextBox->SetText(Preferences::GetString("find-recent", ""));
 
@@ -203,13 +201,13 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	dev.SetText(label);
 	uint32_t labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.x = 32 + captionWidth + 4 + 200 + 4;
 	bounds.height = 24;
 	bounds.y = (bounds.height - 24) / 2 + 2;
 	bounds.width = 20 + labelWidth;
 	mCaseSensitive = new MCheckbox("case-sensitive", bounds, label);
-	mCaseSensitive->SetLayout(ePackStart, false, false, 4);
+	// mCaseSensitive->SetLayout(ePackStart, false, false, 4);
 	AddChild(mCaseSensitive);
 	mCaseSensitive->SetChecked(Preferences::GetBoolean("find-case-sensitive", false));
 
@@ -223,7 +221,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *next = new MButton("find-next", bounds, label);
-	next->SetLayout(ePackStart, false, false, 4);
+	// next->SetLayout(ePackStart, false, false, 4);
 	AddChild(next);
 	AddRoute(next->eClicked, eFindBtn);
 
@@ -235,7 +233,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *prev = new MButton("find-prev", bounds, label);
-	prev->SetLayout(ePackStart, false, false, 4);
+	// prev->SetLayout(ePackStart, false, false, 4);
 	AddChild(prev);
 	AddRoute(prev->eClicked, eFindBtn);
 }
@@ -247,7 +245,8 @@ MSearchPanel::~MSearchPanel()
 void MSearchPanel::Close()
 {
 	Preferences::SetString("find-recent", mTextBox->GetText());
-	ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
+	// mHideSearchPanel();
+	// ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
 }
 
 void MSearchPanel::SetFocus()
@@ -266,7 +265,7 @@ void MSearchPanel::FindBtn(const std::string &inID)
 uint32_t MSearchPanel::GetHeight() const
 {
 	MRect bounds;
-	GetBounds(bounds);
+	bounds = GetBounds();
 	return bounds.height;
 }
 

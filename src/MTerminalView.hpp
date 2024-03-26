@@ -31,7 +31,6 @@
 
 #include "MCanvas.hpp"
 #include "MColor.hpp"
-#include "MHandler.hpp"
 #include "MP2PEvents.hpp"
 #include "MSearchPanel.hpp"
 #include "MTerminalBuffer.hpp"
@@ -68,11 +67,13 @@ class MTerminalView : public MCanvas
 	int32_t GetTopLine() const;
 
 	void Draw() override;
-	void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers) override;
-	void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	void MouseExit() override;
-	void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) override;
+
+	// void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers) override;
+	// void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	// void MouseExit() override;
+	// void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	// void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) override;
+
 	void ShowContextMenu(int32_t inX, int32_t inY) override;
 	static void GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
 		uint32_t &outWidth, uint32_t &outHeight);
@@ -94,8 +95,6 @@ class MTerminalView : public MCanvas
 	void HandleOpened(const std::error_code &ec);
 	void HandleReceived(const std::error_code &ec, std::streambuf &inData);
 
-	bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked) override;
-	bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers) override;
 	bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat) override;
 	bool HandleCharacter(const std::string &inText, bool inRepeat) override;
 

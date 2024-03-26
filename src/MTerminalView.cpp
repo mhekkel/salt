@@ -32,7 +32,6 @@
 #include "MApplication.hpp"
 #include "MCSICommands.hpp"
 #include "MClipboard.hpp"
-#include "MCommands.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MError.hpp"
@@ -49,8 +48,6 @@
 
 #include "MTerminalColours.hpp"
 
-#include "Gtk/MPrimary.hpp"
-
 #include <zeep/crypto.hpp>
 #include <zeep/unicode-support.hpp>
 
@@ -61,27 +58,27 @@
 namespace
 {
 
-// our commands
-const uint32_t
-	cmd_DebugUpdate = 'dbug',
-	cmd_ResetAndClear = 'rstc',
-	cmd_EncodingUTF8 = 'enU8',
+// // our commands
+// const uint32_t
+// 	cmd_DebugUpdate = 'dbug',
+// 	cmd_ResetAndClear = 'rstc',
+// 	cmd_EncodingUTF8 = 'enU8',
 
-	// cmd_AllowColor		= 'tClr',
-    // cmd_AllowTitle		= 'tTtl',
+// 	// cmd_AllowColor		= 'tClr',
+//     // cmd_AllowTitle		= 'tTtl',
 
-	cmd_MetaSendsEscape = 'tEsc',
-	cmd_BackSpaceIsDel = 'tBsD',
-	cmd_DeleteIsDel = 'tDlD',
-	cmd_OldFnKeys = 'tOlF',
-	cmd_VT220Keyboard = 'tVTk',
+// 	cmd_MetaSendsEscape = 'tEsc',
+// 	cmd_BackSpaceIsDel = 'tBsD',
+// 	cmd_DeleteIsDel = 'tDlD',
+// 	cmd_OldFnKeys = 'tOlF',
+// 	cmd_VT220Keyboard = 'tVTk',
 
-	cmd_SendSTOP = 'STOP',
-	cmd_SendCONT = 'CONT',
-	cmd_SendINT = 'INT ',
-	cmd_SendHUP = 'HUP ',
-	cmd_SendTERM = 'TERM',
-	cmd_SendKILL = 'KILL';
+// 	cmd_SendSTOP = 'STOP',
+// 	cmd_SendCONT = 'CONT',
+// 	cmd_SendINT = 'INT ',
+// 	cmd_SendHUP = 'HUP ',
+// 	cmd_SendTERM = 'TERM',
+// 	cmd_SendKILL = 'KILL';
 
 // This is what we report as terminal type:
 // 62	VT200 family
@@ -253,7 +250,7 @@ std::list<MTerminalView *> MTerminalView::sTerminalList;
 MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	MStatusbar *inStatusbar, MScrollbar *inScrollbar, MSearchPanel *inSearchPanel,
 	MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
-	: MCanvas(inID, inBounds, false, false)
+	: MCanvas(inID, inBounds)
 	, eScroll(this, &MTerminalView::Scroll)
 	, eSearch(this, &MTerminalView::FindNext)
 	, ePreferencesChanged(this, &MTerminalView::PreferencesChanged)
@@ -350,8 +347,7 @@ void MTerminalView::Open()
 {
 	mStatusbar->SetStatusText(0, _("Trying to connect"), false);
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	mTerminalChannel->SetTerminalSize(mTerminalWidth, mTerminalHeight,
 		bounds.width - 2 * kBorderWidth, bounds.height - 2 * kBorderWidth);
@@ -439,8 +435,7 @@ void MTerminalView::PreferencesChanged()
 {
 	ReadPreferences();
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	uint32_t w = static_cast<uint32_t>(ceil(mTerminalWidth * mCharWidth) + 2 * kBorderWidth);
 	uint32_t h = mTerminalHeight * mLineHeight + 2 * kBorderWidth;
@@ -654,8 +649,7 @@ void MTerminalView::ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inR
 		mStatusbar->SetStatusText(2, desc, false);
 	}
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	if (mTerminalChannel->IsOpen())
 		mTerminalChannel->SetTerminalSize(mTerminalWidth, mTerminalHeight,
@@ -725,210 +719,210 @@ bool MTerminalView::GetCharacterForPosition(int32_t inX, int32_t inY, int32_t &o
 	return true;
 }
 
-void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
-{
-	bool done = false;
+// void MTerminalView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
+// {
+// 	bool done = false;
 
-	if (not IsFocus())
-		SetFocus();
+// 	if (not IsFocus())
+// 		SetFocus();
 
-	if (not mBuffer->IsSelectionEmpty())
-	{
-		if (inModifiers & kShiftKey and mMouseMode == eTrackMouseNone)
-		{
-			mMouseClick = eSingleClick;
+// 	if (not mBuffer->IsSelectionEmpty())
+// 	{
+// 		if (inModifiers & kShiftKey and mMouseMode == eTrackMouseNone)
+// 		{
+// 			mMouseClick = eSingleClick;
 
-			int32_t line, column;
-			GetCharacterForPosition(inX, inY, line, column);
+// 			int32_t line, column;
+// 			GetCharacterForPosition(inX, inY, line, column);
 
-			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
-			{
-				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+// 			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
+// 			{
+// 				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
 
-				mMinSelLine = mMaxSelLine;
-				mMinSelCol = mMaxSelCol;
-			}
-			else
-			{
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
+// 				mMinSelLine = mMaxSelLine;
+// 				mMinSelCol = mMaxSelCol;
+// 			}
+// 			else
+// 			{
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
 
-				mMaxSelLine = mMinSelLine;
-				mMaxSelCol = mMinSelCol;
-			}
+// 				mMaxSelLine = mMinSelLine;
+// 				mMaxSelCol = mMinSelCol;
+// 			}
 
-			Invalidate();
-			done = true;
-		}
-		else
-		{
-			mBuffer->SetSelection(0, 0, 0, 0, false);
-			Invalidate();
-		}
-	}
+// 			Invalidate();
+// 			done = true;
+// 		}
+// 		else
+// 		{
+// 			mBuffer->SetSelection(0, 0, 0, 0, false);
+// 			Invalidate();
+// 		}
+// 	}
 
-	if (mMouseMode != eTrackMouseNone and inClickCount == 1)
-	{
-		SendMouseCommand(0, inX, inY, inModifiers);
-		mMouseClick = eTrackClick;
-		done = true;
-	}
+// 	if (mMouseMode != eTrackMouseNone and inClickCount == 1)
+// 	{
+// 		SendMouseCommand(0, inX, inY, inModifiers);
+// 		mMouseClick = eTrackClick;
+// 		done = true;
+// 	}
 
-	if (not done)
-	{
-		switch (inClickCount)
-		{
-			case 1:
-				mMouseClick = eWaitClick;
-				mMouseBlockSelect = inModifiers & kControlKey;
-				mLastMouseDown = std::chrono::system_clock::now();
-				mLastMouseX = inX;
-				mLastMouseY = inY;
-				break;
+// 	if (not done)
+// 	{
+// 		switch (inClickCount)
+// 		{
+// 			case 1:
+// 				mMouseClick = eWaitClick;
+// 				mMouseBlockSelect = inModifiers & kControlKey;
+// 				mLastMouseDown = std::chrono::system_clock::now();
+// 				mLastMouseX = inX;
+// 				mLastMouseY = inY;
+// 				break;
 
-			case 2:
-			{
-				mMouseClick = eDoubleClick;
-				mMouseBlockSelect = false;
+// 			case 2:
+// 			{
+// 				mMouseClick = eDoubleClick;
+// 				mMouseBlockSelect = false;
 
-				int32_t line, column;
-				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+// 				int32_t line, column;
+// 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+// 				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
 
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
-				Invalidate();
-				break;
-			}
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+// 				Invalidate();
+// 				break;
+// 			}
 
-			default:
-			{
-				mMouseClick = eTripleClick;
-				mMouseBlockSelect = false;
+// 			default:
+// 			{
+// 				mMouseClick = eTripleClick;
+// 				mMouseBlockSelect = false;
 
-				int32_t line, column;
-				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-				mMinSelLine = mMaxSelLine = line;
-				mMinSelCol = 0;
-				mMaxSelCol = mTerminalWidth;
+// 				int32_t line, column;
+// 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+// 				mMinSelLine = mMaxSelLine = line;
+// 				mMinSelCol = 0;
+// 				mMaxSelCol = mTerminalWidth;
 
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
-				Invalidate();
-				break;
-			}
-		}
-	}
-}
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+// 				Invalidate();
+// 				break;
+// 			}
+// 		}
+// 	}
+// }
 
-void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-	using namespace std::chrono_literals;
+// void MTerminalView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
+// {
+// 	using namespace std::chrono_literals;
 
-	if (mMouseClick == eTrackClick)
-	{
-		if (mMouseMode >= eTrackMouseCellMotionTracking)
-			SendMouseCommand(32, inX, inY, inModifiers);
-		return;
-	}
+// 	if (mMouseClick == eTrackClick)
+// 	{
+// 		if (mMouseMode >= eTrackMouseCellMotionTracking)
+// 			SendMouseCommand(32, inX, inY, inModifiers);
+// 		return;
+// 	}
 
-	// shortcut
-	if (mMouseClick == eNoClick)
-		return;
+// 	// shortcut
+// 	if (mMouseClick == eNoClick)
+// 		return;
 
-	if (mMouseClick == eWaitClick)
-	{
-		if (std::abs(mLastMouseX - inX) > 1 or
-			std::abs(mLastMouseY - inY) > 1 or
-			std::chrono::system_clock::now() > mLastMouseDown + 100ms)
-		{
-			mMouseClick = eSingleClick;
+// 	if (mMouseClick == eWaitClick)
+// 	{
+// 		if (std::abs(mLastMouseX - inX) > 1 or
+// 			std::abs(mLastMouseY - inY) > 1 or
+// 			std::chrono::system_clock::now() > mLastMouseDown + 100ms)
+// 		{
+// 			mMouseClick = eSingleClick;
 
-			int32_t line, column;
-			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
-			mMinSelLine = mMaxSelLine = line;
-			mMinSelCol = column;
-			mMaxSelCol = column + 1;
+// 			int32_t line, column;
+// 			GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
+// 			mMinSelLine = mMaxSelLine = line;
+// 			mMinSelCol = column;
+// 			mMaxSelCol = column + 1;
 
-			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-		}
-	}
+// 			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+// 		}
+// 	}
 
-	int32_t line, column;
-	GetCharacterForPosition(inX, inY, line, column);
+// 	int32_t line, column;
+// 	GetCharacterForPosition(inX, inY, line, column);
 
-	switch (mMouseClick)
-	{
-		case eSingleClick:
-			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
-				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-			else if (line > mMaxSelLine or (line == mMaxSelLine and column > mMaxSelCol))
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
-			else
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
-			break;
+// 	switch (mMouseClick)
+// 	{
+// 		case eSingleClick:
+// 			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
+// 				mBuffer->SetSelection(line, column, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+// 			else if (line > mMaxSelLine or (line == mMaxSelLine and column > mMaxSelCol))
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, column + 1, mMouseBlockSelect);
+// 			else
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
+// 			break;
 
-		case eDoubleClick:
-		{
-			int32_t wl1, wc1, wl2, wc2;
-			mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
+// 		case eDoubleClick:
+// 		{
+// 			int32_t wl1, wc1, wl2, wc2;
+// 			mBuffer->FindWord(line, column, wl1, wc1, wl2, wc2);
 
-			if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
-				mBuffer->SetSelection(wl1, wc1, mMaxSelLine, mMaxSelCol);
-			else if (wl2 > mMaxSelLine or (wl2 == mMaxSelLine and wc2 > mMaxSelCol))
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, wl2, wc2);
-			else
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
-			break;
-		}
+// 			if (wl1 < mMinSelLine or (wl1 == mMinSelLine and wc1 < mMinSelCol))
+// 				mBuffer->SetSelection(wl1, wc1, mMaxSelLine, mMaxSelCol);
+// 			else if (wl2 > mMaxSelLine or (wl2 == mMaxSelLine and wc2 > mMaxSelCol))
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, wl2, wc2);
+// 			else
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+// 			break;
+// 		}
 
-		case eTripleClick:
-		{
-			if (line < mMinSelLine)
-				mBuffer->SetSelection(line, mMinSelCol, mMaxSelLine, mMaxSelCol);
-			else if (line > mMaxSelLine)
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, mMaxSelCol);
-			else
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
-			break;
-		}
+// 		case eTripleClick:
+// 		{
+// 			if (line < mMinSelLine)
+// 				mBuffer->SetSelection(line, mMinSelCol, mMaxSelLine, mMaxSelCol);
+// 			else if (line > mMaxSelLine)
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, line, mMaxSelCol);
+// 			else
+// 				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
+// 			break;
+// 		}
 
-		default:;
-	}
+// 		default:;
+// 	}
 
-	Invalidate();
-}
+// 	Invalidate();
+// }
 
-void MTerminalView::MouseExit()
-{
-	mMouseClick = eNoClick;
-}
+// void MTerminalView::MouseExit()
+// {
+// 	mMouseClick = eNoClick;
+// }
 
-void MTerminalView::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-	if (mMouseMode >= eTrackMouseSendXYOnButton)
-		SendMouseCommand(3, inX, inY, inModifiers);
-	else if (not mBuffer->IsSelectionEmpty())
-	{
-		sSelectBuffer = mBuffer->GetSelectedText();
-#if defined(_MSC_VER)
-		MClipboard::Instance().SetData(sSelectBuffer, mBuffer->IsSelectionBlock());
-#else
-		MPrimary::Instance().SetText(sSelectBuffer);
-#endif
-	}
+// void MTerminalView::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
+// {
+// 	if (mMouseMode >= eTrackMouseSendXYOnButton)
+// 		SendMouseCommand(3, inX, inY, inModifiers);
+// 	else if (not mBuffer->IsSelectionEmpty())
+// 	{
+// 		sSelectBuffer = mBuffer->GetSelectedText();
+// #if defined(_MSC_VER)
+// 		MClipboard::Instance().SetData(sSelectBuffer, mBuffer->IsSelectionBlock());
+// #else
+// 		MPrimary::Instance().SetText(sSelectBuffer);
+// #endif
+// 	}
 
-	mMouseClick = eNoClick;
-}
+// 	mMouseClick = eNoClick;
+// }
 
-void MTerminalView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
-{
-	if (inDeltaY != 0)
-	{
-		if (mMouseMode == eTrackMouseNone)
-			for (int i = 0; i < 2 * std::abs(inDeltaY); ++i)
-				Scroll(inDeltaY > 0 ? kScrollLineUp : kScrollLineDown);
-		else
-			SendMouseCommand(inDeltaY > 0 ? 64 : 65, inX, inY, inModifiers);
-	}
-}
+// void MTerminalView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
+// {
+// 	if (inDeltaY != 0)
+// 	{
+// 		if (mMouseMode == eTrackMouseNone)
+// 			for (int i = 0; i < 2 * std::abs(inDeltaY); ++i)
+// 				Scroll(inDeltaY > 0 ? kScrollLineUp : kScrollLineDown);
+// 		else
+// 			SendMouseCommand(inDeltaY > 0 ? 64 : 65, inX, inY, inModifiers);
+// 	}
+// }
 
 void MTerminalView::ShowContextMenu(int32_t inX, int32_t inY)
 {
@@ -1020,7 +1014,7 @@ void MTerminalView::Draw()
 			std::string trailing = "Printer: None          Network: ";
 			trailing += (mTerminalChannel->IsOpen() ? "Connected    " : "Not Connected");
 
-			if (text.length() + trailing.length() < static_cast<size_t>(mTerminalWidth))
+			if (text.length() + trailing.length() < static_cast<std::size_t>(mTerminalWidth))
 				text += std::string(mTerminalWidth - text.length() - trailing.length(), ' ');
 			text += trailing;
 
@@ -2019,8 +2013,8 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 
 		ObscureCursor();
 	}
-	else
-		handled = MHandler::HandleKeyDown(inKeyCode, inModifiers, inRepeat);
+	// else
+		// handled = MHandler::HandleKeyDown(inKeyCode, inModifiers, inRepeat);
 
 	return handled;
 }
@@ -2185,210 +2179,210 @@ bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 	return result;
 }
 
-bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-{
-	bool handled = true;
-	switch (inCommand)
-	{
-		case cmd_EnterTOTP:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
+// bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
+// {
+// 	bool handled = true;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_EnterTOTP:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
 
-		case cmd_Copy:
-			outEnabled = not mBuffer->IsSelectionEmpty();
-			break;
+// 		case cmd_Copy:
+// 			outEnabled = not mBuffer->IsSelectionEmpty();
+// 			break;
 
-		case cmd_Paste:
-			outEnabled = MClipboard::Instance().HasData();
-			break;
+// 		case cmd_Paste:
+// 			outEnabled = MClipboard::Instance().HasData();
+// 			break;
 
-		case cmd_SelectAll:
-			outEnabled = true;
-			break;
+// 		case cmd_SelectAll:
+// 			outEnabled = true;
+// 			break;
 
-		case cmd_FindNext:
-		case cmd_FindPrev:
-			outEnabled = true;
-			break;
+// 		case cmd_FindNext:
+// 		case cmd_FindPrev:
+// 			outEnabled = true;
+// 			break;
 
-#if DEBUG
-		case cmd_DebugUpdate:
-			outEnabled = true;
-			outChecked = mDebugUpdate;
-			break;
-#endif
+// #if DEBUG
+// 		case cmd_DebugUpdate:
+// 			outEnabled = true;
+// 			outChecked = mDebugUpdate;
+// 			break;
+// #endif
 
-		case cmd_NextTerminal:
-		case cmd_PrevTerminal:
-			outEnabled = true;
-			break;
+// 		case cmd_NextTerminal:
+// 		case cmd_PrevTerminal:
+// 			outEnabled = true;
+// 			break;
 
-		case cmd_Reset:
-		case cmd_ResetAndClear:
-			outEnabled = true;
-			break;
+// 		case cmd_Reset:
+// 		case cmd_ResetAndClear:
+// 			outEnabled = true;
+// 			break;
 
-		case cmd_EncodingUTF8:
-			outEnabled = true;
-			outChecked = mEncoding == kEncodingUTF8;
-			break;
+// 		case cmd_EncodingUTF8:
+// 			outEnabled = true;
+// 			outChecked = mEncoding == kEncodingUTF8;
+// 			break;
 
-		case cmd_BackSpaceIsDel:
-			outEnabled = true;
-			outChecked = not mDECBKM;
-			break;
+// 		case cmd_BackSpaceIsDel:
+// 			outEnabled = true;
+// 			outChecked = not mDECBKM;
+// 			break;
 
-		case cmd_DeleteIsDel:
-			outEnabled = true;
-			outChecked = mDeleteIsDel;
-			break;
+// 		case cmd_DeleteIsDel:
+// 			outEnabled = true;
+// 			outChecked = mDeleteIsDel;
+// 			break;
 
-		case cmd_VT220Keyboard:
-			outEnabled = true;
-			outChecked = not mXTermKeys;
-			break;
+// 		case cmd_VT220Keyboard:
+// 			outEnabled = true;
+// 			outChecked = not mXTermKeys;
+// 			break;
 
-		case cmd_MetaSendsEscape:
-			outEnabled = mXTermKeys;
-			outChecked = mAltSendsEscape;
-			break;
+// 		case cmd_MetaSendsEscape:
+// 			outEnabled = mXTermKeys;
+// 			outChecked = mAltSendsEscape;
+// 			break;
 
-		case cmd_OldFnKeys:
-			outEnabled = mXTermKeys;
-			outChecked = mOldFnKeys;
-			break;
+// 		case cmd_OldFnKeys:
+// 			outEnabled = mXTermKeys;
+// 			outChecked = mOldFnKeys;
+// 			break;
 
-		case cmd_SendSTOP:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
-		case cmd_SendCONT:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
-		case cmd_SendINT:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
-		case cmd_SendHUP:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
-		case cmd_SendTERM:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
-		case cmd_SendKILL:
-			outEnabled = mTerminalChannel->IsOpen();
-			break;
+// 		case cmd_SendSTOP:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
+// 		case cmd_SendCONT:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
+// 		case cmd_SendINT:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
+// 		case cmd_SendHUP:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
+// 		case cmd_SendTERM:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
+// 		case cmd_SendKILL:
+// 			outEnabled = mTerminalChannel->IsOpen();
+// 			break;
 
-		default:
-			handled = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-	}
-	return handled;
-}
+// 		default:
+// 			handled = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+// 	}
+// 	return handled;
+// }
 
-bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-{
-	bool handled = true;
-	switch (inCommand)
-	{
-		case cmd_Copy:
-			MClipboard::Instance().SetData(mBuffer->GetSelectedText(),
-				mBuffer->IsSelectionBlock());
-			break;
+// bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
+// {
+// 	bool handled = true;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_Copy:
+// 			MClipboard::Instance().SetData(mBuffer->GetSelectedText(),
+// 				mBuffer->IsSelectionBlock());
+// 			break;
 
-		case cmd_Paste:
-		{
-			std::string text;
-			bool block;
-			MClipboard::Instance().GetData(text, block);
-			handled = PastePrimaryBuffer(text);
-			break;
-		}
+// 		case cmd_Paste:
+// 		{
+// 			std::string text;
+// 			bool block;
+// 			MClipboard::Instance().GetData(text, block);
+// 			handled = PastePrimaryBuffer(text);
+// 			break;
+// 		}
 
-		case cmd_EnterTOTP:
-			EnterTOTP(inItemIndex - 2);
-			break;
+// 		case cmd_EnterTOTP:
+// 			EnterTOTP(inItemIndex - 2);
+// 			break;
 
-		case cmd_SelectAll:
-			mBuffer->SelectAll();
-			Invalidate();
-			break;
+// 		case cmd_SelectAll:
+// 			mBuffer->SelectAll();
+// 			Invalidate();
+// 			break;
 
-		case cmd_FindNext:
-			FindNext(searchDown);
-			break;
+// 		case cmd_FindNext:
+// 			FindNext(searchDown);
+// 			break;
 
-		case cmd_FindPrev:
-			FindNext(searchUp);
-			break;
+// 		case cmd_FindPrev:
+// 			FindNext(searchUp);
+// 			break;
 
-		case cmd_Reset:
-		{
-			value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
-			Reset();
-			break;
-		}
+// 		case cmd_Reset:
+// 		{
+// 			value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
+// 			Reset();
+// 			break;
+// 		}
 
-		case cmd_ResetAndClear:
-			Reset();
-			mBuffer->Clear();
-			Invalidate();
-			break;
+// 		case cmd_ResetAndClear:
+// 			Reset();
+// 			mBuffer->Clear();
+// 			Invalidate();
+// 			break;
 
-		case cmd_EncodingUTF8:
-			if (mEncoding == kEncodingUTF8)
-				mEncoding = kEncodingISO88591;
-			else
-				mEncoding = kEncodingUTF8;
-			break;
+// 		case cmd_EncodingUTF8:
+// 			if (mEncoding == kEncodingUTF8)
+// 				mEncoding = kEncodingISO88591;
+// 			else
+// 				mEncoding = kEncodingUTF8;
+// 			break;
 
-		case cmd_MetaSendsEscape:
-			mAltSendsEscape = not mAltSendsEscape;
-			break;
+// 		case cmd_MetaSendsEscape:
+// 			mAltSendsEscape = not mAltSendsEscape;
+// 			break;
 
-		case cmd_BackSpaceIsDel:
-			mDECBKM = not mDECBKM;
-			break;
+// 		case cmd_BackSpaceIsDel:
+// 			mDECBKM = not mDECBKM;
+// 			break;
 
-		case cmd_DeleteIsDel:
-			mDeleteIsDel = not mDeleteIsDel;
-			break;
+// 		case cmd_DeleteIsDel:
+// 			mDeleteIsDel = not mDeleteIsDel;
+// 			break;
 
-		case cmd_OldFnKeys:
-			mOldFnKeys = not mOldFnKeys;
-			break;
+// 		case cmd_OldFnKeys:
+// 			mOldFnKeys = not mOldFnKeys;
+// 			break;
 
-		case cmd_VT220Keyboard:
-			mXTermKeys = not mXTermKeys;
-			break;
+// 		case cmd_VT220Keyboard:
+// 			mXTermKeys = not mXTermKeys;
+// 			break;
 
-		case cmd_SendSTOP:
-			mTerminalChannel->SendSignal("STOP");
-			break;
-		case cmd_SendCONT:
-			mTerminalChannel->SendSignal("CONT");
-			break;
-		case cmd_SendINT:
-			mTerminalChannel->SendSignal("INT");
-			break;
-		case cmd_SendHUP:
-			mTerminalChannel->SendSignal("HUP");
-			break;
-		case cmd_SendTERM:
-			mTerminalChannel->SendSignal("TERM");
-			break;
-		case cmd_SendKILL:
-			mTerminalChannel->SendSignal("KILL");
-			break;
+// 		case cmd_SendSTOP:
+// 			mTerminalChannel->SendSignal("STOP");
+// 			break;
+// 		case cmd_SendCONT:
+// 			mTerminalChannel->SendSignal("CONT");
+// 			break;
+// 		case cmd_SendINT:
+// 			mTerminalChannel->SendSignal("INT");
+// 			break;
+// 		case cmd_SendHUP:
+// 			mTerminalChannel->SendSignal("HUP");
+// 			break;
+// 		case cmd_SendTERM:
+// 			mTerminalChannel->SendSignal("TERM");
+// 			break;
+// 		case cmd_SendKILL:
+// 			mTerminalChannel->SendSignal("KILL");
+// 			break;
 
-#if DEBUG
-		case cmd_DebugUpdate:
-			mDebugUpdate = not mDebugUpdate;
-			break;
-#endif
+// #if DEBUG
+// 		case cmd_DebugUpdate:
+// 			mDebugUpdate = not mDebugUpdate;
+// 			break;
+// #endif
 
-		default:
-			handled = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-	}
-	return handled;
-}
+// 		default:
+// 			handled = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+// 	}
+// 	return handled;
+// }
 
 void MTerminalView::EnterTOTP(uint32_t inItemIndex)
 {
@@ -2659,8 +2653,7 @@ void MTerminalView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	MCanvas::ResizeFrame(inWidthDelta, inHeightDelta);
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	MDevice dev;
 	dev.SetFont(mFont);
@@ -3904,7 +3897,7 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 			break;
 		// SGR -- Select Graphic Rendition
 		case eSGR:
-			for (size_t i = 0; i < mArgs.size(); ++i)
+			for (std::size_t i = 0; i < mArgs.size(); ++i)
 			{
 				auto a = mArgs[i];
 
@@ -4567,7 +4560,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 					SendCommand(MFormat("\033[3;%d;%dt", r.x, r.y));
 					break;
 				case 14:
-					GetWindow()->GetBounds(r);
+					r = GetWindow()->GetBounds();
 					SendCommand(MFormat("\033[4;%d;%dt", r.width, r.height));
 					break;
 				case 18:
