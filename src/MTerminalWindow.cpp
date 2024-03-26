@@ -499,7 +499,10 @@ void MTerminalWindow::OnReset()
 
 void MTerminalWindow::OnFind()
 {
-
+	if (mSearchPanel->IsVisible())
+		HideSearchPanel();
+	else
+		ShowSearchPanel();
 }
 
 void MTerminalWindow::OnFindNext()

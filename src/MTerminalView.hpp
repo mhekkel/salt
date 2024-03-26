@@ -69,7 +69,7 @@ class MTerminalView : public MCanvas
 	void Draw() override;
 
 	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 
 	// virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
@@ -96,8 +96,8 @@ class MTerminalView : public MCanvas
 	void HandleOpened(const std::error_code &ec);
 	void HandleReceived(const std::error_code &ec, std::streambuf &inData);
 
-	bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat) override;
-	bool HandleCharacter(const std::string &inText, bool inRepeat) override;
+	bool KeyPressed(uint32_t inKeyCode, uint32_t inModifiers/* , bool inRepeat */) override;
+	void EnterText(const std::string &inText/* , bool inRepeat */) override;
 
 	void HandleMessage(const std::string &inMessage, const std::string &inLanguage);
 

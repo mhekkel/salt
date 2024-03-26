@@ -182,6 +182,7 @@ MApplication *MApplication::Create(MApplicationImpl *inImpl)
 
 void MSaltApp::OnNew()
 {
+	DoNew();
 }
 
 void MSaltApp::OnConnect()

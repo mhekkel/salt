@@ -721,6 +721,8 @@ bool MTerminalView::GetCharacterForPosition(int32_t inX, int32_t inY, int32_t &o
 
 void MTerminalView::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
 {
+	// PRINT(("Click with modifiers %s%s%s%s", (inModifiers ? "" : " none"), (inModifiers & kShiftKey ? " shift" : ""), (inModifiers & kOptionKey ? " alt" : ""), (inModifiers & kControlKey ? " control" : "")));
+
 	bool done = false;
 
 	if (not IsFocus())
@@ -895,7 +897,7 @@ void MTerminalView::PointerLeave()
 	mMouseClick = eNoClick;
 }
 
-void MTerminalView::ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
+void MTerminalView::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseMode >= eTrackMouseSendXYOnButton)
 		SendMouseCommand(3, inX, inY, inModifiers);
@@ -1896,14 +1898,13 @@ std::string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifi
 	return text;
 }
 
-bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
-	bool inRepeat)
+bool MTerminalView::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 {
-	// PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
+	PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
 
-	// shortcut
-	if (inRepeat and mDECARM == false)
-		return true;
+	// // shortcut
+	// if (inRepeat and mDECARM == false)
+	// 	return true;
 
 	bool handled = false;
 
@@ -2013,8 +2014,8 @@ bool MTerminalView::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 
 		ObscureCursor();
 	}
-	// else
-		// handled = MHandler::HandleKeyDown(inKeyCode, inModifiers, inRepeat);
+	else
+		handled = MCanvas::KeyPressed(inKeyCode, inModifiers/* , inRepeat */);
 
 	return handled;
 }
@@ -2030,20 +2031,20 @@ void MTerminalView::HandleMessage(const std::string &inMessage, const std::strin
 	Invalidate();
 }
 
-bool MTerminalView::HandleCharacter(const std::string &inText, bool inRepeat)
+void MTerminalView::EnterText(const std::string &inText/* , bool inRepeat */)
 {
-	// shortcut
+/* 	// shortcut
 	if (inRepeat and mDECARM == false)
 		return true;
-
-	bool handled = false;
+ */
+	// bool handled = false;
 
 	if (not mTerminalChannel->IsOpen())
 	{
 		if (inText == " " or inText == "\n")
 		{
 			Open();
-			handled = true;
+			// handled = true;
 		}
 	}
 	else
@@ -2070,10 +2071,10 @@ bool MTerminalView::HandleCharacter(const std::string &inText, bool inRepeat)
 
 		ObscureCursor();
 
-		handled = true;
+		// handled = true;
 	}
 
-	return handled;
+	// return handled;
 }
 
 // const std::vector<std::string> kDisallowedPasteCharacters{

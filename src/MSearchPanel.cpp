@@ -46,11 +46,11 @@ class MImageButton : public MCanvas
 	MEventOut<void()> eClicked;
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
-	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseExit();
+	void Draw() override;
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void PointerLeave() override;
 
   private:
 	enum MMouseStateForCloseButton
@@ -100,7 +100,7 @@ void MImageButton::Draw()
 	}
 }
 
-void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
+void MImageButton::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
 {
 	if (mBounds.ContainsPoint(inX, inY))
 	{
@@ -109,13 +109,13 @@ void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, ui
 	}
 }
 
-void MImageButton::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
+void MImageButton::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mBounds.ContainsPoint(inX, inY))
 		eClicked();
 }
 
-void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
+void MImageButton::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	MMouseStateForCloseButton state(mMouseState);
 
@@ -141,7 +141,7 @@ void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 		Invalidate();
 }
 
-void MImageButton::MouseExit()
+void MImageButton::PointerLeave()
 {
 	if (mMouseState != mouseOut)
 	{
@@ -172,7 +172,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.x = bounds.y = (kSearchPanelHeight - 16) / 2;
 	bounds.width = bounds.height = 16;
 	MImageButton *closeButton = new MImageButton("close-button", bounds, "close.png");
-	// closeButton->SetLayout(ePackStart, false, false, 8);
+	closeButton->SetLayout(false, false, 8);
 	AddChild(closeButton);
 	AddRoute(eClose, closeButton->eClicked);
 
@@ -184,7 +184,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.height = dev.GetLineHeight();
 	//	bounds.height = 24;
 	MCaption *caption = new MCaption("search-caption", bounds, captionString);
-	// caption->SetLayout(ePackStart, false, false, 4);
+	caption->SetLayout(false, false, 4);
 	AddChild(caption);
 
 	bounds = GetBounds();
@@ -193,7 +193,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.y = (bounds.height - 24) / 2 + 0;
 	bounds.height = 24;
 	mTextBox = new MEdittext("searchstring", bounds);
-	// mTextBox->SetLayout(ePackStart, true, true, 4);
+	mTextBox->SetLayout(true, true, 4);
 	AddChild(mTextBox);
 	mTextBox->SetText(Preferences::GetString("find-recent", ""));
 
@@ -207,7 +207,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.y = (bounds.height - 24) / 2 + 2;
 	bounds.width = 20 + labelWidth;
 	mCaseSensitive = new MCheckbox("case-sensitive", bounds, label);
-	// mCaseSensitive->SetLayout(ePackStart, false, false, 4);
+	mCaseSensitive->SetLayout(false, false, 4);
 	AddChild(mCaseSensitive);
 	mCaseSensitive->SetChecked(Preferences::GetBoolean("find-case-sensitive", false));
 
@@ -221,7 +221,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *next = new MButton("find-next", bounds, label);
-	// next->SetLayout(ePackStart, false, false, 4);
+	next->SetLayout(false, false, 4);
 	AddChild(next);
 	AddRoute(next->eClicked, eFindBtn);
 
@@ -233,7 +233,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *prev = new MButton("find-prev", bounds, label);
-	// prev->SetLayout(ePackStart, false, false, 4);
+	prev->SetLayout(false, false, 4);
 	AddChild(prev);
 	AddRoute(prev->eClicked, eFindBtn);
 }
@@ -269,7 +269,7 @@ uint32_t MSearchPanel::GetHeight() const
 	return bounds.height;
 }
 
-bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
+bool MSearchPanel::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	bool result = true;
 	switch (inKeyCode)
@@ -297,7 +297,7 @@ bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool 
 			break;
 
 		default:
-			result = MBoxControl::HandleKeyDown(inKeyCode, inModifiers, inRepeat);
+			result = MBoxControl::KeyPressed(inKeyCode, inModifiers);
 			break;
 	}
 
