@@ -1374,55 +1374,6 @@ void MTerminalView::Idle()
 		GetWindow()->SetTitle(std::exchange(mSetWindowTitle, ""));
 }
 
-std::string MTerminalView::ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers)
-{
-	std::string text;
-
-	if (inKeyCode == kBackspaceKeyCode)
-		text = mDECBKM ? BS : DEL;
-	else if (inKeyCode == kReturnKeyCode)
-		text = mLNM ? "\r\n" : "\r";
-	else if (inKeyCode == kTabKeyCode)
-		text = "\t";
-	else if ((inModifiers & kControlKey) and not(inModifiers & kNumPad))
-	{
-		switch (inKeyCode)
-		{
-			case '2':
-			case ' ':
-				text = NUL;
-				break;
-			case '3':
-				text = ESC;
-				break;
-			case '4':
-				text = FS;
-				break;
-			case '5':
-				text = GS;
-				break;
-			case '6':
-				text = RS;
-				break;
-			case '7':
-				text = US;
-				break;
-			case '8':
-				text = DEL;
-				break;
-			default:
-				// check to see if this is a decent control key
-				if (inKeyCode >= '@' and inKeyCode < '`')
-					text = char(inKeyCode - '@');
-				else if (inKeyCode == kCancelKeyCode)
-					text = kControlBreakMessage;
-				break;
-		}
-	}
-
-	return text;
-}
-
 std::string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	std::string text;
@@ -1501,9 +1452,6 @@ std::string MTerminalView::ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifie
 				break;
 		}
 	}
-
-	if (text.empty())
-		text = ProcessKeyCommon(inKeyCode, inModifiers);
 
 	return text;
 }
@@ -1685,9 +1633,6 @@ std::string MTerminalView::ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifie
 				inModifiers &= ~kOptionKey;
 		}
 	}
-
-	if (text.empty())
-		text = ProcessKeyCommon(inKeyCode, inModifiers);
 
 	return text;
 }
@@ -1893,9 +1838,6 @@ std::string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifi
 			text = char(inKeyCode + 128);
 	}
 
-	if (text.empty())
-		text = ProcessKeyCommon(inKeyCode, inModifiers);
-
 	return text;
 }
 
@@ -1980,15 +1922,55 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t 
 		else
 			text = ProcessKeyANSI(inKeyCode, inModifiers);
 
+		if (text.empty())
+		{
+			if (inKeyCode == kBackspaceKeyCode)
+				text = mDECBKM ? BS : DEL;
+			else if (inKeyCode == kReturnKeyCode)
+				text = mLNM ? "\r\n" : "\r";
+			else if (inKeyCode == kTabKeyCode)
+				text = "\t";
+			else if ((inModifiers & ~kNumPad) == kControlKey)
+			{
+				switch (inKeyCode)
+				{
+					case '2':
+					case ' ':
+						text = NUL;
+						break;
+					case '3':
+						text = ESC;
+						break;
+					case '4':
+						text = FS;
+						break;
+					case '5':
+						text = GS;
+						break;
+					case '6':
+						text = RS;
+						break;
+					case '7':
+						text = US;
+						break;
+					case '8':
+						text = DEL;
+						break;
+					default:
+						// check to see if this is a decent control key
+						if ((inKeyCode & ~0x20) >= '@' and (inKeyCode & ~0x20) < '`')
+							text = char((inKeyCode & ~0x20) - '@');
+						else if (inKeyCode == kCancelKeyCode)
+							text = kControlBreakMessage;
+						break;
+				}
+			}
+			else if (inModifiers & kControlKey and (inKeyCode == '@' or (inKeyCode >= '[' and inKeyCode < '`')))
+				text = char(inKeyCode - '@');
+		}
+
 		if (not text.empty())
 			break;
-
-		if (inUnicode >= 0x60 and inUnicode <= 0x7f and inModifiers == kControlKey)
-		{
-			char ch = static_cast<char>(inUnicode) - 0x60;
-			text += ch;
-			break;
-		}
 
 		if ((inModifiers & ~kShiftKey) == 0 and inUnicode != 0)
 		{

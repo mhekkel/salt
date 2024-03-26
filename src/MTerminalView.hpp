@@ -362,7 +362,6 @@ class MTerminalView : public MCanvas
 	bool mOldFnKeys;
 	bool mXTermKeys;
 
-	std::string ProcessKeyCommon(uint32_t inKeyCode, uint32_t inModifiers);
 	std::string ProcessKeyVT52(uint32_t inKeyCode, uint32_t inModifiers);
 	std::string ProcessKeyANSI(uint32_t inKeyCode, uint32_t inModifiers);
 	std::string ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifiers);
