@@ -30,33 +30,13 @@
 #pragma once
 
 #include "MApplication.hpp"
+#include "MCommand.hpp"
 #include "MConnectDialog.hpp"
 #include "MTypes.hpp"
 
 #include <pinch.hpp>
 
 extern const char kAppName[], kVersionString[];
-
-const uint32_t
-	cmd_Connect = 'Conn',
-	cmd_Disconnect = 'Disc',
-	cmd_Execute = 'Exec',
-	cmd_Reset = 'rset',
-	cmd_NextTerminal = 'nxtt',
-	cmd_PrevTerminal = 'prvt',
-	cmd_OpenRecentSession = 'recS',
-	cmd_ClearRecentSessions = 'recC',
-	cmd_CloneTerminal = 'clon',
-	cmd_DropPublicKey = 'DPbK',
-	cmd_DropTerminfo = 'DTin',
-	cmd_Register = 'regi',
-	cmd_ForwardPort = 'TnlP',
-	cmd_ProxySOCKS = 'TnlS',
-	cmd_ProxyHTTP = 'TnlH',
-	cmd_Rekey = 'ReKy',
-	cmd_Explore = 'Brws',
-	cmd_AddNewTOTPHash = '+otp',
-	cmd_EnterTOTP = 'totp';
 
 // ===========================================================================
 
@@ -67,21 +47,15 @@ class MSaltApp : public MApplication
 
 	~MSaltApp();
 
-	virtual void DoNew();
-	// virtual void Open(const std::string &inURL);
+	void DoNew() override;
 
-	virtual void Execute(const std::string &inCommand,
-		const std::vector<std::string> &inArguments);
-
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
+	void Execute(const std::string &inCommand,
+		const std::vector<std::string> &inArguments) override;
 
 	void AddRecent(const ConnectInfo &inRecent);
 	void Open(const ConnectInfo &inRecent, const std::string &inCommand = {});
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
-
-	int RunEventLoop();
 
 	MSaltApp &get_executor()
 	{
@@ -110,19 +84,31 @@ class MSaltApp : public MApplication
 	}
 
   private:
-	virtual void DoAbout();
+	bool AllowQuit(bool inLogOff) override;
+	void DoQuit() override;
 
-	virtual bool AllowQuit(bool inLogOff);
-	virtual void DoQuit();
-
-	virtual void UpdateSpecialMenu(const std::string &inName, MMenu *inMenu);
-	void UpdateWindowMenu(MMenu *inMenu);
+	void UpdateSpecialMenu(const std::string &inName, MMenu *inMenu) override;
+	void UpdateWindowMenu(MMenu *inMenu) override;
 	void UpdateRecentSessionMenu(MMenu *inMenu);
 	void UpdatePublicKeyMenu(MMenu *inMenu);
 	void UpdateTOTPMenu(MMenu *inMenu);
 
-	virtual void Initialise();
-	virtual void SaveGlobals();
+	void Initialise() override;
+	void SaveGlobals() override;
+
+	void OnNew();
+	void OnConnect();
+	void OnQuit();
+	void OnNextTerminal();
+	void OnPrevTerminal();
+	void OnAbout();
+
+	MCommand<void()> cNew;
+	MCommand<void()> cConnect;
+	MCommand<void()> cQuit;
+	MCommand<void()> cNextTerminal;
+	MCommand<void()> cPrevTerminal;
+	MCommand<void()> cAbout;
 
 	asio_ns::io_context mIOContext;
 	asio_ns::execution_context *mExContext = &mIOContext;

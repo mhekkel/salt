@@ -30,7 +30,6 @@
 #include "MTerminalWindow.hpp"
 #include "MAlerts.hpp"
 #include "MAnimation.hpp"
-#include "MApplicationImpl.hpp"
 #include "MAuthDialog.hpp"
 #include "MControls.hpp"
 #include "MError.hpp"
@@ -63,8 +62,8 @@ class MSshTerminalWindow : public MTerminalWindow
 		return new MSshTerminalWindow(mUser, mServer, mPort, mSSHCommand, mConnection);
 	}
 
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
+	// virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
+	// virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
   protected:
 	std::string Password();
@@ -114,81 +113,81 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	SetTitle(title.str());
 }
 
-bool MSshTerminalWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-{
-	bool result = true;
+// bool MSshTerminalWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
+// {
+// 	bool result = true;
 
-	switch (inCommand)
-	{
-		case cmd_DropPublicKey:
-			outEnabled = true;
-			break;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_DropPublicKey:
+// 			outEnabled = true;
+// 			break;
 
-		case cmd_ForwardPort:
-		case cmd_ProxySOCKS:
-		case cmd_ProxyHTTP:
-		case cmd_Rekey:
-			outEnabled = mConnection->is_open();
-			break;
+// 		case cmd_ForwardPort:
+// 		case cmd_ProxySOCKS:
+// 		case cmd_ProxyHTTP:
+// 		case cmd_Rekey:
+// 			outEnabled = mConnection->is_open();
+// 			break;
 
-		default:
-			result = MTerminalWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-			break;
-	}
+// 		default:
+// 			result = MTerminalWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+// 			break;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
-bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-{
-	bool result = true;
+// bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
+// {
+// 	bool result = true;
 
-	switch (inCommand)
-	{
-		case cmd_DropPublicKey:
-		{
-			pinch::ssh_agent &agent(pinch::ssh_agent::instance());
+// 	switch (inCommand)
+// 	{
+// 		case cmd_DropPublicKey:
+// 		{
+// 			pinch::ssh_agent &agent(pinch::ssh_agent::instance());
 
-			if (inItemIndex < agent.size())
-			{
-				uint32_t n = inItemIndex;
-				for (auto key = agent.begin(); key != agent.end(); ++key)
-				{
-					if (n-- > 0)
-						continue;
+// 			if (inItemIndex < agent.size())
+// 			{
+// 				uint32_t n = inItemIndex;
+// 				for (auto key = agent.begin(); key != agent.end(); ++key)
+// 				{
+// 					if (n-- > 0)
+// 						continue;
 
-					if (key->get_comment() == inMenu->GetItemLabel(inItemIndex))
-						DropPublicKey(*key);
+// 					if (key->get_comment() == inMenu->GetItemLabel(inItemIndex))
+// 						DropPublicKey(*key);
 
-					break;
-				}
-			}
-			break;
-		}
+// 					break;
+// 				}
+// 			}
+// 			break;
+// 		}
 
-		case cmd_Rekey:
-			mConnection->rekey();
-			break;
+// 		case cmd_Rekey:
+// 			mConnection->rekey();
+// 			break;
 
-		case cmd_ForwardPort:
-			new MPortForwardingDialog(this, mConnection);
-			break;
+// 		case cmd_ForwardPort:
+// 			new MPortForwardingDialog(this, mConnection);
+// 			break;
 
-		case cmd_ProxySOCKS:
-			new MSOCKS5ProxyDialog(this, mConnection);
-			break;
+// 		case cmd_ProxySOCKS:
+// 			new MSOCKS5ProxyDialog(this, mConnection);
+// 			break;
 
-		case cmd_ProxyHTTP:
-			new MHTTPProxyDialog(this, mConnection);
-			break;
+// 		case cmd_ProxyHTTP:
+// 			new MHTTPProxyDialog(this, mConnection);
+// 			break;
 
-		default:
-			result = MTerminalWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-			break;
-	}
+// 		default:
+// 			result = MTerminalWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+// 			break;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 std::string MSshTerminalWindow::Password()
 {
@@ -221,44 +220,44 @@ pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const std::string &inHos
 	const std::vector<uint8_t> &inHostKey, pinch::host_key_state inState)
 {
 	pinch::host_key_reply result = pinch::host_key_reply::reject;
-	std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
+	// std::string_view hsv(reinterpret_cast<const char *>(inHostKey.data()), inHostKey.size());
 
-	std::string value = zeep::encode_base64(hsv);
-	std::string H = zeep::md5(hsv);
+	// std::string value = zeep::encode_base64(hsv);
+	// std::string H = zeep::md5(hsv);
 
-	std::string fingerprint;
+	// std::string fingerprint;
 
-	for (auto b : H)
-	{
-		if (not fingerprint.empty())
-			fingerprint += ':';
+	// for (auto b : H)
+	// {
+	// 	if (not fingerprint.empty())
+	// 		fingerprint += ':';
 
-		fingerprint += kHexChars[(b >> 4) & 0x0f];
-		fingerprint += kHexChars[b & 0x0f];
-	}
+	// 	fingerprint += kHexChars[(b >> 4) & 0x0f];
+	// 	fingerprint += kHexChars[b & 0x0f];
+	// }
 
-	if (inState == pinch::host_key_state::keys_differ)
-	{
-		if (DisplayAlert(this, "host-key-changed-alert", { inHost, fingerprint }) == 2)
-			result = pinch::host_key_reply::trusted;
-	}
-	else
-	{
-		switch (DisplayAlert(this, "unknown-host-alert", { inHost, fingerprint }))
-		{
-			case 1: // Add
-				result = pinch::host_key_reply::trusted;
-				break;
+	// if (inState == pinch::host_key_state::keys_differ)
+	// {
+	// 	if (DisplayAlert(this, "host-key-changed-alert", { inHost, fingerprint }) == 2)
+	// 		result = pinch::host_key_reply::trusted;
+	// }
+	// else
+	// {
+	// 	switch (DisplayAlert(this, "unknown-host-alert", { inHost, fingerprint }))
+	// 	{
+	// 		case 1: // Add
+	// 			result = pinch::host_key_reply::trusted;
+	// 			break;
 
-			case 2: // Cancel
-				result = pinch::host_key_reply::reject;
-				break;
+	// 		case 2: // Cancel
+	// 			result = pinch::host_key_reply::reject;
+	// 			break;
 
-			case 3: // Once
-				result = pinch::host_key_reply::trust_once;
-				break;
-		}
-	}
+	// 		case 3: // Once
+	// 			result = pinch::host_key_reply::trust_once;
+	// 			break;
+	// 	}
+	// }
 	return result;
 }
 
@@ -333,60 +332,64 @@ MTerminalWindow *MTerminalWindow::sFirst = nullptr;
 
 MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
 	: MWindow("Terminal", GetPreferredBounds(),
-		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate /* | kMCustomNonClient */),
-		  "terminal-window-menu")
+		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate | kMShowMenubar))
 	, mChannel(inTerminalChannel)
 	, mNext(nullptr)
+
+	, cClose(this, "close", &MTerminalWindow::OnClose, 'W', kControlKey | kShiftKey)
+	, cCut(this, "cut", &MTerminalWindow::OnCut, 'X', kControlKey | kShiftKey)
+	, cCopy(this, "copy", &MTerminalWindow::OnCopy, 'C', kControlKey | kShiftKey)
+	, cPaste(this, "paste", &MTerminalWindow::OnPaste, 'V', kControlKey | kShiftKey)
+	, cSelectAll(this, "select-all", &MTerminalWindow::OnSelectAll, 'A', kControlKey | kShiftKey)
+	, cCloneTerminal(this, "clone-terminal", &MTerminalWindow::OnCloneTerminal, 'D', kControlKey | kShiftKey)
+	, cReset(this, "reset", &MTerminalWindow::OnReset, 'R', kControlKey | kShiftKey)
+	, cFind(this, "find", &MTerminalWindow::OnFind, 'F', kControlKey | kShiftKey)
+	, cFindNext(this, "find-next", &MTerminalWindow::OnFindNext, kF3KeyCode, kControlKey)
+	, cFindPrev(this, "find-prev", &MTerminalWindow::OnFindPrev, kF3KeyCode, kControlKey | kShiftKey)
 {
 	// create views
 	MRect bounds;
 
 	// create search panel
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.height = kSearchPanelHeight;
 	mSearchPanel = new MSearchPanel("searchpanel", bounds);
 	mSearchPanel->SetBindings(true, true, true, false);
-	mSearchPanel->SetLayout(ePackStart, false, false, 0);
+	// mSearchPanel->SetLayout(false, MRect{});
 	AddChild(mSearchPanel);
 
 	// create status bar
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.y += bounds.height - kScrollbarWidth;
 	bounds.height = kScrollbarWidth;
 
 	MStatusBarElement parts[] = {
-		{ 250, ePackStart, 4, false, false },
-		{ 275, ePackStart, 4, true, true },
-		{ 60, ePackEnd, 4, false, false }
+		// { 250, ePackStart, 4, false, false },
+		// { 275, ePackStart, 4, true, true },
+		// { 60, ePackEnd, 4, false, false }
 	};
 
 	mStatusbar = new MStatusbar("status", bounds, 3, parts);
 	AddChild(mStatusbar);
-	mStatusbar->GetBounds(bounds);
+	bounds = mStatusbar->GetBounds();
 
 	int32_t statusbarHeight = bounds.height;
 
 	// hbox: force correct autolayout in Gtk
 	MBoxControl *hbox = new MBoxControl("hbox", bounds, true, false, true, true, 0, 0);
-	hbox->SetLayout(ePackStart, true, true, 0);
+	hbox->SetLayout(true, true, 0);
 	AddChild(hbox);
 
 	// create scrollbar
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.height -= statusbarHeight + kSearchPanelHeight;
 	bounds.y += kSearchPanelHeight;
 	bounds.x += bounds.width - kScrollbarWidth;
 	bounds.width = kScrollbarWidth;
 	mScrollbar = new MScrollbar("scrollbar", bounds);
 	mScrollbar->SetBindings(false, true, true, true);
-	mScrollbar->SetLayout(ePackEnd, false, false, 0);
 	hbox->AddChild(mScrollbar);
-
-	// create terminal view
-	//	GetBounds(bounds);
-	//	bounds.y += kSearchPanelHeight;
-	//	bounds.height -= statusbarHeight + kSearchPanelHeight;
-	//	bounds.width -= kScrollbarWidth;
+	// mScrollbar->SetLayout(false, MRect{});
 
 	uint32_t w, h;
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
@@ -394,8 +397,10 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	mTerminalView = new MTerminalView("terminalview", bounds, mStatusbar, mScrollbar, mSearchPanel, inTerminalChannel, inArgv);
 	mTerminalView->SetBindings(true, true, true, true);
-	mTerminalView->SetLayout(ePackStart, true, true, 0);
-	hbox->AddChild(mTerminalView);
+	mTerminalView->SetLayout(true, true, 0);
+
+	hbox->AddChild(mTerminalView, mScrollbar);
+
 	AddRoute(mTerminalView->eScroll, mScrollbar->eScroll);
 
 	mSearchPanel->Hide();
@@ -430,7 +435,7 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	RemoveWindowFromWindowList(this);
+	// RemoveWindowFromWindowList(this);
 
 	// Time to quit?
 	if (sFirst == nullptr)
@@ -455,6 +460,62 @@ MRect MTerminalWindow::GetPreferredBounds()
 
 	return MRect(0, 0, w, h + kScrollbarWidth);
 }
+
+void MTerminalWindow::OnClose()
+{
+	if (AllowClose(false))
+		Close();
+}
+
+void MTerminalWindow::OnCut()
+{
+
+}
+
+void MTerminalWindow::OnCopy()
+{
+
+}
+
+void MTerminalWindow::OnPaste()
+{
+
+}
+
+void MTerminalWindow::OnSelectAll()
+{
+
+}
+
+void MTerminalWindow::OnCloneTerminal()
+{
+
+}
+
+void MTerminalWindow::OnReset()
+{
+
+}
+
+void MTerminalWindow::OnFind()
+{
+	if (mSearchPanel->IsVisible())
+		HideSearchPanel();
+	else
+		ShowSearchPanel();
+}
+
+void MTerminalWindow::OnFindNext()
+{
+
+}
+
+void MTerminalWindow::OnFindPrev()
+{
+
+}
+
+
 
 void MTerminalWindow::ShowSearchPanel()
 {
@@ -485,10 +546,12 @@ bool MTerminalWindow::IsAnyTerminalOpen()
 bool MTerminalWindow::AllowClose(bool inLogOff)
 {
 	bool result = true;
+
 	if (mTerminalView->IsOpen())
 	{
 		Select();
-		result = DisplayAlert(this, "close-session-alert", {}) == 1;
+		DisplayAlert(this, "close-session-alert", [this](int result) { if (result == 1) Close(); }, {});
+		result = false;
 	}
 
 	return result;
@@ -500,111 +563,111 @@ void MTerminalWindow::Close()
 	MWindow::Close();
 }
 
-bool MTerminalWindow::UpdateCommandStatus(
-	uint32_t inCommand,
-	MMenu *inMenu,
-	uint32_t inItemIndex,
-	bool &outEnabled,
-	bool &outChecked)
-{
-	bool result = true;
+// bool MTerminalWindow::UpdateCommandStatus(
+// 	uint32_t inCommand,
+// 	MMenu *inMenu,
+// 	uint32_t inItemIndex,
+// 	bool &outEnabled,
+// 	bool &outChecked)
+// {
+// 	bool result = true;
 
-	switch (inCommand)
-	{
-		case cmd_Disconnect:
-			outEnabled = mChannel != nullptr && mChannel->CanDisconnect();
-			break;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_Disconnect:
+// 			outEnabled = mChannel != nullptr && mChannel->CanDisconnect();
+// 			break;
 
-		case cmd_NextTerminal:
-		case cmd_PrevTerminal:
-			outEnabled = sFirst != this or mNext != nullptr;
-			break;
+// 		case cmd_NextTerminal:
+// 		case cmd_PrevTerminal:
+// 			outEnabled = sFirst != this or mNext != nullptr;
+// 			break;
 
-		case cmd_Find:
-		case cmd_CloneTerminal:
-			outEnabled = true;
-			break;
+// 		case cmd_Find:
+// 		case cmd_CloneTerminal:
+// 			outEnabled = true;
+// 			break;
 
-		default:
-			result = MWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-			break;
-	}
+// 		default:
+// 			result = MWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+// 			break;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
-bool MTerminalWindow::ProcessCommand(
-	uint32_t inCommand,
-	const MMenu *inMenu,
-	uint32_t inItemIndex,
-	uint32_t inModifiers)
-{
-	bool result = true;
+// bool MTerminalWindow::ProcessCommand(
+// 	uint32_t inCommand,
+// 	const MMenu *inMenu,
+// 	uint32_t inItemIndex,
+// 	uint32_t inModifiers)
+// {
+// 	bool result = true;
 
-	switch (inCommand)
-	{
-		case cmd_Disconnect:
-			mChannel->Disconnect(inModifiers & kControlKey);
-			break;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_Disconnect:
+// 			mChannel->Disconnect(inModifiers & kControlKey);
+// 			break;
 
-		case cmd_CloneTerminal:
-		{
-			MTerminalWindow *clone = Clone(this);
-			clone->Select();
-			break;
-		}
+// 		case cmd_CloneTerminal:
+// 		{
+// 			MTerminalWindow *clone = Clone(this);
+// 			clone->Select();
+// 			break;
+// 		}
 
-			// case cmd_Explore:
-			//{
-			//	MExploreBrowserWindow* explorer = new MExploreBrowserWindow(mConnection);
-			//	explorer->Select();
-			//	break;
-			// }
+// 			// case cmd_Explore:
+// 			//{
+// 			//	MExploreBrowserWindow* explorer = new MExploreBrowserWindow(mConnection);
+// 			//	explorer->Select();
+// 			//	break;
+// 			// }
 
-		case cmd_NextTerminal:
-			if (mNext != nullptr)
-				mNext->Select();
-			else if (sFirst != this)
-				sFirst->Select();
-			break;
+// 		case cmd_NextTerminal:
+// 			if (mNext != nullptr)
+// 				mNext->Select();
+// 			else if (sFirst != this)
+// 				sFirst->Select();
+// 			break;
 
-		case cmd_PrevTerminal:
-			if (sFirst == this)
-			{
-				MTerminalWindow *w = sFirst;
-				while (w->mNext != nullptr)
-					w = w->mNext;
-				if (w != this)
-					w->Select();
-			}
-			else
-			{
-				MTerminalWindow *w = sFirst;
-				while (w != nullptr and w->mNext != this)
-					w = w->mNext;
-				if (w != nullptr and w != this)
-					w->Select();
-			}
-			break;
+// 		case cmd_PrevTerminal:
+// 			if (sFirst == this)
+// 			{
+// 				MTerminalWindow *w = sFirst;
+// 				while (w->mNext != nullptr)
+// 					w = w->mNext;
+// 				if (w != this)
+// 					w->Select();
+// 			}
+// 			else
+// 			{
+// 				MTerminalWindow *w = sFirst;
+// 				while (w != nullptr and w->mNext != this)
+// 					w = w->mNext;
+// 				if (w != nullptr and w != this)
+// 					w->Select();
+// 			}
+// 			break;
 
-		case cmd_Find:
-			if (mSearchPanel->IsVisible())
-				HideSearchPanel();
-			else
-				ShowSearchPanel();
-			break;
+// 		case cmd_Find:
+// 			if (mSearchPanel->IsVisible())
+// 				HideSearchPanel();
+// 			else
+// 				ShowSearchPanel();
+// 			break;
 
-		case cmd_HideSearchPanel:
-			HideSearchPanel();
-			break;
+// 		case cmd_HideSearchPanel:
+// 			HideSearchPanel();
+// 			break;
 
-		default:
-			result = MWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-			break;
-	}
+// 		default:
+// 			result = MWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+// 			break;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 // ------------------------------------------------------------------
 //

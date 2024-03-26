@@ -50,7 +50,7 @@ class MSearchPanel : public MBoxControl
 
 	virtual ~MSearchPanel();
 
-	virtual bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
+	bool KeyPressed(uint32_t inKeyCode, uint32_t inModifiers) override;
 
 	std::string GetSearchString() const;
 	bool GetIgnoreCase() const;

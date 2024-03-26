@@ -29,7 +29,6 @@
 
 #include "MSearchPanel.hpp"
 #include "MCanvas.hpp"
-#include "MCommands.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MPreferences.hpp"
@@ -47,11 +46,11 @@ class MImageButton : public MCanvas
 	MEventOut<void()> eClicked;
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
-	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseExit();
+	void Draw() override;
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void PointerLeave() override;
 
   private:
 	enum MMouseStateForCloseButton
@@ -65,7 +64,7 @@ class MImageButton : public MCanvas
 };
 
 MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *inImageResource)
-	: MCanvas(inID, inBounds, false, false)
+	: MCanvas(inID, inBounds)
 	, mMouseState(mouseOut)
 {
 	mrsrc::rsrc rsrc(inImageResource);
@@ -80,8 +79,7 @@ MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *
 
 void MImageButton::Draw()
 {
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	MDevice dev(this);
 
@@ -102,7 +100,7 @@ void MImageButton::Draw()
 	}
 }
 
-void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
+void MImageButton::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
 {
 	if (mBounds.ContainsPoint(inX, inY))
 	{
@@ -111,18 +109,18 @@ void MImageButton::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, ui
 	}
 }
 
-void MImageButton::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
+void MImageButton::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mBounds.ContainsPoint(inX, inY))
 		eClicked();
 }
 
-void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
+void MImageButton::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	MMouseStateForCloseButton state(mMouseState);
 
-	if (mMouseState == mouseOut)
-		TrackMouse(true, true);
+	// if (mMouseState == mouseOut)
+	// 	TrackMouse(true, true);
 
 	if (mBounds.ContainsPoint(inX, inY))
 	{
@@ -143,7 +141,7 @@ void MImageButton::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 		Invalidate();
 }
 
-void MImageButton::MouseExit()
+void MImageButton::PointerLeave()
 {
 	if (mMouseState != mouseOut)
 	{
@@ -174,28 +172,28 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.x = bounds.y = (kSearchPanelHeight - 16) / 2;
 	bounds.width = bounds.height = 16;
 	MImageButton *closeButton = new MImageButton("close-button", bounds, "close.png");
-	closeButton->SetLayout(ePackStart, false, false, 8);
+	closeButton->SetLayout(false, false, 8);
 	AddChild(closeButton);
 	AddRoute(eClose, closeButton->eClicked);
 
 	// caption
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.x = 32;
 	bounds.width = captionWidth;
 	bounds.y = (bounds.height - 24) / 2 + 4;
 	bounds.height = dev.GetLineHeight();
 	//	bounds.height = 24;
 	MCaption *caption = new MCaption("search-caption", bounds, captionString);
-	caption->SetLayout(ePackStart, false, false, 4);
+	caption->SetLayout(false, false, 4);
 	AddChild(caption);
 
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.x = 32 + captionWidth + 4;
 	bounds.width = 200;
 	bounds.y = (bounds.height - 24) / 2 + 0;
 	bounds.height = 24;
 	mTextBox = new MEdittext("searchstring", bounds);
-	mTextBox->SetLayout(ePackStart, true, true, 4);
+	mTextBox->SetLayout(true, true, 4);
 	AddChild(mTextBox);
 	mTextBox->SetText(Preferences::GetString("find-recent", ""));
 
@@ -203,13 +201,13 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	dev.SetText(label);
 	uint32_t labelWidth = static_cast<uint32_t>(dev.GetTextWidth());
 
-	GetBounds(bounds);
+	bounds = GetBounds();
 	bounds.x = 32 + captionWidth + 4 + 200 + 4;
 	bounds.height = 24;
 	bounds.y = (bounds.height - 24) / 2 + 2;
 	bounds.width = 20 + labelWidth;
 	mCaseSensitive = new MCheckbox("case-sensitive", bounds, label);
-	mCaseSensitive->SetLayout(ePackStart, false, false, 4);
+	mCaseSensitive->SetLayout(false, false, 4);
 	AddChild(mCaseSensitive);
 	mCaseSensitive->SetChecked(Preferences::GetBoolean("find-case-sensitive", false));
 
@@ -223,7 +221,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *next = new MButton("find-next", bounds, label);
-	next->SetLayout(ePackStart, false, false, 4);
+	next->SetLayout(false, false, 4);
 	AddChild(next);
 	AddRoute(next->eClicked, eFindBtn);
 
@@ -235,7 +233,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *prev = new MButton("find-prev", bounds, label);
-	prev->SetLayout(ePackStart, false, false, 4);
+	prev->SetLayout(false, false, 4);
 	AddChild(prev);
 	AddRoute(prev->eClicked, eFindBtn);
 }
@@ -247,7 +245,8 @@ MSearchPanel::~MSearchPanel()
 void MSearchPanel::Close()
 {
 	Preferences::SetString("find-recent", mTextBox->GetText());
-	ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
+	// mHideSearchPanel();
+	// ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
 }
 
 void MSearchPanel::SetFocus()
@@ -266,11 +265,11 @@ void MSearchPanel::FindBtn(const std::string &inID)
 uint32_t MSearchPanel::GetHeight() const
 {
 	MRect bounds;
-	GetBounds(bounds);
+	bounds = GetBounds();
 	return bounds.height;
 }
 
-bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
+bool MSearchPanel::KeyPressed(uint32_t inKeyCode, uint32_t inModifiers)
 {
 	bool result = true;
 	switch (inKeyCode)
@@ -298,7 +297,7 @@ bool MSearchPanel::HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool 
 			break;
 
 		default:
-			result = MBoxControl::HandleKeyDown(inKeyCode, inModifiers, inRepeat);
+			result = MBoxControl::KeyPressed(inKeyCode, inModifiers);
 			break;
 	}
 

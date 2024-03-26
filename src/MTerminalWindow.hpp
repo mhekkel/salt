@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "MCommand.hpp"
 #include "MWindow.hpp"
 
 #include <pinch.hpp>
@@ -58,9 +59,6 @@ class MTerminalWindow : public MWindow
 
 	~MTerminalWindow() override;
 
-	bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked) override;
-	bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers) override;
-
 	bool AllowClose(bool inLogOff) override;
 	void Close() override;
 
@@ -75,6 +73,28 @@ class MTerminalWindow : public MWindow
 	static MRect GetPreferredBounds();
 
 	static MTerminalWindow *sFirst;
+
+	void OnClose();
+	void OnCut();
+	void OnCopy();
+	void OnPaste();
+	void OnSelectAll();
+	void OnCloneTerminal();
+	void OnReset();
+	void OnFind();
+	void OnFindNext();
+	void OnFindPrev();
+
+	MCommand<void()> cClose;
+	MCommand<void()> cCut;
+	MCommand<void()> cCopy;
+	MCommand<void()> cPaste;
+	MCommand<void()> cSelectAll;
+	MCommand<void()> cCloneTerminal;
+	MCommand<void()> cReset;
+	MCommand<void()> cFind;
+	MCommand<void()> cFindNext;
+	MCommand<void()> cFindPrev;
 
 	MTerminalChannel *mChannel;
 	MStatusbar *mStatusbar;
