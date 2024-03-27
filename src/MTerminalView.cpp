@@ -270,6 +270,11 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, mStatusLineBuffer(mTerminalWidth, 1, false)
 	, mBuffer(&mScreenBuffer)
 	, eIdle(this, &MTerminalView::Idle)
+
+	, cCopy(this, "copy", &MTerminalView::OnCopy, 'C', kControlKey | kShiftKey)
+	, cPaste(this, "paste", &MTerminalView::OnPaste, 'V', kControlKey | kShiftKey)
+	, cSelectAll(this, "select-all", &MTerminalView::OnSelectAll, 'A', kControlKey | kShiftKey)
+
 	, mPFK(nullptr)
 	, mNewPFK(nullptr)
 	, mEscState(eESC_NONE)
@@ -334,6 +339,15 @@ MTerminalView::~MTerminalView()
 	delete mAnimationManager;
 	delete mGraphicalBeep;
 	delete mDisabledFactor;
+}
+
+void MTerminalView::AddedToWindow()
+{
+	MCanvas::AddedToWindow();
+
+	cCopy.Register();
+	cPaste.Register();
+	cSelectAll.Register();
 }
 
 MTerminalView *MTerminalView::GetFrontTerminal()
@@ -2179,6 +2193,28 @@ bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 
 	return result;
 }
+
+void MTerminalView::OnCopy()
+{
+	MClipboard::Instance().SetData(mBuffer->GetSelectedText()/* ,
+		mBuffer->IsSelectionBlock() */);
+}
+
+void MTerminalView::OnPaste()
+{
+	MClipboard::Instance().GetData([this](const std::string &text)
+	{
+		PastePrimaryBuffer(text);
+	});
+}
+
+void MTerminalView::OnSelectAll()
+{
+	mBuffer->SelectAll();
+	Invalidate();
+}
+
+
 
 // bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 // {
@@ -5202,7 +5238,7 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 					else
 					{
 						auto s = zeep::decode_base64({ mArgString.data() + 2, mArgString.length() - 2 });
-						MClipboard::Instance().SetData(s, false);
+						MClipboard::Instance().SetData(s/* , false */);
 					}
 				}
 				break;

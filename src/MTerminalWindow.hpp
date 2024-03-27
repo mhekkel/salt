@@ -75,10 +75,6 @@ class MTerminalWindow : public MWindow
 	static MTerminalWindow *sFirst;
 
 	void OnClose();
-	void OnCut();
-	void OnCopy();
-	void OnPaste();
-	void OnSelectAll();
 	void OnCloneTerminal();
 	void OnReset();
 	void OnFind();
@@ -86,10 +82,6 @@ class MTerminalWindow : public MWindow
 	void OnFindPrev();
 
 	MCommand<void()> cClose;
-	MCommand<void()> cCut;
-	MCommand<void()> cCopy;
-	MCommand<void()> cPaste;
-	MCommand<void()> cSelectAll;
 	MCommand<void()> cCloneTerminal;
 	MCommand<void()> cReset;
 	MCommand<void()> cFind;

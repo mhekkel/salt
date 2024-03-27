@@ -1,104 +1,103 @@
 <?xml version="1.0" standalone="yes"?>
 <menubar>
 	<menu id='filemenu' label="Connection">
-		<section id="1">
-			<item label="Open Terminal" cmd='app.new' />
-			<item label="Connect…" cmd='app.connect' />
-			<menu id='recentmenu' label="Connect Recent" special="recent-session">
-				<section id="2">
-					<item label="Clear Menu" cmd='app.clear-recent' />
-				</section>
-				<section id="3">
-					<item label="dummy" cmd="app.open-recent" />
-				</section>
-			</menu>
-		</section>
-		<section id="2">
-			<item label="Duplicate" cmd='win.duplicate' />
-			<item label="Disconnect" cmd='win.disconnect' />
-		</section>
-		<section id="3">
-			<item label="Renew Keys" cmd='ReKy'/>
-			<menu id='tunnelmenu' label="Tunnel">
-				<item label="Port Forwarding…" cmd='win.forward-port'/>
-				<item label="SOCKS5 Proxy…" cmd='win.socks-proxy'/>
-				<item label="HTTP Proxy…" cmd='win.http-proxy'/>
-			</menu>
-		</section>
-		<section id="4">
-			<menu id='public-key' special='public-keys' label="Install Public Key" />
-			<menu id='motp' special='totps' label="One Time Passwords">
-				<section id="1">
-					<item label="Add new TOTP Hash" cmd='win.add-totp' />
-				</section>
-				<section id="2">
-					<item label="dummy" cmd="0000" />
-				</section>
-			</menu>
-		</section>
-		<section id="5">
-			<item label="Close" cmd='win.close'/>
-		</section>
-		<section id="6">
-			<item label="Quit" cmd='app.quit'/>
-		</section>
+		<item label="Open Terminal" cmd='app.new' />
+		<item label="Connect…" cmd='app.connect' />
+		<menu id='recentmenu' label="Connect Recent" special="recent-session">
+			<item label="Clear Menu" cmd='app.clear-recent' />
+			
+			<separator />
+			
+			<item label="dummy" cmd="app.open-recent"/>
+		</menu>
+		<item label="Duplicate" cmd='win.duplicate'/>
+		<item label="Disconnect" cmd='win.disconnect'/>
+		
+		<separator />
+		
+		<item label="Renew Keys" cmd='ReKy'/>
+		<menu id='tunnelmenu' label="Tunnel">
+			<item label="Port Forwarding…" cmd='win.forward-port'/>
+			<item label="SOCKS5 Proxy…" cmd='win.socks-proxy'/>
+			<item label="HTTP Proxy…" cmd='win.http-proxy'/>
+		</menu>
+		
+		<separator />
+		
+		<menu id='public-key' special='public-keys' label="Install Public Key" />
+		<menu id='motp' special='totps' label="One Time Passwords">
+			<item label="Add new TOTP Hash" cmd='win.add-totp' />
+			
+			<separator />
+			
+			<item label="dummy" cmd="0000" />
+		</menu>
+		
+		<separator />
+		
+		<item label="Close" cmd='win.close'/>
+		
+		<separator />
+		
+		<item label="Quit" cmd='app.quit'/>
 	</menu>
 	<menu id='editmenu' label="Edit">
-		<section id="1">
-			<item label="Copy" cmd='win.copy'/>
-			<item label="Paste" cmd='win.paste'/>
-		</section>
-		<section id="2">
-			<item label="Select All" cmd='win.select-all'/>
-		</section>
-		<section id="3">
-			<item label="Find…" cmd="win.find" />
-			<item label="Find Next" cmd="win.find-next" />
-			<item label="Find Previous" cmd="win.find-previous" />
-		</section>
-		<section id="4">
-			<item label="Preferences" cmd='app.preferences' />
-		</section>
+		<item label="Copy" cmd='win.copy'/>
+		<item label="Paste" cmd='win.paste'/>
+		
+		<separator />
+		
+		<item label="Select All" cmd='win.select-all'/>
+		
+		<separator />
+		
+		<item label="Find…" cmd="win.find" />
+		<item label="Find Next" cmd="win.find-next" />
+		<item label="Find Previous" cmd="win.find-previous" />
+		
+		<separator />
+		
+		<item label="Preferences" cmd='app.preferences' />
 	</menu>
 	<menu id='termmenu' label="Terminal">
-		<section id="1">
-			<item label="Reset" cmd='win.reset-terminal'/>
-			<item label="Reset and clear" cmd='win.reset-and-clear'/>
-		</section>
-		<!-- <section>
-			<item label="UTF-8 Encoding" cmd='win.encoding-utf8' />
-			<item label="Backspace sends DEL" cmd='win.backspace-sends-del' />
-			<item label="Delete sends DEL" cmd='win.' />
-			<item label="VT220 Keyboard" cmd='tVTk' />
-			<item label="Alt sends Escape" cmd='tEsc' />
-			<item label="Old XTerm Function Keys" cmd='tOlF' />
-		</section> -->
-		<section id="3">
-			<menu id='signalmenu' label="Send Signal">
-				<item label="STOP" cmd='win.signal-STOP' />
-				<item label="CONT" cmd='win.signal-CONT' />
-				<item label="INT " cmd='win.signal-INT ' />
-				<item label="HUP " cmd='win.signal-HUP ' />
-				<item label="TERM" cmd='win.signal-TERM' />
-				<item label="KILL" cmd='win.signal-KILL' />
-			</menu>
-		</section>
+		
+		<item label="Reset" cmd='win.reset-terminal'/>
+		<item label="Reset and clear" cmd='win.reset-and-clear'/>
+		<separator />
+		
+		<!--
+							<item label="UTF-8 Encoding" cmd='win.encoding-utf8' />
+							<item label="Backspace sends DEL" cmd='win.backspace-sends-del' />
+							<item label="Delete sends DEL" cmd='win.' />
+							<item label="VT220 Keyboard" cmd='tVTk' />
+							<item label="Alt sends Escape" cmd='tEsc' />
+							<item label="Old XTerm Function Keys" cmd='tOlF' />
+							<separator />
+		-->
+		
+		<menu id='signalmenu' label="Send Signal">
+			<item label="STOP" cmd='win.signal-stop' />
+			<item label="CONT" cmd='win.signal-cont' />
+			<item label="INT " cmd='win.signal-int' />
+			<item label="HUP " cmd='win.signal-hup' />
+			<item label="TERM" cmd='win.signal-term' />
+			<item label="KILL" cmd='win.signal-kill' />
+		</menu>
 	</menu>
 	<menu id='' label="Window" special="window">
-		<section id="1">
-			<item label="Next Terminal" cmd='app.select-next-window'/>
-			<item label="Previous Terminal" cmd='app.select-previous-window'/>
-		</section>
-		<section id="2">
-			<item label="First" />
-		</section>
+		<item label="Next Terminal" cmd='app.select-next-window'/>
+		<item label="Previous Terminal" cmd='app.select-previous-window'/>
+		
+		<separator />
+		
+		<item label="First" />
 	</menu>
 	<menu id='' label="Help">
-		<section id="1">
-			<item label="About…" cmd='app.about'/>
-		</section>
-<!--		-->
-<!--		<item label="Test" cmd='test'/>-->
-<!--		-->
+		<item label="About…" cmd='app.about'/>
+		
+		
+		<!--		-->
+		<!--		<item label="Test" cmd='test'/>-->
+		<!--		-->
 	</menu>
 </menubar>

@@ -31,6 +31,7 @@
 #include "MAlerts.hpp"
 #include "MAnimation.hpp"
 #include "MAuthDialog.hpp"
+#include "MClipboard.hpp"
 #include "MControls.hpp"
 #include "MError.hpp"
 #include "MMenu.hpp"
@@ -332,20 +333,17 @@ MTerminalWindow *MTerminalWindow::sFirst = nullptr;
 
 MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
 	: MWindow("Terminal", GetPreferredBounds(),
-		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate | kMShowMenubar))
-	, mChannel(inTerminalChannel)
-	, mNext(nullptr)
+		  MWindowFlags(kMPostionDefault | kMNoEraseOnUpdate | kMShowMenubar | kMDoNotHandleF10))
 
 	, cClose(this, "close", &MTerminalWindow::OnClose, 'W', kControlKey | kShiftKey)
-	, cCut(this, "cut", &MTerminalWindow::OnCut, 'X', kControlKey | kShiftKey)
-	, cCopy(this, "copy", &MTerminalWindow::OnCopy, 'C', kControlKey | kShiftKey)
-	, cPaste(this, "paste", &MTerminalWindow::OnPaste, 'V', kControlKey | kShiftKey)
-	, cSelectAll(this, "select-all", &MTerminalWindow::OnSelectAll, 'A', kControlKey | kShiftKey)
 	, cCloneTerminal(this, "clone-terminal", &MTerminalWindow::OnCloneTerminal, 'D', kControlKey | kShiftKey)
 	, cReset(this, "reset", &MTerminalWindow::OnReset, 'R', kControlKey | kShiftKey)
 	, cFind(this, "find", &MTerminalWindow::OnFind, 'F', kControlKey | kShiftKey)
 	, cFindNext(this, "find-next", &MTerminalWindow::OnFindNext, kF3KeyCode, kControlKey)
 	, cFindPrev(this, "find-prev", &MTerminalWindow::OnFindPrev, kF3KeyCode, kControlKey | kShiftKey)
+
+	, mChannel(inTerminalChannel)
+	, mNext(nullptr)
 {
 	// create views
 	MRect bounds;
@@ -465,26 +463,6 @@ void MTerminalWindow::OnClose()
 {
 	if (AllowClose(false))
 		Close();
-}
-
-void MTerminalWindow::OnCut()
-{
-
-}
-
-void MTerminalWindow::OnCopy()
-{
-
-}
-
-void MTerminalWindow::OnPaste()
-{
-
-}
-
-void MTerminalWindow::OnSelectAll()
-{
-
 }
 
 void MTerminalWindow::OnCloneTerminal()

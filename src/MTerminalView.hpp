@@ -30,6 +30,7 @@
 #pragma once
 
 #include "MCanvas.hpp"
+#include "MCommand.hpp"
 #include "MColor.hpp"
 #include "MP2PEvents.hpp"
 #include "MSearchPanel.hpp"
@@ -58,8 +59,9 @@ class MTerminalView : public MCanvas
 
 	~MTerminalView() override;
 
-	static MTerminalView *
-	GetFrontTerminal();
+	void AddedToWindow() override;
+
+	static MTerminalView *GetFrontTerminal();
 
 	MEventIn<void(MScrollMessage)> eScroll;
 
@@ -219,6 +221,14 @@ class MTerminalView : public MCanvas
 	void Idle();
 
 	MEventIn<void()> eIdle;
+
+	void OnCopy();
+	void OnPaste();
+	void OnSelectAll();
+
+	MCommand<void()> cCopy;
+	MCommand<void()> cPaste;
+	MCommand<void()> cSelectAll;
 
 	std::deque<char> mInputBuffer;
 	bool mBracketedPaste = true;
