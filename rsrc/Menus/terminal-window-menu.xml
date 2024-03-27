@@ -84,7 +84,7 @@
 			<item label="KILL" cmd='win.signal-kill' />
 		</menu>
 	</menu>
-	<menu id='' label="Window" special="window">
+	<menu id='window' label="Window">
 		<item label="Next Terminal" cmd='win.select-next-window'/>
 		<item label="Previous Terminal" cmd='win.select-previous-window'/>
 		

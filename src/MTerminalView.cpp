@@ -1889,6 +1889,8 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t 
 		{
 			if (inKeyCode == kSpaceKeyCode or inKeyCode == kReturnKeyCode)
 				Open();
+			else
+				handled = false;
 			break;
 		}
 
@@ -2867,9 +2869,16 @@ void MTerminalView::Closed()
 	mAnimationManager->Schedule(storyboard);
 }
 
-bool MTerminalView::IsActive()
+void MTerminalView::ActivateSelf()
 {
-	return IsFocus();
+	MCanvas::ActivateSelf();
+	Invalidate();
+}
+
+void MTerminalView::DeactivateSelf()
+{
+	MCanvas::ActivateSelf();
+	Invalidate();
 }
 
 void MTerminalView::HandleOpened(const std::error_code &ec)

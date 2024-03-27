@@ -416,6 +416,10 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 			w = w->mNext;
 		w->mNext = this;
 	}
+
+	UpdateWindowMenu();
+
+	SetLatentFocus(mTerminalView);
 }
 
 MTerminalWindow::~MTerminalWindow()
@@ -433,12 +437,22 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	// Time to quit?
-	if (sFirst == nullptr)
-		gApp->DoQuit();
+	UpdateWindowMenu();
 }
 
-void MTerminalWindow::Mapped()
+void MTerminalWindow::UpdateWindowMenu()
+{
+	auto m = MMenuBar::instance().FindMenuByID("window");
+	assert(m);
+
+	std::vector<std::string> labels;
+	for (auto w = sFirst; w != nullptr; w = w->mNext)
+		labels.emplace_back(w->GetTitle());
+	
+	m->ReplaceItemsInSection(1, "win.select-terminal", labels);
+}
+
+void MTerminalWindow::ShowSelf()
 {
 	mTerminalView->Open();
 	mTerminalView->SetFocus();

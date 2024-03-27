@@ -118,7 +118,8 @@ class MTerminalView : public MCanvas
 	bool PastePrimaryBuffer(const std::string &inText) override;
 
   private:
-	bool IsActive();
+	void ActivateSelf() override;
+	void DeactivateSelf() override;
 
 	void AdjustScrollbar(int32_t inTopLine);
 	void Scroll(MScrollMessage inMessage);
