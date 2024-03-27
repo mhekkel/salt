@@ -245,7 +245,6 @@ class MFormat
 // --------------------------------------------------------------------
 // The MTerminalView class.
 
-std::string MTerminalView::sSelectBuffer;
 std::list<MTerminalView *> MTerminalView::sTerminalList;
 
 MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
@@ -918,13 +917,11 @@ void MTerminalView::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers
 		SendMouseCommand(3, inX, inY, inModifiers);
 	else if (not mBuffer->IsSelectionEmpty())
 	{
-		sSelectBuffer = mBuffer->GetSelectedText();
-#if defined(_MSC_VER)
-		MClipboard::Instance().SetData(sSelectBuffer, mBuffer->IsSelectionBlock());
-#else
-		// MPrimary::Instance().SetText(sSelectBuffer);
-#endif
+		MClipboard::PrimaryInstance().SetData(mBuffer->GetSelectedText());
+		cCopy.SetEnabled(true);
 	}
+	else
+		cCopy.SetEnabled(false);
 
 	mMouseClick = eNoClick;
 }
@@ -941,12 +938,20 @@ void MTerminalView::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers
 // 	}
 // }
 
-void MTerminalView::ShowContextMenu(int32_t inX, int32_t inY)
+void MTerminalView::MiddleMouseButtonClick(int32_t inX, int32_t inY)
 {
-	if (not sSelectBuffer.empty() and mTerminalChannel->IsOpen())
+	SecondaryMouseButtonClick(inX, inY);
+}
+
+void MTerminalView::SecondaryMouseButtonClick(int32_t inX, int32_t inY)
+{
+	if (MClipboard::PrimaryInstance().HasData() and mTerminalChannel->IsOpen())
 	{
-		mBuffer->ClearSelection();
-		mTerminalChannel->SendData(sSelectBuffer);
+		MClipboard::PrimaryInstance().GetData([this](const std::string &text)
+		{
+			mBuffer->ClearSelection();
+			mTerminalChannel->SendData(text);
+		});
 	}
 }
 

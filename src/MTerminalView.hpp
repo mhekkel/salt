@@ -77,7 +77,9 @@ class MTerminalView : public MCanvas
 	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 	virtual void PointerLeave() override;
 
-	void ShowContextMenu(int32_t inX, int32_t inY) override;
+	void MiddleMouseButtonClick(int32_t inX, int32_t inY) override;
+	void SecondaryMouseButtonClick(int32_t inX, int32_t inY) override;
+
 	static void GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool inStatusLine,
 		uint32_t &outWidth, uint32_t &outHeight);
 	static MRect GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows);
@@ -233,7 +235,6 @@ class MTerminalView : public MCanvas
 	std::deque<char> mInputBuffer;
 	bool mBracketedPaste = true;
 
-	static std::string sSelectBuffer;
 	static std::list<MTerminalView *> sTerminalList;
 
 	enum MColorType
