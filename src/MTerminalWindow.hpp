@@ -77,10 +77,14 @@ class MTerminalWindow : public MWindow
 	void OnClose();
 	void OnCloneTerminal();
 	void OnFind();
+	void OnNextTerminal();
+	void OnPrevTerminal();
 
 	MCommand<void()> cClose;
 	MCommand<void()> cCloneTerminal;
 	MCommand<void()> cFind;
+	MCommand<void()> cNextTerminal;
+	MCommand<void()> cPrevTerminal;
 
 	MTerminalChannel *mChannel;
 	MStatusbar *mStatusbar;

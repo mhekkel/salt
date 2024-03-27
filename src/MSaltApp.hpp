@@ -99,15 +99,11 @@ class MSaltApp : public MApplication
 	void OnNew();
 	void OnConnect();
 	void OnQuit();
-	void OnNextTerminal();
-	void OnPrevTerminal();
 	void OnAbout();
 
 	MCommand<void()> cNew;
 	MCommand<void()> cConnect;
 	MCommand<void()> cQuit;
-	MCommand<void()> cNextTerminal;
-	MCommand<void()> cPrevTerminal;
 	MCommand<void()> cAbout;
 
 	asio_ns::io_context mIOContext;

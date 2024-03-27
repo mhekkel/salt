@@ -80,8 +80,6 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	, cNew(this, "new", &MSaltApp::OnNew, 'n', kControlKey | kShiftKey)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
 	, cQuit(this, "quit", &MSaltApp::OnQuit, 'q', kControlKey | kShiftKey)
-	, cNextTerminal(this, "nextterminal", &MSaltApp::OnNextTerminal, kTabKeyCode, kControlKey)
-	, cPrevTerminal(this, "prevterminal", &MSaltApp::OnPrevTerminal, kTabKeyCode, kControlKey | kShiftKey)
 	, cAbout(this, "about", &MSaltApp::OnAbout)
 {
 }
@@ -195,14 +193,6 @@ void MSaltApp::OnQuit()
 {
 	if (AllowQuit(false))
 		DoQuit();
-}
-
-void MSaltApp::OnNextTerminal()
-{
-}
-
-void MSaltApp::OnPrevTerminal()
-{
 }
 
 void MSaltApp::OnAbout()

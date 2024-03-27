@@ -85,8 +85,8 @@
 		</menu>
 	</menu>
 	<menu id='' label="Window" special="window">
-		<item label="Next Terminal" cmd='app.select-next-window'/>
-		<item label="Previous Terminal" cmd='app.select-previous-window'/>
+		<item label="Next Terminal" cmd='win.select-next-window'/>
+		<item label="Previous Terminal" cmd='win.select-previous-window'/>
 		
 		<separator />
 		

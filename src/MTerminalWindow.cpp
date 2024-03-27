@@ -339,6 +339,9 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	, cCloneTerminal(this, "clone-terminal", &MTerminalWindow::OnCloneTerminal, 'D', kControlKey | kShiftKey)
 	, cFind(this, "find", &MTerminalWindow::OnFind, 'F', kControlKey | kShiftKey)
 
+	, cNextTerminal(this, "select-next-window", &MTerminalWindow::OnNextTerminal, kTabKeyCode, kControlKey)
+	, cPrevTerminal(this, "select-previous-window", &MTerminalWindow::OnPrevTerminal, kTabKeyCode, kControlKey | kShiftKey)
+
 	, mChannel(inTerminalChannel)
 	, mNext(nullptr)
 {
@@ -472,6 +475,34 @@ void MTerminalWindow::OnFind()
 		HideSearchPanel();
 	else
 		ShowSearchPanel();
+}
+
+void MTerminalWindow::OnNextTerminal()
+{
+	if (mNext != nullptr)
+		mNext->Select();
+	else if (sFirst != this)
+		sFirst->Select();
+}
+
+void MTerminalWindow::OnPrevTerminal()
+{
+	if (sFirst == this)
+	{
+		MTerminalWindow *w = sFirst;
+		while (w->mNext != nullptr)
+			w = w->mNext;
+		if (w != this)
+			w->Select();
+	}
+	else
+	{
+		MTerminalWindow *w = sFirst;
+		while (w != nullptr and w->mNext != this)
+			w = w->mNext;
+		if (w != nullptr and w != this)
+			w->Select();
+	}
 }
 
 void MTerminalWindow::ShowSearchPanel()
