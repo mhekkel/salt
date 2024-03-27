@@ -123,6 +123,8 @@ class MTerminalView : public MCanvas
 	void AdjustScrollbar(int32_t inTopLine);
 	void Scroll(MScrollMessage inMessage);
 
+	bool Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) override;
+
 	void AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 
 	void ReadPreferences();

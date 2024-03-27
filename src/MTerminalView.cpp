@@ -926,17 +926,19 @@ void MTerminalView::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers
 	mMouseClick = eNoClick;
 }
 
-// void MTerminalView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
-// {
-// 	if (inDeltaY != 0)
-// 	{
-// 		if (mMouseMode == eTrackMouseNone)
-// 			for (int i = 0; i < 2 * std::abs(inDeltaY); ++i)
-// 				Scroll(inDeltaY > 0 ? kScrollLineUp : kScrollLineDown);
-// 		else
-// 			SendMouseCommand(inDeltaY > 0 ? 64 : 65, inX, inY, inModifiers);
-// 	}
-// }
+bool MTerminalView::Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
+{
+	if (inDeltaY != 0)
+	{
+		if (mMouseMode == eTrackMouseNone)
+			for (int i = 0; i < 2 * std::abs(inDeltaY); ++i)
+				Scroll(inDeltaY > 0 ? kScrollLineUp : kScrollLineDown);
+		else
+			SendMouseCommand(inDeltaY > 0 ? 64 : 65, inX, inY, inModifiers);
+	}
+
+	return true;
+}
 
 void MTerminalView::MiddleMouseButtonClick(int32_t inX, int32_t inY)
 {
