@@ -1843,7 +1843,7 @@ std::string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifi
 
 bool MTerminalView::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat)
 {
-	PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
+	// PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
 
 	bool handled = true;
 	std::string text;
