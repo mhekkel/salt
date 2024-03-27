@@ -229,10 +229,18 @@ class MTerminalView : public MCanvas
 	void OnCopy();
 	void OnPaste();
 	void OnSelectAll();
+	void OnReset();
+	void OnResetAndClear();
+	void OnFindNext();
+	void OnFindPrev();
 
 	MCommand<void()> cCopy;
 	MCommand<void()> cPaste;
 	MCommand<void()> cSelectAll;
+	MCommand<void()> cReset;
+	MCommand<void()> cResetAndClear;
+	MCommand<void()> cFindNext;
+	MCommand<void()> cFindPrev;
 
 	std::deque<char> mInputBuffer;
 	bool mBracketedPaste = true;

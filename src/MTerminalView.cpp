@@ -273,6 +273,10 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, cCopy(this, "copy", &MTerminalView::OnCopy, 'C', kControlKey | kShiftKey)
 	, cPaste(this, "paste", &MTerminalView::OnPaste, 'V', kControlKey | kShiftKey)
 	, cSelectAll(this, "select-all", &MTerminalView::OnSelectAll, 'A', kControlKey | kShiftKey)
+	, cReset(this, "reset", &MTerminalView::OnReset, 'R', kControlKey | kShiftKey)
+	, cResetAndClear(this, "reset-and-clear", &MTerminalView::OnResetAndClear)
+	, cFindNext(this, "find-next", &MTerminalView::OnFindNext, kF3KeyCode, kControlKey)
+	, cFindPrev(this, "find-previous", &MTerminalView::OnFindPrev, kF3KeyCode, kControlKey | kShiftKey)
 
 	, mPFK(nullptr)
 	, mNewPFK(nullptr)
@@ -347,6 +351,12 @@ void MTerminalView::AddedToWindow()
 	cCopy.Register();
 	cPaste.Register();
 	cSelectAll.Register();
+	cReset.Register();
+	cResetAndClear.Register();
+	cFindNext.Register();
+	cFindPrev.Register();
+
+	cCopy.SetEnabled(false);
 }
 
 MTerminalView *MTerminalView::GetFrontTerminal()
@@ -932,9 +942,9 @@ bool MTerminalView::Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t i
 	{
 		if (mMouseMode == eTrackMouseNone)
 			for (int i = 0; i < 2 * std::abs(inDeltaY); ++i)
-				Scroll(inDeltaY > 0 ? kScrollLineUp : kScrollLineDown);
+				Scroll(inDeltaY < 0 ? kScrollLineUp : kScrollLineDown);
 		else
-			SendMouseCommand(inDeltaY > 0 ? 64 : 65, inX, inY, inModifiers);
+			SendMouseCommand(inDeltaY < 0 ? 64 : 65, inX, inY, inModifiers);
 	}
 
 	return true;
@@ -2221,6 +2231,28 @@ void MTerminalView::OnSelectAll()
 	Invalidate();
 }
 
+void MTerminalView::OnFindNext()
+{
+	FindNext(searchDown);
+}
+
+void MTerminalView::OnFindPrev()
+{
+	FindNext(searchUp);
+}
+
+void MTerminalView::OnReset()
+{
+	value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
+	Reset();
+}
+
+void MTerminalView::OnResetAndClear()
+{
+	Reset();
+	mBuffer->Clear();
+	Invalidate();
+}
 
 
 // bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)

@@ -337,10 +337,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	, cClose(this, "close", &MTerminalWindow::OnClose, 'W', kControlKey | kShiftKey)
 	, cCloneTerminal(this, "clone-terminal", &MTerminalWindow::OnCloneTerminal, 'D', kControlKey | kShiftKey)
-	, cReset(this, "reset", &MTerminalWindow::OnReset, 'R', kControlKey | kShiftKey)
 	, cFind(this, "find", &MTerminalWindow::OnFind, 'F', kControlKey | kShiftKey)
-	, cFindNext(this, "find-next", &MTerminalWindow::OnFindNext, kF3KeyCode, kControlKey)
-	, cFindPrev(this, "find-prev", &MTerminalWindow::OnFindPrev, kF3KeyCode, kControlKey | kShiftKey)
 
 	, mChannel(inTerminalChannel)
 	, mNext(nullptr)
@@ -433,8 +430,6 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	// RemoveWindowFromWindowList(this);
-
 	// Time to quit?
 	if (sFirst == nullptr)
 		gApp->DoQuit();
@@ -467,12 +462,8 @@ void MTerminalWindow::OnClose()
 
 void MTerminalWindow::OnCloneTerminal()
 {
-
-}
-
-void MTerminalWindow::OnReset()
-{
-
+	MTerminalWindow *clone = Clone(this);
+	clone->Select();
 }
 
 void MTerminalWindow::OnFind()
@@ -482,18 +473,6 @@ void MTerminalWindow::OnFind()
 	else
 		ShowSearchPanel();
 }
-
-void MTerminalWindow::OnFindNext()
-{
-
-}
-
-void MTerminalWindow::OnFindPrev()
-{
-
-}
-
-
 
 void MTerminalWindow::ShowSearchPanel()
 {
@@ -528,7 +507,9 @@ bool MTerminalWindow::AllowClose(bool inLogOff)
 	if (mTerminalView->IsOpen())
 	{
 		Select();
-		DisplayAlert(this, "close-session-alert", [this](int result) { if (result == 1) Close(); }, {});
+		DisplayAlert(this, "close-session-alert", [this](int result)
+			{ if (result == 1) Close(); },
+			{});
 		result = false;
 	}
 

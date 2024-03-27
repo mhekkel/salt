@@ -10,7 +10,7 @@
 			
 			<item label="dummy" cmd="app.open-recent"/>
 		</menu>
-		<item label="Duplicate" cmd='win.duplicate'/>
+		<item label="Duplicate" cmd='win.clone-terminal'/>
 		<item label="Disconnect" cmd='win.disconnect'/>
 		
 		<separator />
@@ -61,7 +61,7 @@
 	</menu>
 	<menu id='termmenu' label="Terminal">
 		
-		<item label="Reset" cmd='win.reset-terminal'/>
+		<item label="Reset" cmd='win.reset'/>
 		<item label="Reset and clear" cmd='win.reset-and-clear'/>
 		<separator />
 		
