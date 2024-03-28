@@ -83,12 +83,13 @@ class MSaltApp : public MApplication
 		mImpl->execute(std::move(h));
 	}
 
+	void UpdateWindowMenu();
+
   private:
 	bool AllowQuit(bool inLogOff) override;
 	void DoQuit() override;
 
 	void UpdateSpecialMenu(const std::string &inName, MMenu *inMenu) override;
-	void UpdateWindowMenu(MMenu *inMenu) override;
 	void UpdateRecentSessionMenu(MMenu *inMenu);
 	void UpdatePublicKeyMenu(MMenu *inMenu);
 	void UpdateTOTPMenu(MMenu *inMenu);
@@ -100,11 +101,13 @@ class MSaltApp : public MApplication
 	void OnConnect();
 	void OnQuit();
 	void OnAbout();
+	void OnSelectTerminal(int inTerminalNr);
 
 	MCommand<void()> cNew;
 	MCommand<void()> cConnect;
 	MCommand<void()> cQuit;
 	MCommand<void()> cAbout;
+	MCommand<void(int)> cSelectTerminal;
 
 	asio_ns::io_context mIOContext;
 	asio_ns::execution_context *mExContext = &mIOContext;

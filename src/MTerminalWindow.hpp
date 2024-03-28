@@ -64,6 +64,13 @@ class MTerminalWindow : public MWindow
 
 	static bool IsAnyTerminalOpen();
 
+	void SetTitle(const std::string &inTitle) override;
+
+	uint32_t GetTerminalNr() const
+	{
+		return mNr;
+	}
+
   protected:
 	MTerminalWindow(MTerminalChannel *inChannel, const std::vector<std::string> &inArgv);
 
@@ -93,4 +100,6 @@ class MTerminalWindow : public MWindow
 	MSearchPanel *mSearchPanel;
 	MTerminalView *mTerminalView;
 	MTerminalWindow *mNext;
+	uint32_t mNr;
+	static uint32_t sNextNr;
 };

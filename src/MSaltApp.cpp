@@ -81,6 +81,7 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
 	, cQuit(this, "quit", &MSaltApp::OnQuit, 'q', kControlKey | kShiftKey)
 	, cAbout(this, "about", &MSaltApp::OnAbout)
+	, cSelectTerminal(this, "select-terminal", &MSaltApp::OnSelectTerminal)
 {
 }
 
@@ -200,6 +201,18 @@ void MSaltApp::OnAbout()
 	DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, std::to_string(kBuildNumber), kRevisionDate });
 }
 
+void MSaltApp::OnSelectTerminal(int inTerminalNr)
+{
+	for (auto w = MTerminalWindow::GetFirstTerminal(); w != nullptr; w = w->GetNextTerminal())
+	{
+		if (w->GetTerminalNr() != inTerminalNr)
+			continue;
+		
+		w->Select();
+		break;
+	}
+}
+
 // bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 // {
 // 	bool result = true;
@@ -275,17 +288,19 @@ void MSaltApp::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)
 	// 	MApplication::UpdateSpecialMenu(inName, inMenu);
 }
 
-void MSaltApp::UpdateWindowMenu(MMenu *inMenu)
+void MSaltApp::UpdateWindowMenu()
 {
-	// inMenu->RemoveItems(3, inMenu->CountItems() - 3);
+	auto m = MMenuBar::instance().FindMenuByID("window");
+	assert(m);
 
-	// MTerminalWindow *term = MTerminalWindow::GetFirstTerminal();
-	// while (term != nullptr)
-	// {
-	// 	std::string label = term->GetTitle();
-	// 	inMenu->AppendItem(label, cmd_SelectWindowFromMenu);
-	// 	term = term->GetNextTerminal();
-	// }
+	std::vector<std::tuple<std::string, uint32_t>> labels;
+	for (auto w = MTerminalWindow::GetFirstTerminal(); w != nullptr; w = w->GetNextTerminal())
+		labels.emplace_back(w->GetTitle(), w->GetTerminalNr());
+	
+	m->ReplaceItemsInSection(1, "app.select-terminal", labels);
+
+	if (auto w = dynamic_cast<MTerminalWindow *>(GetActiveWindow()); w != nullptr)
+		cSelectTerminal.SetState(w->GetTerminalNr());
 }
 
 void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)

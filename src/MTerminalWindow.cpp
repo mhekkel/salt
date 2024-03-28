@@ -330,6 +330,7 @@ MPtyTerminalWindow::MPtyTerminalWindow(MPtyTerminalWindow *inOriginal)
 //
 
 MTerminalWindow *MTerminalWindow::sFirst = nullptr;
+uint32_t MTerminalWindow::sNextNr = 1;
 
 MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
 	: MWindow("Terminal", GetPreferredBounds(),
@@ -344,6 +345,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	, mChannel(inTerminalChannel)
 	, mNext(nullptr)
+	, mNr(sNextNr++)
 {
 	// create views
 	MRect bounds;
@@ -417,8 +419,6 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 		w->mNext = this;
 	}
 
-	UpdateWindowMenu();
-
 	SetLatentFocus(mTerminalView);
 
 	mTerminalView->Open();
@@ -439,19 +439,13 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	UpdateWindowMenu();
+	static_cast<MSaltApp *>(gApp)->UpdateWindowMenu();
 }
 
-void MTerminalWindow::UpdateWindowMenu()
+void MTerminalWindow::SetTitle(const std::string &inTitle)
 {
-	auto m = MMenuBar::instance().FindMenuByID("window");
-	assert(m);
-
-	std::vector<std::string> labels;
-	for (auto w = sFirst; w != nullptr; w = w->mNext)
-		labels.emplace_back(w->GetTitle());
-	
-	m->ReplaceItemsInSection(1, "win.select-terminal", labels);
+	MWindow::SetTitle(inTitle);
+	static_cast<MSaltApp *>(gApp)->UpdateWindowMenu();
 }
 
 void MTerminalWindow::ShowSelf()
