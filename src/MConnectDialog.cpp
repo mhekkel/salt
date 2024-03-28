@@ -267,7 +267,7 @@ bool MConnectDialog::OKClicked()
 
 	try
 	{
-		MSaltApp::instance().Open(ci, GetText("ssh-command"));
+		MSaltApp::Instance().Open(ci, GetText("ssh-command"));
 	}
 	catch (const std::exception &e)
 	{

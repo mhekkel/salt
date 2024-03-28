@@ -426,7 +426,7 @@ MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnec
 	// sc->add_rule("/", {});
 
 	// m_server.reset(new MHTTPServer(gApp->get_io_context(), sc));
-	m_server.reset(new MHTTPServer(*this, MSaltApp::instance().get_io_context(), nullptr));
+	m_server.reset(new MHTTPServer(*this, MSaltApp::Instance().get_io_context(), nullptr));
 
 	m_server->set_allowed_methods({ "GET", "POST", "PUT", "OPTIONS", "HEAD", "DELETE", "CONNECT" });
 

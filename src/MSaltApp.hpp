@@ -72,7 +72,7 @@ class MSaltApp : public MApplication
 		return mIOContext;
 	}
 
-	static MSaltApp &instance()
+	static MSaltApp &Instance()
 	{
 		return static_cast<MSaltApp &>(*gApp);
 	}
@@ -97,6 +97,7 @@ class MSaltApp : public MApplication
 
 	void OnNew();
 	void OnConnect();
+	void OnAddNewTOTP();
 	void OnQuit();
 	void OnAbout();
 	void OnSelectTerminal(int inTerminalNr);
@@ -105,6 +106,7 @@ class MSaltApp : public MApplication
 
 	MCommand<void()> cNew;
 	MCommand<void()> cConnect;
+	MCommand<void()> cAddNewTOTP;
 	MCommand<void()> cQuit;
 	MCommand<void()> cAbout;
 	MCommand<void(int)> cSelectTerminal;
@@ -153,6 +155,6 @@ class MAppExecutor
 	template <class F>
 	void execute(F f) const
 	{
-		MSaltApp::instance().execute(std::move(f));
+		MSaltApp::Instance().execute(std::move(f));
 	}
 };

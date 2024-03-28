@@ -105,8 +105,6 @@ class MTerminalView : public MCanvas
 
 	void HandleMessage(const std::string &inMessage, const std::string &inLanguage);
 
-	void EnterTOTP(uint32_t inItemIndex);
-
 	MEventIn<void(MSearchDirection)> eSearch;
 	void FindNext(MSearchDirection inSearchDirection);
 
@@ -115,7 +113,7 @@ class MTerminalView : public MCanvas
 	MEventIn<void()> ePreferencesChanged;
 	MEventIn<void(MColor)> ePreviewColor;
 
-	bool PastePrimaryBuffer(const std::string &inText) override;
+	bool DoPaste(const std::string &inText);
 
   private:
 	void ActivateSelf() override;
@@ -227,23 +225,37 @@ class MTerminalView : public MCanvas
 
 	MEventIn<void()> eIdle;
 
-	void OnAddNewTOTP();
 	void OnEnterTOTP(int inTOTPNr);
 	void OnCopy();
 	void OnPaste();
 	void OnSelectAll();
 	void OnReset();
 	void OnResetAndClear();
+
+	void OnEncodingUtf8(bool inChecked);
+	void OnBackspaceSendsDel(bool inChecked);
+	void OnDeleteSendsDel(bool inChecked);
+	void OnVt220Keyboard(bool inChecked);
+	void OnAltSendsEscape(bool inChecked);
+	void OnOldXtermFnKeys(bool inChecked);
+
 	void OnFindNext();
 	void OnFindPrev();
 
-	MCommand<void()> cAddNewTOTP;
 	MCommand<void(int)> cEnterTOTP;
 	MCommand<void()> cCopy;
 	MCommand<void()> cPaste;
 	MCommand<void()> cSelectAll;
 	MCommand<void()> cReset;
 	MCommand<void()> cResetAndClear;
+
+	MCommand<void(bool)> cEncodingUtf8;
+	MCommand<void(bool)> cBackspaceSendsDel;
+	MCommand<void(bool)> cDeleteSendsDel;
+	MCommand<void(bool)> cVt220Keyboard;
+	MCommand<void(bool)> cAltSendsEscape;
+	MCommand<void(bool)> cOldXtermFnKeys;
+
 	MCommand<void()> cFindNext;
 	MCommand<void()> cFindPrev;
 

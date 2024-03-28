@@ -79,6 +79,7 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 
 	, cNew(this, "new", &MSaltApp::OnNew, 'n', kControlKey | kShiftKey)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
+	, cAddNewTOTP(this, "add-totp", &MSaltApp::OnAddNewTOTP)
 	, cQuit(this, "quit", &MSaltApp::OnQuit, 'q', kControlKey | kShiftKey)
 	, cAbout(this, "about", &MSaltApp::OnAbout)
 	, cSelectTerminal(this, "select-terminal", &MSaltApp::OnSelectTerminal)
@@ -194,6 +195,12 @@ void MSaltApp::OnConnect()
 	d->Select();
 }
 
+void MSaltApp::OnAddNewTOTP()
+{
+	MDialog *d = new MAddTOTPHashDialog();
+	d->Select();
+}
+
 void MSaltApp::OnQuit()
 {
 	if (AllowQuit(false))
@@ -231,7 +238,7 @@ void MSaltApp::OnOpenRecent(int inConnectionNr)
 	{
 		if (nr != inConnectionNr)
 			continue;
-		
+
 		Open(ci);
 		break;
 	}

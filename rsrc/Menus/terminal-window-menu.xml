@@ -16,7 +16,7 @@
 		<separator />
 		
 		<item label="Renew Keys" cmd='win.renew-keys'/>
-
+		
 		<menu id='tunnelmenu' label="Tunnel">
 			<item label="Port Forwarding…" cmd='win.forward-port'/>
 			<item label="SOCKS5 Proxy…" cmd='win.socks-proxy'/>
@@ -29,7 +29,7 @@
 			<item />
 		</menu>
 		<menu id='totp' label="One Time Passwords">
-			<item label="Add new TOTP Hash" cmd='win.add-totp' />
+			<item label="Add new TOTP Hash" cmd='app.add-totp' />
 			
 			<separator />
 			
@@ -68,15 +68,15 @@
 		<item label="Reset and clear" cmd='win.reset-and-clear'/>
 		<separator />
 		
-		<!--
-							<item label="UTF-8 Encoding" cmd='win.encoding-utf8' />
-							<item label="Backspace sends DEL" cmd='win.backspace-sends-del' />
-							<item label="Delete sends DEL" cmd='win.' />
-							<item label="VT220 Keyboard" cmd='tVTk' />
-							<item label="Alt sends Escape" cmd='tEsc' />
-							<item label="Old XTerm Function Keys" cmd='tOlF' />
-							<separator />
-		-->
+		<item label="UTF-8 Encoding" cmd='win.encoding-utf8' />
+		<item label="Backspace sends DEL" cmd='win.backspace-sends-del' />
+		<item label="Delete sends DEL" cmd='win.delete-sends-del' />
+		<item label="VT220 Keyboard" cmd='win.vt220-keyboard' />
+		<item label="Alt sends Escape" cmd='win.alt-sends-escape' />
+		<item label="Old XTerm Function Keys" cmd='win.old-xterm-fn-keys' />
+
+		<separator />
+		
 		
 		<menu id='signalmenu' label="Send Signal">
 			<item label="STOP" cmd='win.signal-stop' />

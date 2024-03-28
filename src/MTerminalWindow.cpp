@@ -101,7 +101,7 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 {
 	using namespace std::placeholders;
 
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	using namespace std::placeholders;
 
@@ -145,7 +145,7 @@ void MSshTerminalWindow::OnInstallPublicKey(int inKeyNr)
 		std::string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
 	std::string comment = key.get_comment();
 
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	mKeyDropper.reset(new pinch::exec_channel(
 		mConnection, command, [this, comment](const std::string &, int status)
@@ -456,13 +456,13 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	MSaltApp::instance().UpdateWindowMenu();
+	MSaltApp::Instance().UpdateWindowMenu();
 }
 
 void MTerminalWindow::SetTitle(const std::string &inTitle)
 {
 	MWindow::SetTitle(inTitle);
-	MSaltApp::instance().UpdateWindowMenu();
+	MSaltApp::Instance().UpdateWindowMenu();
 }
 
 void MTerminalWindow::ShowSelf()

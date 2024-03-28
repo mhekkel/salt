@@ -117,7 +117,7 @@ MSshTerminalChannel::~MSshTerminalChannel()
 
 void MSshTerminalChannel::SetMessageCallback(const MessageCallback &inMessageCallback)
 {
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	mMessageCB = asio_ns::bind_executor(
 		my_executor,
@@ -149,7 +149,7 @@ void MSshTerminalChannel::Open(const string &inTerminalType,
 {
 	// env is ignored anyway...
 
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,
@@ -197,7 +197,7 @@ void MSshTerminalChannel::SendSignal(const string &inSignal)
 
 void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,

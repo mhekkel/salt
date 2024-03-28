@@ -58,7 +58,7 @@
 
 MPtyTerminalChannel::MPtyTerminalChannel()
 	: mPid(-1)
-	, mPty(MSaltApp::instance().get_io_context())
+	, mPty(MSaltApp::Instance().get_io_context())
 {
 }
 
@@ -291,7 +291,7 @@ void MPtyTerminalChannel::SendSignal(const std::string &inSignal)
 
 void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
 {
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,

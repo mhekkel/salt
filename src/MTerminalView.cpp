@@ -42,8 +42,8 @@
 #include "MSound.hpp"
 #include "MStrings.hpp"
 #include "MTerminalBuffer.hpp"
-#include "MUtils.hpp"
 #include "MUnicode.hpp"
+#include "MUtils.hpp"
 #include "MVT220CharSets.hpp"
 #include "MWindow.hpp"
 
@@ -270,7 +270,6 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, mBuffer(&mScreenBuffer)
 	, eIdle(this, &MTerminalView::Idle)
 
-	, cAddNewTOTP(this, "add-totp", &MTerminalView::OnAddNewTOTP)
 	, cEnterTOTP(this, "enter-totp", &MTerminalView::OnEnterTOTP)
 
 	, cCopy(this, "copy", &MTerminalView::OnCopy, 'C', kControlKey | kShiftKey)
@@ -278,6 +277,14 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, cSelectAll(this, "select-all", &MTerminalView::OnSelectAll, 'A', kControlKey | kShiftKey)
 	, cReset(this, "reset", &MTerminalView::OnReset, 'R', kControlKey | kShiftKey)
 	, cResetAndClear(this, "reset-and-clear", &MTerminalView::OnResetAndClear)
+
+	, cEncodingUtf8(this, "encoding-utf8", &MTerminalView::OnEncodingUtf8)
+	, cBackspaceSendsDel(this, "backspace-sends-del", &MTerminalView::OnBackspaceSendsDel)
+	, cDeleteSendsDel(this, "delete-sends-del", &MTerminalView::OnDeleteSendsDel)
+	, cVt220Keyboard(this, "vt220-keyboard", &MTerminalView::OnVt220Keyboard)
+	, cAltSendsEscape(this, "alt-sends-escape", &MTerminalView::OnAltSendsEscape)
+	, cOldXtermFnKeys(this, "old-xterm-fn-keys", &MTerminalView::OnOldXtermFnKeys)
+
 	, cFindNext(this, "find-next", &MTerminalView::OnFindNext, kF3KeyCode, kControlKey)
 	, cFindPrev(this, "find-previous", &MTerminalView::OnFindPrev, kF3KeyCode, kControlKey | kShiftKey)
 
@@ -310,7 +317,7 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 
 	Reset();
 
-	AddRoute(MSaltApp::instance().eIdle, eIdle);
+	AddRoute(MSaltApp::Instance().eIdle, eIdle);
 	AddRoute(MPreferencesDialog::ePreferencesChanged, ePreferencesChanged);
 	AddRoute(MPreferencesDialog::eColorPreview, ePreviewColor);
 	AddRoute(mStatusbar->ePartClicked, eStatusPartClicked);
@@ -351,17 +358,32 @@ void MTerminalView::AddedToWindow()
 {
 	MCanvas::AddedToWindow();
 
-	cAddNewTOTP.Register();
 	cEnterTOTP.Register();
 	cCopy.Register();
 	cPaste.Register();
 	cSelectAll.Register();
 	cReset.Register();
 	cResetAndClear.Register();
+
+	cEncodingUtf8.Register();
+	cBackspaceSendsDel.Register();
+	cDeleteSendsDel.Register();
+	cVt220Keyboard.Register();
+	cAltSendsEscape.Register();
+	cOldXtermFnKeys.Register();
+
 	cFindNext.Register();
 	cFindPrev.Register();
 
 	cCopy.SetEnabled(false);
+	cEnterTOTP.SetState(-1);
+
+	cEncodingUtf8.SetChecked(mEncoding == kEncodingUTF8);
+	cBackspaceSendsDel.SetChecked(not mDECBKM);
+	cDeleteSendsDel.SetChecked(mDeleteIsDel);
+	cVt220Keyboard.SetChecked(not mXTermKeys);
+	cAltSendsEscape.SetChecked(mAltSendsEscape);
+	cOldXtermFnKeys.SetChecked(mOldFnKeys);
 }
 
 MTerminalView *MTerminalView::GetFrontTerminal()
@@ -400,7 +422,7 @@ void MTerminalView::Close()
 	mTerminalChannel->Release();
 	mTerminalChannel = nullptr;
 
-	RemoveRoute(MSaltApp::instance().eIdle, eIdle);
+	RemoveRoute(MSaltApp::Instance().eIdle, eIdle);
 	RemoveRoute(MPreferencesDialog::ePreferencesChanged, ePreferencesChanged);
 	RemoveRoute(MPreferencesDialog::eColorPreview, ePreviewColor);
 	RemoveRoute(mStatusbar->ePartClicked, eStatusPartClicked);
@@ -965,10 +987,7 @@ void MTerminalView::SecondaryMouseButtonClick(int32_t inX, int32_t inY)
 	if (MClipboard::PrimaryInstance().HasData() and mTerminalChannel->IsOpen())
 	{
 		MClipboard::PrimaryInstance().GetData([this](const std::string &text)
-		{
-			mBuffer->ClearSelection();
-			mTerminalChannel->SendData(text);
-		});
+			{ DoPaste(text); });
 	}
 }
 
@@ -2160,7 +2179,7 @@ struct DisallowedChar
 	{ "DEL", 0x7F }
 };
 
-bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
+bool MTerminalView::DoPaste(const std::string &inText)
 {
 	bool result = false;
 
@@ -2218,27 +2237,63 @@ bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 	return result;
 }
 
-void MTerminalView::OnAddNewTOTP()
+void MTerminalView::OnEnterTOTP(int inItemIndex)
 {
-}
+	auto totp = Preferences::GetArray("totp");
 
-void MTerminalView::OnEnterTOTP(int inTOTPNr)
-{
-}
+	// silently break on errors
+	for (;;)
+	{
+		if (inItemIndex >= totp.size())
+			break;
 
+		auto s = totp[inItemIndex].rfind(';');
+		if (s == std::string::npos)
+			break;
+
+		std::string hash = totp[inItemIndex].substr(s + 1, std::string::npos);
+
+		auto h = zeep::decode_base32(hash);
+
+		int timestamp = time(nullptr) / 30;
+
+		uint8_t val[8];
+		for (int i = 8; i-- > 0; timestamp >>= 8)
+			val[i] = static_cast<uint8_t>(timestamp);
+
+		auto computed = zeep::hmac_sha1(std::string_view((char *)val, 8), h);
+
+		int offset = computed.back() & 0xf;
+		uint32_t truncated = 0;
+		for (int i = 0; i < 4; ++i)
+		{
+			truncated <<= 8;
+			truncated |= static_cast<uint8_t>(computed[offset + i]);
+		}
+
+		truncated &= 0x7fffffff;
+		truncated %= 1000000;
+
+		std::stringstream ss;
+		ss << std::fixed << std::setw(6) << std::setfill('0') << truncated;
+
+		mTerminalChannel->SendData(ss.str());
+
+		break;
+	}
+}
 
 void MTerminalView::OnCopy()
 {
-	MClipboard::Instance().SetData(mBuffer->GetSelectedText()/* ,
-		mBuffer->IsSelectionBlock() */);
+	MClipboard::Instance().SetData(mBuffer->GetSelectedText() /* ,
+	     mBuffer->IsSelectionBlock() */
+	);
 }
 
 void MTerminalView::OnPaste()
 {
 	MClipboard::Instance().GetData([this](const std::string &text)
-	{
-		PastePrimaryBuffer(text);
-	});
+		{ DoPaste(text); });
 }
 
 void MTerminalView::OnSelectAll()
@@ -2270,6 +2325,38 @@ void MTerminalView::OnResetAndClear()
 	Invalidate();
 }
 
+void MTerminalView::OnEncodingUtf8(bool inChecked)
+{
+	if (inChecked)
+		mEncoding = kEncodingUTF8;
+	else
+		mEncoding = kEncodingISO88591;
+}
+
+void MTerminalView::OnBackspaceSendsDel(bool inChecked)
+{
+	mDECBKM = not inChecked;
+}
+
+void MTerminalView::OnDeleteSendsDel(bool inChecked)
+{
+	mDeleteIsDel = inChecked;
+}
+
+void MTerminalView::OnVt220Keyboard(bool inChecked)
+{
+	mXTermKeys = inChecked;
+}
+
+void MTerminalView::OnAltSendsEscape(bool inChecked)
+{
+	mAltSendsEscape = inChecked;
+}
+
+void MTerminalView::OnOldXtermFnKeys(bool inChecked)
+{
+	mOldFnKeys = inChecked;
+}
 
 // bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 // {
@@ -2475,52 +2562,6 @@ void MTerminalView::OnResetAndClear()
 // 	}
 // 	return handled;
 // }
-
-void MTerminalView::EnterTOTP(uint32_t inItemIndex)
-{
-	auto totp = Preferences::GetArray("totp");
-
-	// silently break on errors
-	for (;;)
-	{
-		if (inItemIndex >= totp.size())
-			break;
-
-		auto s = totp[inItemIndex].rfind(';');
-		if (s == std::string::npos)
-			break;
-
-		std::string hash = totp[inItemIndex].substr(s + 1, std::string::npos);
-
-		auto h = zeep::decode_base32(hash);
-
-		int timestamp = time(nullptr) / 30;
-
-		uint8_t val[8];
-		for (int i = 8; i-- > 0; timestamp >>= 8)
-			val[i] = static_cast<uint8_t>(timestamp);
-
-		auto computed = zeep::hmac_sha1(std::string_view((char *)val, 8), h);
-
-		int offset = computed.back() & 0xf;
-		uint32_t truncated = 0;
-		for (int i = 0; i < 4; ++i)
-		{
-			truncated <<= 8;
-			truncated |= static_cast<uint8_t>(computed[offset + i]);
-		}
-
-		truncated &= 0x7fffffff;
-		truncated %= 1000000;
-
-		std::stringstream ss;
-		ss << std::fixed << std::setw(6) << std::setfill('0') << truncated;
-
-		mTerminalChannel->SendData(ss.str());
-
-		break;
-	}
-}
 
 void MTerminalView::FindNext(MSearchDirection inSearchDirection)
 {
@@ -2874,16 +2915,6 @@ void MTerminalView::Closed()
 
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
 	storyboard->AddTransition(mDisabledFactor, 1, 1000ms, "acceleration-decelleration");
-
-	// if (not mArgv.empty())
-	// {
-	// 	storyboard->AddFinishedCallback([w = GetWindow()]()
-	// 		{ static_cast<MSaltApp  *>(gApp)->execute([w]()
-	// 			  {
-	// 			if (MWindow::WindowExists(w))
-	// 				w->ProcessCommand(cmd_Close, nullptr, 0, 0); }); });
-	// }
-
 	mAnimationManager->Schedule(storyboard);
 }
 
@@ -4800,9 +4831,11 @@ void MTerminalView::SelectCharSet(uint8_t inChar)
 		{
 			case '@':
 				mEncoding = kEncodingISO88591;
+				cEncodingUtf8.SetChecked(false);
 				break;
 			case 'G':
 				mEncoding = kEncodingUTF8;
+				cEncodingUtf8.SetChecked(true);
 				break;
 		}
 	}
@@ -5307,7 +5340,7 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 					else
 					{
 						auto s = zeep::decode_base64({ mArgString.data() + 2, mArgString.length() - 2 });
-						MClipboard::Instance().SetData(s/* , false */);
+						MClipboard::Instance().SetData(s /* , false */);
 					}
 				}
 				break;

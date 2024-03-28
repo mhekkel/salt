@@ -31,6 +31,7 @@
 #include "MAlerts.hpp"
 #include "MError.hpp"
 #include "MPreferences.hpp"
+#include "MSaltApp.hpp"
 #include "MUtils.hpp"
 
 #include <zeep/crypto.hpp>
@@ -69,6 +70,8 @@ bool MAddTOTPHashDialog::OKClicked()
 		auto totp = Preferences::GetArray("totp");
 		totp.push_back(name + ";" + hash);
 		Preferences::SetArray("totp", totp);
+
+		MSaltApp::Instance().UpdateTOTPMenu();
 
 		result = true;
 	}
