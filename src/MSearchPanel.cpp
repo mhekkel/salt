@@ -156,6 +156,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	: MBoxControl(inID, inBounds, true)
 	, eClose(this, &MSearchPanel::Close)
 	, eFindBtn(this, &MSearchPanel::FindBtn)
+	, eKeyDown(this, &MSearchPanel::KeyDown)
 	, mTextBox(nullptr)
 {
 	MDevice dev;
@@ -196,6 +197,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	mTextBox->SetLayout(true, true, 4);
 	AddChild(mTextBox);
 	mTextBox->SetText(Preferences::GetString("find-recent", ""));
+	AddRoute(eKeyDown, mTextBox->eKeyDown);
 
 	std::string label(_("Case sensitive"));
 	dev.SetText(label);
@@ -245,8 +247,9 @@ MSearchPanel::~MSearchPanel()
 void MSearchPanel::Close()
 {
 	Preferences::SetString("find-recent", mTextBox->GetText());
-	// mHideSearchPanel();
-	// ProcessCommand(cmd_HideSearchPanel, nullptr, 0, 0);
+	Hide();
+	if (auto w = dynamic_cast<MTerminalWindow *>(GetWindow()); w != nullptr)
+		w->FocusTerminalView();
 }
 
 void MSearchPanel::SetFocus()
@@ -269,9 +272,8 @@ uint32_t MSearchPanel::GetHeight() const
 	return bounds.height;
 }
 
-bool MSearchPanel::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat)
+void MSearchPanel::KeyDown(uint32_t inKeyCode, uint32_t inModifiers)
 {
-	bool result = true;
 	switch (inKeyCode)
 	{
 		case kReturnKeyCode:
@@ -297,11 +299,8 @@ bool MSearchPanel::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t i
 			break;
 
 		default:
-			result = MBoxControl::KeyPressed(inKeyCode, inUnicode, inModifiers, inAutoRepeat);
 			break;
 	}
-
-	return result;
 }
 
 std::string MSearchPanel::GetSearchString() const

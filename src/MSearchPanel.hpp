@@ -45,12 +45,9 @@ enum MSearchDirection
 class MSearchPanel : public MBoxControl
 {
   public:
-	MSearchPanel(const std::string &inID,
-		MRect inBounds);
+	MSearchPanel(const std::string &inID, MRect inBounds);
 
 	virtual ~MSearchPanel();
-
-	bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) override;
 
 	std::string GetSearchString() const;
 	bool GetIgnoreCase() const;
@@ -68,6 +65,9 @@ class MSearchPanel : public MBoxControl
 
 	MEventIn<void(const std::string &)> eFindBtn;
 	void FindBtn(const std::string &);
+
+	MEventIn<void(uint32_t inKeyCode, uint32_t inModifiers)> eKeyDown;
+	void KeyDown(uint32_t inKeyCode, uint32_t inModifiers);
 
 	MEdittext *mTextBox;
 	MCheckbox *mCaseSensitive;
