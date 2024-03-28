@@ -82,6 +82,9 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	, cQuit(this, "quit", &MSaltApp::OnQuit, 'q', kControlKey | kShiftKey)
 	, cAbout(this, "about", &MSaltApp::OnAbout)
 	, cSelectTerminal(this, "select-terminal", &MSaltApp::OnSelectTerminal)
+
+	, cClearRecentMenu(this, "clear-recent", &MSaltApp::OnClearRecentMenu)
+	, cOpenRecent(this, "open-recent", &MSaltApp::OnOpenRecent)
 {
 }
 
@@ -105,7 +108,8 @@ void MSaltApp::Initialise()
 
 	// recent menu
 	for (auto &r : MConnectDialog::GetRecentHosts())
-		mRecent.push_back(r);
+		mRecent.emplace_back(r, mNextRecentNr++);
+	UpdateRecentSessionMenu();
 
 	// known hosts
 	auto &known_hosts = pinch::known_hosts::instance();
@@ -149,17 +153,17 @@ void MSaltApp::Initialise()
 		{
 			std::cerr << "Exception in io_context thread: " << ex.what() << '\n';
 		} });
+
+	UpdateRecentSessionMenu();
+	UpdatePublicKeyMenu();
+	UpdateTOTPMenu();
 }
 
 void MSaltApp::SaveGlobals()
 {
-	// std::vector<std::string> recent(mRecent.begin(), mRecent.end());
-	// Preferences::SetArray("recent-sessions", recent);
-
 	std::vector<std::string> recent_v;
-	std::transform(mRecent.begin(), mRecent.end(), std::back_inserter(recent_v),
-		[](const ConnectInfo &ci)
-		{ return ci.str(); });
+	for (const auto &[r, nr] : mRecent)
+		recent_v.emplace_back(r.str());
 	Preferences::SetArray("recent-sessions", recent_v);
 
 	// save new format of known hosts
@@ -207,8 +211,28 @@ void MSaltApp::OnSelectTerminal(int inTerminalNr)
 	{
 		if (w->GetTerminalNr() != inTerminalNr)
 			continue;
-		
+
 		w->Select();
+		break;
+	}
+}
+
+void MSaltApp::OnClearRecentMenu()
+{
+	mRecent.clear();
+	UpdateRecentSessionMenu();
+	Preferences::SetArray("recent-sessions", {});
+	SaveGlobals();
+}
+
+void MSaltApp::OnOpenRecent(int inConnectionNr)
+{
+	for (const auto &[ci, nr] : mRecent)
+	{
+		if (nr != inConnectionNr)
+			continue;
+		
+		Open(ci);
 		break;
 	}
 }
@@ -272,82 +296,50 @@ void MSaltApp::OnSelectTerminal(int inTerminalNr)
 // 	return result;
 // }
 
-void MSaltApp::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)
-{
-	// // PRINT(("UpdateSpecialMenu %s", inName.c_str()));
-
-	// if (inName == "window")
-	// 	UpdateWindowMenu(inMenu);
-	// else if (inName == "recent-session")
-	// 	UpdateRecentSessionMenu(inMenu);
-	// else if (inName == "public-keys")
-	// 	UpdatePublicKeyMenu(inMenu);
-	// else if (inName == "totps")
-	// 	UpdateTOTPMenu(inMenu);
-	// else
-	// 	MApplication::UpdateSpecialMenu(inName, inMenu);
-}
-
 void MSaltApp::UpdateWindowMenu()
 {
-	auto m = MMenuBar::instance().FindMenuByID("window");
+	auto m = MMenuBar::Instance().FindMenuByID("window");
 	assert(m);
 
 	std::vector<std::tuple<std::string, uint32_t>> labels;
 	for (auto w = MTerminalWindow::GetFirstTerminal(); w != nullptr; w = w->GetNextTerminal())
 		labels.emplace_back(w->GetTitle(), w->GetTerminalNr());
-	
+
 	m->ReplaceItemsInSection(1, "app.select-terminal", labels);
 
 	if (auto w = dynamic_cast<MTerminalWindow *>(GetActiveWindow()); w != nullptr)
 		cSelectTerminal.SetState(w->GetTerminalNr());
 }
 
-void MSaltApp::UpdateRecentSessionMenu(MMenu *inMenu)
+void MSaltApp::UpdateRecentSessionMenu()
 {
-	// using namespace std::literals;
-
-	// inMenu->RemoveItems(2, inMenu->CountItems() - 2);
-
-	// for (auto &recent : mRecent)
-	// 	inMenu->AppendItem(recent.DisplayString(), cmd_OpenRecentSession);
+	std::vector<std::tuple<std::string, uint32_t>> items;
+	for (const auto &[ci, nr] : mRecent)
+		items.emplace_back(ci.str(), nr);
+	MMenuBar::Instance().FindMenuByID("recent")->ReplaceItemsInSection(1, "app.open-recent", items);
 }
 
-void MSaltApp::UpdatePublicKeyMenu(MMenu *inMenu)
+void MSaltApp::UpdatePublicKeyMenu()
 {
-	// inMenu->RemoveItems(0, inMenu->CountItems());
-
-	// pinch::ssh_agent &agent(pinch::ssh_agent::instance());
-	// for (auto key = agent.begin(); key != agent.end(); ++key)
-	// 	inMenu->AppendItem(key->get_comment(), cmd_DropPublicKey);
+	std::vector<std::tuple<std::string, uint32_t>> items;
+	pinch::ssh_agent &agent(pinch::ssh_agent::instance());
+	for (uint32_t i = 0; auto &key : agent)
+		items.emplace_back(key.get_comment(), i++);
+	MMenuBar::Instance().FindMenuByID("public-keys")->ReplaceItemsInSection(0, "win.install-public-key", items);
 }
 
-void MSaltApp::UpdateTOTPMenu(MMenu *inMenu)
+void MSaltApp::UpdateTOTPMenu()
 {
-	// inMenu->RemoveItems(2, inMenu->CountItems() - 2);
+	std::vector<std::tuple<std::string, uint32_t>> items;
+	const std::regex rx("(.+);[A-Z2-7]+");
 
-	// const std::regex rx("(.+);[A-Z2-7]+");
-
-	// for (auto &p : Preferences::GetArray("totp"))
-	// {
-	// 	std::smatch m;
-	// 	if (regex_match(p, m, rx))
-	// 		inMenu->AppendItem(m[1].str(), cmd_EnterTOTP);
-	// }
-}
-
-void MSaltApp::AddRecent(const ConnectInfo &inRecent)
-{
-	mRecent.erase(remove(mRecent.begin(), mRecent.end(), inRecent), mRecent.end());
-	mRecent.push_front(inRecent);
-	if (mRecent.size() > 10)
-		mRecent.pop_back();
-
-	std::vector<std::string> recent_v;
-	std::transform(mRecent.begin(), mRecent.end(), std::back_inserter(recent_v),
-		[](const ConnectInfo &ci)
-		{ return ci.str(); });
-	Preferences::SetArray("recent-sessions", recent_v);
+	for (uint32_t i = 0; auto &p : Preferences::GetArray("totp"))
+	{
+		std::smatch m;
+		if (regex_match(p, m, rx))
+			items.emplace_back(m[1].str(), i++);
+	}
+	MMenuBar::Instance().FindMenuByID("totp")->ReplaceItemsInSection(1, "win.enter-totp", items);
 }
 
 void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
@@ -359,7 +351,21 @@ void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
 	auto w = MTerminalWindow::Create(inRecent.user, inRecent.host, inRecent.port, inCommand, connection);
 	w->Select();
 
-	AddRecent(inRecent);
+	mRecent.emplace_front(inRecent, mNextRecentNr++);
+	for (auto i = mRecent.begin() + 1; i != mRecent.end(); ++i)
+	{
+		if (i->first != inRecent)
+			continue;
+
+		mRecent.erase(i);
+		break;
+	}
+
+	if (mRecent.size() > 10)
+		mRecent.pop_back();
+
+	UpdateRecentSessionMenu();
+	SaveGlobals();
 }
 
 bool MSaltApp::AllowQuit(bool inLogOff)
@@ -380,14 +386,6 @@ void MSaltApp::DoQuit()
 	mQuitPending = true;
 
 	mConnectionPool.disconnect_all();
-
-	// std::vector<MWindow *> windows;
-
-	// for (MWindow *w = MWindow::GetFirstWindow(); w != nullptr; w = w->GetNextWindow())
-	// 	windows.push_back(w);
-
-	// for (auto w : windows)
-	// 	w->Close();
 
 	MApplication::DoQuit();
 }

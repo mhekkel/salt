@@ -79,9 +79,6 @@ class MTerminalWindow : public MWindow
 
 	static MRect GetPreferredBounds();
 
-	static MTerminalWindow *sFirst;
-	void UpdateWindowMenu();
-
 	void OnClose();
 	void OnCloneTerminal();
 	void OnFind();
@@ -99,7 +96,10 @@ class MTerminalWindow : public MWindow
 	MScrollbar *mScrollbar;
 	MSearchPanel *mSearchPanel;
 	MTerminalView *mTerminalView;
+
+	static MTerminalWindow *sFirst;
 	MTerminalWindow *mNext;
+
 	uint32_t mNr;
 	static uint32_t sNextNr;
 };

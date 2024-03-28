@@ -84,15 +84,13 @@ class MSaltApp : public MApplication
 	}
 
 	void UpdateWindowMenu();
+	void UpdateRecentSessionMenu();
+	void UpdatePublicKeyMenu();
+	void UpdateTOTPMenu();
 
   private:
 	bool AllowQuit(bool inLogOff) override;
 	void DoQuit() override;
-
-	void UpdateSpecialMenu(const std::string &inName, MMenu *inMenu) override;
-	void UpdateRecentSessionMenu(MMenu *inMenu);
-	void UpdatePublicKeyMenu(MMenu *inMenu);
-	void UpdateTOTPMenu(MMenu *inMenu);
 
 	void Initialise() override;
 	void SaveGlobals() override;
@@ -102,18 +100,24 @@ class MSaltApp : public MApplication
 	void OnQuit();
 	void OnAbout();
 	void OnSelectTerminal(int inTerminalNr);
+	void OnClearRecentMenu();
+	void OnOpenRecent(int inConnectionNr);
 
 	MCommand<void()> cNew;
 	MCommand<void()> cConnect;
 	MCommand<void()> cQuit;
 	MCommand<void()> cAbout;
 	MCommand<void(int)> cSelectTerminal;
+	MCommand<void()> cClearRecentMenu;
+	MCommand<void(int)> cOpenRecent;
 
 	asio_ns::io_context mIOContext;
 	asio_ns::execution_context *mExContext = &mIOContext;
 	std::thread mIOContextThread;
 
-	std::deque<ConnectInfo> mRecent;
+	std::deque<std::pair<ConnectInfo,uint32_t>> mRecent;
+	uint32_t mNextRecentNr = 1;
+
 	pinch::connection_pool mConnectionPool;
 };
 
@@ -149,6 +153,6 @@ class MAppExecutor
 	template <class F>
 	void execute(F f) const
 	{
-		static_cast<MSaltApp *>(gApp)->execute(std::move(f));
+		MSaltApp::instance().execute(std::move(f));
 	}
 };

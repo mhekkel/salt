@@ -63,8 +63,9 @@ class MSshTerminalWindow : public MTerminalWindow
 		return new MSshTerminalWindow(mUser, mServer, mPort, mSSHCommand, mConnection);
 	}
 
-	// virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	// virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
+	void OnDisconnect();
+	void OnRenewKeys();
+	void OnInstallPublicKey(int inKeyNr);
 
   protected:
 	std::string Password();
@@ -73,22 +74,25 @@ class MSshTerminalWindow : public MTerminalWindow
 	pinch::host_key_reply AcceptHostKey(const std::string &inHost,
 		const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
 
-	void DropPublicKey(pinch::ssh_private_key inKey);
+	MCommand<void()> cDisconnect;
+	MCommand<void()> cRenewKeys;
+	MCommand<void(int)> cInstallPublicKey;
 
-	std::shared_ptr<pinch::basic_connection>
-		mConnection;
+	std::shared_ptr<pinch::basic_connection> mConnection;
 	std::string mUser, mServer;
 	uint16_t mPort;
 	std::string mSSHCommand;
 	pinch::channel_ptr mKeyDropper;
-
-	// // callbacks
-	// pinch::accept_host_key_handler_type mValidateHostCB;
 };
 
 MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
 	const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
 	: MTerminalWindow(MTerminalChannel::Create(inConnection), { inSSHCommand })
+
+	, cDisconnect(this, "disconnect", &MSshTerminalWindow::OnDisconnect)
+	, cRenewKeys(this, "renew-keys", &MSshTerminalWindow::OnRenewKeys)
+	, cInstallPublicKey(this, "install-public-key", &MSshTerminalWindow::OnInstallPublicKey)
+
 	, mConnection(inConnection)
 	, mUser(inUser)
 	, mServer(inHost)
@@ -112,6 +116,47 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	if (mPort != 22)
 		title << ':' << mPort;
 	SetTitle(title.str());
+}
+
+void MSshTerminalWindow::OnDisconnect()
+{
+	mConnection->close();
+}
+
+void MSshTerminalWindow::OnRenewKeys()
+{
+	mConnection->rekey();
+}
+
+void MSshTerminalWindow::OnInstallPublicKey(int inKeyNr)
+{
+	auto &key = pinch::ssh_agent::instance().at(inKeyNr);
+
+	// create the public key
+	auto b = key.get_blob();
+	std::string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
+
+	// create a command
+	zeep::replace_all(blob, "\n", "");
+	std::string publickey = key.get_type() + ' ' + blob + ' ' + key.get_comment();
+	zeep::replace_all(publickey, "'", "'\\''");
+
+	std::string command =
+		std::string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
+	std::string comment = key.get_comment();
+
+	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
+
+	mKeyDropper.reset(new pinch::exec_channel(
+		mConnection, command, [this, comment](const std::string &, int status)
+		{
+		if (status == 0)
+			DisplayAlert(this, "installed-public-key", {comment, this->mServer});
+		else
+			DisplayAlert(this, "failed-to-install-public-key", {comment, this->mServer}); },
+		my_executor));
+
+	mKeyDropper->open();
 }
 
 // bool MSshTerminalWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
@@ -262,35 +307,6 @@ pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const std::string &inHos
 	return result;
 }
 
-void MSshTerminalWindow::DropPublicKey(pinch::ssh_private_key inKeyToDrop)
-{
-	// create the public key
-	auto b = inKeyToDrop.get_blob();
-	std::string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
-
-	// create a command
-	zeep::replace_all(blob, "\n", "");
-	std::string publickey = inKeyToDrop.get_type() + ' ' + blob + ' ' + inKeyToDrop.get_comment();
-	zeep::replace_all(publickey, "'", "'\\''");
-
-	std::string command =
-		std::string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
-	std::string comment = inKeyToDrop.get_comment();
-
-	MAppExecutor my_executor{ &MSaltApp::instance().get_context() };
-
-	mKeyDropper.reset(new pinch::exec_channel(
-		mConnection, command, [this, comment](const std::string &, int status)
-		{
-		if (status == 0)
-			DisplayAlert(this, "installed-public-key", {comment, this->mServer});
-		else
-			DisplayAlert(this, "failed-to-install-public-key", {comment, this->mServer}); },
-		my_executor));
-
-	mKeyDropper->open();
-}
-
 // ------------------------------------------------------------------
 //
 
@@ -338,6 +354,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	, cClose(this, "close", &MTerminalWindow::OnClose, 'W', kControlKey | kShiftKey)
 	, cCloneTerminal(this, "clone-terminal", &MTerminalWindow::OnCloneTerminal, 'D', kControlKey | kShiftKey)
+
 	, cFind(this, "find", &MTerminalWindow::OnFind, 'F', kControlKey | kShiftKey)
 
 	, cNextTerminal(this, "select-next-window", &MTerminalWindow::OnNextTerminal, kTabKeyCode, kControlKey)
@@ -439,13 +456,13 @@ MTerminalWindow::~MTerminalWindow()
 			w->mNext = mNext;
 	}
 
-	static_cast<MSaltApp *>(gApp)->UpdateWindowMenu();
+	MSaltApp::instance().UpdateWindowMenu();
 }
 
 void MTerminalWindow::SetTitle(const std::string &inTitle)
 {
 	MWindow::SetTitle(inTitle);
-	static_cast<MSaltApp *>(gApp)->UpdateWindowMenu();
+	MSaltApp::instance().UpdateWindowMenu();
 }
 
 void MTerminalWindow::ShowSelf()

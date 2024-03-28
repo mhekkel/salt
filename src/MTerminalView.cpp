@@ -270,6 +270,9 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, mBuffer(&mScreenBuffer)
 	, eIdle(this, &MTerminalView::Idle)
 
+	, cAddNewTOTP(this, "add-totp", &MTerminalView::OnAddNewTOTP)
+	, cEnterTOTP(this, "enter-totp", &MTerminalView::OnEnterTOTP)
+
 	, cCopy(this, "copy", &MTerminalView::OnCopy, 'C', kControlKey | kShiftKey)
 	, cPaste(this, "paste", &MTerminalView::OnPaste, 'V', kControlKey | kShiftKey)
 	, cSelectAll(this, "select-all", &MTerminalView::OnSelectAll, 'A', kControlKey | kShiftKey)
@@ -348,6 +351,8 @@ void MTerminalView::AddedToWindow()
 {
 	MCanvas::AddedToWindow();
 
+	cAddNewTOTP.Register();
+	cEnterTOTP.Register();
 	cCopy.Register();
 	cPaste.Register();
 	cSelectAll.Register();
@@ -2213,6 +2218,15 @@ bool MTerminalView::PastePrimaryBuffer(const std::string &inText)
 	return result;
 }
 
+void MTerminalView::OnAddNewTOTP()
+{
+}
+
+void MTerminalView::OnEnterTOTP(int inTOTPNr)
+{
+}
+
+
 void MTerminalView::OnCopy()
 {
 	MClipboard::Instance().SetData(mBuffer->GetSelectedText()/* ,
@@ -2814,6 +2828,8 @@ void MTerminalView::SendMouseCommand(int32_t inButton, int32_t inX, int32_t inY,
 
 void MTerminalView::Opened()
 {
+	cEnterTOTP.SetEnabled(true);
+
 	value_changer<int32_t> x(mCursor.x, 0), y(mCursor.y, 0);
 
 	mStatusbar->SetStatusText(0, _("Connected"), false);
@@ -2840,6 +2856,8 @@ void MTerminalView::Closed()
 {
 	if (mTerminalChannel->IsOpen())
 		mTerminalChannel->Close();
+
+	cEnterTOTP.SetEnabled(false);
 
 	mStatusbar->SetStatusText(0, _("Connection closed"), false);
 
@@ -2898,11 +2916,14 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 
 		if (Preferences::GetBoolean("forward-gpg-agent", true))
 		{
+			// TODO: Implement
 		}
 
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
 			{ this->HandleReceived(ec, inData); });
 	}
+
+	cEnterTOTP.SetEnabled(mTerminalChannel->IsOpen());
 }
 
 void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &inData)

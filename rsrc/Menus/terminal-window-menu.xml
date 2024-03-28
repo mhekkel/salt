@@ -3,7 +3,7 @@
 	<menu id='filemenu' label="Connection">
 		<item label="Open Terminal" cmd='app.new' />
 		<item label="Connect…" cmd='app.connect' />
-		<menu id='recentmenu' label="Connect Recent" special="recent-session">
+		<menu id='recent' label="Connect Recent">
 			<item label="Clear Menu" cmd='app.clear-recent' />
 			
 			<separator />
@@ -15,7 +15,8 @@
 		
 		<separator />
 		
-		<item label="Renew Keys" cmd='ReKy'/>
+		<item label="Renew Keys" cmd='win.renew-keys'/>
+
 		<menu id='tunnelmenu' label="Tunnel">
 			<item label="Port Forwarding…" cmd='win.forward-port'/>
 			<item label="SOCKS5 Proxy…" cmd='win.socks-proxy'/>
@@ -24,8 +25,10 @@
 		
 		<separator />
 		
-		<menu id='public-key' special='public-keys' label="Install Public Key" />
-		<menu id='motp' special='totps' label="One Time Passwords">
+		<menu id='public-keys' label="Install Public Key">
+			<item />
+		</menu>
+		<menu id='totp' label="One Time Passwords">
 			<item label="Add new TOTP Hash" cmd='win.add-totp' />
 			
 			<separator />

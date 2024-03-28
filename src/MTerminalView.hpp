@@ -227,6 +227,8 @@ class MTerminalView : public MCanvas
 
 	MEventIn<void()> eIdle;
 
+	void OnAddNewTOTP();
+	void OnEnterTOTP(int inTOTPNr);
 	void OnCopy();
 	void OnPaste();
 	void OnSelectAll();
@@ -235,6 +237,8 @@ class MTerminalView : public MCanvas
 	void OnFindNext();
 	void OnFindPrev();
 
+	MCommand<void()> cAddNewTOTP;
+	MCommand<void(int)> cEnterTOTP;
 	MCommand<void()> cCopy;
 	MCommand<void()> cPaste;
 	MCommand<void()> cSelectAll;
