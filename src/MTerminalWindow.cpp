@@ -420,6 +420,8 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	UpdateWindowMenu();
 
 	SetLatentFocus(mTerminalView);
+
+	mTerminalView->Open();
 }
 
 MTerminalWindow::~MTerminalWindow()
@@ -454,7 +456,6 @@ void MTerminalWindow::UpdateWindowMenu()
 
 void MTerminalWindow::ShowSelf()
 {
-	mTerminalView->Open();
 	mTerminalView->SetFocus();
 }
 
