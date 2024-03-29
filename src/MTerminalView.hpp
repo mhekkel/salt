@@ -111,7 +111,8 @@ class MTerminalView : public MCanvas
 	void ResizeTerminal(uint32_t inColumns, uint32_t inRows, bool inResetCursor = false, bool inResizeWindow = true);
 
 	MEventIn<void()> ePreferencesChanged;
-	MEventIn<void(MColor)> ePreviewColor;
+	MEventIn<void(MColor)> ePreviewBackColor;
+	MEventIn<void(MColor)> ePreviewSelectionColor;
 
 	bool DoPaste(const std::string &inText);
 
@@ -128,7 +129,9 @@ class MTerminalView : public MCanvas
 
 	void ReadPreferences();
 	void PreferencesChanged();
-	void PreviewColor(MColor inColor);
+	void PreviewBackColor(MColor inBackColor);
+	void PreviewSelectionColor(MColor inSelectionColor);
+	void PreviewColors(MColor inBackColor, MColor inSelectionColor);
 
 	MEventIn<void(uint32_t, MRect)> eStatusPartClicked;
 	void StatusPartClicked(uint32_t inNr, MRect);

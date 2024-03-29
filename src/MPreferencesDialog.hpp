@@ -37,7 +37,8 @@ class MPreferencesDialog : public MDialog
 	static MPreferencesDialog &Instance();
 
 	static MEventOut<void()> ePreferencesChanged;
-	static MEventOut<void(MColor)> eColorPreview;
+	static MEventOut<void(MColor)> eBackColorPreview;
+	static MEventOut<void(MColor)> eSelectionColorPreview;
 
   private:
 	MPreferencesDialog();
@@ -53,8 +54,11 @@ class MPreferencesDialog : public MDialog
 	virtual void ValueChanged(const std::string &inID, int32_t inValue);
 	virtual void ColorChanged(const std::string &inID, MColor inValue);
 
-	MEventIn<void(const std::string &, MColor)> ePreviewColor;
-	void ColorPreview(const std::string &inID, MColor inValue);
+	MEventIn<void(const std::string &, MColor)> ePreviewBackColor;
+	void BackColorPreview(const std::string &inID, MColor inValue);
+
+	MEventIn<void(const std::string &, MColor)> ePreviewSelectionColor;
+	void SelectionColorPreview(const std::string &inID, MColor inValue);
 
 	virtual void Apply();
 

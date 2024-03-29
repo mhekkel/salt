@@ -256,7 +256,8 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, eScroll(this, &MTerminalView::Scroll)
 	, eSearch(this, &MTerminalView::FindNext)
 	, ePreferencesChanged(this, &MTerminalView::PreferencesChanged)
-	, ePreviewColor(this, &MTerminalView::PreviewColor)
+	, ePreviewBackColor(this, &MTerminalView::PreviewBackColor)
+	, ePreviewSelectionColor(this, &MTerminalView::PreviewSelectionColor)
 	, eStatusPartClicked(this, &MTerminalView::StatusPartClicked)
 	, mStatusInfo(0)
 	, mStatusbar(inStatusbar)
@@ -328,7 +329,8 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 
 	AddRoute(MSaltApp::Instance().eIdle, eIdle);
 	AddRoute(MPreferencesDialog::ePreferencesChanged, ePreferencesChanged);
-	AddRoute(MPreferencesDialog::eColorPreview, ePreviewColor);
+	AddRoute(MPreferencesDialog::eBackColorPreview, ePreviewBackColor);
+	AddRoute(MPreferencesDialog::eSelectionColorPreview, ePreviewSelectionColor);
 	AddRoute(mStatusbar->ePartClicked, eStatusPartClicked);
 	AddRoute(mSearchPanel->eSearch, eSearch);
 	AddRoute(mAnimationManager->eAnimate, eAnimate);
@@ -440,7 +442,7 @@ void MTerminalView::Close()
 
 	RemoveRoute(MSaltApp::Instance().eIdle, eIdle);
 	RemoveRoute(MPreferencesDialog::ePreferencesChanged, ePreferencesChanged);
-	RemoveRoute(MPreferencesDialog::eColorPreview, ePreviewColor);
+	RemoveRoute(MPreferencesDialog::eBackColorPreview, ePreviewBackColor);
 	RemoveRoute(mStatusbar->ePartClicked, eStatusPartClicked);
 	RemoveRoute(mSearchPanel->eSearch, eSearch);
 	RemoveRoute(mAnimationManager->eAnimate, eAnimate);
@@ -463,7 +465,7 @@ void MTerminalView::ReadPreferences()
 	mIgnoreColors = Preferences::GetBoolean("ignore-color", false);
 
 	// set the color
-	PreviewColor(MColor(Preferences::GetString("back-color", "#0f290e")));
+	PreviewColors(Preferences::GetColor("back-color", "#0f290e"), Preferences::GetColor("selection-color", "#FFD281"));
 
 	MDevice dev;
 	dev.SetFont(mFont);
@@ -524,10 +526,22 @@ void MTerminalView::PreferencesChanged()
 	Invalidate();
 }
 
-void MTerminalView::PreviewColor(MColor inColor)
+void MTerminalView::PreviewBackColor(MColor inColor)
 {
+	PreviewColors(inColor, sSelectionColor);
+}
+
+void MTerminalView::PreviewSelectionColor(MColor inColor)
+{
+	PreviewColors(mTerminalColors[eBack], inColor);
+}
+
+void MTerminalView::PreviewColors(MColor inBackColor, MColor inSectionColor)
+{
+	sSelectionColor = inSectionColor;
+
 	// color calculation
-	MColor base(inColor);
+	MColor base(inBackColor);
 
 	// work with floats
 	float r = (base.red / 255.f), g = (base.green / 255.f), b = (base.blue / 255.f);
@@ -1032,9 +1046,6 @@ void MTerminalView::Draw()
 	//	}
 
 	// selection colours
-
-	if (sSelectionColor == kBlack)
-		MDevice::GetSysSelectionColor(sSelectionColor);
 
 	MColor selectionColor, bc = mTerminalColors[eBack], fc = mTerminalColors[eText];
 

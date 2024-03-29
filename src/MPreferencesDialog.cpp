@@ -47,7 +47,8 @@ using namespace std;
 
 MPreferencesDialog *MPreferencesDialog::sInstance;
 MEventOut<void()> MPreferencesDialog::ePreferencesChanged;
-MEventOut<void(MColor)> MPreferencesDialog::eColorPreview;
+MEventOut<void(MColor)> MPreferencesDialog::eBackColorPreview;
+MEventOut<void(MColor)> MPreferencesDialog::eSelectionColorPreview;
 
 MPreferencesDialog &MPreferencesDialog::Instance()
 {
@@ -58,7 +59,8 @@ MPreferencesDialog &MPreferencesDialog::Instance()
 
 MPreferencesDialog::MPreferencesDialog()
 	: MDialog("prefs-dialog")
-	, ePreviewColor(this, &MPreferencesDialog::ColorPreview)
+	, ePreviewBackColor(this, &MPreferencesDialog::BackColorPreview)
+	, ePreviewSelectionColor(this, &MPreferencesDialog::SelectionColorPreview)
 {
 	vector<string> fonts;
 	MDevice::ListFonts(true, fonts);
@@ -120,27 +122,26 @@ MPreferencesDialog::MPreferencesDialog()
 	zeep::replace_all(answerback, "\t", "\\t");
 	SetText("answer-back", answerback);
 
-	SetColor("back-color", MColor(Preferences::GetString("back-color", "#0f290e")));
+	SetColor("back-color", Preferences::GetColor("back-color", "#0f290e"));
+	SetColor("selection-color", Preferences::GetColor("selection-color", "#FFD281"));
 
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID("back-color"));
 	if (swatch != nullptr)
 	{
-		AddRoute(swatch->eColorPreview, ePreviewColor);
-		swatch->SetPalette({
-			MColor("#0f290e"),
+		AddRoute(swatch->eColorPreview, ePreviewBackColor);
+		swatch->SetPalette({ MColor("#0f290e"),
 			MColor("#353535"),
 			MColor("#192039"),
 			MColor("#FFF3CF"),
 			kWhite,
-			kBlack
-		});
+			kBlack });
 	}
 
 	SetChecked("audible-beep", Preferences::GetBoolean("audible-beep", true));
 	SetChecked("graphical-beep", Preferences::GetBoolean("graphical-beep", true));
 
 	stringstream env;
-	
+
 	for (const string &s : Preferences::GetArray("env"))
 		env << s << '\n';
 	SetText("env", env.str());
@@ -174,7 +175,8 @@ bool MPreferencesDialog::OKClicked()
 void MPreferencesDialog::Apply()
 {
 	Preferences::SetString("font", GetText("font") + ' ' + GetText("size"));
-	Preferences::SetString("back-color", GetColor("back-color").str());
+	Preferences::SetColor("back-color", GetColor("back-color"));
+	Preferences::SetColor("selection-color", GetColor("selection-color"));
 	Preferences::SetInteger("buffer-size", std::stoul(GetText("buffer")));
 	Preferences::SetBoolean("block-cursor", IsChecked("block-cursor"));
 	Preferences::SetBoolean("blink-cursor", IsChecked("blink-cursor"));
@@ -362,7 +364,12 @@ void MPreferencesDialog::CheckboxChanged(const string &inID, bool inValue)
 #endif
 }
 
-void MPreferencesDialog::ColorPreview(const string &inID, MColor inValue)
+void MPreferencesDialog::BackColorPreview(const string &inID, MColor inValue)
 {
-	eColorPreview(inValue);
+	eBackColorPreview(inValue);
+}
+
+void MPreferencesDialog::SelectionColorPreview(const string &inID, MColor inValue)
+{
+	eSelectionColorPreview(inValue);
 }
