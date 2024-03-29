@@ -334,7 +334,7 @@ void MPreferencesDialog::TextChanged(const string &inID, const string &inText)
 void MPreferencesDialog::ValueChanged(const string &inID, int32_t inValue)
 {
 	if (inID == "page-selector")
-		static_cast<MPager *>(FindSubViewByID("pages"))->SelectPage(inValue);
+		static_cast<MStackControl *>(FindSubViewByID("pages"))->Select("page" + std::to_string(inValue + 1));
 	//	else
 	//		SetEnabled("apply", true);
 }

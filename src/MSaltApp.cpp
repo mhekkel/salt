@@ -81,6 +81,9 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
 	, cAddNewTOTP(this, "add-totp", &MSaltApp::OnAddNewTOTP)
 	, cQuit(this, "quit", &MSaltApp::OnQuit, 'q', kControlKey | kShiftKey)
+
+	, cShowPreferences(this, "preferences", &MSaltApp::OnShowPreferences)
+
 	, cAbout(this, "about", &MSaltApp::OnAbout)
 	, cSelectTerminal(this, "select-terminal", &MSaltApp::OnSelectTerminal)
 
@@ -205,6 +208,11 @@ void MSaltApp::OnQuit()
 {
 	if (AllowQuit(false))
 		DoQuit();
+}
+
+void MSaltApp::OnShowPreferences()
+{
+	MPreferencesDialog::Instance().Select();
 }
 
 void MSaltApp::OnAbout()
