@@ -79,12 +79,12 @@
 		
 		
 		<menu id='signalmenu' label="Send Signal">
-			<item label="STOP" cmd='win.signal-stop' />
-			<item label="CONT" cmd='win.signal-cont' />
-			<item label="INT " cmd='win.signal-int' />
-			<item label="HUP " cmd='win.signal-hup' />
-			<item label="TERM" cmd='win.signal-term' />
-			<item label="KILL" cmd='win.signal-kill' />
+			<item label="STOP" cmd='win.signal-STOP' />
+			<item label="CONT" cmd='win.signal-CONT' />
+			<item label="INT " cmd='win.signal-INT' />
+			<item label="HUP " cmd='win.signal-HUP' />
+			<item label="TERM" cmd='win.signal-TERM' />
+			<item label="KILL" cmd='win.signal-KILL' />
 		</menu>
 	</menu>
 	<menu id='window' label="Window">

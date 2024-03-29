@@ -528,45 +528,45 @@ void MSaltApp::Execute(const std::string &inCommand,
 
 int main(int argc, char *const argv[])
 {
-	// // #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-	// // 	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
-	// // 	if (err_fd > 0)
-	// // 		dup2(err_fd, STDERR_FILENO);
-	// // #endif
+	#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+		int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
+		if (err_fd > 0)
+			dup2(err_fd, STDERR_FILENO);
+	#endif
 
-	// auto &config = mcfp::config::instance();
+	auto &config = mcfp::config::instance();
 
-	// config.init("usage: salt [options] [-- program [args...]]",
-	// 	mcfp::make_option("help,h", "Display this message"),
-	// 	mcfp::make_option("version", "Show version number"),
-	// 	mcfp::make_option("verbose", "More verbose"),
-	// 	mcfp::make_option<std::string>("connect,c", "Connect to remote host"),
-	// 	mcfp::make_option("select-host", "Show connection dialog"),
-	// 	mcfp::make_option("install,i", "Install the application"),
-	// 	mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
+	config.init("usage: salt [options] [-- program [args...]]",
+		mcfp::make_option("help,h", "Display this message"),
+		mcfp::make_option("version", "Show version number"),
+		mcfp::make_option("verbose", "More verbose"),
+		mcfp::make_option<std::string>("connect,c", "Connect to remote host"),
+		mcfp::make_option("select-host", "Show connection dialog"),
+		mcfp::make_option("install,i", "Install the application"),
+		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
 
-	// // for now
-	// config.set_ignore_unknown(true);
+	// for now
+	config.set_ignore_unknown(true);
 
-	// std::error_code ec;
-	// config.parse(argc, argv, ec);
-	// if (ec)
-	// {
-	// 	std::cerr << ec.message() << '\n';
-	// 	exit(1);
-	// }
+	std::error_code ec;
+	config.parse(argc, argv, ec);
+	if (ec)
+	{
+		std::cerr << ec.message() << '\n';
+		exit(1);
+	}
 
-	// if (config.has("help"))
-	// {
-	// 	std::cerr << config << '\n';
-	// 	exit(0);
-	// }
+	if (config.has("help"))
+	{
+		std::cerr << config << '\n';
+		exit(0);
+	}
 
-	// if (config.has("version"))
-	// {
-	// 	write_version_string(std::cout, config.has("verbose"));
-	// 	exit(0);
-	// }
+	if (config.has("version"))
+	{
+		write_version_string(std::cout, config.has("verbose"));
+		exit(0);
+	}
 
 	// if (config.has("install"))
 	// {

@@ -112,8 +112,10 @@ enum MCSICmd : uint32_t
 	eTBC = 'g',       // Clear Tabs
 	eVPA = 'd',       // Vertical Line Position Absolute
 	eVPR = 'e',       // Vertical Position Relative
+
 	eXTERMDMK = '>n', // Set XTerm modify keys
 	eXTERMEMK = '>m', // Reset XTerm modify keys
+	eXTERMDMKR = '?m',// Get XTerm modify keys state
 
 	eDECCARA = '$r',    // Change attributes in rectangular area
 	eDECCRA = '$v',     // Copy rectangular area
@@ -210,6 +212,7 @@ enum MCSICmd : uint32_t
 	//	eDECTME =		' ~',		// Terminal Mode Emulation
 	//	eDECTST =		'y',		// Invoke Confidence Test
 	//	eDECUS =		',y',		// Update Session
+	
 };
 
 //	eDECKBUM =		'****', 	// Keyboard usage mode

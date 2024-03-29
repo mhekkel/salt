@@ -287,6 +287,18 @@ void MPtyTerminalChannel::SendData(std::string &&inData)
 
 void MPtyTerminalChannel::SendSignal(const std::string &inSignal)
 {
+	if (inSignal == "STOP")
+		killpg(mPid, SIGSTOP);
+	else if (inSignal == "CONT")
+		killpg(mPid, SIGCONT);
+	else if (inSignal == "INT")
+		killpg(mPid, SIGINT);
+	else if (inSignal == "HUP")
+		killpg(mPid, SIGHUP);
+	else if (inSignal == "TERM")
+		killpg(mPid, SIGTERM);
+	else if (inSignal == "KILL")
+		killpg(mPid, SIGKILL);
 }
 
 void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
@@ -295,7 +307,7 @@ void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
 
 	auto cb = asio_ns::bind_executor(
 		my_executor,
-		[this, inCallback](const std::error_code &ec, size_t inBytesReceived)
+		[this, inCallback](const std::error_code &ec, std::size_t inBytesReceived)
 		{
 			if (this->mRefCount > 0)
 				inCallback(ec, this->mResponse);

@@ -52,6 +52,8 @@
 #include <zeep/crypto.hpp>
 #include <zeep/unicode-support.hpp>
 
+#include <pinch/debug.hpp>
+
 #include <chrono>
 #include <cmath>
 #include <map>
@@ -285,6 +287,13 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, cAltSendsEscape(this, "alt-sends-escape", &MTerminalView::OnAltSendsEscape)
 	, cOldXtermFnKeys(this, "old-xterm-fn-keys", &MTerminalView::OnOldXtermFnKeys)
 
+	, cSendSignalSTOP(this, "signal-STOP", &MTerminalView::OnSendSignalSTOP)
+	, cSendSignalCONT(this, "signal-CONT", &MTerminalView::OnSendSignalCONT)
+	, cSendSignalINT(this, "signal-INT", &MTerminalView::OnSendSignalINT)
+	, cSendSignalHUP(this, "signal-HUP", &MTerminalView::OnSendSignalHUP)
+	, cSendSignalTERM(this, "signal-TERM", &MTerminalView::OnSendSignalTERM)
+	, cSendSignalKILL(this, "signal-KILL", &MTerminalView::OnSendSignalKILL)
+
 	, cFindNext(this, "find-next", &MTerminalView::OnFindNext, kF3KeyCode, kControlKey)
 	, cFindPrev(this, "find-previous", &MTerminalView::OnFindPrev, kF3KeyCode, kControlKey | kShiftKey)
 
@@ -371,6 +380,13 @@ void MTerminalView::AddedToWindow()
 	cVt220Keyboard.Register();
 	cAltSendsEscape.Register();
 	cOldXtermFnKeys.Register();
+
+	cSendSignalSTOP.Register();
+	cSendSignalCONT.Register();
+	cSendSignalINT.Register();
+	cSendSignalHUP.Register();
+	cSendSignalTERM.Register();
+	cSendSignalKILL.Register();
 
 	cFindNext.Register();
 	cFindPrev.Register();
@@ -2358,210 +2374,35 @@ void MTerminalView::OnOldXtermFnKeys(bool inChecked)
 	mOldFnKeys = inChecked;
 }
 
-// bool MTerminalView::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-// {
-// 	bool handled = true;
-// 	switch (inCommand)
-// 	{
-// 		case cmd_EnterTOTP:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
+void MTerminalView::OnSendSignalSTOP()
+{
+	mTerminalChannel->SendSignal("STOP");
+}
 
-// 		case cmd_Copy:
-// 			outEnabled = not mBuffer->IsSelectionEmpty();
-// 			break;
+void MTerminalView::OnSendSignalCONT()
+{
+	mTerminalChannel->SendSignal("CONT");
+}
 
-// 		case cmd_Paste:
-// 			outEnabled = MClipboard::Instance().HasData();
-// 			break;
+void MTerminalView::OnSendSignalINT()
+{
+	mTerminalChannel->SendSignal("INT");
+}
 
-// 		case cmd_SelectAll:
-// 			outEnabled = true;
-// 			break;
+void MTerminalView::OnSendSignalHUP()
+{
+	mTerminalChannel->SendSignal("HUP");
+}
 
-// 		case cmd_FindNext:
-// 		case cmd_FindPrev:
-// 			outEnabled = true;
-// 			break;
+void MTerminalView::OnSendSignalTERM()
+{
+	mTerminalChannel->SendSignal("TERM");
+}
 
-// #if DEBUG
-// 		case cmd_DebugUpdate:
-// 			outEnabled = true;
-// 			outChecked = mDebugUpdate;
-// 			break;
-// #endif
-
-// 		case cmd_NextTerminal:
-// 		case cmd_PrevTerminal:
-// 			outEnabled = true;
-// 			break;
-
-// 		case cmd_Reset:
-// 		case cmd_ResetAndClear:
-// 			outEnabled = true;
-// 			break;
-
-// 		case cmd_EncodingUTF8:
-// 			outEnabled = true;
-// 			outChecked = mEncoding == kEncodingUTF8;
-// 			break;
-
-// 		case cmd_BackSpaceIsDel:
-// 			outEnabled = true;
-// 			outChecked = not mDECBKM;
-// 			break;
-
-// 		case cmd_DeleteIsDel:
-// 			outEnabled = true;
-// 			outChecked = mDeleteIsDel;
-// 			break;
-
-// 		case cmd_VT220Keyboard:
-// 			outEnabled = true;
-// 			outChecked = not mXTermKeys;
-// 			break;
-
-// 		case cmd_MetaSendsEscape:
-// 			outEnabled = mXTermKeys;
-// 			outChecked = mAltSendsEscape;
-// 			break;
-
-// 		case cmd_OldFnKeys:
-// 			outEnabled = mXTermKeys;
-// 			outChecked = mOldFnKeys;
-// 			break;
-
-// 		case cmd_SendSTOP:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
-// 		case cmd_SendCONT:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
-// 		case cmd_SendINT:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
-// 		case cmd_SendHUP:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
-// 		case cmd_SendTERM:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
-// 		case cmd_SendKILL:
-// 			outEnabled = mTerminalChannel->IsOpen();
-// 			break;
-
-// 		default:
-// 			handled = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-// 	}
-// 	return handled;
-// }
-
-// bool MTerminalView::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-// {
-// 	bool handled = true;
-// 	switch (inCommand)
-// 	{
-// 		case cmd_Copy:
-// 			MClipboard::Instance().SetData(mBuffer->GetSelectedText(),
-// 				mBuffer->IsSelectionBlock());
-// 			break;
-
-// 		case cmd_Paste:
-// 		{
-// 			std::string text;
-// 			bool block;
-// 			MClipboard::Instance().GetData(text, block);
-// 			handled = PastePrimaryBuffer(text);
-// 			break;
-// 		}
-
-// 		case cmd_EnterTOTP:
-// 			EnterTOTP(inItemIndex - 2);
-// 			break;
-
-// 		case cmd_SelectAll:
-// 			mBuffer->SelectAll();
-// 			Invalidate();
-// 			break;
-
-// 		case cmd_FindNext:
-// 			FindNext(searchDown);
-// 			break;
-
-// 		case cmd_FindPrev:
-// 			FindNext(searchUp);
-// 			break;
-
-// 		case cmd_Reset:
-// 		{
-// 			value_changer<int32_t> savedX(mCursor.x, mCursor.x), savedY(mCursor.y, mCursor.y);
-// 			Reset();
-// 			break;
-// 		}
-
-// 		case cmd_ResetAndClear:
-// 			Reset();
-// 			mBuffer->Clear();
-// 			Invalidate();
-// 			break;
-
-// 		case cmd_EncodingUTF8:
-// 			if (mEncoding == kEncodingUTF8)
-// 				mEncoding = kEncodingISO88591;
-// 			else
-// 				mEncoding = kEncodingUTF8;
-// 			break;
-
-// 		case cmd_MetaSendsEscape:
-// 			mAltSendsEscape = not mAltSendsEscape;
-// 			break;
-
-// 		case cmd_BackSpaceIsDel:
-// 			mDECBKM = not mDECBKM;
-// 			break;
-
-// 		case cmd_DeleteIsDel:
-// 			mDeleteIsDel = not mDeleteIsDel;
-// 			break;
-
-// 		case cmd_OldFnKeys:
-// 			mOldFnKeys = not mOldFnKeys;
-// 			break;
-
-// 		case cmd_VT220Keyboard:
-// 			mXTermKeys = not mXTermKeys;
-// 			break;
-
-// 		case cmd_SendSTOP:
-// 			mTerminalChannel->SendSignal("STOP");
-// 			break;
-// 		case cmd_SendCONT:
-// 			mTerminalChannel->SendSignal("CONT");
-// 			break;
-// 		case cmd_SendINT:
-// 			mTerminalChannel->SendSignal("INT");
-// 			break;
-// 		case cmd_SendHUP:
-// 			mTerminalChannel->SendSignal("HUP");
-// 			break;
-// 		case cmd_SendTERM:
-// 			mTerminalChannel->SendSignal("TERM");
-// 			break;
-// 		case cmd_SendKILL:
-// 			mTerminalChannel->SendSignal("KILL");
-// 			break;
-
-// #if DEBUG
-// 		case cmd_DebugUpdate:
-// 			mDebugUpdate = not mDebugUpdate;
-// 			break;
-// #endif
-
-// 		default:
-// 			handled = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-// 	}
-// 	return handled;
-// }
+void MTerminalView::OnSendSignalKILL()
+{
+	mTerminalChannel->SendSignal("KILL");
+}
 
 void MTerminalView::FindNext(MSearchDirection inSearchDirection)
 {
@@ -2968,8 +2809,27 @@ void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &in
 	}
 	else
 	{
+#ifndef NDEBUG
+		pinch::blob b;
+
+
+		while (inData.in_avail() > 0)
+			b.insert(b.end(), inData.sbumpc());
+
+		pinch::print(std::cerr, b);
+
+		mInputBuffer.insert(mInputBuffer.end(), b.begin(), b.end());
+
+
+			// mInputBuffer.push_back(inData.sbumpc());
+
+
+#else
 		while (inData.in_avail() > 0)
 			mInputBuffer.push_back(inData.sbumpc());
+#endif
+
+
 
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
 			{ this->HandleReceived(ec, inData); });
@@ -3790,7 +3650,7 @@ void MTerminalView::EscapeCSI(uint8_t inChar)
 {
 	if (mState == 0)
 	{
-#if DEBUG
+#ifndef NDEBUG
 		mCtrlSeq.clear();
 #endif
 		mCSICmd = 0;
@@ -3799,7 +3659,7 @@ void MTerminalView::EscapeCSI(uint8_t inChar)
 		mState = 1;
 	}
 
-#if DEBUG
+#ifndef NDEBUG
 	mCtrlSeq += inChar;
 #endif
 
@@ -3816,9 +3676,9 @@ void MTerminalView::EscapeCSI(uint8_t inChar)
 		mEscState = eESC_NONE;
 		mCSICmd = mCSICmd << 8 | uint8_t(inChar);
 
-		// PRINT(("CSI: %s (%s)", mCtrlSeq.c_str(), Cmd2Name(mCSICmd)));
-
 		MCSICmd cmd = static_cast<MCSICmd>(mCSICmd);
+
+		PRINT(("CSI: %s (%x)", mCtrlSeq.c_str(), mCSICmd));
 
 		if (mDECSCL > 1)
 			ProcessCSILevel4(cmd);
@@ -4287,6 +4147,8 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 			//					case 1:	mModifyOtherKeys = -1; break;
 			//				}
 			break;
+		case eXTERMDMKR: // request modifyCursorKeyState
+			break;
 
 		// REP -- Repeat preceding character
 		case eREP:
@@ -4332,7 +4194,7 @@ void MTerminalView::ProcessCSILevel1(uint32_t inCmd)
 			break;
 
 		default:
-			PRINT(("Unhandled CSI level 1 command: >> %4.4s <<", &inCmd));
+			PRINT(("Unhandled CSI level 1 command: %s (%x)", mCtrlSeq.c_str(), mCSICmd));
 			break;
 	}
 }
@@ -5662,6 +5524,10 @@ void MTerminalView::SetResetMode(uint32_t inMode, bool inANSI, bool inSet)
 					mMouseMode = (MouseTrackingMode)inMode;
 				else
 					mMouseMode = eTrackMouseNone;
+				break;
+
+			case 1004:
+				// ignored for now, focus tracking?
 				break;
 
 			case 47: // alternate screen buffer support

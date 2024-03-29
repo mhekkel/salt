@@ -239,6 +239,13 @@ class MTerminalView : public MCanvas
 	void OnAltSendsEscape(bool inChecked);
 	void OnOldXtermFnKeys(bool inChecked);
 
+	void OnSendSignalSTOP();
+	void OnSendSignalCONT();
+	void OnSendSignalINT();
+	void OnSendSignalHUP();
+	void OnSendSignalTERM();
+	void OnSendSignalKILL();
+
 	void OnFindNext();
 	void OnFindPrev();
 
@@ -255,6 +262,13 @@ class MTerminalView : public MCanvas
 	MCommand<void(bool)> cVt220Keyboard;
 	MCommand<void(bool)> cAltSendsEscape;
 	MCommand<void(bool)> cOldXtermFnKeys;
+
+	MCommand<void()> cSendSignalSTOP;
+	MCommand<void()> cSendSignalCONT;
+	MCommand<void()> cSendSignalINT;
+	MCommand<void()> cSendSignalHUP;
+	MCommand<void()> cSendSignalTERM;
+	MCommand<void()> cSendSignalKILL;
 
 	MCommand<void()> cFindNext;
 	MCommand<void()> cFindPrev;
