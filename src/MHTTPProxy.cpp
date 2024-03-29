@@ -535,7 +535,7 @@ MHTTPProxy &MHTTPProxy::instance()
 void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 	uint16_t inPort, bool require_authentication, log_level log)
 {
-	auto user = Preferences::GetString("http-proxy-user", "");
-	auto password = Preferences::GetString("http-proxy-password", "");
+	auto user = MPrefs::GetString("http-proxy-user", "");
+	auto password = MPrefs::GetString("http-proxy-password", "");
 	m_impl = new MHTTPProxyImpl(inConnection, inPort, require_authentication, user, password, log);
 }

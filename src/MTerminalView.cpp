@@ -317,7 +317,7 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 #if DEBUG
 	mDebugUpdate = false;
 #endif
-	std::string encoding = Preferences::GetString("default-encoding", "utf-8");
+	std::string encoding = MPrefs::GetString("default-encoding", "utf-8");
 	if (encoding == "utf-8")
 		mEncoding = kEncodingUTF8;
 	else if (encoding == "iso-8859-1")
@@ -424,10 +424,10 @@ void MTerminalView::Open()
 	// set some environment variables
 
 	mTerminalChannel->Open(
-		Preferences::GetString("terminal-type", "xterm-256color"),
-		Preferences::GetBoolean("forward-ssh-agent", true),
-		Preferences::GetBoolean("forward-x11", true),
-		mArgv, Preferences::GetArray("env"),
+		MPrefs::GetString("terminal-type", "xterm-256color"),
+		MPrefs::GetBoolean("forward-ssh-agent", true),
+		MPrefs::GetBoolean("forward-x11", true),
+		mArgv, MPrefs::GetArray("env"),
 		[this](const std::error_code &ec)
 		{
 			this->HandleOpened(ec);
@@ -456,16 +456,16 @@ void MTerminalView::Destroy()
 
 void MTerminalView::ReadPreferences()
 {
-	mScreenBuffer.SetBufferSize(Preferences::GetInteger("buffer-size", 5000));
+	mScreenBuffer.SetBufferSize(MPrefs::GetInteger("buffer-size", 5000));
 
-	mCursor.block = mBlockCursor = Preferences::GetBoolean("block-cursor", false);
-	mCursor.blink = mBlinkCursor = Preferences::GetBoolean("blink-cursor", true);
+	mCursor.block = mBlockCursor = MPrefs::GetBoolean("block-cursor", false);
+	mCursor.blink = mBlinkCursor = MPrefs::GetBoolean("blink-cursor", true);
 
-	mFont = Preferences::GetString("font", Preferences::GetString("font", "Consolas 10"));
-	mIgnoreColors = Preferences::GetBoolean("ignore-color", false);
+	mFont = MPrefs::GetString("font", MPrefs::GetString("font", "Consolas 10"));
+	mIgnoreColors = MPrefs::GetBoolean("ignore-color", false);
 
 	// set the color
-	PreviewColors(Preferences::GetColor("back-color", "#0f290e"), Preferences::GetColor("selection-color", "#FFD281"));
+	PreviewColors(MPrefs::GetColor("back-color", "#0f290e"), MPrefs::GetColor("selection-color", "#FFD281"));
 
 	MDevice dev;
 	dev.SetFont(mFont);
@@ -473,8 +473,8 @@ void MTerminalView::ReadPreferences()
 	mCharWidth = dev.GetXWidth();
 	mLineHeight = dev.GetLineHeight();
 
-	mAudibleBeep = Preferences::GetBoolean("audible-beep", true);
-	if (Preferences::GetBoolean("graphical-beep", true))
+	mAudibleBeep = MPrefs::GetBoolean("audible-beep", true);
+	if (MPrefs::GetBoolean("graphical-beep", true))
 	{
 		if (mGraphicalBeep == nullptr)
 			mGraphicalBeep = mAnimationManager->CreateVariable(0, 0, 1.0);
@@ -485,7 +485,7 @@ void MTerminalView::ReadPreferences()
 		mGraphicalBeep = nullptr;
 	}
 
-	mUDKWithShift = Preferences::GetBoolean("udk-with-shift", true);
+	mUDKWithShift = MPrefs::GetBoolean("udk-with-shift", true);
 	mDeleteIsDel = false;
 
 	// XTerm
@@ -494,7 +494,7 @@ void MTerminalView::ReadPreferences()
 	mXTermKeys = true;
 
 	// VT320 ?
-	mDECSSDT = Preferences::GetBoolean("show-status-line", false) ? 1 : 0;
+	mDECSSDT = MPrefs::GetBoolean("show-status-line", false) ? 1 : 0;
 
 	if (mCursor.blink == false)
 		Invalidate();
@@ -514,7 +514,7 @@ void MTerminalView::PreferencesChanged()
 
 	GetWindow()->ResizeWindow(w - bounds.width, h - bounds.height);
 
-	bool showStatusBar = Preferences::GetBoolean("show-status-bar", true);
+	bool showStatusBar = MPrefs::GetBoolean("show-status-bar", true);
 	if (mStatusbar->IsVisible() != showStatusBar)
 	{
 		if (showStatusBar)
@@ -624,7 +624,7 @@ void MTerminalView::Reset()
 
 	ResetCursor();
 
-	mBracketedPaste = Preferences::GetBoolean("enable-bracketed-paste", true);
+	mBracketedPaste = MPrefs::GetBoolean("enable-bracketed-paste", true);
 
 	mIRM = false;
 	mKAM = false;
@@ -647,7 +647,7 @@ void MTerminalView::Reset()
 
 	mDECSASD = false;
 	bool needResize = mDECSSDT > 0;
-	mDECSSDT = Preferences::GetBoolean("show-status-line", false) ? 1 : 0;
+	mDECSSDT = MPrefs::GetBoolean("show-status-line", false) ? 1 : 0;
 	mDECVSSM = false;
 
 	mCursor.saved = false;
@@ -1925,6 +1925,10 @@ std::string MTerminalView::ProcessKeyXTerm(uint32_t inKeyCode, uint32_t inModifi
 
 bool MTerminalView::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat)
 {
+	// Special case, for now
+	if (inKeyCode == kTabKeyCode and inModifiers & kControlKey)
+		return false;
+
 	// PRINT(("HandleKeyDown(0x%x, 0x%x)", inKeyCode, inModifiers));
 
 	bool handled = true;
@@ -2216,11 +2220,11 @@ bool MTerminalView::DoPaste(const std::string &inText)
 	{
 		// clean up the text to be pasted
 
-		auto dpc = Preferences::GetArray("disallowed-paste-characters");
+		auto dpc = MPrefs::GetArray("disallowed-paste-characters");
 		if (dpc.empty())
 		{
 			dpc = std::vector<std::string>{ "BS", "DEL", "ENQ", "EOT", "ESC", "NUL" };
-			Preferences::SetArray("disallowed-paste-characters", dpc);
+			MPrefs::SetArray("disallowed-paste-characters", dpc);
 		}
 
 		for (const auto &dc : dpc)
@@ -2266,7 +2270,7 @@ bool MTerminalView::DoPaste(const std::string &inText)
 
 void MTerminalView::OnEnterTOTP(int inItemIndex)
 {
-	auto totp = Preferences::GetArray("totp");
+	auto totp = MPrefs::GetArray("totp");
 
 	// silently break on errors
 	for (;;)
@@ -2616,7 +2620,7 @@ void MTerminalView::GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool
 	uint32_t &outWidth, uint32_t &outHeight)
 {
 	MDevice dev;
-	dev.SetFont(Preferences::GetString("font", Preferences::GetString("font", "Consolas 10")));
+	dev.SetFont(MPrefs::GetString("font", MPrefs::GetString("font", "Consolas 10")));
 
 	float charWidth = dev.GetXWidth();
 	uint32_t lineHeight = dev.GetLineHeight();
@@ -2630,7 +2634,7 @@ void MTerminalView::GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool
 MRect MTerminalView::GetIdealTerminalBounds(uint32_t inColumns, uint32_t inRows)
 {
 	uint32_t w, h;
-	GetTerminalMetrics(inColumns, inRows, Preferences::GetBoolean("show-status-line", false), w, h);
+	GetTerminalMetrics(inColumns, inRows, MPrefs::GetBoolean("show-status-line", false), w, h);
 	return { 0, 0, static_cast<int32_t>(w), static_cast<int32_t>(h) };
 }
 
@@ -2797,7 +2801,7 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 	{
 		Opened();
 
-		if (Preferences::GetBoolean("forward-gpg-agent", true))
+		if (MPrefs::GetBoolean("forward-gpg-agent", true))
 		{
 			// TODO: Implement
 		}
@@ -2820,25 +2824,25 @@ void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &in
 	}
 	else
 	{
-#ifndef NDEBUG
-		pinch::blob b;
+// #ifndef NDEBUG
+// 		pinch::blob b;
 
 
-		while (inData.in_avail() > 0)
-			b.insert(b.end(), inData.sbumpc());
+// 		while (inData.in_avail() > 0)
+// 			b.insert(b.end(), inData.sbumpc());
 
-		pinch::print(std::cerr, b);
+// 		pinch::print(std::cerr, b);
 
-		mInputBuffer.insert(mInputBuffer.end(), b.begin(), b.end());
-
-
-			// mInputBuffer.push_back(inData.sbumpc());
+// 		mInputBuffer.insert(mInputBuffer.end(), b.begin(), b.end());
 
 
-#else
+// 			// mInputBuffer.push_back(inData.sbumpc());
+
+
+// #else
 		while (inData.in_avail() > 0)
 			mInputBuffer.push_back(inData.sbumpc());
-#endif
+// #endif
 
 
 
@@ -3135,7 +3139,7 @@ void MTerminalView::Emulate()
 			{
 				case ENQ:
 				{
-					std::string answer_back = Preferences::GetString("answer-back", "salt");
+					std::string answer_back = MPrefs::GetString("answer-back", "salt");
 					for (auto p = answer_back.find_first_of("\r\n"); p != std::string::npos; p = answer_back.find_first_of("\n\r", p))
 						answer_back.erase(answer_back.begin() + p);
 					mTerminalChannel->SendData(answer_back);
@@ -3689,7 +3693,7 @@ void MTerminalView::EscapeCSI(uint8_t inChar)
 
 		MCSICmd cmd = static_cast<MCSICmd>(mCSICmd);
 
-		PRINT(("CSI: %s (%x)", mCtrlSeq.c_str(), mCSICmd));
+		// PRINT(("CSI: %s (%x)", mCtrlSeq.c_str(), mCSICmd));
 
 		if (mDECSCL > 1)
 			ProcessCSILevel4(cmd);

@@ -196,7 +196,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	mTextBox = new MEdittext("searchstring", bounds);
 	mTextBox->SetLayout(true, true, 4);
 	AddChild(mTextBox);
-	mTextBox->SetText(Preferences::GetString("find-recent", ""));
+	mTextBox->SetText(MPrefs::GetString("find-recent", ""));
 	AddRoute(eKeyDown, mTextBox->eKeyDown);
 
 	std::string label(_("Case sensitive"));
@@ -211,7 +211,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	mCaseSensitive = new MCheckbox("case-sensitive", bounds, label);
 	mCaseSensitive->SetLayout(false, false, 4);
 	AddChild(mCaseSensitive);
-	mCaseSensitive->SetChecked(Preferences::GetBoolean("find-case-sensitive", false));
+	mCaseSensitive->SetChecked(MPrefs::GetBoolean("find-case-sensitive", false));
 
 	// nog twee knoppen
 
@@ -246,7 +246,7 @@ MSearchPanel::~MSearchPanel()
 
 void MSearchPanel::Close()
 {
-	Preferences::SetString("find-recent", mTextBox->GetText());
+	MPrefs::SetString("find-recent", mTextBox->GetText());
 	Hide();
 	if (auto w = dynamic_cast<MTerminalWindow *>(GetWindow()); w != nullptr)
 		w->FocusTerminalView();

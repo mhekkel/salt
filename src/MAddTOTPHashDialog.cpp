@@ -67,9 +67,9 @@ bool MAddTOTPHashDialog::OKClicked()
 		if (b.length() < 8) // or (size % 8) != 0)
 			throw std::runtime_error("invalid hash");
 
-		auto totp = Preferences::GetArray("totp");
+		auto totp = MPrefs::GetArray("totp");
 		totp.push_back(name + ";" + hash);
-		Preferences::SetArray("totp", totp);
+		MPrefs::SetArray("totp", totp);
 
 		MSaltApp::Instance().UpdateTOTPMenu();
 

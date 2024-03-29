@@ -45,6 +45,7 @@
 #include <mcfp/mcfp.hpp>
 #include <zeep/crypto.hpp>
 #include <zeep/unicode-support.hpp>
+#include <zeep/http/uri.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -104,6 +105,7 @@ void MSaltApp::Initialise()
 {
 	MApplication::Initialise();
 	MMenuBar::Init("terminal-window-menu");
+	SetIconName("salt");
 
 #if defined _MSC_VER
 	if (Preferences::GetBoolean("act-as-pageant", true))
@@ -127,7 +129,7 @@ void MSaltApp::Initialise()
 
 	std::regex rx("^(\\S+) (\\S+) (.+)");
 
-	for (const std::string &known : Preferences::GetArray("known-hosts"))
+	for (const std::string &known : MPrefs::GetArray("known-hosts"))
 	{
 		std::smatch m;
 		if (std::regex_match(known, m, rx))
@@ -136,15 +138,15 @@ void MSaltApp::Initialise()
 
 	// set preferred algorithms
 	pinch::key_exchange::set_algorithm(pinch::algorithm::encryption, pinch::direction::both,
-		Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
+		MPrefs::GetString("enc", pinch::kEncryptionAlgorithms));
 	pinch::key_exchange::set_algorithm(pinch::algorithm::verification, pinch::direction::both,
-		Preferences::GetString("mac", pinch::kMacAlgorithms));
+		MPrefs::GetString("mac", pinch::kMacAlgorithms));
 	pinch::key_exchange::set_algorithm(pinch::algorithm::compression, pinch::direction::both,
-		Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
+		MPrefs::GetString("cmp", pinch::kCompressionAlgorithms));
 	pinch::key_exchange::set_algorithm(pinch::algorithm::keyexchange, pinch::direction::both,
-		Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
+		MPrefs::GetString("kex", pinch::kKeyExchangeAlgorithms));
 	pinch::key_exchange::set_algorithm(pinch::algorithm::serverhostkey, pinch::direction::both,
-		Preferences::GetString("shk", pinch::kServerHostKeyAlgorithms));
+		MPrefs::GetString("shk", pinch::kServerHostKeyAlgorithms));
 
 	mIOContextThread = std::thread([this]()
 		{
@@ -168,14 +170,14 @@ void MSaltApp::SaveGlobals()
 	std::vector<std::string> recent_v;
 	for (const auto &[r, nr] : mRecent)
 		recent_v.emplace_back(r.str());
-	Preferences::SetArray("recent-sessions", recent_v);
+	MPrefs::SetArray("recent-sessions", recent_v);
 
 	// save new format of known hosts
 	std::ofstream known_host_file(gPrefsDir / "known_hosts");
 	if (known_host_file.is_open())
 		pinch::known_hosts::instance().save_host_file(known_host_file);
 
-	Preferences::SetArray("known-hosts", {});
+	MPrefs::SetArray("known-hosts", {});
 
 	MApplication::SaveGlobals();
 }
@@ -236,7 +238,7 @@ void MSaltApp::OnClearRecentMenu()
 {
 	mRecent.clear();
 	UpdateRecentSessionMenu();
-	Preferences::SetArray("recent-sessions", {});
+	MPrefs::SetArray("recent-sessions", {});
 	SaveGlobals();
 }
 
@@ -251,65 +253,6 @@ void MSaltApp::OnOpenRecent(int inConnectionNr)
 		break;
 	}
 }
-
-// bool MSaltApp::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-// {
-// 	bool result = true;
-
-// 	switch (inCommand)
-// 	{
-// 		case cmd_Connect:
-// 		{
-// 			break;
-// 		}
-
-// 		case cmd_About:
-// 			DoAbout();
-// 			break;
-
-// 		case cmd_OpenRecentSession:
-// 			if (inItemIndex - 2 < mRecent.size())
-// 				Open(*(mRecent.begin() + inItemIndex - 2));
-// 			break;
-
-// 		case cmd_ClearRecentSessions:
-// 			mRecent.clear();
-// 			break;
-
-// 		case cmd_SelectWindowFromMenu:
-// 		{
-// 			MTerminalWindow *term = MTerminalWindow::GetFirstTerminal();
-// 			while (inItemIndex-- > 3 and term != nullptr)
-// 				term = term->GetNextTerminal();
-// 			if (term != nullptr)
-// 				term->Select();
-// 			break;
-// 		}
-
-// 		case cmd_Preferences:
-// 			MPreferencesDialog::Instance().Select();
-// 			break;
-
-// 		case cmd_AddNewTOTPHash:
-// 		{
-// 			MDialog *d = new MAddTOTPHashDialog();
-// 			d->Select();
-// 			break;
-// 		}
-
-// 			// #if DEBUG
-// 			//		case 'test':
-// 			//			new MTestWindow();
-// 			//			break;
-// 			// #endif
-
-// 		default:
-// 			result = MApplication::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-// 			break;
-// 	}
-
-// 	return result;
-// }
 
 void MSaltApp::UpdateWindowMenu()
 {
@@ -348,7 +291,7 @@ void MSaltApp::UpdateTOTPMenu()
 	std::vector<std::tuple<std::string, uint32_t>> items;
 	const std::regex rx("(.+);[A-Z2-7]+");
 
-	for (uint32_t i = 0; auto &p : Preferences::GetArray("totp"))
+	for (uint32_t i = 0; auto &p : MPrefs::GetArray("totp"))
 	{
 		std::smatch m;
 		if (regex_match(p, m, rx))
@@ -359,9 +302,10 @@ void MSaltApp::UpdateTOTPMenu()
 
 void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
 {
-	auto connection = inRecent.proxy.has_value() ? mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port,
-													   inRecent.proxy->user, inRecent.proxy->host, inRecent.proxy->port, inRecent.proxy->command)
-	                                             : mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port);
+	auto connection =
+		inRecent.proxy.has_value() ? mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port,
+										 inRecent.proxy->user, inRecent.proxy->host, inRecent.proxy->port, inRecent.proxy->command)
+								   : mConnectionPool.get(inRecent.user, inRecent.host, inRecent.port);
 
 	auto w = MTerminalWindow::Create(inRecent.user, inRecent.host, inRecent.port, inCommand, connection);
 	w->Select();
@@ -405,6 +349,35 @@ void MSaltApp::DoQuit()
 	MApplication::DoQuit();
 }
 
+int MSaltApp::HandleCommandLine(int argc, const char * const argv[])
+{
+	auto &config = mcfp::config::instance();
+
+	config.init("usage: salt [options] [-- program [args...]]",
+		mcfp::make_option<std::string>("connect,c", "Connect to remote host"),
+		mcfp::make_option("select-host", "Show connection dialog")
+	);
+
+	std::error_code ec;
+	config.parse(argc, argv, ec);
+	if (ec)
+	{
+		std::cerr << ec.message() << '\n';
+		return 1;
+	}
+
+	if (config.has("connect"))
+		Execute("Open", { config.get("connect") });
+	else if (config.has("select-host"))
+		Execute("Connect", {});
+	else if (config.operands().empty())
+		Execute("New", {});
+	else
+		Execute("Execute", config.operands());
+	
+	return 0;
+}
+
 void MSaltApp::DoNew()
 {
 	MWindow *w = MTerminalWindow::Create({});
@@ -420,20 +393,32 @@ void MSaltApp::Execute(const std::string &inCommand,
 		OnConnect();
 	else if (inCommand == "Open")
 	{
-		std::regex re("^(?:ssh://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?$");
-		std::smatch m;
+		ConnectInfo ci;
 
-		if (std::regex_match(inArguments.front(), m, re))
+		auto url = inArguments.front();
+		
+		if (zeep::http::is_valid_uri(url))
 		{
-			std::string user = m[1];
-			std::string host = m[3];
-			uint16_t port = m[4].matched ? std::stoi(m[4]) : 22;
-			std::string command;
+			zeep::http::uri uri(url);
+			if (auto scheme = uri.get_scheme(); not (scheme.empty() or zeep::iequals(scheme, "ssh")))
+				return;
 
-			std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(user, host, port);
-			MWindow *w = MTerminalWindow::Create(user, host, port, command, connection);
-			w->Select();
+			ci.host = uri.get_host();
+			ci.port = uri.get_port();
+			ci.user = uri.get_userinfo();
 		}
+		else
+			ci.host = url;
+
+		if (ci.user.empty())
+			ci.user = GetUserName();
+
+		if (ci.port == 0)
+			ci.port = 22;
+
+		std::shared_ptr<pinch::basic_connection> connection = mConnectionPool.get(ci.user, ci.host, ci.port);
+		MWindow *w = MTerminalWindow::Create(ci.user, ci.host, ci.port, "", connection);
+		w->Select();
 	}
 	else if (inCommand == "Execute")
 	{
@@ -442,105 +427,179 @@ void MSaltApp::Execute(const std::string &inCommand,
 	}
 }
 
-// #if not defined(_MSC_VER)
+// --------------------------------------------------------------------
 
-// # include <gtk/gtk.h>
+void SetStdinEcho(bool inEnable)
+{
+	struct termios tty;
+	::tcgetattr(STDIN_FILENO, &tty);
+	if (not inEnable)
+		tty.c_lflag &= ~ECHO;
+	else
+		tty.c_lflag |= ECHO;
 
-// void MApplication::Install(const std::string &inPrefix)
-// {
-// 	if (getuid() != 0)
-// 		throw std::runtime_error("You must be root to be able to install salt");
+	(void)::tcsetattr(STDIN_FILENO, TCSANOW, &tty);
+}
 
-// 	if (not fs::exists(gExecutablePath))
-// 		throw std::runtime_error(std::string("I don't seem to exist...?") + gExecutablePath.string());
+bool askYesNo(const std::string &msg, bool defaultYes)
+{
+	std::string yesno;
+	std::cout << msg << (defaultYes ? " [Y/n]: " : " [y/N]: ");
+	std::cout.flush();
+	std::getline(std::cin, yesno);
 
-// 	fs::path prefix(inPrefix);
-// 	if (prefix.empty())
-// 		prefix = "/usr/local";
+	return yesno.empty() ? defaultYes : zeep::iequals(yesno, "y") or zeep::iequals(yesno, "yes");
+}
 
-// 	// copy the executable to the appropriate destination
-// 	if (not fs::exists(prefix / "bin"))
-// 	{
-// 		std::cout << "Creating directory " << (prefix / "bin") << '\n';
-// 		fs::create_directories(prefix / "bin");
-// 	}
-// 	fs::path exeDest = prefix / "bin" / "salt";
+std::string ask(const std::string &msg, std::string defaultAnswer = {})
+{
+	std::cout << msg << " [" << defaultAnswer << "]: ";
+	std::cout.flush();
 
-// 	if (not fs::exists(prefix / "share" / "salt"))
-// 	{
-// 		std::cout << "Creating directory " << (prefix / "share" / "salt") << '\n';
-// 		fs::create_directories(prefix / "share" / "salt");
-// 	}
-// 	fs::path iconDest = prefix / "share" / "salt" / "icon.png";
+	std::string answer;
+	std::getline(std::cin, answer);
+	return answer.empty() ? defaultAnswer : answer;
+}
 
-// 	std::cout << "copying " << gExecutablePath.string() << " to " << exeDest.string() << '\n';
+void Install(const std::string &inPrefix)
+{
+	std::error_code ec;
+	if (auto exefile = fs::read_symlink("/proc/self/exe", ec); not ec and fs::exists(exefile, ec))
+		gExecutablePath = exefile;
 
-// 	if (fs::exists(exeDest))
-// 		fs::remove(exeDest);
+	fs::path prefix(inPrefix);
+	if (prefix.empty())
+	{
+		if (getuid() == 0)
+			prefix = "/usr/local";
+		else if (auto path = getenv("PATH"); path != nullptr)
+		{
+			std::cmatch m;
+			std::regex rx(R"((?!<:)/home/[^/:]+/\.local/bin(?!=:))");
+			if (std::regex_search(path, m, rx))
+			{
+				prefix = m[0].str();
+				prefix = prefix.parent_path();
+			}
+		}
 
-// 	fs::copy_file(gExecutablePath, exeDest);
+		// --------------------------------------------------------------------
+		// Ask if this is ok
 
-// 	if (fs::exists(iconDest))
-// 		fs::remove(iconDest);
+		std::cout << "No prefix was specied, where do you want to install salt?\n";
 
-// 	// create desktop file
-// 	mrsrc::rsrc rsrc("salt.desktop");
-// 	mrsrc::rsrc icon("Icons/appicon.png");
+		prefix = ask("prefix path", prefix);
+	}
 
-// 	if (not rsrc)
-// 		throw std::runtime_error("salt.desktop file could not be created, missing data");
+	if (prefix.empty() or not fs::exists(prefix, ec))
+	{
+		std::cout << "Not a valid location, exiting\n";
+		exit(1);
+	}
 
-// 	std::string desktop(rsrc.data(), rsrc.size());
-// 	zeep::replace_all(desktop, "__EXE__", exeDest.string());
-// 	zeep::replace_all(desktop, "__ICON__", iconDest.string());
+	fs::path bindir = prefix / "bin";
+	fs::path datadir = prefix / "share";
+	fs::path icondir = datadir / "icons" / "hicolor" / "48x48" / "apps";
+	fs::path appdir = datadir / "applications";
 
-// 	// locate applications directory
-// 	// don't use glib here,
+	// Create directories
+	for (auto &p : { bindir, datadir, icondir, appdir })
+	{
+		if (not fs::exists(p, ec))
+		{
+			std::cout << "Creating directory " << (p) << '\n';
+			fs::create_directories(p, ec);
 
-// 	fs::path desktopFile, applicationsDir;
+			if (ec)
+			{
+				std::cout << "Error creating directory " << p << ": " << ec.message() << "\n";
+				exit(1);
+			}
+		}
+	}
 
-// 	const char *const *config_dirs = g_get_system_data_dirs();
-// 	for (const char *const *dir = config_dirs; *dir != nullptr; ++dir)
-// 	{
-// 		applicationsDir = fs::path(*dir) / "applications";
-// 		if (fs::exists(applicationsDir) and fs::is_directory(applicationsDir))
-// 			break;
-// 	}
+	// copy executable
 
-// 	if (not fs::exists(applicationsDir))
-// 	{
-// 		std::cout << "Creating directory " << applicationsDir << '\n';
-// 		fs::create_directories(applicationsDir);
-// 	}
+	std::cout << "copying " << gExecutablePath.string() << " to " << bindir << '\n';
 
-// 	std::cout << "writing icon file " << iconDest << '\n';
+	if (fs::exists(bindir / "salt", ec))
+		fs::remove(bindir / "salt", ec);
 
-// 	desktopFile = applicationsDir / "salt.desktop";
-// 	std::cout << "writing desktop file " << desktopFile << '\n';
+	if (ec)
+	{
+		std::cout << "Removing old executable failed: " << ec.message() << "\n";
+		exit(1);
+	}
 
-// 	std::ofstream file(desktopFile, std::ios::trunc);
-// 	file << desktop;
-// 	file.close();
+	fs::copy_file(gExecutablePath, bindir / "salt", ec);
 
-// 	std::cout << "writing icon file " << iconDest << '\n';
-// 	file.open(iconDest, std::ios::trunc | std::ios::binary);
-// 	file.write(icon.data(), icon.size());
-// 	file.close();
+	if (ec)
+	{
+		std::cout << "Copying executable failed: " << ec.message() << "\n";
+		exit(1);
+	}
 
-// 	exit(0);
-// }
+	// copy icon
 
-// #endif
+	if (fs::exists(icondir / "com.hekkelman.salt.png", ec))
+		fs::remove(icondir / "com.hekkelman.salt.png", ec);
+
+	if (ec)
+	{
+		std::cout << "Removing old icon failed: " << ec.message() << "\n";
+		exit(1);
+	}
+
+	mrsrc::rsrc icon("Icons/appicon.png");
+	if (not icon)
+	{
+		std::cout << "Icon resource is missing\n";
+		exit(1);
+	}
+
+	std::cout << "writing icon file " << (icondir / "com.hekkelman.salt.png") << '\n';
+
+	std::ofstream file;
+	file.open((icondir / "com.hekkelman.salt.png"), std::ios::trunc | std::ios::binary);
+	file.write(icon.data(), icon.size());
+	if (file.bad())
+	{
+		std::cout << "Writing icon failed\n";
+		exit(1);
+	}
+	file.close();
+
+	// create desktop file
+	mrsrc::rsrc rsrc("salt.desktop");
+	if (not rsrc)
+	{
+		std::cout << "Missing destkop resource\n";
+		exit(1);
+	}
+
+	std::string desktop(rsrc.data(), rsrc.size());
+	zeep::replace_all(desktop, "__EXE__", (bindir / "salt").string());
+	zeep::replace_all(desktop, "__ICON__", (icondir / "com.hekkelman.salt.png").string());
+
+	fs::path desktopFile = appdir / "com.hekkelman.salt.desktop";
+	std::cout << "writing desktop file " << desktopFile << '\n';
+
+	file.open(desktopFile, std::ios::trunc);
+	file << desktop;
+	file.close();
+
+	exit(0);
+}
 
 // --------------------------------------------------------------------
 
 int main(int argc, char *const argv[])
 {
-	#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-		int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
-		if (err_fd > 0)
-			dup2(err_fd, STDERR_FILENO);
-	#endif
+#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+	int err_fd = open(("/tmp/salt-debug-" + std::to_string(getpid()) + ".log").c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
+	if (err_fd > 0)
+		dup2(err_fd, STDERR_FILENO);
+#endif
 
 	auto &config = mcfp::config::instance();
 
@@ -551,7 +610,7 @@ int main(int argc, char *const argv[])
 		mcfp::make_option<std::string>("connect,c", "Connect to remote host"),
 		mcfp::make_option("select-host", "Show connection dialog"),
 		mcfp::make_option("install,i", "Install the application"),
-		mcfp::make_option<std::string>("prefix,p", "/usr/local", "Installation prefix"));
+		mcfp::make_option<std::string>("prefix,p", "Installation prefix"));
 
 	// for now
 	config.set_ignore_unknown(true);
@@ -576,34 +635,11 @@ int main(int argc, char *const argv[])
 		exit(0);
 	}
 
-	// if (config.has("install"))
-	// {
-	// 	gExecutablePath = fs::canonical(argv[0]);
-
-	// 	std::string prefix = config.get<std::string>("prefix");
-	// 	MApplication::Install(prefix);
-	// 	exit(0);
-	// }
-
-	// std::string command;
-	// std::vector<std::string> args;
-
-	// if (config.has("select-host"))
-	// 	command = "Connect";
-	// else if (config.has("connect"))
-	// {
-	// 	command = "Open";
-	// 	args.emplace_back(config.get("connect"));
-	// }
-	// else if (config.operands().empty())
-	// 	command = "New";
-	// else
-	// {
-	// 	command = "Execute";
-	// 	args = config.operands();
-	// }
-
-	// return MApplication::Main(command, args);
+	if (config.has("install"))
+	{
+		Install(config.has("prefix") ? config.get("prefix") : "");
+		exit(0);
+	}
 
 	std::vector<std::string> args;
 	for (int i = 0; i < argc; ++i)

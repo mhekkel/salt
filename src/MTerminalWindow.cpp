@@ -364,6 +364,8 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	, mNext(nullptr)
 	, mNr(sNextNr++)
 {
+	SetIconName("salt");
+
 	// create views
 	MRect bounds;
 
@@ -422,7 +424,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 
 	mSearchPanel->Hide();
 
-	if (Preferences::GetBoolean("show-status-bar", true) == false)
+	if (MPrefs::GetBoolean("show-status-bar", true) == false)
 		mStatusbar->Hide();
 
 	// add to bottom of the list

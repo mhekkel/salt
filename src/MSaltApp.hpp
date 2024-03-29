@@ -47,6 +47,8 @@ class MSaltApp : public MApplication
 
 	~MSaltApp();
 
+	int HandleCommandLine(int argc, const char * const argv[]) override;
+
 	void DoNew() override;
 
 	void Execute(const std::string &inCommand,

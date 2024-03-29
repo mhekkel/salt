@@ -144,7 +144,7 @@ MTerminalBuffer::MTerminalBuffer(uint32_t inWidth, uint32_t inHeight, bool inBuf
 	, mForeColor(kXTermColorNone)
 	, mBackColor(kXTermColorNone)
 {
-	mBufferSize = inBuffer ? Preferences::GetInteger("buffer-size", 5000) : 0;
+	mBufferSize = inBuffer ? MPrefs::GetInteger("buffer-size", 5000) : 0;
 }
 
 MTerminalBuffer::~MTerminalBuffer()

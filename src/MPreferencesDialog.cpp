@@ -68,7 +68,7 @@ MPreferencesDialog::MPreferencesDialog()
 
 	SetChoices("font", fonts);
 
-	string font = Preferences::GetString("font", "Consolas 10");
+	string font = MPrefs::GetString("font", "Consolas 10");
 	string::size_type s = font.rfind(' ');
 	if (s == string::npos)
 		font = "Consolas 10";
@@ -84,12 +84,12 @@ MPreferencesDialog::MPreferencesDialog()
 		SetValue("size", 1);
 	}
 
-	SetText("buffer", std::to_string(Preferences::GetInteger("buffer-size", 5000)));
-	SetChecked("block-cursor", Preferences::GetBoolean("block-cursor", false));
-	SetChecked("blink-cursor", Preferences::GetBoolean("blink-cursor", false));
-	SetText("terminal-type", Preferences::GetString("terminal-type", "xterm"));
-	SetChecked("ignore-color", Preferences::GetBoolean("ignore-color", false));
-	SetChecked("show-status-bar", Preferences::GetBoolean("show-status-bar", false));
+	SetText("buffer", std::to_string(MPrefs::GetInteger("buffer-size", 5000)));
+	SetChecked("block-cursor", MPrefs::GetBoolean("block-cursor", false));
+	SetChecked("blink-cursor", MPrefs::GetBoolean("blink-cursor", false));
+	SetText("terminal-type", MPrefs::GetString("terminal-type", "xterm"));
+	SetChecked("ignore-color", MPrefs::GetBoolean("ignore-color", false));
+	SetChecked("show-status-bar", MPrefs::GetBoolean("show-status-bar", false));
 
 	// connection page
 #if defined _MSC_VER
@@ -99,31 +99,31 @@ MPreferencesDialog::MPreferencesDialog()
 	SetEnabled("forward-ssh-agent", useCertificates);
 	SetEnabled("act-as-pageant", useCertificates);
 #else
-	SetChecked("forward-ssh-agent", Preferences::GetBoolean("forward-ssh-agent", true));
+	SetChecked("forward-ssh-agent", MPrefs::GetBoolean("forward-ssh-agent", true));
 #endif
 
-	SetChecked("forward-gpg-agent", Preferences::GetBoolean("forward-gpg-agent", true));
+	SetChecked("forward-gpg-agent", MPrefs::GetBoolean("forward-gpg-agent", true));
 
-	auto dpc = Preferences::GetArray("disallowed-paste-characters");
+	auto dpc = MPrefs::GetArray("disallowed-paste-characters");
 	if (dpc.empty())
 	{
 		dpc = std::vector<std::string>{ "BS", "DEL", "ENQ", "EOT", "ESC", "NUL" };
-		Preferences::SetArray("disallowed-paste-characters", dpc);
+		MPrefs::SetArray("disallowed-paste-characters", dpc);
 	}
 
 	SetText("disallowed-paste-characters", zeep::join(dpc, ","));
 
-	SetChecked("forward-x11", Preferences::GetBoolean("forward-x11", true));
-	SetChecked("udk-with-shift", Preferences::GetBoolean("udk-with-shift", true));
+	SetChecked("forward-x11", MPrefs::GetBoolean("forward-x11", true));
+	SetChecked("udk-with-shift", MPrefs::GetBoolean("udk-with-shift", true));
 
-	string answerback = Preferences::GetString("answer-back", "salt\r");
+	string answerback = MPrefs::GetString("answer-back", "salt\r");
 	zeep::replace_all(answerback, "\r", "\\r");
 	zeep::replace_all(answerback, "\n", "\\n");
 	zeep::replace_all(answerback, "\t", "\\t");
 	SetText("answer-back", answerback);
 
-	SetColor("back-color", Preferences::GetColor("back-color", "#0f290e"));
-	SetColor("selection-color", Preferences::GetColor("selection-color", "#FFD281"));
+	SetColor("back-color", MPrefs::GetColor("back-color", "#0f290e"));
+	SetColor("selection-color", MPrefs::GetColor("selection-color", "#FFD281"));
 
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID("back-color"));
 	if (swatch != nullptr)
@@ -137,20 +137,20 @@ MPreferencesDialog::MPreferencesDialog()
 			kBlack });
 	}
 
-	SetChecked("audible-beep", Preferences::GetBoolean("audible-beep", true));
-	SetChecked("graphical-beep", Preferences::GetBoolean("graphical-beep", true));
+	SetChecked("audible-beep", MPrefs::GetBoolean("audible-beep", true));
+	SetChecked("graphical-beep", MPrefs::GetBoolean("graphical-beep", true));
 
 	stringstream env;
 
-	for (const string &s : Preferences::GetArray("env"))
+	for (const string &s : MPrefs::GetArray("env"))
 		env << s << '\n';
 	SetText("env", env.str());
 
-	SetText("enc", Preferences::GetString("enc", pinch::kEncryptionAlgorithms));
-	SetText("mac", Preferences::GetString("mac", pinch::kMacAlgorithms));
-	SetText("kex", Preferences::GetString("kex", pinch::kKeyExchangeAlgorithms));
-	SetText("cmp", Preferences::GetString("cmp", pinch::kCompressionAlgorithms));
-	SetText("shk", Preferences::GetString("shk", pinch::kServerHostKeyAlgorithms));
+	SetText("enc", MPrefs::GetString("enc", pinch::kEncryptionAlgorithms));
+	SetText("mac", MPrefs::GetString("mac", pinch::kMacAlgorithms));
+	SetText("kex", MPrefs::GetString("kex", pinch::kKeyExchangeAlgorithms));
+	SetText("cmp", MPrefs::GetString("cmp", pinch::kCompressionAlgorithms));
+	SetText("shk", MPrefs::GetString("shk", pinch::kServerHostKeyAlgorithms));
 
 	//	SetEnabled("apply", false);
 }
@@ -174,15 +174,15 @@ bool MPreferencesDialog::OKClicked()
 
 void MPreferencesDialog::Apply()
 {
-	Preferences::SetString("font", GetText("font") + ' ' + GetText("size"));
-	Preferences::SetColor("back-color", GetColor("back-color"));
-	Preferences::SetColor("selection-color", GetColor("selection-color"));
-	Preferences::SetInteger("buffer-size", std::stoul(GetText("buffer")));
-	Preferences::SetBoolean("block-cursor", IsChecked("block-cursor"));
-	Preferences::SetBoolean("blink-cursor", IsChecked("blink-cursor"));
-	Preferences::SetString("terminal-type", GetText("terminal-type"));
-	Preferences::SetBoolean("ignore-color", IsChecked("ignore-color"));
-	Preferences::SetBoolean("show-status-bar", IsChecked("show-status-bar"));
+	MPrefs::SetString("font", GetText("font") + ' ' + GetText("size"));
+	MPrefs::SetColor("back-color", GetColor("back-color"));
+	MPrefs::SetColor("selection-color", GetColor("selection-color"));
+	MPrefs::SetInteger("buffer-size", std::stoul(GetText("buffer")));
+	MPrefs::SetBoolean("block-cursor", IsChecked("block-cursor"));
+	MPrefs::SetBoolean("blink-cursor", IsChecked("blink-cursor"));
+	MPrefs::SetString("terminal-type", GetText("terminal-type"));
+	MPrefs::SetBoolean("ignore-color", IsChecked("ignore-color"));
+	MPrefs::SetBoolean("show-status-bar", IsChecked("show-status-bar"));
 
 	//
 #if defined _MSC_VER
@@ -193,13 +193,13 @@ void MPreferencesDialog::Apply()
 	// commit pageant setting
 	pinch::ssh_agent::instance().expose_pageant(IsChecked("act-as-pageant"));
 #else
-	Preferences::SetBoolean("forward-ssh-agent", IsChecked("forward-ssh-agent"));
+	MPrefs::SetBoolean("forward-ssh-agent", IsChecked("forward-ssh-agent"));
 #endif
 
-	Preferences::SetBoolean("forward-gpg-agent", IsChecked("forward-gpg-agent"));
+	MPrefs::SetBoolean("forward-gpg-agent", IsChecked("forward-gpg-agent"));
 
-	Preferences::SetBoolean("forward-x11", IsChecked("forward-x11"));
-	Preferences::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
+	MPrefs::SetBoolean("forward-x11", IsChecked("forward-x11"));
+	MPrefs::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
 
 	const std::set<std::string> kDisallowedPasteCharacters{
 		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT",
@@ -224,17 +224,17 @@ void MPreferencesDialog::Apply()
 		i = j + 1;
 	}
 
-	Preferences::SetArray("disallowed-paste-characters", dpc);
+	MPrefs::SetArray("disallowed-paste-characters", dpc);
 	SetText("disallowed-paste-characters", zeep::join(dpc, ","));
 
 	string answerback = GetText("answer-back");
 	zeep::replace_all(answerback, "\\r", "\r");
 	zeep::replace_all(answerback, "\\n", "\n");
 	zeep::replace_all(answerback, "\\t", "\t");
-	Preferences::SetString("answer-back", answerback);
+	MPrefs::SetString("answer-back", answerback);
 
-	Preferences::SetBoolean("audible-beep", IsChecked("audible-beep"));
-	Preferences::SetBoolean("graphical-beep", IsChecked("graphical-beep"));
+	MPrefs::SetBoolean("audible-beep", IsChecked("audible-beep"));
+	MPrefs::SetBoolean("graphical-beep", IsChecked("graphical-beep"));
 
 	stringstream envs(GetText("env"));
 	vector<string> env;
@@ -255,7 +255,7 @@ void MPreferencesDialog::Apply()
 			env.push_back(v);
 	}
 
-	Preferences::SetArray("env", env);
+	MPrefs::SetArray("env", env);
 
 	// protocols
 	struct
@@ -300,7 +300,7 @@ void MPreferencesDialog::Apply()
 		if (ok)
 		{
 			string algo = zeep::join(v, ",");
-			Preferences::SetString(alg.conf, algo);
+			MPrefs::SetString(alg.conf, algo);
 
 			pinch::key_exchange::set_algorithm(alg.type, pinch::direction::both, algo);
 		}

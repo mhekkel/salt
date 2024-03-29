@@ -138,7 +138,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-target_link_libraries(salt zeep::zeep pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui)
+target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui)
 
 mrc_target_resources(salt ${RESOURCES})
 

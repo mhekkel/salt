@@ -44,8 +44,8 @@ MPortForwardingDialog::MPortForwardingDialog(MWindow *inTerminal, std::shared_pt
 	: MDialog("port-forwarding-dialog")
 	, mConnection(inConnection)
 {
-	SetText("listen", Preferences::GetString("port-forwarding-port", "2080"));
-	SetText("connect", Preferences::GetString("port-forwarding-host", "localhost:80"));
+	SetText("listen", MPrefs::GetString("port-forwarding-port", "2080"));
+	SetText("connect", MPrefs::GetString("port-forwarding-host", "localhost:80"));
 	Show(inTerminal);
 	SetFocus("listen");
 }
@@ -76,8 +76,8 @@ bool MPortForwardingDialog::OKClicked()
 
 		mConnection->forward_port(listenPort, m[1], connectPort);
 
-		Preferences::SetString("port-forwarding-host", connect);
-		Preferences::SetString("port-forwarding-port", std::to_string(listenPort));
+		MPrefs::SetString("port-forwarding-host", connect);
+		MPrefs::SetString("port-forwarding-port", std::to_string(listenPort));
 
 		result = true;
 	}
@@ -95,7 +95,7 @@ MSOCKS5ProxyDialog::MSOCKS5ProxyDialog(MWindow *inTerminal, std::shared_ptr<pinc
 	: MDialog("socks5-proxy-dialog")
 	, mConnection(inConnection)
 {
-	SetText("listen", Preferences::GetString("socks5-proxy-port", "2080"));
+	SetText("listen", MPrefs::GetString("socks5-proxy-port", "2080"));
 	Show(inTerminal);
 	SetFocus("listen");
 }
@@ -112,7 +112,7 @@ bool MSOCKS5ProxyDialog::OKClicked()
 	{
 		uint16_t listenPort = std::stoi(GetText("listen"));
 		mConnection->forward_socks5(listenPort);
-		Preferences::SetString("socks5-proxy-port", std::to_string(listenPort));
+		MPrefs::SetString("socks5-proxy-port", std::to_string(listenPort));
 		result = true;
 	}
 	catch (const exception &e)
@@ -129,10 +129,10 @@ MHTTPProxyDialog::MHTTPProxyDialog(MWindow *inTerminal, std::shared_ptr<pinch::b
 	: MDialog("http-proxy-dialog")
 	, mConnection(inConnection)
 {
-	SetText("listen", Preferences::GetString("http-proxy-port", "3128"));
-	SetChecked("log", Preferences::GetBoolean("http-proxy-log", false));
+	SetText("listen", MPrefs::GetString("http-proxy-port", "3128"));
+	SetChecked("log", MPrefs::GetBoolean("http-proxy-log", false));
 
-	string user = Preferences::GetString("http-proxy-user", "");
+	string user = MPrefs::GetString("http-proxy-user", "");
 
 	SetText("user", user);
 	SetPasswordChar("password");
@@ -161,16 +161,16 @@ bool MHTTPProxyDialog::OKClicked()
 
 		string user = GetText("user");
 
-		Preferences::SetString("http-proxy-port", std::to_string(listenPort));
-		Preferences::SetBoolean("http-proxy-log", log);
-		Preferences::SetString("http-proxy-user", user);
+		MPrefs::SetString("http-proxy-port", std::to_string(listenPort));
+		MPrefs::SetBoolean("http-proxy-log", log);
+		MPrefs::SetString("http-proxy-user", user);
 
 		if (user.empty())
-			Preferences::SetString("http-proxy-password", "");
+			MPrefs::SetString("http-proxy-password", "");
 		else if (m_password_changed)
 		{
 			string password = GetText("password");
-			Preferences::SetString("http-proxy-password", zeep::encode_hex(zeep::md5(user + ':' + kSaltProxyRealm + ':' + password)));
+			MPrefs::SetString("http-proxy-password", zeep::encode_hex(zeep::md5(user + ':' + kSaltProxyRealm + ':' + password)));
 		}
 
 		MHTTPProxy::instance().Init(mConnection, listenPort, not user.empty(), log ? log_level::request : log_level::none);

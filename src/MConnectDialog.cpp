@@ -138,7 +138,7 @@ MConnectDialog::MConnectDialog()
 	std::smatch m;
 	std::vector<std::string> hosts;
 
-	for (auto &s : Preferences::GetArray("recent-proxies"))
+	for (auto &s : MPrefs::GetArray("recent-proxies"))
 	{
 		if (not std::regex_match(s, m, kProxyRX))
 			continue;
@@ -180,7 +180,7 @@ std::vector<ConnectInfo> MConnectDialog::GetRecentHosts()
 {
 	std::vector<ConnectInfo> result;
 
-	for (auto &s : Preferences::GetArray("recent-sessions"))
+	for (auto &s : MPrefs::GetArray("recent-sessions"))
 	{
 		auto ci = ConnectInfo::parse(s);
 		if (ci)
