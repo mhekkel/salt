@@ -5,12 +5,13 @@ Comment=Alternative command line and SSH terminal
 Comment[nl]=Alternatieve opdracht prompt en SSH terminal
 TryExec=salt
 Exec=__EXE__
-Icon=com.hekkelman.salt
+Icon=com.hekkelman.Salt
 Type=Application
 Categories=GNOME;GTK;Utility;TerminalEmulator;
 Keywords=Run;
 MimeType=x-scheme-handler/ssh
 Actions=new-terminal;connect;
+DBusActivatable=true
 
 [Desktop Action new-terminal]
 Name=New Terminal
@@ -20,4 +21,4 @@ Exec=__EXE__
 [Desktop Action connect]
 Name=Open Connection
 Name[nl]=Verbind met server
-Exec=__EXE__ --connect
+Exec=__EXE__ --select-host

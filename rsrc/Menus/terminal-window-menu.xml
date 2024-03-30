@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
 <menubar>
 	<menu id='filemenu' label="Connection">
-		<item label="Open Terminal" cmd='app.new' />
+		<item label="Open Terminal" cmd='app.new-terminal' />
 		<item label="Connect…" cmd='app.connect' />
 		<menu id='recent' label="Connect Recent">
 			<item label="Clear Menu" cmd='app.clear-recent' />

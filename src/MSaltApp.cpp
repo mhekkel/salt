@@ -78,7 +78,7 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	, mIOContext(1)
 	, mConnectionPool(mIOContext)
 
-	, cNew(this, "new", &MSaltApp::OnNew, 'n', kControlKey | kShiftKey)
+	, cNew(this, "new-terminal", &MSaltApp::OnNew, 'n', kControlKey | kShiftKey)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
 	, cAddNewTOTP(this, "add-totp", &MSaltApp::OnAddNewTOTP)
 	, cQuit(this, "quit", &MSaltApp::OnQuit, 'q', kControlKey | kShiftKey)
@@ -541,8 +541,8 @@ void Install(const std::string &inPrefix)
 
 	// copy icon
 
-	if (fs::exists(icondir / "com.hekkelman.salt.png", ec))
-		fs::remove(icondir / "com.hekkelman.salt.png", ec);
+	if (fs::exists(icondir / "salt.png", ec))
+		fs::remove(icondir / "salt.png", ec);
 
 	if (ec)
 	{
@@ -557,10 +557,10 @@ void Install(const std::string &inPrefix)
 		exit(1);
 	}
 
-	std::cout << "writing icon file " << (icondir / "com.hekkelman.salt.png") << '\n';
+	std::cout << "writing icon file " << (icondir / "salt.png") << '\n';
 
 	std::ofstream file;
-	file.open((icondir / "com.hekkelman.salt.png"), std::ios::trunc | std::ios::binary);
+	file.open((icondir / "salt.png"), std::ios::trunc | std::ios::binary);
 	file.write(icon.data(), icon.size());
 	if (file.bad())
 	{
@@ -579,9 +579,9 @@ void Install(const std::string &inPrefix)
 
 	std::string desktop(rsrc.data(), rsrc.size());
 	zeep::replace_all(desktop, "__EXE__", (bindir / "salt").string());
-	zeep::replace_all(desktop, "__ICON__", (icondir / "com.hekkelman.salt.png").string());
+	zeep::replace_all(desktop, "__ICON__", (icondir / "salt.png").string());
 
-	fs::path desktopFile = appdir / "com.hekkelman.salt.desktop";
+	fs::path desktopFile = appdir / "salt.desktop";
 	std::cout << "writing desktop file " << desktopFile << '\n';
 
 	file.open(desktopFile, std::ios::trunc);
