@@ -120,21 +120,24 @@ bool MAuthDialog::OKClicked()
 std::function<bool(std::string &)> MAuthDialog::RequestSimplePassword(
 	const std::string &inDialogTitle, const std::string &inInstruction, MWindow *inParent)
 {
-	return [inDialogTitle, inInstruction, inParent](std::string &outPassword)
-	{
-		bool result = false;
+#warning FIXME
+	return [](std::string &) { return false; };
 
-		try
-		{
-			MAuthDialog *dlog = new MAuthDialog(inDialogTitle, inParent, [&outPassword](const std::string &pw)
-				{ outPassword = pw; });
-			result = dlog->ShowModal(inParent);
-		}
-		catch (const std::exception &e)
-		{
-			DisplayError(e);
-		}
+	// return [inDialogTitle, inInstruction, inParent](std::string &outPassword)
+	// {
+	// 	bool result = false;
 
-		return result;
-	};
+	// 	try
+	// 	{
+	// 		MAuthDialog *dlog = new MAuthDialog(inDialogTitle, inParent, [&outPassword](const std::string &pw)
+	// 			{ outPassword = pw; });
+	// 		result = dlog->ShowModal(inParent);
+	// 	}
+	// 	catch (const std::exception &e)
+	// 	{
+	// 		DisplayError(e);
+	// 	}
+
+	// 	return result;
+	// };
 }

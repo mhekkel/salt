@@ -52,7 +52,7 @@
 // ------------------------------------------------------------------
 //
 
-class MSshTerminalWindow : public MTerminalWindow
+class MSshTerminalWindow : public MTerminalWindow, public pinch::connection_callback_interface
 {
   public:
 	MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
@@ -72,11 +72,25 @@ class MSshTerminalWindow : public MTerminalWindow
 	void OnProxyHTTP();
 
   protected:
-	std::string Password();
-	std::vector<std::string> Credentials(const std::string &name, const std::string &instruction,
-		const std::string &lang, const std::vector<pinch::prompt> &prompts);
-	pinch::host_key_reply AcceptHostKey(const std::string &inHost,
-		const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
+	// std::string Password();
+	// std::vector<std::string> Credentials(const std::string &name, const std::string &instruction,
+	// 	const std::string &lang, const std::vector<pinch::prompt> &prompts);
+	// pinch::host_key_reply AcceptHostKey(const std::string &inHost,
+	// 	const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
+
+	callback_executor_type get_executor() override
+	{
+		MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
+		return my_executor;
+	}
+
+	void accepts_hostkey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
+		pinch::host_key_state state, std::function<void(pinch::host_key_reply)> &&cb) override;
+
+	void provide_password(std::function<void(asio_ns::error_code, std::string)> &&cb) override;
+
+	void provide_credentials(const std::string &name, const std::string &instruction, const std::string &lang,
+		const std::vector<pinch::prompt> &prompts, std::function<void(std::vector<std::string>)> &&cb) override;
 
 	MCommand<void()> cDisconnect;
 	MCommand<void()> cRenewKeys;
@@ -117,11 +131,13 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 
 	using namespace std::placeholders;
 
-	mConnection->set_callback_executor(my_executor);
+	mConnection->set_connection_callback_interface(this);
 
-	mConnection->set_provide_password_callback(std::bind(&MSshTerminalWindow::Password, this));
-	mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4));
-	mConnection->set_accept_host_key_handler(std::bind(&MSshTerminalWindow::AcceptHostKey, this, _1, _2, _3, _4));
+	// mConnection->set_callback_executor(my_executor);
+
+	// mConnection->set_provide_password_callback(std::bind(&MSshTerminalWindow::Password, this));
+	// mConnection->set_provide_credentials_callback(std::bind(&MSshTerminalWindow::Credentials, this, _1, _2, _3, _4));
+	// mConnection->set_accept_host_key_handler(std::bind(&MSshTerminalWindow::AcceptHostKey, this, _1, _2, _3, _4));
 
 	std::stringstream title;
 	title << mUser << '@' << mServer;
@@ -186,32 +202,93 @@ void MSshTerminalWindow::OnProxyHTTP()
 	new MHTTPProxyDialog(this, mConnection);
 }
 
-std::string MSshTerminalWindow::Password()
+void MSshTerminalWindow::accepts_hostkey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
+	pinch::host_key_state state, std::function<void(pinch::host_key_reply)> &&cb)
 {
-	std::string result;
+	std::string_view hsv(reinterpret_cast<const char *>(key.data()), key.size());
 
-	std::unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
-		{ result = pw; }));
-	bool ok = dlog->ShowModal(this);
-	dlog.release();
+	std::string value = zeep::encode_base64(hsv);
+	std::string H = zeep::md5(hsv);
 
-	return ok ? result : "";
+	std::string fingerprint;
+
+	for (auto b : H)
+	{
+		if (not fingerprint.empty())
+			fingerprint += ':';
+
+		fingerprint += kHexChars[(b >> 4) & 0x0f];
+		fingerprint += kHexChars[b & 0x0f];
+	}
+
+	if (state == pinch::host_key_state::keys_differ)
+	{
+		DisplayAlert(this, "host-key-changed-alert",
+			[cb = std::move(cb)](int btn)
+			{
+				cb(btn == 2 ? pinch::host_key_reply::trusted : pinch::host_key_reply::reject);
+			},
+			{ host, fingerprint });
+	}
+	else
+	{
+		DisplayAlert(this, "unknown-host-alert",
+			[cb = std::move(cb)](int btn)
+			{
+				switch (btn)
+				{
+					case 1: // Add
+						cb(pinch::host_key_reply::trusted);
+						break;
+
+					case 2: // Cancel
+						cb(pinch::host_key_reply::reject);
+						break;
+
+					case 3: // Once
+						cb(pinch::host_key_reply::trust_once);
+						break;
+				}
+			},
+			{ host, fingerprint });
+	}
 }
 
-std::vector<std::string> MSshTerminalWindow::Credentials(const std::string &name, const std::string &instruction,
-	const std::string &lang, const std::vector<pinch::prompt> &prompts)
+void MSshTerminalWindow::provide_password(std::function<void(asio_ns::error_code, std::string)> &&cb)
 {
-	std::vector<std::string> result;
-
-	std::unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
-		name, instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
-		prompts, this, [&result](const std::vector<std::string> &r)
-		{ result = r; }));
-	bool ok = dlog->ShowModal(this);
-	dlog.release();
-
-	return ok ? result : std::vector<std::string>{};
 }
+
+void MSshTerminalWindow::provide_credentials(const std::string &name, const std::string &instruction, const std::string &lang,
+	const std::vector<pinch::prompt> &prompts, std::function<void(std::vector<std::string>)> &&cb)
+{
+}
+
+// std::string MSshTerminalWindow::Password()
+// {
+// 	std::string result;
+
+// 	std::unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"), this, [&result](const std::string &pw)
+// 		{ result = pw; }));
+// 	bool ok = dlog->ShowModal(this);
+// 	dlog.release();
+
+// 	return ok ? result : "";
+// }
+
+// std::vector<std::string> MSshTerminalWindow::Credentials(const std::string &name, const std::string &instruction,
+// 	const std::string &lang, const std::vector<pinch::prompt> &prompts)
+// {
+// 	std::vector<std::string> result;
+
+// 	std::unique_ptr<MAuthDialog> dlog(new MAuthDialog(_("Logging in"),
+// 		name, instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
+// 		prompts, this, [&result](const std::vector<std::string> &r)
+// 		{ result = r; }));
+// 	bool ok = dlog->ShowModal(this);
+// 	dlog.release();
+
+// 	return ok ? result : std::vector<std::string>{};
+// }
 
 pinch::host_key_reply MSshTerminalWindow::AcceptHostKey(const std::string &inHost, const std::string &inAlgorithm,
 	const std::vector<uint8_t> &inHostKey, pinch::host_key_state inState)
