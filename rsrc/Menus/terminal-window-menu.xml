@@ -19,8 +19,8 @@
 		
 		<menu id='tunnelmenu' label="Tunnel">
 			<item label="Port Forwarding…" cmd='win.forward-port'/>
-			<item label="SOCKS5 Proxy…" cmd='win.socks-proxy'/>
-			<item label="HTTP Proxy…" cmd='win.http-proxy'/>
+			<item label="SOCKS5 Proxy…" cmd='win.proxy-socks'/>
+			<item label="HTTP Proxy…" cmd='win.proxy-http'/>
 		</menu>
 		
 		<separator />

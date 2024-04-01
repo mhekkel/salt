@@ -413,9 +413,11 @@ MHTTPProxyImpl::MHTTPProxyImpl(std::shared_ptr<pinch::basic_connection> inConnec
 	bool require_authentication, const std::string &user, const std::string &password, log_level log)
 	: m_user_service({ { user, password, { "PROXY_USER" } } })
 	, m_connection(inConnection)
-	, m_log_level(log)
+	, m_log_level(log_level::none)
 {
-#if DEBUG
+#if NDEBUG
+	set_log_level(log);
+#else
 	set_log_level(log_level::debug);
 #endif
 
@@ -481,7 +483,8 @@ void MHTTPProxyImpl::log_request(const std::string &client, const zh::request &r
 				   << reply.size() << ' '
 				   << '"' << referer << '"' << ' '
 				   << '"' << userAgent << '"'
-				   << '\n';
+				   << '\n'
+				   << std::flush;
 		}
 	}
 	catch (...)
@@ -535,7 +538,11 @@ MHTTPProxy &MHTTPProxy::instance()
 void MHTTPProxy::Init(std::shared_ptr<pinch::basic_connection> inConnection,
 	uint16_t inPort, bool require_authentication, log_level log)
 {
+	if (m_impl)
+		delete m_impl;
+
 	auto user = MPrefs::GetString("http-proxy-user", "");
 	auto password = MPrefs::GetString("http-proxy-password", "");
+
 	m_impl = new MHTTPProxyImpl(inConnection, inPort, require_authentication, user, password, log);
 }

@@ -67,6 +67,10 @@ class MSshTerminalWindow : public MTerminalWindow
 	void OnRenewKeys();
 	void OnInstallPublicKey(int inKeyNr);
 
+	void OnForwardPort();
+	void OnProxySOCKS();
+	void OnProxyHTTP();
+
   protected:
 	std::string Password();
 	std::vector<std::string> Credentials(const std::string &name, const std::string &instruction,
@@ -77,6 +81,10 @@ class MSshTerminalWindow : public MTerminalWindow
 	MCommand<void()> cDisconnect;
 	MCommand<void()> cRenewKeys;
 	MCommand<void(int)> cInstallPublicKey;
+
+	MCommand<void()> cForwardPort;
+	MCommand<void()> cProxySOCKS;
+	MCommand<void()> cProxyHTTP;
 
 	std::shared_ptr<pinch::basic_connection> mConnection;
 	std::string mUser, mServer;
@@ -92,6 +100,10 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	, cDisconnect(this, "disconnect", &MSshTerminalWindow::OnDisconnect)
 	, cRenewKeys(this, "renew-keys", &MSshTerminalWindow::OnRenewKeys)
 	, cInstallPublicKey(this, "install-public-key", &MSshTerminalWindow::OnInstallPublicKey)
+
+	, cForwardPort(this, "forward-port", &MSshTerminalWindow::OnForwardPort)
+	, cProxySOCKS(this, "proxy-socks", &MSshTerminalWindow::OnProxySOCKS)
+	, cProxyHTTP(this, "proxy-http", &MSshTerminalWindow::OnProxyHTTP)
 
 	, mConnection(inConnection)
 	, mUser(inUser)
@@ -159,81 +171,20 @@ void MSshTerminalWindow::OnInstallPublicKey(int inKeyNr)
 	mKeyDropper->open();
 }
 
-// bool MSshTerminalWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-// {
-// 	bool result = true;
+void MSshTerminalWindow::OnForwardPort()
+{
+	new MPortForwardingDialog(this, mConnection);
+}
 
-// 	switch (inCommand)
-// 	{
-// 		case cmd_DropPublicKey:
-// 			outEnabled = true;
-// 			break;
+void MSshTerminalWindow::OnProxySOCKS()
+{
+	new MSOCKS5ProxyDialog(this, mConnection);
+}
 
-// 		case cmd_ForwardPort:
-// 		case cmd_ProxySOCKS:
-// 		case cmd_ProxyHTTP:
-// 		case cmd_Rekey:
-// 			outEnabled = mConnection->is_open();
-// 			break;
-
-// 		default:
-// 			result = MTerminalWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-// 			break;
-// 	}
-
-// 	return result;
-// }
-
-// bool MSshTerminalWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-// {
-// 	bool result = true;
-
-// 	switch (inCommand)
-// 	{
-// 		case cmd_DropPublicKey:
-// 		{
-// 			pinch::ssh_agent &agent(pinch::ssh_agent::instance());
-
-// 			if (inItemIndex < agent.size())
-// 			{
-// 				uint32_t n = inItemIndex;
-// 				for (auto key = agent.begin(); key != agent.end(); ++key)
-// 				{
-// 					if (n-- > 0)
-// 						continue;
-
-// 					if (key->get_comment() == inMenu->GetItemLabel(inItemIndex))
-// 						DropPublicKey(*key);
-
-// 					break;
-// 				}
-// 			}
-// 			break;
-// 		}
-
-// 		case cmd_Rekey:
-// 			mConnection->rekey();
-// 			break;
-
-// 		case cmd_ForwardPort:
-// 			new MPortForwardingDialog(this, mConnection);
-// 			break;
-
-// 		case cmd_ProxySOCKS:
-// 			new MSOCKS5ProxyDialog(this, mConnection);
-// 			break;
-
-// 		case cmd_ProxyHTTP:
-// 			new MHTTPProxyDialog(this, mConnection);
-// 			break;
-
-// 		default:
-// 			result = MTerminalWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-// 			break;
-// 	}
-
-// 	return result;
-// }
+void MSshTerminalWindow::OnProxyHTTP()
+{
+	new MHTTPProxyDialog(this, mConnection);
+}
 
 std::string MSshTerminalWindow::Password()
 {

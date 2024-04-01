@@ -72,11 +72,6 @@ class MAuthDialog : public MDialog
 
 	virtual bool OKClicked();
 
-	bool RequestSimplePassword(const std::string &inDialogTitle,
-		const std::string &inInstruction,
-		MWindow *inParent,
-		std::string &outPassword);
-
 	int32_t mFields = 1;
 	MWindow *mParent;
 
