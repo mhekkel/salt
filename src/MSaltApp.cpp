@@ -44,8 +44,8 @@
 
 #include <mcfp/mcfp.hpp>
 #include <zeep/crypto.hpp>
-#include <zeep/unicode-support.hpp>
 #include <zeep/http/uri.hpp>
+#include <zeep/unicode-support.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -148,17 +148,25 @@ void MSaltApp::Initialise()
 	pinch::key_exchange::set_algorithm(pinch::algorithm::serverhostkey, pinch::direction::both,
 		MPrefs::GetString("shk", pinch::kServerHostKeyAlgorithms));
 
-	mIOContextThread = std::thread([this]()
+	// clang-format off
+	mIOContextThread = std::thread(
+		[this]
 		{
-		try
-		{
-			auto wg = asio_ns::make_work_guard(mIOContext.get_executor());
-			mIOContext.run();
-		}
-		catch (const std::exception &ex)
-		{
-			std::cerr << "Exception in io_context thread: " << ex.what() << '\n';
-		} });
+			for (;;)
+			{
+				try
+				{
+					auto wg = asio_ns::make_work_guard(mIOContext.get_executor());
+					mIOContext.run();
+					break;
+				}
+				catch (const std::exception &ex)
+				{
+					std::cerr << "Exception in io_context thread: " << ex.what() << '\n';
+				}
+			}
+		});
+	// clang-format on
 
 	UpdateRecentSessionMenu();
 	UpdatePublicKeyMenu();
@@ -349,14 +357,13 @@ void MSaltApp::DoQuit()
 	MApplication::DoQuit();
 }
 
-int MSaltApp::HandleCommandLine(int argc, const char * const argv[])
+int MSaltApp::HandleCommandLine(int argc, const char *const argv[])
 {
 	auto &config = mcfp::config::instance();
 
 	config.init("usage: salt [options] [-- program [args...]]",
 		mcfp::make_option<std::string>("connect,c", "Connect to remote host"),
-		mcfp::make_option("select-host", "Show connection dialog")
-	);
+		mcfp::make_option("select-host", "Show connection dialog"));
 
 	std::error_code ec;
 	config.parse(argc, argv, ec);
@@ -374,7 +381,7 @@ int MSaltApp::HandleCommandLine(int argc, const char * const argv[])
 		Execute("New", {});
 	else
 		Execute("Execute", config.operands());
-	
+
 	return 0;
 }
 
@@ -396,11 +403,11 @@ void MSaltApp::Execute(const std::string &inCommand,
 		ConnectInfo ci;
 
 		auto url = inArguments.front();
-		
+
 		if (zeep::http::is_valid_uri(url))
 		{
 			zeep::http::uri uri(url);
-			if (auto scheme = uri.get_scheme(); not (scheme.empty() or zeep::iequals(scheme, "ssh")))
+			if (auto scheme = uri.get_scheme(); not(scheme.empty() or zeep::iequals(scheme, "ssh")))
 				return;
 
 			ci.host = uri.get_host();

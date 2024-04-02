@@ -35,26 +35,17 @@
 
 #include <pinch.hpp>
 
+#include <optional>
+
 // --------------------------------------------------------------------
 
 class MAuthDialog : public MDialog
 {
   public:
-	template <typename Handler>
-	MAuthDialog(const std::string &inTitle, MWindow *inParent, Handler &&handler)
-		: MAuthDialog(inTitle, inParent)
-	{
-		mPasswordHandler = std::move(handler);
-	}
+	MAuthDialog(const std::string &inTitle, MWindow *inParent, std::promise<std::string> inReply);
 
-	template <typename Handler>
-	MAuthDialog(const std::string &inTitle,
-		const std::string &name, const std::string &inInstruction,
-		const std::vector<pinch::prompt> &prompts, MWindow *inParent, Handler &&handler)
-		: MAuthDialog(inTitle, name, inInstruction, prompts, inParent)
-	{
-		mCredentialsHandler = std::move(handler);
-	}
+	MAuthDialog(const std::string &inTitle, const std::string &name, const std::string &inInstruction,
+		const std::vector<pinch::prompt> &prompts, MWindow *inParent, std::promise<std::vector<std::string>> inReply);
 
 	virtual ~MAuthDialog();
 
@@ -64,17 +55,12 @@ class MAuthDialog : public MDialog
 		MWindow *inParent);
 
   protected:
-	MAuthDialog(const std::string &inTitle, MWindow *inParent);
-
-	MAuthDialog(const std::string &inTitle,
-		const std::string &name, const std::string &inInstruction,
-		const std::vector<pinch::prompt> &prompts, MWindow *inParent);
 
 	virtual bool OKClicked();
 
-	int32_t mFields = 1;
+	int32_t mFields = -1;
 	MWindow *mParent;
 
-	std::function<void(std::string)> mPasswordHandler;
-	std::function<void(std::vector<std::string>)> mCredentialsHandler;
+	std::optional<std::promise<std::string>> mPasswordReply;
+	std::optional<std::promise<std::vector<std::string>>> mCredentialsReply;
 };

@@ -39,9 +39,10 @@
 
 // --------------------------------------------------------------------
 
-MAuthDialog::MAuthDialog(const std::string &inTitle, MWindow *inParent)
+MAuthDialog::MAuthDialog(const std::string &inTitle, MWindow *inParent, std::promise<std::string> inReply)
 	: MDialog("auth-dialog")
 	, mParent(inParent)
+	, mPasswordReply(std::move(inReply))
 {
 	SetTitle(inTitle);
 
@@ -63,11 +64,11 @@ MAuthDialog::MAuthDialog(const std::string &inTitle, MWindow *inParent)
 	SetFocus("edit-1");
 }
 
-MAuthDialog::MAuthDialog(const std::string &inTitle,
-	const std::string &name, const std::string &inInstruction,
-	const std::vector<pinch::prompt> &prompts, MWindow *inParent)
+MAuthDialog::MAuthDialog(const std::string &inTitle, const std::string &name, const std::string &inInstruction,
+	const std::vector<pinch::prompt> &prompts, MWindow *inParent, std::promise<std::vector<std::string>> inReply)
 	: MDialog("auth-dialog")
 	, mParent(inParent)
+	, mCredentialsReply(std::move(inReply))
 {
 	mFields = prompts.size();
 
@@ -100,18 +101,28 @@ MAuthDialog::MAuthDialog(const std::string &inTitle,
 
 MAuthDialog::~MAuthDialog()
 {
+	if (mPasswordReply.has_value())
+		mPasswordReply.value().set_exception(std::make_exception_ptr(std::system_error(pinch::error::auth_cancelled_by_user)));
+	if (mCredentialsReply.has_value())
+		mCredentialsReply.value().set_exception(std::make_exception_ptr(std::system_error(pinch::error::auth_cancelled_by_user)));
 }
 
 bool MAuthDialog::OKClicked()
 {
-	if (mPasswordHandler)
-		mPasswordHandler(GetText("edit-1"));
-	else if (mCredentialsHandler)
+	if (mPasswordReply.has_value())
+	{
+		mPasswordReply.value().set_value(GetText("edit-1"));
+		mPasswordReply.reset();
+	}
+
+	if (mCredentialsReply.has_value())
 	{
 		std::vector<std::string> args;
 		for (int32_t id = 1; id <= mFields; ++id)
 			args.push_back(GetText("edit-" + std::to_string(id)));
-		mCredentialsHandler(args);
+
+		mCredentialsReply.value().set_value(std::move(args));
+		mCredentialsReply.reset();
 	}
 
 	return true;
