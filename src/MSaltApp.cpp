@@ -652,5 +652,5 @@ int main(int argc, char *const argv[])
 	for (int i = 0; i < argc; ++i)
 		args.emplace_back(argv[i]);
 
-	return MSaltApp::Main(args);
+	return MSaltApp::Main("com.hekkelman.salt", args);
 }

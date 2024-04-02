@@ -83,10 +83,10 @@ find_package(Threads REQUIRED)
 
 # find_package(pinch 1.1 REQUIRED)
 
-add_subdirectory(libpinch EXCLUDE_FROM_ALL)
-add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
-add_subdirectory(libmgui EXCLUDE_FROM_ALL)
 add_subdirectory(libzeep EXCLUDE_FROM_ALL)
+add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
+add_subdirectory(libpinch EXCLUDE_FROM_ALL)
+add_subdirectory(libmgui EXCLUDE_FROM_ALL)
 
 # find_package(zeep 5.1.6 REQUIRED)
 
