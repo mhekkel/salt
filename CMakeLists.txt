@@ -143,7 +143,7 @@ target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::
 mrc_target_resources(salt ${RESOURCES})
 
 set(SALT_EXE ${CMAKE_INSTALL_PREFIX}/bin/salt)
-set(SALT_ICON ${CMAKE_INSTALL_PREFIX}/share/salt/icon.png)
+set(SALT_ICON com.hekkelman.salt)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/salt.desktop.in
 	${CMAKE_CURRENT_BINARY_DIR}/salt.desktop @ONLY)
 
@@ -151,8 +151,9 @@ install(TARGETS salt
 	RUNTIME DESTINATION bin)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/salt.desktop
-	DESTINATION share/applications )
+	DESTINATION share/applications
+	RENAME com.hekkelman.salt.desktop )
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rsrc/Icons/appicon.png
-	RENAME icon.png
-	DESTINATION share/salt/)
+	RENAME com.hekkelman.salt.png
+	DESTINATION share/icons/hicolor/48x48/apps/)
