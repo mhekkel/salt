@@ -277,7 +277,7 @@ class MTerminalView : public MCanvas
 	MCommand<void()> cFindPrev;
 
 	std::deque<char> mInputBuffer;
-	bool mBracketedPaste = true;
+	bool mBracketedPaste = false;
 
 	static std::list<MTerminalView *> sTerminalList;
 
