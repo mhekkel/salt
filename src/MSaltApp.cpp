@@ -577,7 +577,7 @@ void Install(const std::string &inPrefix)
 	file.close();
 
 	// create desktop file
-	mrsrc::rsrc rsrc("salt.desktop");
+	mrsrc::rsrc rsrc("salt.desktop.in");
 	if (not rsrc)
 	{
 		std::cout << "Missing destkop resource\n";
@@ -585,8 +585,8 @@ void Install(const std::string &inPrefix)
 	}
 
 	std::string desktop(rsrc.data(), rsrc.size());
-	zeep::replace_all(desktop, "__EXE__", (bindir / "salt").string());
-	zeep::replace_all(desktop, "__ICON__", (icondir / "salt.png").string());
+	zeep::replace_all(desktop, "@__EXE__@", (bindir / "salt").string());
+	zeep::replace_all(desktop, "@__ICON__@", (icondir / "salt.png").string());
 
 	fs::path desktopFile = appdir / "salt.desktop";
 	std::cout << "writing desktop file " << desktopFile << '\n';

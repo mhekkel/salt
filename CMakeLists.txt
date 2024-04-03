@@ -130,7 +130,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/version.rc
 	${CMAKE_SOURCE_DIR}/rsrc/templates
 	${CMAKE_SOURCE_DIR}/rsrc/css
-	${CMAKE_SOURCE_DIR}/rsrc/salt.desktop
+	${CMAKE_SOURCE_DIR}/rsrc/salt.desktop.in
 	${CMAKE_SOURCE_DIR}/rsrc/Dialogs
 	${CMAKE_SOURCE_DIR}/rsrc/strings.xml.nl
 	${CMAKE_SOURCE_DIR}/rsrc/MakeRes.pl
@@ -142,9 +142,9 @@ target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::
 
 mrc_target_resources(salt ${RESOURCES})
 
-set(SALT_EXE ${CMAKE_INSTALL_PREFIX}/bin/salt)
-set(SALT_ICON com.hekkelman.salt)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/salt.desktop.in
+set(__EXE__ ${CMAKE_INSTALL_FULL_BINDIR}/salt)
+set(__ICON__ ${CMAKE_INSTALL_FULL_DATAROOTDIR}/icons/hicolor/48x48/apps/com.hekkelman.salt.png)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/rsrc/salt.desktop.in
 	${CMAKE_CURRENT_BINARY_DIR}/salt.desktop @ONLY)
 
 install(TARGETS salt
