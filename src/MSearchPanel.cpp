@@ -173,7 +173,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.x = bounds.y = (kSearchPanelHeight - 16) / 2;
 	bounds.width = bounds.height = 16;
 	MImageButton *closeButton = new MImageButton("close-button", bounds, "close.png");
-	closeButton->SetLayout(false, false, 8);
+	closeButton->SetLayout({ false, 8 });
 	AddChild(closeButton);
 	AddRoute(eClose, closeButton->eClicked);
 
@@ -185,7 +185,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.height = dev.GetLineHeight();
 	//	bounds.height = 24;
 	MCaption *caption = new MCaption("search-caption", bounds, captionString);
-	caption->SetLayout(false, false, 4);
+	caption->SetLayout({ false, 4 });
 	AddChild(caption);
 
 	bounds = GetBounds();
@@ -194,7 +194,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.y = (bounds.height - 24) / 2 + 0;
 	bounds.height = 24;
 	mTextBox = new MEdittext("searchstring", bounds);
-	mTextBox->SetLayout(true, true, 4);
+	mTextBox->SetLayout({ true, 4 });
 	AddChild(mTextBox);
 	mTextBox->SetText(MPrefs::GetString("find-recent", ""));
 	AddRoute(eKeyDown, mTextBox->eKeyDown);
@@ -209,7 +209,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	bounds.y = (bounds.height - 24) / 2 + 2;
 	bounds.width = 20 + labelWidth;
 	mCaseSensitive = new MCheckbox("case-sensitive", bounds, label);
-	mCaseSensitive->SetLayout(false, false, 4);
+	mCaseSensitive->SetLayout({ false, 4 });
 	AddChild(mCaseSensitive);
 	mCaseSensitive->SetChecked(MPrefs::GetBoolean("find-case-sensitive", false));
 
@@ -223,7 +223,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *next = new MButton("find-next", bounds, label);
-	next->SetLayout(false, false, 4);
+	next->SetLayout({ false, 4 });
 	AddChild(next);
 	AddRoute(next->eClicked, eFindBtn);
 
@@ -235,7 +235,7 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	bounds.width = labelWidth + 20;
 	MButton *prev = new MButton("find-prev", bounds, label);
-	prev->SetLayout(false, false, 4);
+	prev->SetLayout({ false, 4 });
 	AddChild(prev);
 	AddRoute(prev->eClicked, eFindBtn);
 }

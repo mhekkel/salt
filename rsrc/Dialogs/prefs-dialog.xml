@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <dialog title="Preferences">
-	<vbox padding="8">
+	<vbox margin="8">
 		<hbox>
-			<listbox id="page-selector" bind="top bottom" height="80" width="60" padding="8">
+			<listbox id="page-selector" bind="top bottom" height="80" width="60" margin="8">
 				<listitem>Appearance</listitem>
 				<listitem>Connection</listitem>
 				<listitem>Security</listitem>
