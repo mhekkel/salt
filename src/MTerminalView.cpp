@@ -229,8 +229,8 @@ class MFormat
   public:
 	template <typename... Arguments>
 	MFormat(const char *fmt, Arguments... args)
+		: m_str(255, 0)
 	{
-		m_str.reserve(255);
 		auto n = snprintf(m_str.data(), 255, fmt, args...);
 		m_str.resize(n);
 	}

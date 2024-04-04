@@ -34,6 +34,7 @@
 
 #include <pinch.hpp>
 
+class MBoxControl;
 class MStatusbar;
 class MScrollbar;
 class MTerminalView;
@@ -92,6 +93,7 @@ class MTerminalWindow : public MWindow
 	MCommand<void()> cPrevTerminal;
 
 	MTerminalChannel *mChannel;
+	MBoxControl *mMainVBox;
 	MStatusbar *mStatusbar;
 	MScrollbar *mScrollbar;
 	MSearchPanel *mSearchPanel;

@@ -325,13 +325,19 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	// create views
 	MRect bounds;
 
+	// Main VBox first
+	bounds = GetBounds();
+	mMainVBox = new MBoxControl("main-vbox", bounds, false, false, true, true);
+	mMainVBox->SetLayout(true, true, 0);
+	AddChild(mMainVBox);
+
 	// create search panel
 	bounds = GetBounds();
 	bounds.height = kSearchPanelHeight;
 	mSearchPanel = new MSearchPanel("searchpanel", bounds);
 	mSearchPanel->SetBindings(true, true, true, false);
 	// mSearchPanel->SetLayout(false, MRect{});
-	AddChild(mSearchPanel);
+	mMainVBox->AddChild(mSearchPanel);
 
 	// create status bar
 	bounds = GetBounds();
@@ -339,13 +345,13 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	bounds.height = kScrollbarWidth;
 
 	MStatusBarElement parts[] = {
-		// { 250, ePackStart, 4, false, false },
-		// { 275, ePackStart, 4, true, true },
-		// { 60, ePackEnd, 4, false, false }
+		{ 250, { 4, 0, 4, 0 }, false },
+		{ 275, { 4, 0, 4, 0 }, true },
+		{ 60, { 4, 0, 4, 0 }, false }
 	};
 
 	mStatusbar = new MStatusbar("status", bounds, 3, parts);
-	AddChild(mStatusbar);
+	mMainVBox->AddChild(mStatusbar);
 	bounds = mStatusbar->GetBounds();
 
 	int32_t statusbarHeight = bounds.height;
@@ -353,7 +359,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	// hbox: force correct autolayout in Gtk
 	MBoxControl *hbox = new MBoxControl("hbox", bounds, true, false, true, true, 0, 0);
 	hbox->SetLayout(true, true, 0);
-	AddChild(hbox);
+	mMainVBox->AddChild(hbox, mStatusbar);
 
 	// create scrollbar
 	bounds = GetBounds();
