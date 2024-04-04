@@ -251,7 +251,7 @@ void MSshTerminalWindow::accepts_hostkey(const std::string &host, const std::str
 void MSshTerminalWindow::provide_password(std::promise<std::string> result)
 {
 	auto dlog = new MAuthDialog(_("Logging in"), this, std::move(result));
-	dlog->ShowModal(this);
+	dlog->Select();
 }
 
 void MSshTerminalWindow::provide_credentials(const std::string &name, const std::string &instruction, const std::string &lang,
@@ -260,7 +260,7 @@ void MSshTerminalWindow::provide_credentials(const std::string &name, const std:
 	auto dlog = new MAuthDialog(_("Logging in"), name,
 		instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
 		prompts, this, std::move(result));
-	dlog->ShowModal(this);
+	dlog->Select();
 }
 
 // ------------------------------------------------------------------
