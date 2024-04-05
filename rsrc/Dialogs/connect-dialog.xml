@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <dialog title="Connect">
-	<vbox bind="left right">
+	<vbox margin="2">
 		<hbox margin="0">
 			<caption width="50" id="label-1" text="Server:"/>
 			<combobox width="120" bind="left right" id="host"/>

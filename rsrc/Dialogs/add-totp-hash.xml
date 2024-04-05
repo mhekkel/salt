@@ -1,17 +1,16 @@
 <?xml version="1.0"?>
 <dialog title="Add new TOTP Hash">
-	<vbox>
+	<vbox margin="2">
 		<hbox bind="left right">
-			<caption margin-top="3" width="75" id="label-2" text="Name:"/>
+			<caption width="75" id="label-2" text="Name:"/>
 			<edittext width="120" bind="left right" id="name"/>
 		</hbox>
 		<hbox bind="left right">
-			<caption margin-top="3" width="75" id="label-2" text="Hash:"/>
+			<caption width="75" id="label-2" text="Hash:"/>
 			<edittext width="120" bind="left right" id="hash"/>
 		</hbox>
 	</vbox>
 	<hbox bind="left right bottom" margin-top="7">
-		<vbox bind="left right" /> <!-- expandable filler -->
 		<button bind="right bottom" title="OK" id="ok" default="true" />
 		<button bind="right bottom" title="Cancel" id="cancel" />
 	</hbox>

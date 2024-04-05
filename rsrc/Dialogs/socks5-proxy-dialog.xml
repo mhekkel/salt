@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <dialog title="SOCKS5 Proxy">
-	<vbox>
+	<vbox margin="2">
 		<hbox bind="left right">
-			<caption margin-top="3" width="75" id="label-2" text="Port to listen to:"/>
+			<caption width="75" id="label-2" text="Port to listen to:"/>
 			<edittext width="120" bind="left right" id="listen"/>
 		</hbox>
 	</vbox>

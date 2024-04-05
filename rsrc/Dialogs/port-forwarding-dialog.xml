@@ -1,17 +1,16 @@
 <?xml version="1.0"?>
 <dialog title="Port Forwarding">
-	<vbox>
+	<vbox margin="2">
 		<hbox bind="left right">
-			<caption margin-top="3" width="75" id="label-2" text="Port to listen to:"/>
+			<caption width="75" id="label-2" text="Port to listen to:"/>
 			<edittext width="120" bind="left right" id="listen"/>
 		</hbox>
 		<hbox bind="left right">
-			<caption margin-top="3" width="75" id="label-3" text="Host to connect to:"/>
+			<caption width="75" id="label-3" text="Host to connect to:"/>
 			<edittext width="120" bind="left right" id="connect"/>
 		</hbox>
 	</vbox>
 	<hbox bind="left right bottom" margin-top="7">
-		<vbox bind="left right" /> <!-- expandable filler -->
 		<button bind="right bottom" title="Cancel" id="cancel" />
 		<button bind="right bottom" title="OK" id="ok" default="true" />
 	</hbox>
