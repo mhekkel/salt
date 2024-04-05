@@ -102,7 +102,7 @@ MPreferencesDialog::MPreferencesDialog()
 	SetChecked("forward-ssh-agent", MPrefs::GetBoolean("forward-ssh-agent", true));
 #endif
 
-	SetChecked("forward-gpg-agent", MPrefs::GetBoolean("forward-gpg-agent", true));
+	// SetChecked("forward-gpg-agent", MPrefs::GetBoolean("forward-gpg-agent", true));
 
 	auto dpc = MPrefs::GetArray("disallowed-paste-characters");
 	if (dpc.empty())
@@ -196,7 +196,7 @@ void MPreferencesDialog::Apply()
 	MPrefs::SetBoolean("forward-ssh-agent", IsChecked("forward-ssh-agent"));
 #endif
 
-	MPrefs::SetBoolean("forward-gpg-agent", IsChecked("forward-gpg-agent"));
+	// MPrefs::SetBoolean("forward-gpg-agent", IsChecked("forward-gpg-agent"));
 
 	MPrefs::SetBoolean("forward-x11", IsChecked("forward-x11"));
 	MPrefs::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));

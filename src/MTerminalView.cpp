@@ -2801,10 +2801,10 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 	{
 		Opened();
 
-		if (MPrefs::GetBoolean("forward-gpg-agent", true))
-		{
-			// TODO: Implement
-		}
+		// if (MPrefs::GetBoolean("forward-gpg-agent", true))
+		// {
+		// 	// TODO: Implement
+		// }
 
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
 			{ this->HandleReceived(ec, inData); });
