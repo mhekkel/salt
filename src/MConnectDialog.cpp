@@ -190,33 +190,40 @@ std::vector<ConnectInfo> MConnectDialog::GetRecentHosts()
 	return result;
 }
 
+void MConnectDialog::SelectedPrivateKey(const std::filesystem::path &inPemFile)
+{
+	std::ifstream file(inPemFile);
+	if (not file.is_open())
+		throw std::runtime_error("Could not open private key file");
+
+	std::string key;
+	for (;;)
+	{
+		std::string line;
+		getline(file, line);
+		if (line.empty() and file.eof())
+			break;
+		key += line + "\n";
+	}
+
+	auto fileName = inPemFile.filename().string();
+
+	if (not pinch::ssh_agent::instance().add(key, fileName))
+	{
+		MAuthDialog::RequestSimplePassword(_("Adding Private Key"),
+			FormatString("Please enter password for the private key ^0", fileName),
+			this, [key, fileName, this](const std::string &password)
+			{ pinch::ssh_agent::instance().add(key, fileName, password); });
+	}
+}
+
 void MConnectDialog::ButtonClicked(const std::string &inID)
 {
 	//	if (inID == "more-expander")
 	//		SetVisible("more-box", IsOpen("more-expander"));
 	//	else
 	if (inID == "priv-key")
-	{
-		MFileDialogs::ChooseOneFile(this, [this](std::filesystem::path pemFile)
-			{
-				std::ifstream file(pemFile);
-				if (not file.is_open())
-					throw std::runtime_error("Could not open private key file");
-
-				std::string key;
-				for (;;)
-				{
-					std::string line;
-					getline(file, line);
-					if (line.empty() and file.eof())
-						break;
-					key += line + "\n";
-				}
-
-				pinch::ssh_agent::instance().add(key, pemFile.filename().string(),
-					MAuthDialog::RequestSimplePassword(_("Adding Private Key"),
-						FormatString("Please enter password for the private key ^0", pemFile.filename().string()), this)); });
-	}
+		MFileDialogs::ChooseOneFile(this, std::bind(&MConnectDialog::SelectedPrivateKey, this, std::placeholders::_1));
 	else
 		MDialog::ButtonClicked(inID);
 }

@@ -49,10 +49,11 @@ class MAuthDialog : public MDialog
 
 	virtual ~MAuthDialog();
 
-	static std::function<bool(std::string &)> RequestSimplePassword(
+	static void RequestSimplePassword(
 		const std::string &inDialogTitle,
 		const std::string &inInstruction,
-		MWindow *inParent);
+		MWindow *inParent,
+		std::function<void(std::string)> &&inReplyCallback);
 
   protected:
 

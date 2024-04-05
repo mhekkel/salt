@@ -128,11 +128,14 @@ bool MAuthDialog::OKClicked()
 	return true;
 }
 
-std::function<bool(std::string &)> MAuthDialog::RequestSimplePassword(
-	const std::string &inDialogTitle, const std::string &inInstruction, MWindow *inParent)
+void MAuthDialog::RequestSimplePassword(
+	const std::string &inDialogTitle, const std::string &inInstruction, MWindow *inParent,
+	std::function<void(std::string)> &&inReplyCallback)
 {
+	inReplyCallback("");
 #warning FIXME
-	return [](std::string &) { return false; };
+	// return [](std::string &) { return false; };
+
 
 	// return [inDialogTitle, inInstruction, inParent](std::string &outPassword)
 	// {

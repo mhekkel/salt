@@ -31,6 +31,7 @@
 
 #include "MDialog.hpp"
 
+#include <filesystem>
 #include <optional>
 
 struct ConnectInfoBase
@@ -101,6 +102,8 @@ class MConnectDialog : public MDialog
   private:
 	void SelectProxy(const ProxyInfo &inProxy);
 	void SelectRecent(const ConnectInfo &inRecent);
+
+	void SelectedPrivateKey(const std::filesystem::path &inPemFile);
 
 	std::vector<ConnectInfo> mRecentSessions;
 	std::vector<ProxyInfo> mRecentProxies;
