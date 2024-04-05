@@ -32,7 +32,7 @@
 #include <zeep/crypto.hpp>
 #include <zeep/http/error-handler.hpp>
 #include <zeep/http/html-controller.hpp>
-#include <zeep/http/login-controller.hpp>
+// #include <zeep/http/login-controller.hpp>
 #include <zeep/http/message-parser.hpp>
 #include <zeep/http/security.hpp>
 #include <zeep/http/server.hpp>
@@ -263,16 +263,6 @@ class proxy_controller : public zeep::http::html_controller
 		while (not ec)
 		{
 			auto uri = req.get_uri();
-
-			// std::regex re("^(?:http://)?(?:([-$_.+!*'(),[:alnum:];?&=]+)(?::([-$_.+!*'(),[:alnum:];?&=]+))?@)?([-[:alnum:].]+)(?::(\\d+))?(/.*)?");
-			// std::smatch mr;
-
-			// std::string uri = req.get_uri();
-			// if (not std::regex_match(uri, mr, re))
-			// {
-			// 	send_reply(socket, zh::reply{zh::bad_request}, yield);
-			// 	return;
-			// }
 
 			++m_request_count;
 

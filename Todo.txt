@@ -1,11 +1,9 @@
 te doen?
 
 - PlaySound
-- 'Defaults' knop op prefs dialoogvenster
 - kopiëren van kleurtjes (RTF? HTML?)
 - drag&drop?
 - Telnet, rlogin, seriële poort
-- Kleur van rand aanpassen aan achtergrond
 - meer documentatie
 - Link klikken
 - clippen van regel (voor dubbele hoogte tekst)

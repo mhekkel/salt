@@ -70,5 +70,5 @@ class MHTTPProxyDialog : public MDialog
 
   private:
 	std::shared_ptr<pinch::basic_connection> mConnection;
-	bool m_password_changed;
+	// bool m_password_changed;
 };

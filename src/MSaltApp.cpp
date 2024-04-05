@@ -43,7 +43,6 @@
 #include <pinch.hpp>
 
 #include <mcfp/mcfp.hpp>
-#include <zeep/crypto.hpp>
 #include <zeep/http/uri.hpp>
 #include <zeep/unicode-support.hpp>
 

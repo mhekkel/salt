@@ -6,7 +6,7 @@
 			<edittext width="120" bind="left right" id="listen"/>
 		</hbox>
 	
-		<hbox bind="left right">
+		<!-- <hbox bind="left right">
 			<caption width="75" id="label-2" text="Username:"/>
 			<edittext width="120" bind="left right" id="user"/>
 		</hbox>
@@ -14,7 +14,7 @@
 		<hbox bind="left right">
 			<caption width="75" id="label-2" text="Password:"/>
 			<edittext width="120" bind="left right" id="password"/>
-		</hbox>
+		</hbox> -->
 		
 		<hbox bind="left right">
 			<caption width="75" />

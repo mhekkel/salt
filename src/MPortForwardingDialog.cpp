@@ -32,8 +32,9 @@
 
 #include <pinch.hpp>
 
-#include <zeep/crypto.hpp>
+// #include <zeep/crypto.hpp>
 
+#include <charconv>
 #include <regex>
 
 using namespace std;
@@ -132,18 +133,18 @@ MHTTPProxyDialog::MHTTPProxyDialog(MWindow *inTerminal, std::shared_ptr<pinch::b
 	SetText("listen", MPrefs::GetString("http-proxy-port", "3128"));
 	SetChecked("log", MPrefs::GetBoolean("http-proxy-log", false));
 
-	string user = MPrefs::GetString("http-proxy-user", "");
+	// string user = MPrefs::GetString("http-proxy-user", "");
 
-	SetText("user", user);
-	SetPasswordChar("password");
+	// SetText("user", user);
+	// SetPasswordChar("password");
 
-	if (not user.empty())
-		SetText("password", "xxxxxxxxxxxx");
+	// if (not user.empty())
+	// 	SetText("password", "xxxxxxxxxxxx");
 
 	Show(inTerminal);
 	SetFocus("listen");
 
-	m_password_changed = false;
+	// m_password_changed = false;
 }
 
 MHTTPProxyDialog::~MHTTPProxyDialog()
@@ -156,24 +157,29 @@ bool MHTTPProxyDialog::OKClicked()
 
 	try
 	{
-		uint16_t listenPort = std::stoi(GetText("listen"));
+		auto portString = GetText("listen");
+		uint16_t listenPort;
+		if (auto [ptr, ec] = std::from_chars(portString.data(), portString.data() + portString.length(), listenPort); ec != std::errc{})
+			throw std::runtime_error("Invalid port number: " + std::make_error_code(ec).message());
+
 		bool log = IsChecked("log");
 
-		string user = GetText("user");
+		// string user = GetText("user");
 
 		MPrefs::SetString("http-proxy-port", std::to_string(listenPort));
 		MPrefs::SetBoolean("http-proxy-log", log);
-		MPrefs::SetString("http-proxy-user", user);
+		// MPrefs::SetString("http-proxy-user", user);
 
-		if (user.empty())
-			MPrefs::SetString("http-proxy-password", "");
-		else if (m_password_changed)
-		{
-			string password = GetText("password");
-			MPrefs::SetString("http-proxy-password", zeep::encode_hex(zeep::md5(user + ':' + kSaltProxyRealm + ':' + password)));
-		}
+		// if (user.empty())
+		// 	MPrefs::SetString("http-proxy-password", "");
+		// else if (m_password_changed)
+		// {
+		// 	string password = GetText("password");
+		// 	MPrefs::SetString("http-proxy-password", zeep::encode_hex(zeep::md5(user + ':' + kSaltProxyRealm + ':' + password)));
+		// }
 
-		MHTTPProxy::instance().Init(mConnection, listenPort, not user.empty(), log ? log_level::request : log_level::none);
+		MHTTPProxy::instance().Init(mConnection, listenPort, false/* not user.empty() */,
+			log ? log_level::request : log_level::none);
 
 		result = true;
 	}
@@ -187,6 +193,6 @@ bool MHTTPProxyDialog::OKClicked()
 
 void MHTTPProxyDialog::TextChanged(const string &inID, const string &inValue)
 {
-	if (inID == "password")
-		m_password_changed = true;
+	// if (inID == "password")
+	// 	m_password_changed = true;
 }
