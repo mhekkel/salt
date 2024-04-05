@@ -51,7 +51,7 @@ class MScrollbar;
 class MAnimationVariable;
 class MAnimationManager;
 
-class MTerminalView : public MCanvas
+class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTerminalView>
 {
   public:
 	MTerminalView(const std::string &inID, MRect inBounds, MStatusbar *inStatusbar, MScrollbar *inScrollbar,

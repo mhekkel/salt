@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <dialog title="Preferences">
-	<vbox margin="8">
+	<vbox margin="2">
 		<hbox>
-			<listbox id="page-selector" bind="top bottom" height="80" width="60" margin="8">
+			<listbox id="page-selector" bind="top bottom" height="80" width="60" margin="1">
 				<listitem>Appearance</listitem>
 				<listitem>Connection</listitem>
 				<listitem>Security</listitem>
@@ -10,7 +10,7 @@
 				<listitem>Environment</listitem>
 				<listitem>Protocols</listitem>
 			</listbox>
-			<pager id="pages" bind="left top" margin-left="5">
+			<pager id="pages" bind="left top" margin-left="2">
 				<page id="page1">
 					<hbox>
 						<caption margin-top="3" width="50" text="Font"/>
@@ -91,7 +91,6 @@
 		</hbox>
 	</vbox>
 	<hbox margin-top="4" bind="left right bottom">
-		<vbox bind="left right" /> <!-- expandable filler -->
 		<button bind="right bottom" title="OK" id="ok" default="true" />
 		<button bind="right bottom" title="Cancel" id="cancel" />
 		<button bind="right bottom" title="Apply" id="apply" />

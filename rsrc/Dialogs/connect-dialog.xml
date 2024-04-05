@@ -1,38 +1,38 @@
 <?xml version="1.0"?>
 <dialog title="Connect">
-	<vbox bind="left right" spacing="4">
-		<hbox bind="left right">
-			<caption margin-top="3" width="50" id="label-1" text="Server:"/>
+	<vbox bind="left right">
+		<hbox margin="0">
+			<caption width="50" id="label-1" text="Server:"/>
 			<combobox width="120" bind="left right" id="host"/>
 		</hbox>
-		<hbox bind="left right" spacing="4">
-			<caption margin-top="3" width="50" id="label-2" text="Username:"/>
+		<hbox margin="0">
+			<caption width="50" id="label-2" text="Username:"/>
 			<edittext width="120" bind="left right" id="user"/>
 		</hbox>
 		<expander id="more-expander" title="More Options">
 			<vbox id="more-box">
-				<hbox margin-top="10" bind="left right">
-					<caption margin-top="3" width="60" text="Add Private Key:"/>
+				<hbox margin-top="1" bind="left right">
+					<caption width="60" text="Add Private Key:"/>
 					<button title="Browse…" id="priv-key"/>
 				</hbox>
 
-				<hbox margin-top="10" bind="left right" spacing="4">
-					<caption margin-top="3" width="60" id="label-2" text="SSH Command:"/>
+				<hbox margin-top="1" bind="left right">
+					<caption width="60" id="label-2" text="SSH Command:"/>
 					<edittext width="100" bind="left right" id="ssh-command"/>
 				</hbox>
 				
-				<checkbox margin-top="10" id='use-proxy' title="Use proxy" />
+				<checkbox margin-top="1" id='use-proxy' title="Use proxy" />
 	
-				<hbox bind="left right">
-					<caption margin-top="3" width="60" id="label-2" text="Proxy Server:"/>
+				<hbox margin="0">
+					<caption width="60" id="label-2" text="Proxy Server:"/>
 					<combobox width="100" bind="left right" id="proxy-host"/>
 				</hbox>
-				<hbox bind="left right">
-					<caption margin-top="3" width="60" id="label-2" text="Proxy Username:"/>
+				<hbox margin="0">
+					<caption width="60" id="label-2" text="Proxy Username:"/>
 					<edittext width="100" bind="left right" id="proxy-user"/>
 				</hbox>
-				<hbox bind="left right">
-					<caption margin-top="3" width="60" id="label-2" text="Proxy Command:"/>
+				<hbox margin="0">
+					<caption width="60" id="label-2" text="Proxy Command:"/>
 					<edittext width="100" bind="left right" id="proxy-command"/>
 				</hbox>
 			</vbox>

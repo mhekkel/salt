@@ -60,7 +60,6 @@ class MSearchPanel : public MBoxControl
 	void SetFocus() override;
 
   private:
-	MEventIn<void()> eClose;
 	void Close();
 
 	MEventIn<void(const std::string &)> eFindBtn;

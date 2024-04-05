@@ -35,6 +35,7 @@
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MError.hpp"
+#include "MFile.hpp"
 #include "MPreferences.hpp"
 #include "MPreferencesDialog.hpp"
 #include "MSaltApp.hpp"
@@ -423,14 +424,17 @@ void MTerminalView::Open()
 
 	// set some environment variables
 
+	std::weak_ptr<MTerminalView> self = shared_from_this();
+		
 	mTerminalChannel->Open(
 		MPrefs::GetString("terminal-type", "xterm-256color"),
 		MPrefs::GetBoolean("forward-ssh-agent", true),
 		MPrefs::GetBoolean("forward-x11", true),
 		mArgv, MPrefs::GetArray("env"),
-		[this](const std::error_code &ec)
+		[self = std::move(self)](const std::error_code &ec)
 		{
-			this->HandleOpened(ec);
+			if (auto tv = self.lock())
+				tv->HandleOpened(ec);
 		});
 }
 
@@ -543,14 +547,14 @@ void MTerminalView::PreviewColors(MColor inBackColor, MColor inSectionColor)
 	// color calculation
 	MColor base(inBackColor);
 
+	mTerminalColors[eBack] = base;
+
 	// work with floats
 	float r = (base.red / 255.f), g = (base.green / 255.f), b = (base.blue / 255.f);
 
 	// recalculate to hsv
 	float h, s, v;
 	rgb2hsv(r, g, b, h, s, v);
-
-	mTerminalColors[eBack] = base;
 
 	// text color is base but lighter (or darker) and less saturated
 	if (v < 0.5f)

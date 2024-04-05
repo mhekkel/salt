@@ -156,14 +156,14 @@ const MLine &MTerminalBuffer::GetLine(int32_t inLine) const
 	if (inLine >= 0)
 	{
 		if (static_cast<uint32_t>(inLine) >= mLines.size())
-			THROW(("Out of range"));
+			throw std::runtime_error("Out of range");
 		return mLines[inLine];
 	}
 	else
 	{
 		inLine = -inLine - 1;
 		if (static_cast<uint32_t>(inLine) >= mBuffer.size())
-			THROW(("Out of range"));
+			throw std::runtime_error("Out of range");
 		return mBuffer[inLine];
 	}
 }

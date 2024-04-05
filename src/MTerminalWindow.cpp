@@ -373,10 +373,10 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	MTerminalView::GetTerminalMetrics(80, 24, false, w, h);
 	bounds = MRect(0, 0, w, h);
 
-	mTerminalView = new MTerminalView("terminalview", bounds, mStatusbar, mScrollbar, mSearchPanel, inTerminalChannel, inArgv);
+	mTerminalView.reset(new MTerminalView("terminalview", bounds, mStatusbar, mScrollbar, mSearchPanel, inTerminalChannel, inArgv));
 	mTerminalView->SetLayout({ true, 0 });
 
-	hbox->AddChild(mTerminalView, mScrollbar);
+	hbox->AddChild(mTerminalView.get(), mScrollbar);
 
 	AddRoute(mTerminalView->eScroll, mScrollbar->eScroll);
 
@@ -396,7 +396,7 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 		w->mNext = this;
 	}
 
-	SetLatentFocus(mTerminalView);
+	SetLatentFocus(mTerminalView.get());
 
 	mTerminalView->Open();
 }

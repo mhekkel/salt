@@ -1,50 +1,56 @@
 <?xml version="1.0"?>
 <dialog title="Select a Colour">
-	<vbox>
-		<hbox bind="left top right bottom" spacing="10">
-			<filler id="square" bind="left top right bottom" width="256" height="256" />
-			<filler id="slider" bind="top right bottom" width="12" height="256" />
+	<vbox margin="2">
+		<hbox bind="left top right bottom" >
+			<vbox margin="0">
+				<hbox margin="0">
+					<filler id="square" bind="left top right bottom" width="256px" height="256px" />
+					<filler id="slider" bind="top right bottom" width="12" height="256px" />
+				</hbox>
+				<hbox id="palette" margin="0" margin-top="2">
+
+				</hbox>
+			</vbox>
 			<vbox id="l" bind="top right bottom">
-				<hbox bind="left right" spacing="0">
-					<filler id="sample-before" bind="left right" height="25"/>
-					<filler id="sample-after" bind="left right" height="25"/>
+				<hbox bind="left right">
+					<filler id="sample-before" bind="left right" height="8" width="40"/>
+					<filler id="sample-after" bind="left right" height="8" width="40"/>
 				</hbox>
 				<filler bind="top bottom" />
-				<vbox spacing="1" bind="bottom">
-					<hbox>
-						<radiobutton margin-top="3" id="hue" width="22" title="h:"/>
+				<vbox bind="bottom">
+					<hbox margin-top-bottom="0">
+						<radiobutton id="hue" width="22" title="h:"/>
 						<edittext style="right number" width="22" id="hue-text"/>
 					</hbox>
-					<hbox>
-						<radiobutton margin-top="3" id="saturation" width="22" title="s:"/>
+					<hbox margin-top-bottom="0">
+						<radiobutton id="saturation" width="22" title="s:"/>
 						<edittext style="right number" width="22" id="saturation-text"/>
 					</hbox>
-					<hbox>
-						<radiobutton margin-top="3" id="value" width="22" title="v:"/>
+					<hbox margin-top-bottom="0">
+						<radiobutton id="value" width="22" title="v:"/>
 						<edittext style="right number" width="22" id="value-text"/>
 					</hbox>
-					<hbox>
-						<radiobutton margin-top="3" id="red" width="22" title="r:"/>
+					<hbox margin-top-bottom="0">
+						<radiobutton id="red" width="22" title="r:"/>
 						<edittext style="right number" width="22" id="red-text"/>
 					</hbox>
-					<hbox>
-						<radiobutton margin-top="3" id="green" width="22" title="g:"/>
+					<hbox margin-top-bottom="0">
+						<radiobutton id="green" width="22" title="g:"/>
 						<edittext style="right number" width="22" id="green-text"/>
 					</hbox>
-					<hbox>
-						<radiobutton margin-top="3" id="blue" width="22" title="b:"/>
+					<hbox margin-top-bottom="0">
+						<radiobutton id="blue" width="22" title="b:"/>
 						<edittext style="right number" width="22" id="blue-text"/>
 					</hbox>
 				</vbox>
 				<hbox bind="left right">
-					<caption margin-top="3" text="#" />
+					<caption text="#" />
 					<edittext width="30" bind="left right bottom" id="hex"/>
 				</hbox>
 			</vbox>
 		</hbox>
 	</vbox>
-	<hbox margin-top="7" bind="left right bottom">
-		<vbox bind="left right" /> <!-- expandable filler -->
+	<hbox bind="left right bottom">
 		<button bind="right bottom" title="OK" id="ok" default="true" />
 		<button bind="right bottom" title="Cancel" id="cancel" />
 	</hbox>

@@ -1,20 +1,12 @@
-bugs:
-
-- Geen Focus op checkbox in Search Panel
-
 te doen?
 
+- PlaySound
 - 'Defaults' knop op prefs dialoogvenster
-
 - kopiëren van kleurtjes (RTF? HTML?)
-- popup op 'verbonden' vlak in status bar met opties om connectie te verbreken
 - drag&drop?
-- Telnet, rlogin, seriële poort, console
+- Telnet, rlogin, seriële poort
 - Kleur van rand aanpassen aan achtergrond
-
 - meer documentatie
-- Tweakable interface (verbergen panel/menu)
 - Link klikken
 - clippen van regel (voor dubbele hoogte tekst)
 
-- command-line versie (voor tortoisesvn, bijvoorbeeld)

@@ -38,123 +38,10 @@
 
 #include "mrsrc.hpp"
 
-class MImageButton : public MCanvas
-{
-  public:
-	MImageButton(const std::string &inID, MRect inBounds, const char *inImageResource);
-
-	MEventOut<void()> eClicked;
-
-	// virtual void	Draw(MRect inUpdate);
-	void Draw() override;
-	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
-	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	void PointerLeave() override;
-
-  private:
-	enum MMouseStateForCloseButton
-	{
-		mouseOut,
-		mouseOver,
-		mouseDownOver,
-		mouseDownOut
-	} mMouseState;
-	MBitmap mCloseButtonBitmaps[3];
-};
-
-MImageButton::MImageButton(const std::string &inID, MRect inBounds, const char *inImageResource)
-	: MCanvas(inID, inBounds)
-	, mMouseState(mouseOut)
-{
-	mrsrc::rsrc rsrc(inImageResource);
-	if (not rsrc)
-		throw std::runtime_error("resource not found");
-
-	MBitmap buttons(rsrc.data(), rsrc.size());
-	mCloseButtonBitmaps[0] = MBitmap(buttons, MRect{ 0, 0, 16, 16 });
-	mCloseButtonBitmaps[1] = MBitmap(buttons, MRect{ 16, 0, 16, 16 });
-	mCloseButtonBitmaps[2] = MBitmap(buttons, MRect{ 32, 0, 16, 16 });
-}
-
-void MImageButton::Draw()
-{
-	MRect bounds = GetBounds();
-
-	MDevice dev(this);
-
-	if (kDialogBackgroundColor != kBlack)
-	{
-		dev.SetBackColor(kDialogBackgroundColor);
-		dev.EraseRect(bounds);
-	}
-
-	float y = (bounds.height - 16) / 2;
-
-	switch (mMouseState)
-	{
-		default: dev.DrawBitmap(mCloseButtonBitmaps[0], 0, y); break;
-		case mouseOver:
-		case mouseDownOut: dev.DrawBitmap(mCloseButtonBitmaps[1], 0, y); break;
-		case mouseDownOver: dev.DrawBitmap(mCloseButtonBitmaps[2], 0, y); break;
-	}
-}
-
-void MImageButton::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
-{
-	if (mBounds.ContainsPoint(inX, inY))
-	{
-		mMouseState = mouseDownOver;
-		Invalidate();
-	}
-}
-
-void MImageButton::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-	if (mBounds.ContainsPoint(inX, inY))
-		eClicked();
-}
-
-void MImageButton::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-	MMouseStateForCloseButton state(mMouseState);
-
-	// if (mMouseState == mouseOut)
-	// 	TrackMouse(true, true);
-
-	if (mBounds.ContainsPoint(inX, inY))
-	{
-		if (mMouseState == mouseOut)
-			mMouseState = mouseOver;
-		else if (mMouseState == mouseDownOut)
-			mMouseState = mouseDownOver;
-	}
-	else
-	{
-		if (mMouseState == mouseOver)
-			mMouseState = mouseOut;
-		else if (mMouseState == mouseDownOver)
-			mMouseState = mouseDownOut;
-	}
-
-	if (mMouseState != state)
-		Invalidate();
-}
-
-void MImageButton::PointerLeave()
-{
-	if (mMouseState != mouseOut)
-	{
-		Invalidate();
-		mMouseState = mouseOut;
-	}
-}
-
 // --------------------------------------------------------------------
 
 MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	: MBoxControl(inID, inBounds, true)
-	, eClose(this, &MSearchPanel::Close)
 	, eFindBtn(this, &MSearchPanel::FindBtn)
 	, eKeyDown(this, &MSearchPanel::KeyDown)
 	, mTextBox(nullptr)
@@ -168,22 +55,11 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 
 	MRect bounds(inBounds);
 
-	// close button
-
-	bounds.x = bounds.y = (kSearchPanelHeight - 16) / 2;
-	bounds.width = bounds.height = 16;
-	MImageButton *closeButton = new MImageButton("close-button", bounds, "close.png");
-	closeButton->SetLayout({ false, 8 });
-	AddChild(closeButton);
-	AddRoute(eClose, closeButton->eClicked);
-
 	// caption
 	bounds = GetBounds();
-	bounds.x = 32;
 	bounds.width = captionWidth;
 	bounds.y = (bounds.height - 24) / 2 + 4;
 	bounds.height = dev.GetLineHeight();
-	//	bounds.height = 24;
 	MCaption *caption = new MCaption("search-caption", bounds, captionString);
 	caption->SetLayout({ false, 4 });
 	AddChild(caption);

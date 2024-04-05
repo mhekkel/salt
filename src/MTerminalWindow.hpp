@@ -97,7 +97,7 @@ class MTerminalWindow : public MWindow
 	MStatusbar *mStatusbar;
 	MScrollbar *mScrollbar;
 	MSearchPanel *mSearchPanel;
-	MTerminalView *mTerminalView;
+	std::shared_ptr<MTerminalView> mTerminalView;
 
 	static MTerminalWindow *sFirst;
 	MTerminalWindow *mNext;

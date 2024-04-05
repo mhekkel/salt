@@ -162,7 +162,7 @@ void MPtyTerminalChannel::Execute(const std::vector<std::string> &inArgv, const 
 	}
 
 	/* Make it our controlling tty. */
-	if (ioctl(inTtyFD, TIOCSCTTY, NULL) < 0)
+	if (ioctl(inTtyFD, TIOCSCTTY, nullptr) < 0)
 		std::cerr << "ioctl(TIOCSCTTY): " << strerror(errno) << '\n';
 
 	fd = open(mTtyName.c_str(), O_RDWR);
@@ -215,9 +215,9 @@ void MPtyTerminalChannel::Execute(const std::vector<std::string> &inArgv, const 
 
 	std::error_code ec;
 	if (mCWD.empty())
-		fs::current_path(pw->pw_dir, ec);
+		std::filesystem::current_path(pw->pw_dir, ec);
 	else
-		fs::current_path(mCWD, ec);
+		std::filesystem::current_path(mCWD, ec);
 
 	// close all other file descriptors
 	endpwent();
@@ -269,7 +269,7 @@ std::filesystem::path MPtyTerminalChannel::GetCWD() const
 
 		std::filesystem::path cwd = std::filesystem::path("/proc") / std::to_string(mPid) / "cwd";
 
-		if (fs::exists(cwd, ec))
+		if (std::filesystem::exists(cwd, ec))
 			result = std::filesystem::read_symlink(cwd, ec);
 	}
 

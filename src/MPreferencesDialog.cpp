@@ -123,8 +123,6 @@ MPreferencesDialog::MPreferencesDialog()
 	SetText("answer-back", answerback);
 
 	SetColor("back-color", MPrefs::GetColor("back-color", "#0f290e"));
-	SetColor("selection-color", MPrefs::GetColor("selection-color", "#FFD281"));
-
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID("back-color"));
 	if (swatch != nullptr)
 	{
@@ -135,6 +133,19 @@ MPreferencesDialog::MPreferencesDialog()
 			MColor("#FFF3CF"),
 			kWhite,
 			kBlack });
+	}
+
+	SetColor("selection-color", MPrefs::GetColor("selection-color", "#FFD281"));
+	swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID("selection-color"));
+	if (swatch)
+	{
+		AddRoute(swatch->eColorPreview, ePreviewSelectionColor);
+		swatch->SetPalette({ MColor("#c9ddc9"),
+			MColor("#FFD281"),
+			MColor("#badeff"),
+			MColor("#eebd99"),
+			MColor("#eeec99"),
+			MColor("#d6d6d6") });
 	}
 
 	SetChecked("audible-beep", MPrefs::GetBoolean("audible-beep", true));

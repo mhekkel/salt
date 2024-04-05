@@ -126,7 +126,6 @@ add_executable(salt
 set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Menus
 	${CMAKE_SOURCE_DIR}/rsrc/Alerts
-	${CMAKE_SOURCE_DIR}/rsrc/close.png
 	${CMAKE_SOURCE_DIR}/rsrc/version.rc
 	${CMAKE_SOURCE_DIR}/rsrc/templates
 	${CMAKE_SOURCE_DIR}/rsrc/css
