@@ -2235,8 +2235,8 @@ bool MTerminalView::DoPaste(const std::string &inText)
 		{
 			for (const auto &[name, ch] : kDisallowedPasteCharacters)
 			{
-				if (zeep::iequals(dc, name) or (zeep::iequals(dc, "C0") and ch <= 0x1F))
-					zeep::replace_all(text, { &ch, 1 }, " ");
+				if (IEquals(dc, name) or (IEquals(dc, "C0") and ch <= 0x1F))
+					ReplaceAll(text, { &ch, 1 }, " ");
 			}
 		}
 
@@ -2671,16 +2671,16 @@ void MTerminalView::SendCommand(std::string inData)
 	{
 		if (mS8C1T)
 		{
-			zeep::replace_all(inData, "\033D", "\204");  // IND
-			zeep::replace_all(inData, "\033E", "\205");  // NEL
-			zeep::replace_all(inData, "\033H", "\210");  // HTS
-			zeep::replace_all(inData, "\033M", "\215");  // RI
-			zeep::replace_all(inData, "\033N", "\216");  // SS2
-			zeep::replace_all(inData, "\033O", "\217");  // SS3
-			zeep::replace_all(inData, "\033P", "\220");  // DCS
-			zeep::replace_all(inData, "\033[", "\233");  // CSI
-			zeep::replace_all(inData, "\033\\", "\234"); // ST
-			zeep::replace_all(inData, "\033]", "\235");  // OSC
+			ReplaceAll(inData, "\033D", "\204");  // IND
+			ReplaceAll(inData, "\033E", "\205");  // NEL
+			ReplaceAll(inData, "\033H", "\210");  // HTS
+			ReplaceAll(inData, "\033M", "\215");  // RI
+			ReplaceAll(inData, "\033N", "\216");  // SS2
+			ReplaceAll(inData, "\033O", "\217");  // SS3
+			ReplaceAll(inData, "\033P", "\220");  // DCS
+			ReplaceAll(inData, "\033[", "\233");  // CSI
+			ReplaceAll(inData, "\033\\", "\234"); // ST
+			ReplaceAll(inData, "\033]", "\235");  // OSC
 		}
 
 		mTerminalChannel->SendData(std::move(inData));
@@ -4492,7 +4492,7 @@ void MTerminalView::ProcessCSILevel4(uint32_t inCmd)
 					for (int i = 0; i < mTerminalWidth; ++i)
 						if (mTabStops[i])
 							ts.push_back(std::to_string(i + 1));
-					SendCommand(kDCS + "2$u" + zeep::join(ts, "/") + "\033\\");
+					SendCommand(kDCS + "2$u" + Join(ts, "/") + "\033\\");
 					break;
 				}
 			}
@@ -4917,7 +4917,7 @@ void MTerminalView::EscapeDCS(uint8_t inChar)
 				if (mCursor.style.GetBackColor() != kXTermColorNone)
 					sgr.push_back(std::to_string(40 + mCursor.style.GetBackColor()));
 
-				response = MFormat("\033P1$r%s", zeep::join(sgr, ";").c_str());
+				response = MFormat("\033P1$r%s", Join(sgr, ";").c_str());
 			}
 			//			else if (mDECRQSS == ",|")	// DECAC - Assign Color
 			//			else if (mDECRQSS == ",}")	// DECATC - Alternate Text Color

@@ -36,6 +36,7 @@
 #include "MPreferences.hpp"
 #include "MPreferencesDialog.hpp"
 #include "MTerminalWindow.hpp"
+#include "MUnicode.hpp"
 #include "MUtils.hpp"
 #include "mrsrc.hpp"
 #include "revision.hpp"
@@ -406,7 +407,7 @@ void MSaltApp::Execute(const std::string &inCommand,
 		if (zeep::http::is_valid_uri(url))
 		{
 			zeep::http::uri uri(url);
-			if (auto scheme = uri.get_scheme(); not(scheme.empty() or zeep::iequals(scheme, "ssh")))
+			if (auto scheme = uri.get_scheme(); not(scheme.empty() or IEquals(scheme, "ssh")))
 				return;
 
 			ci.host = uri.get_host();
@@ -454,7 +455,7 @@ bool askYesNo(const std::string &msg, bool defaultYes)
 	std::cout.flush();
 	std::getline(std::cin, yesno);
 
-	return yesno.empty() ? defaultYes : zeep::iequals(yesno, "y") or zeep::iequals(yesno, "yes");
+	return yesno.empty() ? defaultYes : IEquals(yesno, "y") or IEquals(yesno, "yes");
 }
 
 std::string ask(const std::string &msg, std::string defaultAnswer = {})
@@ -584,8 +585,8 @@ void Install(const std::string &inPrefix)
 	}
 
 	std::string desktop(rsrc.data(), rsrc.size());
-	zeep::replace_all(desktop, "@__EXE__@", (bindir / "salt").string());
-	zeep::replace_all(desktop, "@__ICON__@", (icondir / "salt.png").string());
+	ReplaceAll(desktop, "@__EXE__@", (bindir / "salt").string());
+	ReplaceAll(desktop, "@__ICON__@", (icondir / "salt.png").string());
 
 	fs::path desktopFile = appdir / "salt.desktop";
 	std::cout << "writing desktop file " << desktopFile << '\n';

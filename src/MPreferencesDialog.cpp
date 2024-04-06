@@ -35,6 +35,7 @@
 #include "MPreferences.hpp"
 #include "MSaltApp.hpp"
 #include "MTerminalWindow.hpp"
+#include "MUnicode.hpp"
 
 #include <pinch.hpp>
 
@@ -111,15 +112,15 @@ MPreferencesDialog::MPreferencesDialog()
 		MPrefs::SetArray("disallowed-paste-characters", dpc);
 	}
 
-	SetText("disallowed-paste-characters", zeep::join(dpc, ","));
+	SetText("disallowed-paste-characters", Join(dpc, ","));
 
 	SetChecked("forward-x11", MPrefs::GetBoolean("forward-x11", true));
 	SetChecked("udk-with-shift", MPrefs::GetBoolean("udk-with-shift", true));
 
 	string answerback = MPrefs::GetString("answer-back", "salt\r");
-	zeep::replace_all(answerback, "\r", "\\r");
-	zeep::replace_all(answerback, "\n", "\\n");
-	zeep::replace_all(answerback, "\t", "\\t");
+	ReplaceAll(answerback, "\r", "\\r");
+	ReplaceAll(answerback, "\n", "\\n");
+	ReplaceAll(answerback, "\t", "\\t");
 	SetText("answer-back", answerback);
 
 	SetColor("back-color", MPrefs::GetColor("back-color", "#0f290e"));
@@ -236,12 +237,12 @@ void MPreferencesDialog::Apply()
 	}
 
 	MPrefs::SetArray("disallowed-paste-characters", dpc);
-	SetText("disallowed-paste-characters", zeep::join(dpc, ","));
+	SetText("disallowed-paste-characters", Join(dpc, ","));
 
 	string answerback = GetText("answer-back");
-	zeep::replace_all(answerback, "\\r", "\r");
-	zeep::replace_all(answerback, "\\n", "\n");
-	zeep::replace_all(answerback, "\\t", "\t");
+	ReplaceAll(answerback, "\\r", "\r");
+	ReplaceAll(answerback, "\\n", "\n");
+	ReplaceAll(answerback, "\\t", "\t");
 	MPrefs::SetString("answer-back", answerback);
 
 	MPrefs::SetBoolean("audible-beep", IsChecked("audible-beep"));
@@ -310,7 +311,7 @@ void MPreferencesDialog::Apply()
 
 		if (ok)
 		{
-			string algo = zeep::join(v, ",");
+			string algo = Join(v, ",");
 			MPrefs::SetString(alg.conf, algo);
 
 			pinch::key_exchange::set_algorithm(alg.type, pinch::direction::both, algo);

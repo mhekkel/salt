@@ -159,9 +159,9 @@ void MSshTerminalWindow::OnInstallPublicKey(int inKeyNr)
 	std::string blob = zeep::encode_base64(std::string_view(reinterpret_cast<const char *>(b.data()), b.size()));
 
 	// create a command
-	zeep::replace_all(blob, "\n", "");
+	ReplaceAll(blob, "\n", "");
 	std::string publickey = key.get_type() + ' ' + blob + ' ' + key.get_comment();
-	zeep::replace_all(publickey, "'", "'\\''");
+	ReplaceAll(publickey, "'", "'\\''");
 
 	std::string command =
 		std::string("umask 077 ; test -d .ssh || mkdir .ssh ; echo '") + publickey + "' >> .ssh/authorized_keys";
