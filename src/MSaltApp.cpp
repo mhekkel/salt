@@ -45,7 +45,6 @@
 
 #include <mcfp/mcfp.hpp>
 #include <zeep/http/uri.hpp>
-#include <zeep/unicode-support.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -90,6 +89,8 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 
 	, cClearRecentMenu(this, "clear-recent", &MSaltApp::OnClearRecentMenu)
 	, cOpenRecent(this, "open-recent", &MSaltApp::OnOpenRecent)
+
+	, ePreferencesChanged(this, &MSaltApp::OnPreferencesChanged)
 {
 }
 
@@ -173,6 +174,17 @@ void MSaltApp::Initialise()
 	UpdateTOTPMenu();
 }
 
+void MSaltApp::OnPreferencesChanged()
+{
+	// only recent for now
+
+	mRecent.clear();
+	for (auto &r : MConnectDialog::GetRecentHosts())
+		mRecent.emplace_back(r, mNextRecentNr++);
+	UpdateRecentSessionMenu();
+
+}
+
 void MSaltApp::SaveGlobals()
 {
 	std::vector<std::string> recent_v;
@@ -222,7 +234,9 @@ void MSaltApp::OnQuit()
 
 void MSaltApp::OnShowPreferences()
 {
-	MPreferencesDialog::Instance().Select();
+	auto &dlog = MPreferencesDialog::Instance();
+	AddRoute(ePreferencesChanged, dlog.ePreferencesChanged);
+	dlog.Select();
 }
 
 void MSaltApp::OnAbout()
@@ -328,7 +342,7 @@ void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
 		break;
 	}
 
-	if (mRecent.size() > 10)
+	while (mRecent.size() > MPrefs::GetInteger("recent-count", 10))
 		mRecent.pop_back();
 
 	UpdateRecentSessionMenu();

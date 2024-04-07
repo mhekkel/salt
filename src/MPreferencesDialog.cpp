@@ -39,6 +39,7 @@
 
 #include <pinch.hpp>
 
+#include <charconv>
 #include <set>
 #include <sstream>
 
@@ -114,6 +115,7 @@ MPreferencesDialog::MPreferencesDialog()
 
 	SetChecked("forward-x11", MPrefs::GetBoolean("forward-x11", true));
 	SetChecked("udk-with-shift", MPrefs::GetBoolean("udk-with-shift", true));
+	SetText("recent-count", std::to_string(MPrefs::GetInteger("recent-count", 10)));
 
 	string answerback = MPrefs::GetString("answer-back", "salt\r");
 	ReplaceAll(answerback, "\r", "\\r");
@@ -211,13 +213,27 @@ void MPreferencesDialog::Apply()
 	MPrefs::SetBoolean("forward-x11", IsChecked("forward-x11"));
 	MPrefs::SetBoolean("udk-with-shift", IsChecked("udk-with-shift"));
 
+	auto s = GetText("recent-count");
+	int recentCount;
+	if (auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.length(), recentCount); ec == std::errc{})
+	{
+		MPrefs::SetInteger("recent-count", recentCount);
+
+		auto recent = MPrefs::GetArray("recent-sessions");
+		if (recent.size() > recentCount)
+		{
+			recent.resize(recentCount);
+			MPrefs::SetArray("recent-sesions", recent);
+		}
+	}
+
 	const std::set<std::string> kDisallowedPasteCharacters{
 		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT",
 		"FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
 		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "DEL"
 	};
 
-	std::string s = GetText("disallowed-paste-characters");
+	s = GetText("disallowed-paste-characters");
 	std::vector<std::string> dpc;
 	auto i = 0;
 	for (;;)
@@ -336,6 +352,9 @@ void MPreferencesDialog::ButtonClicked(const string &inID)
 
 void MPreferencesDialog::TextChanged(const string &inID, const string &inText)
 {
+	// if (inID == "recent-count")
+
+
 	//	SetEnabled("apply", true);
 }
 

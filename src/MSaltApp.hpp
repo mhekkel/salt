@@ -117,6 +117,9 @@ class MSaltApp : public MApplication
 	MCommand<void()> cClearRecentMenu;
 	MCommand<void(int)> cOpenRecent;
 
+	void OnPreferencesChanged();
+	MEventIn<void()> ePreferencesChanged;
+
 	asio_ns::io_context mIOContext;
 	asio_ns::execution_context *mExContext = &mIOContext;
 	std::thread mIOContextThread;

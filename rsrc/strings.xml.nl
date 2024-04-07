@@ -330,6 +330,11 @@
 		<key>User Defined Keys require shift key</key>
 		<value>Shift toets gebruiken voor UDK (user defined keys)</value>
 	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Recent session count</key>
+		<value>Te onthouden sessies</value>
+	</localstring>
 	
 	<localstring context="prefs-dialog">
 		<key>Apply</key>

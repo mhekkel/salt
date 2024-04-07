@@ -51,7 +51,6 @@
 #include "MTerminalColours.hpp"
 
 #include <zeep/crypto.hpp>
-#include <zeep/unicode-support.hpp>
 
 #include <pinch/debug.hpp>
 

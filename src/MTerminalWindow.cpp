@@ -47,7 +47,6 @@
 #include "MSalt.hpp"
 
 #include <zeep/crypto.hpp>
-#include <zeep/unicode-support.hpp>
 
 // ------------------------------------------------------------------
 //

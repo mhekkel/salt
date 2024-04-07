@@ -179,9 +179,12 @@ MConnectDialog::MConnectDialog()
 std::vector<ConnectInfo> MConnectDialog::GetRecentHosts()
 {
 	std::vector<ConnectInfo> result;
+	int recentCount = MPrefs::GetInteger("recent-count", 10);
 
-	for (auto &s : MPrefs::GetArray("recent-sessions"))
+	for (int i = 0; auto &s : MPrefs::GetArray("recent-sessions"))
 	{
+		if (i++ >= recentCount)
+			break;
 		auto ci = ConnectInfo::parse(s);
 		if (ci)
 			result.push_back(std::move(ci));

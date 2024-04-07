@@ -48,15 +48,20 @@
 				</page>
 				<page id="page2">
 					<hbox>
-						<caption margin-top="3" width="50" text="TERM type"/>
+						<caption margin-top="3" width="55" text="TERM type"/>
 						<edittext id="terminal-type" width="30" />
 					</hbox>
 					<hbox>
-						<caption margin-top="3" width="50" text="Answer-back"/>
+						<caption margin-top="3" width="55" text="Answer-back"/>
 						<edittext id="answer-back" width="50" />
 					</hbox>
 					<checkbox margin-top="10" bind="top left" id="forward-x11" title="Forward X11" />
 					<checkbox bind="top left" id="udk-with-shift" title="User Defined Keys require shift key" />
+
+					<hbox>
+						<caption margin-top="5" width="55" text="Recent session count"/>
+						<edittext id="recent-count" width="8" />
+					</hbox>
 				</page>
 				<page id="page3">
 					<checkbox if="WINDOWS" bind="top left" id="use-certificate" title="Use Certficates for authentication" />
