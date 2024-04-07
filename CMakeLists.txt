@@ -81,14 +81,10 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-# find_package(pinch 1.1 REQUIRED)
-
 add_subdirectory(libzeep EXCLUDE_FROM_ALL)
 add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
 add_subdirectory(libpinch EXCLUDE_FROM_ALL)
 add_subdirectory(libmgui EXCLUDE_FROM_ALL)
-
-# find_package(zeep 5.1.6 REQUIRED)
 
 add_executable(salt
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.cpp
@@ -137,7 +133,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/Icons)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui)
+target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui zeep::zeep)
 
 mrc_target_resources(salt ${RESOURCES})
 
