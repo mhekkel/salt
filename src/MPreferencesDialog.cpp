@@ -39,8 +39,6 @@
 
 #include <pinch.hpp>
 
-#include <zeep/unicode-support.hpp>
-
 #include <set>
 #include <sstream>
 
@@ -288,20 +286,15 @@ void MPreferencesDialog::Apply()
 	{
 		bool ok = true;
 
-		std::vector<std::string> allowed;
-		zeep::split(allowed, alg.def, ",");
+		auto requested = Split<std::string>(GetText(alg.conf), ",", true);
+		auto standard = Split(alg.def, ",", true);
 
-		std::sort(allowed.begin(), allowed.end());
-		allowed.erase(std::unique(allowed.begin(), allowed.end()), allowed.end());
+		requested.erase(std::unique(requested.begin(), requested.end()), requested.end());
 
-		std::vector<string> v;
-		string s = GetText(alg.conf);
-		zeep::split(v, s, ",");
-
-		for (auto &a : v)
+		for (auto &a : requested)
 		{
-			zeep::trim(a);
-			if (std::find(allowed.begin(), allowed.end(), a) == allowed.end())
+			Trim(a);
+			if (std::find(standard.begin(), standard.end(), a) == standard.end())
 			{
 				DisplayAlert(this, "algo-unsupported", { alg.desc, a });
 				ok = false;
@@ -311,8 +304,9 @@ void MPreferencesDialog::Apply()
 
 		if (ok)
 		{
-			string algo = Join(v, ",");
+			string algo = Join(requested, ",");
 			MPrefs::SetString(alg.conf, algo);
+			SetText(alg.conf, algo);
 
 			pinch::key_exchange::set_algorithm(alg.type, pinch::direction::both, algo);
 		}
