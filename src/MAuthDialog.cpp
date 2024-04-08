@@ -32,6 +32,7 @@
 #include "MAuthDialog.hpp"
 #include "MAlerts.hpp"
 #include "MStrings.hpp"
+#include "MSaltApp.hpp"
 
 #include <pinch.hpp>
 
@@ -132,26 +133,16 @@ void MAuthDialog::RequestSimplePassword(
 	const std::string &inDialogTitle, const std::string &inInstruction, MWindow *inParent,
 	std::function<void(std::string)> &&inReplyCallback)
 {
-	inReplyCallback("");
-#warning FIXME
-	// return [](std::string &) { return false; };
+	std::promise<std::string> promise;
+	std::future<std::string> result = promise.get_future();
 
+	auto a = std::async(std::launch::async, [f = std::move(result), cb = std::move(inReplyCallback)]() mutable
+	{
+		f.wait();
+		cb(f.get());
+	});
 
-	// return [inDialogTitle, inInstruction, inParent](std::string &outPassword)
-	// {
-	// 	bool result = false;
-
-	// 	try
-	// 	{
-	// 		MAuthDialog *dlog = new MAuthDialog(inDialogTitle, inParent, [&outPassword](const std::string &pw)
-	// 			{ outPassword = pw; });
-	// 		result = dlog->ShowModal(inParent);
-	// 	}
-	// 	catch (const std::exception &e)
-	// 	{
-	// 		DisplayError(e);
-	// 	}
-
-	// 	return result;
-	// };
+	auto dlog = new MAuthDialog(inDialogTitle/* , inInstruction */, inParent, std::move(promise));
+	// dlog->SetModal(true);
+	dlog->Show();
 }
