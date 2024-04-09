@@ -390,7 +390,8 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 		eSingleClick,
 		eDoubleClick,
 		eTripleClick,
-		eTrackClick
+		eTrackClick,
+		eLinkClick
 	} mMouseClick;
 	bool mMouseBlockSelect;
 	std::chrono::system_clock::time_point mLastMouseDown;
@@ -439,6 +440,11 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 	int32_t mMouseTrackX, mMouseTrackY;
 
 	std::string mSetWindowTitle;
+
+	int mHyperLink = 0, mCurrentLink = 0, mAnchorLink = 0;
+	void SetHyperLink(const std::string &inURI);
+
+	void LinkClicked(std::string inLink);
 
 #if DEBUG
 	bool mDebugUpdate;

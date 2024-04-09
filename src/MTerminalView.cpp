@@ -28,6 +28,7 @@
 // All rights reserved
 
 #include "MTerminalView.hpp"
+#include "MAlerts.hpp"
 #include "MAnimation.hpp"
 #include "MApplication.hpp"
 #include "MCSICommands.hpp"
@@ -51,6 +52,7 @@
 #include "MTerminalColours.hpp"
 
 #include <zeep/crypto.hpp>
+#include <zeep/http/uri.hpp>
 
 #include <pinch/debug.hpp>
 
@@ -60,28 +62,6 @@
 
 namespace
 {
-
-// // our commands
-// const uint32_t
-// 	cmd_DebugUpdate = 'dbug',
-// 	cmd_ResetAndClear = 'rstc',
-// 	cmd_EncodingUTF8 = 'enU8',
-
-// 	// cmd_AllowColor		= 'tClr',
-//     // cmd_AllowTitle		= 'tTtl',
-
-// 	cmd_MetaSendsEscape = 'tEsc',
-// 	cmd_BackSpaceIsDel = 'tBsD',
-// 	cmd_DeleteIsDel = 'tDlD',
-// 	cmd_OldFnKeys = 'tOlF',
-// 	cmd_VT220Keyboard = 'tVTk',
-
-// 	cmd_SendSTOP = 'STOP',
-// 	cmd_SendCONT = 'CONT',
-// 	cmd_SendINT = 'INT ',
-// 	cmd_SendHUP = 'HUP ',
-// 	cmd_SendTERM = 'TERM',
-// 	cmd_SendKILL = 'KILL';
 
 // This is what we report as terminal type:
 // 62	VT200 family
@@ -424,7 +404,7 @@ void MTerminalView::Open()
 	// set some environment variables
 
 	std::weak_ptr<MTerminalView> self = shared_from_this();
-		
+
 	mTerminalChannel->Open(
 		MPrefs::GetString("terminal-type", "xterm-256color"),
 		MPrefs::GetBoolean("forward-ssh-agent", true),
@@ -812,14 +792,14 @@ void MTerminalView::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount,
 	if (not IsFocus())
 		SetFocus();
 
+	int32_t line, column;
+	GetCharacterForPosition(inX, inY, line, column);
+
 	if (not mBuffer->IsSelectionEmpty())
 	{
 		if (inModifiers & kShiftKey and mMouseMode == eTrackMouseNone)
 		{
 			mMouseClick = eSingleClick;
-
-			int32_t line, column;
-			GetCharacterForPosition(inX, inY, line, column);
 
 			if (line < mMinSelLine or (line == mMinSelLine and column < mMinSelCol))
 			{
@@ -842,6 +822,17 @@ void MTerminalView::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount,
 		else
 		{
 			mBuffer->SetSelection(0, 0, 0, 0, false);
+			Invalidate();
+		}
+	}
+	else if (inModifiers & kControlKey and mMouseMode == eTrackMouseNone)
+	{
+		int hoveredLink = mBuffer->GetHoveredLink(line, column);
+		if (hoveredLink != 0)
+		{
+			mCurrentLink = mAnchorLink = hoveredLink;
+			mMouseClick = eLinkClick;
+			done = true;
 			Invalidate();
 		}
 	}
@@ -909,9 +900,33 @@ void MTerminalView::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers
 		return;
 	}
 
-	// shortcut
+	// Find a possible link
+
+	int32_t line, column;
+	GetCharacterForPosition(inX, inY, line, column);
+	int hoveredLink = mBuffer->GetHoveredLink(line, column);
+
+	// shortcuts
 	if (mMouseClick == eNoClick)
+	{
+		if (std::exchange(mCurrentLink, hoveredLink) != hoveredLink)
+			Invalidate();
 		return;
+	}
+
+	if (mMouseClick == eLinkClick)
+	{
+		if (hoveredLink != mCurrentLink)
+		{
+			if (hoveredLink != mAnchorLink)
+				mCurrentLink = 0;
+			else
+				mCurrentLink = hoveredLink;
+			Invalidate();
+		}
+
+		return;
+	}
 
 	if (mMouseClick == eWaitClick)
 	{
@@ -930,9 +945,6 @@ void MTerminalView::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers
 			mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, mMouseBlockSelect);
 		}
 	}
-
-	int32_t line, column;
-	GetCharacterForPosition(inX, inY, line, column);
 
 	switch (mMouseClick)
 	{
@@ -979,12 +991,21 @@ void MTerminalView::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers
 void MTerminalView::PointerLeave()
 {
 	mMouseClick = eNoClick;
+	mAnchorLink = 0;
 }
 
 void MTerminalView::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseMode >= eTrackMouseSendXYOnButton)
 		SendMouseCommand(3, inX, inY, inModifiers);
+	else if (mMouseClick == eLinkClick)
+	{
+		if (mCurrentLink != 0)
+		{
+			LinkClicked(mBuffer->GetHyperLink(mCurrentLink));
+			mCurrentLink = 0;
+		}
+	}
 	else if (not mBuffer->IsSelectionEmpty())
 	{
 		MClipboard::PrimaryInstance().SetData(mBuffer->GetSelectedText());
@@ -994,6 +1015,7 @@ void MTerminalView::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers
 		cCopy.SetEnabled(false);
 
 	mMouseClick = eNoClick;
+	mAnchorLink = 0;
 }
 
 bool MTerminalView::Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
@@ -1222,6 +1244,7 @@ void MTerminalView::Draw()
 
 			unicode uc = line[c];
 			MStyle st = line[c];
+			int linkNr = line[c].GetHyperLink();
 
 			if (uc == 0 or st & kStyleInvisible)
 				uc = ' ';
@@ -1328,6 +1351,14 @@ void MTerminalView::Draw()
 				style |= MDevice::eTextStyleBold;
 			if (st & kStyleUnderline)
 				style |= MDevice::eTextStyleUnderline;
+
+			// hyper link tracking
+			if (linkNr != 0 and linkNr == mCurrentLink)
+			{
+				style |= MDevice::eTextStyleUnderline;
+				if (mMouseClick == eLinkClick)
+					style |= MDevice::eTextStyleBold;
+			}
 
 			if (styleValue.empty() or styleValue.back() != style)
 			{
@@ -2827,27 +2858,22 @@ void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &in
 	}
 	else
 	{
-// #ifndef NDEBUG
-// 		pinch::blob b;
+		// #ifndef NDEBUG
+		// 		pinch::blob b;
 
+		// 		while (inData.in_avail() > 0)
+		// 			b.insert(b.end(), inData.sbumpc());
 
-// 		while (inData.in_avail() > 0)
-// 			b.insert(b.end(), inData.sbumpc());
+		// 		pinch::print(std::cerr, b);
 
-// 		pinch::print(std::cerr, b);
+		// 		mInputBuffer.insert(mInputBuffer.end(), b.begin(), b.end());
 
-// 		mInputBuffer.insert(mInputBuffer.end(), b.begin(), b.end());
+		// 			// mInputBuffer.push_back(inData.sbumpc());
 
-
-// 			// mInputBuffer.push_back(inData.sbumpc());
-
-
-// #else
+		// #else
 		while (inData.in_avail() > 0)
 			mInputBuffer.push_back(inData.sbumpc());
-// #endif
-
-
+		// #endif
 
 		mTerminalChannel->ReadData([this](std::error_code ec, std::streambuf &inData)
 			{ this->HandleReceived(ec, inData); });
@@ -2921,7 +2947,7 @@ void MTerminalView::WriteChar(unicode inChar)
 	if (mIRM)
 		buffer->InsertCharacter(mCursor.y, mCursor.x);
 
-	buffer->SetCharacter(mCursor.y, mCursor.x, inChar, mCursor.style);
+	buffer->SetCharacter(mCursor.y, mCursor.x, inChar, mCursor.style, mHyperLink);
 
 	++mCursor.x;
 
@@ -5178,6 +5204,10 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 				}
 				break;
 
+			case 8:
+				SetHyperLink(mArgString);
+				break;
+
 			case 10:
 				if (mArgString == "?")
 				{
@@ -5687,5 +5717,56 @@ void MTerminalView::UploadFile(const std::string &path)
 	{
 		MFileDialogs::ChooseOneFile(GetWindow(), [path, channel = mTerminalChannel](std::filesystem::path file)
 			{ channel->UploadFile(path, file); });
+	}
+}
+
+// --------------------------------------------------------------------
+
+void MTerminalView::SetHyperLink(const std::string &inURI)
+{
+	mHyperLink = 0;
+	if (not inURI.empty())
+	{
+		std::string id, uri;
+
+		if (auto s = inURI.find(';'); s != std::string::npos)
+		{
+			for (auto p : Split(inURI.substr(0, s), ":", true))
+			{
+				if (p.starts_with("id="))
+					id = p.substr(3);
+			}
+
+			uri = inURI.substr(s + 1);
+		}
+		else
+			uri = inURI;
+
+		if (zeep::http::is_valid_uri(uri))
+		{
+			mHyperLink = mBuffer->AddHyperLink(uri, id);
+
+			PRINT(("Set hyperlink [%d]: %s", mHyperLink, inURI.c_str()));
+		}
+	}
+}
+
+void MTerminalView::LinkClicked(std::string inLink)
+{
+	try
+	{
+		zeep::http::uri uri(inLink);
+
+		if (uri.get_scheme() == "file")
+		{
+			// TODO: validate hostname in uri. Should be either empty, localhost or the actual hostname of the host we're connected to
+			DownloadFile(uri.get_path().string());
+		}
+		else
+			OpenURI(uri.string(), GetWindow());
+	}
+	catch (const std::exception &e)
+	{
+		DisplayError(e);
 	}
 }

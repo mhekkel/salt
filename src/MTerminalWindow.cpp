@@ -71,11 +71,6 @@ class MSshTerminalWindow : public MTerminalWindow, public pinch::connection_call
 	void OnProxyHTTP();
 
   protected:
-	// std::string Password();
-	// std::vector<std::string> Credentials(const std::string &name, const std::string &instruction,
-	// 	const std::string &lang, const std::vector<pinch::prompt> &prompts);
-	// pinch::host_key_reply AcceptHostKey(const std::string &inHost,
-	// 	const std::string &inAlg, const pinch::blob &inHostKey, pinch::host_key_state inState);
 
 	callback_executor_type get_executor() override
 	{
@@ -537,112 +532,6 @@ void MTerminalWindow::Close()
 	mTerminalView->Destroy();
 	MWindow::Close();
 }
-
-// bool MTerminalWindow::UpdateCommandStatus(
-// 	uint32_t inCommand,
-// 	MMenu *inMenu,
-// 	uint32_t inItemIndex,
-// 	bool &outEnabled,
-// 	bool &outChecked)
-// {
-// 	bool result = true;
-
-// 	switch (inCommand)
-// 	{
-// 		case cmd_Disconnect:
-// 			outEnabled = mChannel != nullptr && mChannel->CanDisconnect();
-// 			break;
-
-// 		case cmd_NextTerminal:
-// 		case cmd_PrevTerminal:
-// 			outEnabled = sFirst != this or mNext != nullptr;
-// 			break;
-
-// 		case cmd_Find:
-// 		case cmd_CloneTerminal:
-// 			outEnabled = true;
-// 			break;
-
-// 		default:
-// 			result = MWindow::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-// 			break;
-// 	}
-
-// 	return result;
-// }
-
-// bool MTerminalWindow::ProcessCommand(
-// 	uint32_t inCommand,
-// 	const MMenu *inMenu,
-// 	uint32_t inItemIndex,
-// 	uint32_t inModifiers)
-// {
-// 	bool result = true;
-
-// 	switch (inCommand)
-// 	{
-// 		case cmd_Disconnect:
-// 			mChannel->Disconnect(inModifiers & kControlKey);
-// 			break;
-
-// 		case cmd_CloneTerminal:
-// 		{
-// 			MTerminalWindow *clone = Clone(this);
-// 			clone->Select();
-// 			break;
-// 		}
-
-// 			// case cmd_Explore:
-// 			//{
-// 			//	MExploreBrowserWindow* explorer = new MExploreBrowserWindow(mConnection);
-// 			//	explorer->Select();
-// 			//	break;
-// 			// }
-
-// 		case cmd_NextTerminal:
-// 			if (mNext != nullptr)
-// 				mNext->Select();
-// 			else if (sFirst != this)
-// 				sFirst->Select();
-// 			break;
-
-// 		case cmd_PrevTerminal:
-// 			if (sFirst == this)
-// 			{
-// 				MTerminalWindow *w = sFirst;
-// 				while (w->mNext != nullptr)
-// 					w = w->mNext;
-// 				if (w != this)
-// 					w->Select();
-// 			}
-// 			else
-// 			{
-// 				MTerminalWindow *w = sFirst;
-// 				while (w != nullptr and w->mNext != this)
-// 					w = w->mNext;
-// 				if (w != nullptr and w != this)
-// 					w->Select();
-// 			}
-// 			break;
-
-// 		case cmd_Find:
-// 			if (mSearchPanel->IsVisible())
-// 				HideSearchPanel();
-// 			else
-// 				ShowSearchPanel();
-// 			break;
-
-// 		case cmd_HideSearchPanel:
-// 			HideSearchPanel();
-// 			break;
-
-// 		default:
-// 			result = MWindow::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-// 			break;
-// 	}
-
-// 	return result;
-// }
 
 // ------------------------------------------------------------------
 //

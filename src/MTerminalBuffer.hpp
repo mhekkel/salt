@@ -184,87 +184,95 @@ class MStyle
 
 // MChar is a container for both a unicode and the style associated with
 // this character in the buffer. Keeping them together makes coding easier.
-// The unicode needs 17 bits, the style 15. We'll do the bit shifting
-// ourselves since compilers tend to do a poor job here.
-
 // Unicode is limited to 1ffff, Everything in Plane 2 and up is not supported.
 
 class MChar
 {
   public:
-	//	enum
-	//	{
-	////		kCharMask	= 0x001fffff,
-	//		kCharMask	= 0x0001ffff,
-	////		kStyleMask	= 0xffe00000
-	//		kStyleMask	= 0xfffe0000
-	//	};
-	//
-	MChar()
-		: mUnicode(' ')
-	{
-	}
-	MChar(MXTermColor inForeColor, MXTermColor inBackColor)
+	MChar() = default;
+
+	MChar(MXTermColor inForeColor, MXTermColor inBackColor) noexcept
 		: mUnicode(' ')
 		, mStyle(inForeColor, inBackColor)
 	{
 	}
-	MChar(unicode inChar, MStyle inStyle)
+
+	MChar(unicode inChar, MStyle inStyle, int inHyperLink = 0) noexcept
 		: mUnicode(inChar)
 		, mStyle(inStyle)
-	{
-	}
-	MChar(const MChar &inChar)
-		: mUnicode(inChar.mUnicode)
-		, mStyle(inChar.mStyle)
+		, mHyperLink(inHyperLink)
 	{
 	}
 
-	MChar &operator=(const MChar &inChar)
+	MChar(const MChar &inChar) noexcept
+		: mUnicode(inChar.mUnicode)
+		, mStyle(inChar.mStyle)
+		, mHyperLink(inChar.mHyperLink)
+	{
+	}
+
+	MChar &operator=(const MChar &inChar) noexcept
 	{
 		mUnicode = inChar.mUnicode;
 		mStyle = inChar.mStyle;
+		mHyperLink = inChar.mHyperLink;
 		return *this;
 	}
-	MChar &operator=(unicode inChar)
+
+	MChar &operator=(unicode inChar) noexcept
 	{
 		mUnicode = inChar;
 		return *this;
 	}
-	MChar &operator=(char inChar)
+
+	MChar &operator=(char inChar) noexcept
 	{
 		mUnicode = inChar;
 		return *this;
 	}
-	MChar &operator=(MStyle inStyle)
+
+	MChar &operator=(MStyle inStyle) noexcept
 	{
 		mStyle = inStyle;
 		return *this;
 	}
 
-	bool operator==(char rhs) const { return mUnicode == static_cast<uint32_t>(rhs); }
+	bool operator==(char rhs) const { return mUnicode == static_cast<char32_t>(rhs); }
 	bool operator==(unicode rhs) const { return mUnicode == rhs; }
 	bool operator==(MStyle rhs) const { return mStyle == rhs; }
 
-	bool operator!=(char rhs) const { return mUnicode != static_cast<uint32_t>(rhs); }
+	bool operator!=(char rhs) const { return mUnicode != static_cast<char32_t>(rhs); }
 	bool operator!=(unicode rhs) const { return mUnicode != rhs; }
 	bool operator!=(MStyle rhs) const { return mStyle != rhs; }
 
 	bool operator&(MCharStyle inStyle) const { return (mStyle & inStyle) != 0; }
 
-	void operator|=(uint32_t inStyle) { mStyle.SetFlag((MCharStyle)inStyle); }
-	void operator&=(uint32_t inStyle) { mStyle.ClearFlag((MCharStyle)inStyle); }
+	void operator|=(char32_t inStyle) { mStyle.SetFlag((MCharStyle)inStyle); }
+	void operator&=(char32_t inStyle) { mStyle.ClearFlag((MCharStyle)inStyle); }
 
 	void ReverseFlag(MCharStyle inStyle) { mStyle.ReverseFlag(inStyle); }
-	void ChangeFlags(uint32_t inMode) { mStyle.ChangeFlags(inMode); }
+	void ChangeFlags(char32_t inMode) { mStyle.ChangeFlags(inMode); }
 
 	operator unicode() const { return mUnicode; }
 	operator MStyle() const { return mStyle; }
 
+	void SetHyperLink(int inLinkNr)
+	{
+		mHyperLink = inLinkNr;
+	}
+
+	int GetHyperLink() const
+	{
+		return mHyperLink;
+	}
+
   private:
-	uint32_t mUnicode;
-	MStyle mStyle;
+	int mHyperLink : 11 = 0;
+	char32_t mUnicode : 21 = ' ';
+	MStyle mStyle{};
 };
+
+static_assert(sizeof(MChar) == 8, "MChar should be 8 bytes");
 
 // --------------------------------------------------------------------
 // Characters are store in lines
@@ -273,10 +281,21 @@ class MLine
 {
   public:
 	MLine(uint32_t inSize, MXTermColor inForeColor, MXTermColor inBackColor);
+
 	MLine(const MLine &rhs);
+
+	MLine(MLine &&rhs) noexcept
+	{
+		swap(*this, rhs);
+	}
+
 	~MLine();
 
-	MLine &operator=(const MLine &rhs);
+	MLine &operator=(MLine rhs) noexcept
+	{
+		swap(*this, rhs);
+		return *this;
+	}
 
 	void Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor, MXTermColor inBackColor);
 	void Insert(uint32_t inColumn, uint32_t inWidth);
@@ -292,7 +311,7 @@ class MLine
 		return mCharacters[inColumn];
 	}
 
-	void swap(MLine &rhs);
+	friend void swap(MLine &lhs, MLine &rhs) noexcept;
 
 	bool IsSoftWrapped() const { return mSoftWrapped; }
 	void SetSoftWrapped(bool inSoftWrapped) { mSoftWrapped = inSoftWrapped; }
@@ -317,20 +336,11 @@ class MLine
 	void CopyOut(OutputIterator iter) const;
 
   private:
-	MChar *mCharacters;
-	uint32_t mSize;
-	bool mSoftWrapped;
+	MChar *mCharacters = nullptr;
+	uint32_t mSize = 0;
+	bool mSoftWrapped = false;
 	bool mDoubleWidth = false, mDoubleHeight = false, mDoubleHeightTop = false;
 };
-
-namespace std
-{
-template <>
-inline void swap(MLine &a, MLine &b)
-{
-	a.swap(b);
-}
-} // namespace std
 
 // --------------------------------------------------------------------
 // And all the lines together for a buffer. We store the lines in a
@@ -354,7 +364,8 @@ class MTerminalBuffer
 	// adjust scrollbar.
 	void Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnchorLine);
 
-	void SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar, MStyle inStyle = MStyle());
+	void SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar,
+		MStyle inStyle = MStyle(), int inHyperLink = 0);
 
 	template <typename Handler>
 	void ForeachInRectangle(int32_t inFromLine, int32_t inFromColumn,
@@ -437,6 +448,10 @@ class MTerminalBuffer
 	bool FindPrevious(int32_t &ioLine, int32_t &ioColumn, const std::string &inWhat,
 		bool inIgnoreCase, bool inWrapAround);
 
+	int AddHyperLink(const std::string &inURI, const std::string &inID);
+	int GetHoveredLink(int32_t inLine, int32_t inColumn) const;
+	std::string GetHyperLink(int inNr) const;
+
   private:
 	unicode GetChar(uint32_t inOffset, bool inToLower) const;
 
@@ -448,4 +463,15 @@ class MTerminalBuffer
 	int32_t mBeginLine, mBeginColumn, mEndLine, mEndColumn;
 	bool mBlockSelection;
 	MXTermColor mForeColor, mBackColor;
+
+	// On screen hyperlinks
+	int mNextHyperLinkNr = 1;
+
+	struct MHyperLink
+	{
+		int nr;
+		std::string mID, mURI;
+	};
+
+	std::vector<MHyperLink> mHyperLinks;
 };

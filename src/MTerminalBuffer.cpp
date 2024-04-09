@@ -68,29 +68,6 @@ MLine::~MLine()
 	delete[] mCharacters;
 }
 
-MLine &MLine::operator=(const MLine &rhs)
-{
-	if (this != &rhs)
-	{
-		if (rhs.mSize != mSize)
-		{
-			MChar *tmp = new MChar[rhs.mSize];
-			delete[] mCharacters;
-			mCharacters = tmp;
-			mSize = rhs.mSize;
-		}
-
-		copy(rhs.mCharacters, rhs.mCharacters + mSize, mCharacters);
-
-		mSoftWrapped = rhs.mSoftWrapped;
-		mDoubleWidth = rhs.mDoubleWidth;
-		mDoubleHeight = rhs.mDoubleHeight;
-		mDoubleHeightTop = rhs.mDoubleHeightTop;
-	}
-
-	return *this;
-}
-
 void MLine::Delete(uint32_t inColumn, uint32_t inWidth, MXTermColor inForeColor, MXTermColor inBackColor)
 {
 	if (inWidth == 0 or inWidth > mSize)
@@ -120,14 +97,14 @@ void MLine::CopyOut(OutputIterator iter) const
 	copy(begin, end, iter);
 }
 
-void MLine::swap(MLine &p)
+void swap(MLine &lhs, MLine &rhs) noexcept
 {
-	std::swap(mCharacters, p.mCharacters);
-	std::swap(mSize, p.mSize);
-	std::swap(mSoftWrapped, p.mSoftWrapped);
-	std::swap(mDoubleWidth, p.mDoubleWidth);
-	std::swap(mDoubleHeight, p.mDoubleHeight);
-	std::swap(mDoubleHeightTop, p.mDoubleHeightTop);
+	std::swap(lhs.mCharacters, rhs.mCharacters);
+	std::swap(lhs.mSize, rhs.mSize);
+	std::swap(lhs.mSoftWrapped, rhs.mSoftWrapped);
+	std::swap(lhs.mDoubleWidth, rhs.mDoubleWidth);
+	std::swap(lhs.mDoubleHeight, rhs.mDoubleHeight);
+	std::swap(lhs.mDoubleHeightTop, rhs.mDoubleHeightTop);
 }
 
 // --------------------------------------------------------------------
@@ -302,7 +279,7 @@ void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
 			mBuffer.pop_back();
 
 		for (uint32_t line = inFromLine; line < inToLine; ++line)
-			mLines[line].swap(mLines[line + 1]);
+			swap(mLines[line], mLines[line + 1]);
 	}
 	else
 	{
@@ -364,13 +341,14 @@ void MTerminalBuffer::Clear()
 	EraseDisplay(0, 0, 2, false);
 }
 
-void MTerminalBuffer::SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar, MStyle inStyle)
+void MTerminalBuffer::SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar,
+	MStyle inStyle, int inHyperLink)
 {
 	if (inLine >= mLines.size())
 		return;
 
 	MLine &line(mLines[inLine]);
-	line[inColumn] = MChar(inChar, inStyle);
+	line[inColumn] = MChar(inChar, inStyle, inHyperLink);
 
 	mDirty = true;
 }
@@ -1046,4 +1024,56 @@ bool MTerminalBuffer::FindPrevious(int32_t &ioLine, int32_t &ioColumn, const str
 	}
 
 	return result;
+}
+
+int MTerminalBuffer::AddHyperLink(const std::string &inURI, const std::string &inID)
+{
+	for (auto &&[nr, id, uri] : mHyperLinks)
+	{
+		if (uri == inURI)
+			return nr;
+		
+		if (id == inID and not id.empty())
+		{
+			uri = inURI;
+			return nr;
+		}
+	}
+
+	int result = mNextHyperLinkNr++;
+	mHyperLinks.emplace_back(result, inID, inURI);
+	return result;
+}
+
+int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
+{
+	int result = 0;
+
+	if (inColumn > mWidth)
+		return 0;
+
+	if (inLine >= 0)
+	{
+		if (static_cast<uint32_t>(inLine) < mLines.size())
+			result = mLines[inLine][inColumn].GetHyperLink();
+	}
+	else
+	{
+		inLine = -inLine - 1;
+		if (static_cast<size_t>(inLine) < mBuffer.size())
+			result = mLines[inLine][inColumn].GetHyperLink();
+	}
+
+	return result;
+}
+
+std::string MTerminalBuffer::GetHyperLink(int inNr) const
+{
+	for (auto &&[nr, id, uri] : mHyperLinks)
+	{
+		if (nr == inNr)
+			return uri;
+	}
+
+	return {};
 }
