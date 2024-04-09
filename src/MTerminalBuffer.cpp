@@ -1039,7 +1039,8 @@ int MTerminalBuffer::AddHyperLink(const std::string &inURI, const std::string &i
 		}
 	}
 
-	if (mHyperLinks.size() > 1024)
+	// garbage collect once in a while
+	if ((mNextHyperLinkNr % 128) == 0)
 		GarbageCollectHyperlinks();
 
 	int result = mNextHyperLinkNr++;

@@ -7,9 +7,9 @@
  * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    std::list of conditions and the following disclaimer
+ *    list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this std::list of conditions and the following disclaimer in the documentation
+ *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -315,12 +315,6 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	AddRoute(mSearchPanel->eSearch, eSearch);
 	AddRoute(mAnimationManager->eAnimate, eAnimate);
 
-	//	mTerminalChannel->set_message_callbacks(
-	//		std::bind(&MTerminalView::HandleMessage, this, _1, _2),
-	//		std::bind(&MTerminalView::HandleMessage, this, _1, _2),
-	//		std::bind(&MTerminalView::HandleMessage, this, _1, _2)
-	//		);
-	//
 	AdjustScrollbar(0);
 
 	std::string desc = MFormat("%dx%d", mTerminalWidth, mTerminalHeight);
