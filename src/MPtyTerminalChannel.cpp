@@ -56,10 +56,12 @@
 
 // --------------------------------------------------------------------
 
-MPtyTerminalChannel::MPtyTerminalChannel()
+MPtyTerminalChannel::MPtyTerminalChannel(MTerminalChannel *inCloneFrom)
 	: mPid(-1)
 	, mPty(MSaltApp::Instance().get_io_context())
 {
+	if (auto c = dynamic_cast<MPtyTerminalChannel *>(inCloneFrom))
+		SetCWD(c->GetCWD());
 }
 
 MPtyTerminalChannel::~MPtyTerminalChannel()
@@ -319,7 +321,7 @@ void MPtyTerminalChannel::ReadData(const ReadCallback &inCallback)
 // --------------------------------------------------------------------
 // MTerminalChannel factory
 
-MTerminalChannel *MTerminalChannel::Create()
+MTerminalChannel *MTerminalChannel::Create(MTerminalChannel *inCloneFrom)
 {
-	return new MPtyTerminalChannel();
+	return new MPtyTerminalChannel(inCloneFrom);
 }

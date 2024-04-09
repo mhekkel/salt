@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include "MP2PEvents.hpp"
+
 #include <pinch.hpp>
 
 class MTerminalChannel
@@ -40,6 +42,8 @@ class MTerminalChannel
 	typedef std::function<void(std::error_code, std::streambuf &inData)> ReadCallback;
 
 	virtual void SetMessageCallback(const MessageCallback &inMessageCallback);
+
+	MEventOut<void(std::string)> eIOStatus;
 
 	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
 		uint32_t inPixelWidth, uint32_t inPixelHeight) = 0;
@@ -69,7 +73,7 @@ class MTerminalChannel
 	virtual void ReadData(const ReadCallback &inCallback) = 0;
 
 	static MTerminalChannel *Create(std::shared_ptr<pinch::basic_connection> inConnection);
-	static MTerminalChannel *Create();
+	static MTerminalChannel *Create(MTerminalChannel *inCloneFrom);
 
 	const std::vector<std::string> &GetConnectionInfo() const
 	{
@@ -77,8 +81,8 @@ class MTerminalChannel
 	}
 
 	virtual bool CanDownloadFiles() const { return false; }
-	virtual void DownloadFile(const std::string &remotepath, const std::string &localpath) {}
-	virtual void UploadFile(const std::string &remotepath, const std::string &localpath) {}
+	virtual void DownloadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) {}
+	virtual void UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) {}
 
   protected:
 	MTerminalChannel();

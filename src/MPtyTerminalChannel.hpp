@@ -39,24 +39,24 @@
 class MPtyTerminalChannel : public MTerminalChannel
 {
   public:
-	MPtyTerminalChannel();
+	MPtyTerminalChannel(MTerminalChannel *inCloneFrom);
 	~MPtyTerminalChannel();
 
-	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-		uint32_t inPixelWidth, uint32_t inPixelHeight);
+	void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+		uint32_t inPixelWidth, uint32_t inPixelHeight) override;
 
-	virtual void Open(const std::string &inTerminalType,
+	void Open(const std::string &inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
 		const std::vector<std::string> &inArgv, const std::vector<std::string> &env,
-		const OpenCallback &inOpenCallback);
+		const OpenCallback &inOpenCallback) override;
 
-	virtual void Close();
+	void Close() override;
 
-	virtual bool IsOpen() const;
+	bool IsOpen() const override;
 
-	virtual void SendData(std::string &&inData);
-	virtual void SendSignal(const std::string &inSignal);
-	virtual void ReadData(const ReadCallback &inCallback);
+	void SendData(std::string &&inData) override;
+	void SendSignal(const std::string &inSignal) override;
+	void ReadData(const ReadCallback &inCallback) override;
 
 	std::filesystem::path GetCWD() const;
 	void SetCWD(const std::filesystem::path &inCWD)

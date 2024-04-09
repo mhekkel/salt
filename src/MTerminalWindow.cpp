@@ -274,22 +274,15 @@ class MPtyTerminalWindow : public MTerminalWindow
 };
 
 MPtyTerminalWindow::MPtyTerminalWindow(const std::vector<std::string> &inArgv)
-	: MTerminalWindow(MTerminalChannel::Create(), inArgv)
+	: MTerminalWindow(MTerminalChannel::Create(nullptr), inArgv)
 {
 	SetTitle("Salt - terminal");
 }
 
 MPtyTerminalWindow::MPtyTerminalWindow(MPtyTerminalWindow *inOriginal)
-	: MTerminalWindow(MTerminalChannel::Create(), {})
+	: MTerminalWindow(MTerminalChannel::Create(inOriginal->mChannel), {})
 {
 	SetTitle("Salt - terminal");
-
-	if (inOriginal != nullptr)
-	{
-		auto channel = dynamic_cast<MPtyTerminalChannel *>(inOriginal->mChannel);
-		if (channel != nullptr)
-			static_cast<MPtyTerminalChannel *>(mChannel)->SetCWD(channel->GetCWD());
-	}
 }
 
 // ------------------------------------------------------------------

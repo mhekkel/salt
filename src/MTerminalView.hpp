@@ -446,6 +446,9 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 
 	void LinkClicked(std::string inLink);
 
+	void OnIOStatus(std::string inMessage);
+	MEventIn<void(std::string)> eIOStatus;
+
 #if DEBUG
 	bool mDebugUpdate;
 #endif

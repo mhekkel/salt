@@ -683,6 +683,11 @@
 	</localstring>
 	
 	<localstring>
+		<key>Select Folder</key>
+		<value>Selecteer map</value>
+	</localstring>
+	
+	<localstring>
 		<key>Disallow pasting of the following characters</key>
 		<value>Het plakken van de volgende karakters niet toestaan</value>
 	</localstring>

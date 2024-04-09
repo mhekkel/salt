@@ -287,10 +287,13 @@ MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	, mAnimationManager(new MAnimationManager())
 	, mGraphicalBeep(nullptr)
 	, mDisabledFactor(mAnimationManager->CreateVariable(1, 0, 1))
+
+	, eIOStatus(this, &MTerminalView::OnIOStatus)
 {
 	mTerminalChannel->SetMessageCallback(
 		[this](const std::string &msg, const std::string &lang)
 		{ this->HandleMessage(msg, lang); });
+	AddRoute(mTerminalChannel->eIOStatus, eIOStatus);
 
 	ReadPreferences();
 
@@ -5784,4 +5787,9 @@ void MTerminalView::LinkClicked(std::string inLink)
 	{
 		DisplayError(e);
 	}
+}
+
+void MTerminalView::OnIOStatus(std::string inMessage)
+{
+	mStatusbar->SetStatusText(0, inMessage, false);
 }

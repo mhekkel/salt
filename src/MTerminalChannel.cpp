@@ -31,6 +31,7 @@
 #include "MAlerts.hpp"
 #include "MError.hpp"
 #include "MSaltApp.hpp"
+#include "MStrings.hpp"
 #include "MUtils.hpp"
 
 #include <pinch.hpp>
@@ -76,30 +77,30 @@ class MSshTerminalChannel : public MTerminalChannel
 	MSshTerminalChannel(std::shared_ptr<pinch::basic_connection> inConnection);
 	~MSshTerminalChannel();
 
-	virtual void SetMessageCallback(const MessageCallback &inMessageCallback);
+	void SetMessageCallback(const MessageCallback &inMessageCallback) override;
 
-	virtual void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
-		uint32_t inPixelWidth, uint32_t inPixelHeight);
+	void SetTerminalSize(uint32_t inColumns, uint32_t inRows,
+		uint32_t inPixelWidth, uint32_t inPixelHeight) override;
 
-	virtual void Open(const string &inTerminalType,
+	void Open(const string &inTerminalType,
 		bool inForwardAgent, bool inForwardX11,
 		const std::vector<std::string> &inArgv, const vector<string> &env,
-		const OpenCallback &inOpenCallback);
+		const OpenCallback &inOpenCallback) override;
 
-	virtual void Close();
+	void Close() override;
 
-	virtual bool IsOpen() const;
+	bool IsOpen() const override;
 
-	virtual bool CanDisconnect() const { return true; }
-	virtual void Disconnect(bool disconnectProxy);
+	bool CanDisconnect() const override { return true;}
+	void Disconnect(bool disconnectProxy) override;
 
-	virtual void SendData(string &&inData);
-	virtual void SendSignal(const string &inSignal);
-	virtual void ReadData(const ReadCallback &inCallback);
+	void SendData(string &&inData) override;
+	void SendSignal(const string &inSignal) override;
+	void ReadData(const ReadCallback &inCallback) override;
 
-	virtual bool CanDownloadFiles() const { return true; }
-	virtual void DownloadFile(const std::string &remotepath, const std::string &localpath);
-	virtual void UploadFile(const std::string &remotepath, const std::string &localpath);
+	bool CanDownloadFiles() const override { return true; }
+	void DownloadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) override;
+	void UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) override;
 
   private:
 	shared_ptr<pinch::terminal_channel> mChannel;
@@ -219,49 +220,61 @@ void ReportError(asio_system_ns::error_code ec)
 	});
 }
 
-void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std::string &localpath)
+void MSshTerminalChannel::DownloadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath)
 {
 	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
 
 	p->async_init(3,
-		[self = p, remotepath, localpath](const asio_system_ns::error_code &ec, int version)
+		[channel = p, remotepath, localpath, this](const asio_system_ns::error_code &ec, int version)
 		{
 			if (ec or version != 3)
 			{
 				ReportError(ec);
-				self->close();
+				channel->close();
 			}
 			else
 			{
-				self->read_file(remotepath, localpath,
-					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
+				eIOStatus(FormatString("Downloading ^0", remotepath.filename().string()));
+				channel->read_file(remotepath.string(), localpath.string(),
+					[channel, this, localpath](asio_system_ns::error_code ec, size_t bytes_transfered)
 					{
 						if (ec)
+						{
+							eIOStatus("");
 							ReportError(ec);
+						}
+						else
+							eIOStatus(FormatString("Downloaded ^0", localpath.filename().string()));
 					});
 			}
 		});
 }
 
-void MSshTerminalChannel::UploadFile(const std::string &remotepath, const std::string &localpath)
+void MSshTerminalChannel::UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath)
 {
 	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
 
 	p->async_init(3,
-		[self = p, remotepath, localpath](const asio_system_ns::error_code &ec, int version)
+		[channel = p, remotepath, localpath, this](const asio_system_ns::error_code &ec, int version)
 		{
 			if (ec or version != 3)
 			{
 				ReportError(ec);
-				self->close();
+				channel->close();
 			}
 			else
 			{
-				self->write_file(remotepath, localpath,
-					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
+				eIOStatus(FormatString("Uploading ^0", remotepath.filename().string()));
+				channel->write_file(remotepath.string(), localpath.string(),
+					[channel, localpath, this](asio_system_ns::error_code ec, size_t bytes_transfered)
 					{
 						if (ec)
+						{
+							eIOStatus("");
 							ReportError(ec);
+						}
+						else
+							eIOStatus(FormatString("Uploaded ^0", localpath.filename().string()));
 					});
 			}
 		});
