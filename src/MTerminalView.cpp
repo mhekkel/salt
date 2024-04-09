@@ -1355,7 +1355,7 @@ void MTerminalView::Draw()
 			// hyper link tracking
 			if (linkNr != 0 and linkNr == mCurrentLink)
 			{
-				style |= MDevice::eTextStyleUnderline;
+				style |= MDevice::eTextStyleDoubleUnderline;
 				if (mMouseClick == eLinkClick)
 					style |= MDevice::eTextStyleBold;
 			}
@@ -5762,8 +5762,20 @@ void MTerminalView::LinkClicked(std::string inLink)
 			// TODO: validate hostname in uri. Should be either empty, localhost or the actual hostname of the host we're connected to
 			DownloadFile(uri.get_path().string());
 		}
+		else if (uri.get_scheme() == "ssh")
+		{
+			std::string user = uri.get_userinfo();
+			if (auto c = user.find(':'); c != std::string::npos)
+				user.resize(c);
+			
+			uint16_t port = uri.get_port();
+			if (port == 0)
+				port = 22;
+
+			MSaltApp::Instance().Open({ uri.get_host(), user, port });
+		}
 		else
-			OpenURI(uri.string(), GetWindow());
+			OpenURI(uri.string());
 	}
 	catch (const std::exception &e)
 	{

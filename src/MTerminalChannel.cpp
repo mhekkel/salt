@@ -211,6 +211,14 @@ void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 	asio_ns::async_read(*mChannel, mResponse, asio_ns::transfer_at_least(1), std::move(cb));
 }
 
+void ReportError(asio_system_ns::error_code ec)
+{
+	MSaltApp::Instance().execute([ec]()
+	{
+		DisplayError(ec);
+	});
+}
+
 void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std::string &localpath)
 {
 	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
@@ -220,7 +228,7 @@ void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std:
 		{
 			if (ec or version != 3)
 			{
-				DisplayError(ec);
+				ReportError(ec);
 				self->close();
 			}
 			else
@@ -229,7 +237,7 @@ void MSshTerminalChannel::DownloadFile(const std::string &remotepath, const std:
 					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
 					{
 						if (ec)
-							DisplayError(ec);
+							ReportError(ec);
 					});
 			}
 		});
@@ -244,7 +252,7 @@ void MSshTerminalChannel::UploadFile(const std::string &remotepath, const std::s
 		{
 			if (ec or version != 3)
 			{
-				DisplayError(ec);
+				ReportError(ec);
 				self->close();
 			}
 			else
@@ -253,7 +261,7 @@ void MSshTerminalChannel::UploadFile(const std::string &remotepath, const std::s
 					[self](asio_system_ns::error_code ec, size_t bytes_transfered)
 					{
 						if (ec)
-							DisplayError(ec);
+							ReportError(ec);
 					});
 			}
 		});

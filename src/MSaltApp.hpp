@@ -54,7 +54,6 @@ class MSaltApp : public MApplication
 	void Execute(const std::string &inCommand,
 		const std::vector<std::string> &inArguments) override;
 
-	void AddRecent(const ConnectInfo &inRecent);
 	void Open(const ConnectInfo &inRecent, const std::string &inCommand = {});
 
 	pinch::connection_pool &GetConnectionPool() { return mConnectionPool; }
