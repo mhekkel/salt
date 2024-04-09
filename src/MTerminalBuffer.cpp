@@ -1040,7 +1040,7 @@ int MTerminalBuffer::AddHyperLink(const std::string &inURI, const std::string &i
 	}
 
 	// garbage collect once in a while
-	if ((mNextHyperLinkNr % 128) == 0)
+	if ((mNextHyperLinkNr % 1024) == 0)
 		GarbageCollectHyperlinks();
 
 	int result = mNextHyperLinkNr++;
@@ -1086,6 +1086,15 @@ void MTerminalBuffer::GarbageCollectHyperlinks()
 	std::set<int> inUse;
 
 	for (auto &line : mLines)
+	{
+		for (auto &ch : line)
+		{
+			if (int link = ch.GetHyperLink())
+				inUse.insert(link);
+		}
+	}	
+
+	for (auto &line : mBuffer)
 	{
 		for (auto &ch : line)
 		{
