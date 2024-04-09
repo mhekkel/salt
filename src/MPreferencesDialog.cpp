@@ -32,10 +32,12 @@
 #include "MColorPicker.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
+#include "MFile.hpp"
 #include "MPreferences.hpp"
 #include "MSaltApp.hpp"
 #include "MTerminalWindow.hpp"
 #include "MUnicode.hpp"
+#include "MUtils.hpp"
 
 #include <pinch.hpp>
 
@@ -163,6 +165,10 @@ MPreferencesDialog::MPreferencesDialog()
 	SetText("kex", MPrefs::GetString("kex", pinch::kKeyExchangeAlgorithms));
 	SetText("cmp", MPrefs::GetString("cmp", pinch::kCompressionAlgorithms));
 	SetText("shk", MPrefs::GetString("shk", pinch::kServerHostKeyAlgorithms));
+
+	// --------------------------------------------------------------------
+	SetText("download-dir", MPrefs::GetString("download-dir", GetDownloadDirectory().string() ));
+	SetChecked("always-ask-download-dir", MPrefs::GetBoolean("always-ask-download-dir", false));
 
 	//	SetEnabled("apply", false);
 }
@@ -328,6 +334,9 @@ void MPreferencesDialog::Apply()
 		}
 	}
 
+	MPrefs::SetString("download-dir", GetText("download-dir"));
+	MPrefs::SetBoolean("always-ask-download-dir", IsChecked("always-ask-download-dir"));
+
 	ePreferencesChanged();
 }
 
@@ -345,6 +354,13 @@ void MPreferencesDialog::ButtonClicked(const string &inID)
 		SetText("kex", pinch::kKeyExchangeAlgorithms);
 		SetText("shk", pinch::kServerHostKeyAlgorithms);
 		SetText("cmp", pinch::kCompressionAlgorithms);
+	}
+	else if (inID == "browse-download-dir")
+	{
+		MFileDialogs::ChooseDirectory(this, [this](std::filesystem::path dir)
+		{
+			SetText("download-dir", dir.string());
+		});
 	}
 	else
 		MDialog::ButtonClicked(inID);

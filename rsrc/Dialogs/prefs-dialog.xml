@@ -9,6 +9,7 @@
 				<listitem>Beeps</listitem>
 				<listitem>Environment</listitem>
 				<listitem>Protocols</listitem>
+				<listitem>Downloads</listitem>
 			</listbox>
 			<pager id="pages" bind="left top" margin-left="2">
 				<page id="page1">
@@ -91,6 +92,17 @@
 					<caption text="Compression protocols" />
 					<edittext bind="top left right bottom" id="cmp" style="multiline" width="200" height="100" />
 					<button bind="right bottom" title="Reset" id="reset-protocols" />
+				</page>
+				<page id="page7">
+					<caption text="Downloads"/>
+
+					<hbox>
+						<caption margin-top="5" width="55" text="Save file in"/>
+						<edittext id="download-dir" />
+						<button title="Browse…" id="browse-download-dir" />
+					</hbox>
+					
+					<checkbox bind="top left" id="always-ask-download-dir" title="Always ask where to save downloaded files" />
 				</page>
 			</pager>
 		</hbox>

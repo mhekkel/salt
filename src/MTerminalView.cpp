@@ -5702,16 +5702,29 @@ bool MTerminalView::GetMode(uint32_t inMode, bool inANSI)
 
 // --------------------------------------------------------------------
 
-void MTerminalView::DownloadFile(const std::string &path)
+void MTerminalView::DownloadFile(const std::filesystem::path &path)
 {
 	if (mTerminalChannel->CanDownloadFiles())
 	{
-		MFileDialogs::SaveFileAs(GetWindow(), path, [path, channel = mTerminalChannel](std::filesystem::path file)
-			{ channel->DownloadFile(path, file); });
+		auto downloadDir = GetDownloadDirectory();
+
+		auto lambda = [path, channel = mTerminalChannel](std::filesystem::path dir)
+		{
+			auto localFile = dir / path.filename();
+			for (std::size_t i = 1; std::filesystem::exists(localFile); ++i)
+				localFile = dir / (path.filename().stem().string() + "-(" + std::to_string(i) + ")" + path.filename().extension().string());
+
+			channel->DownloadFile(path, localFile);
+		};
+
+		if (MPrefs::GetBoolean("always-ask-download-dir", false))
+			MFileDialogs::SaveFileAs(GetWindow(), path, std::move(lambda));
+		else
+			lambda(GetDownloadDirectory());
 	}
 }
 
-void MTerminalView::UploadFile(const std::string &path)
+void MTerminalView::UploadFile(const std::filesystem::path &path)
 {
 	if (mTerminalChannel->CanDownloadFiles())
 	{
@@ -5743,11 +5756,7 @@ void MTerminalView::SetHyperLink(const std::string &inURI)
 			uri = inURI;
 
 		if (zeep::http::is_valid_uri(uri))
-		{
 			mHyperLink = mBuffer->AddHyperLink(uri, id);
-
-			PRINT(("Set hyperlink [%d]: %s", mHyperLink, inURI.c_str()));
-		}
 	}
 }
 
@@ -5757,7 +5766,7 @@ void MTerminalView::LinkClicked(std::string inLink)
 	{
 		zeep::http::uri uri(inLink);
 
-		if (uri.get_scheme() == "file")
+		if (uri.get_scheme() == "file" and mTerminalChannel->CanDownloadFiles())
 		{
 			// TODO: validate hostname in uri. Should be either empty, localhost or the actual hostname of the host we're connected to
 			DownloadFile(uri.get_path().string());

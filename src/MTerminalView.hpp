@@ -181,8 +181,8 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 	void SwitchToAlternateScreen();
 	void SwitchToRegularScreen();
 
-	void DownloadFile(const std::string &path);
-	void UploadFile(const std::string &path);
+	void DownloadFile(const std::filesystem::path &path);
+	void UploadFile(const std::filesystem::path &path);
 
 	void Beep();
 

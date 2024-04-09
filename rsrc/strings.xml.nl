@@ -356,6 +356,26 @@
 		<value>Voeg hier NAAM=WAARDE paren toe</value>
 	</localstring>
 	
+	<localstring context="prefs-dialog">
+		<key>Downloads</key>
+		<value>Downloads</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Save file in</key>
+		<value>Bestanden opslaan in</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Browse…</key>
+		<value>Bladeren…</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Always ask where to save downloaded files</key>
+		<value>Altijd vragen waar bestanden moeten worden opgeslagen</value>
+	</localstring>
+
 	<localstring context="tunnel-dialog">
 		<key>Please enter the port numbers for the tunnel</key>
 		<value>Vul de poortnummmers voor de tunnel in</value>
@@ -655,6 +675,11 @@
 	<localstring>
 		<key>Save</key>
 		<value>Bewaar</value>
+	</localstring>
+	
+	<localstring>
+		<key>Select</key>
+		<value>Selecteer</value>
 	</localstring>
 	
 	<localstring>

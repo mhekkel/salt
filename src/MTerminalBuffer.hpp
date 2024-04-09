@@ -267,12 +267,12 @@ class MChar
 	}
 
   private:
-	int mHyperLink : 11 = 0;
-	char32_t mUnicode : 21 = ' ';
+	uint32_t mHyperLink = 0;
+	char32_t mUnicode = ' ';
 	MStyle mStyle{};
 };
 
-static_assert(sizeof(MChar) == 8, "MChar should be 8 bytes");
+static_assert(sizeof(MChar) == 12, "MChar should be 12 bytes");
 
 // --------------------------------------------------------------------
 // Characters are store in lines
@@ -334,6 +334,56 @@ class MLine
 
 	template <class OutputIterator>
 	void CopyOut(OutputIterator iter) const;
+
+	struct iterator
+	{
+		using iterator_category = std::bidirectional_iterator_tag;
+		using value_type = MChar;
+		using pointer = value_type *;
+		using reference = value_type &;
+		using difference_type = std::ptrdiff_t;
+
+		iterator(MChar *inPtr)
+			: mPtr(inPtr)
+		{
+		}
+
+		reference operator*() { return *mPtr; }
+		pointer operator->() const { return mPtr; }
+
+		iterator &operator++()
+		{
+			++mPtr;
+			return *this;
+		}
+
+		iterator operator++(int)
+		{
+			iterator iter(*this);
+			operator++();
+			return iter;
+		}
+
+		iterator &operator--()
+		{
+			--mPtr;
+			return *this;
+		}
+
+		iterator operator--(int)
+		{
+			iterator iter(*this);
+			operator--();
+			return iter;
+		}
+
+		friend auto operator<=>(const iterator &lhs, const iterator &rhs) = default;
+
+		MChar *mPtr;
+	};
+
+	iterator begin() { return iterator(mCharacters); }
+	iterator end() { return iterator(mCharacters + mSize); }
 
   private:
 	MChar *mCharacters = nullptr;
@@ -454,6 +504,8 @@ class MTerminalBuffer
 
   private:
 	unicode GetChar(uint32_t inOffset, bool inToLower) const;
+
+	void GarbageCollectHyperlinks();
 
 	std::deque<MLine> mBuffer;
 	uint32_t mBufferSize;

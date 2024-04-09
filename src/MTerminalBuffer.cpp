@@ -33,10 +33,9 @@
 #include "MUnicode.hpp"
 
 #include <algorithm>
+#include <set>
 
 using namespace std;
-
-static_assert(sizeof(MChar) == 8, "An MChar should be eight bytes");
 
 // --------------------------------------------------------------------
 
@@ -1040,6 +1039,9 @@ int MTerminalBuffer::AddHyperLink(const std::string &inURI, const std::string &i
 		}
 	}
 
+	if (mHyperLinks.size() > 1024)
+		GarbageCollectHyperlinks();
+
 	int result = mNextHyperLinkNr++;
 	mHyperLinks.emplace_back(result, inID, inURI);
 	return result;
@@ -1061,7 +1063,7 @@ int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
 	{
 		inLine = -inLine - 1;
 		if (static_cast<size_t>(inLine) < mBuffer.size())
-			result = mLines[inLine][inColumn].GetHyperLink();
+			result = mBuffer[inLine][inColumn].GetHyperLink();
 	}
 
 	return result;
@@ -1076,4 +1078,27 @@ std::string MTerminalBuffer::GetHyperLink(int inNr) const
 	}
 
 	return {};
+}
+
+void MTerminalBuffer::GarbageCollectHyperlinks()
+{
+	std::set<int> inUse;
+
+	for (auto &line : mLines)
+	{
+		for (auto &ch : line)
+		{
+			if (int link = ch.GetHyperLink())
+				inUse.insert(link);
+		}
+	}	
+
+	mHyperLinks.erase(
+		std::remove_if(mHyperLinks.begin(), mHyperLinks.end(),
+			[&inUse](const MHyperLink &link) 
+			{
+				return not inUse.contains(link.nr);
+			}),
+		mHyperLinks.end()
+	);
 }
