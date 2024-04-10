@@ -5791,5 +5791,7 @@ void MTerminalView::LinkClicked(std::string inLink)
 
 void MTerminalView::OnIOStatus(std::string inMessage)
 {
-	mStatusbar->SetStatusText(0, inMessage, false);
+	MSaltApp::Instance().execute([this, inMessage](){
+		mStatusbar->SetStatusText(0, inMessage, false);
+	});
 }
