@@ -267,9 +267,9 @@ class MChar
 	}
 
   private:
-	uint32_t mHyperLink = 0;
 	char32_t mUnicode = ' ';
 	MStyle mStyle{};
+	int mHyperLink = 0;
 };
 
 static_assert(sizeof(MChar) == 12, "MChar should be 12 bytes");

@@ -240,8 +240,6 @@ bool MConnectDialog::CancelClicked()
 
 bool MConnectDialog::OKClicked()
 {
-	MWindow *w = nullptr;
-
 	ConnectInfo ci{};
 
 	std::string host = GetText("host");
@@ -290,9 +288,9 @@ bool MConnectDialog::OKClicked()
 
 void MConnectDialog::ValueChanged(const std::string &inID, int32_t inValue)
 {
-	if (inID == "host" and inValue >= 0 and inValue < mRecentSessions.size())
+	if (inID == "host" and inValue >= 0 and static_cast<uint32_t>(inValue) < mRecentSessions.size())
 		SelectRecent(mRecentSessions.at(inValue));
-	else if (inID == "proxy-host" and inValue >= 0 and inValue <= mRecentProxies.size())
+	else if (inID == "proxy-host" and inValue >= 0 and static_cast<uint32_t>(inValue) <= mRecentProxies.size())
 		SelectProxy(mRecentProxies.at(inValue));
 }
 

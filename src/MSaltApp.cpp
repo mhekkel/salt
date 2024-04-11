@@ -75,7 +75,6 @@ std::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)"
 MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	: MApplication(inImpl)
 	, mIOContext(1)
-	, mConnectionPool(mIOContext)
 
 	, cNew(this, "new-terminal", &MSaltApp::OnNew, 'n', kControlKey | kShiftKey)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
@@ -91,6 +90,8 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	, cOpenRecent(this, "open-recent", &MSaltApp::OnOpenRecent)
 
 	, ePreferencesChanged(this, &MSaltApp::OnPreferencesChanged)
+
+	, mConnectionPool(mIOContext)
 {
 }
 
