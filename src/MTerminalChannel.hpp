@@ -83,6 +83,7 @@ class MTerminalChannel
 	virtual bool CanDownloadFiles() const { return false; }
 	virtual void DownloadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) {}
 	virtual void UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) {}
+	virtual void UploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_directory) {}
 
   protected:
 	MTerminalChannel();

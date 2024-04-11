@@ -36,6 +36,8 @@
 
 #include <pinch.hpp>
 
+#include <asio/experimental/awaitable_operators.hpp>
+
 #include <fstream>
 
 using namespace std;
@@ -101,6 +103,9 @@ class MSshTerminalChannel : public MTerminalChannel
 	bool CanDownloadFiles() const override { return true; }
 	void DownloadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) override;
 	void UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) override;
+	void UploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_directory) override;
+
+	asio_ns::awaitable<void> DoUploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_directory);
 
   private:
 	shared_ptr<pinch::terminal_channel> mChannel;
@@ -278,6 +283,68 @@ void MSshTerminalChannel::UploadFile(const std::filesystem::path &remotepath, co
 					});
 			}
 		});
+}
+
+void MSshTerminalChannel::UploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_dir)
+{
+	asio_ns::io_context &context = MSaltApp::Instance().get_io_context();
+
+	asio_ns::co_spawn(context, DoUploadFileTo(localpath, remote_dir), asio_ns::detached);
+}
+
+asio_ns::awaitable<void> MSshTerminalChannel::DoUploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_dir)
+{
+	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+
+	auto version = co_await p->async_init(3, asio_ns::use_awaitable);
+	if (version == 3)
+	{
+		auto files = co_await p->read_dir(remote_dir, asio_ns::use_awaitable);
+
+		// see if filename needs a trailing number
+
+		std::string filename = localpath.filename().string();
+		int nr = 0;
+		for (;;)
+		{
+			
+			{
+
+			}
+		}
+		
+
+		// std::size_t = co_await p->async_get_file_size()
+	}
+
+
+
+	// p->async_init(3,
+	// 	[channel = p, localpath, remotedir, this](const asio_system_ns::error_code &ec, int version)
+	// 	{
+	// 		if (ec or version != 3)
+	// 		{
+	// 			ReportError(ec);
+	// 			channel->close();
+	// 		}
+	// 		else
+	// 		{
+				
+
+	// 			eIOStatus(FormatString("Uploading ^0", remotepath.filename().string()));
+	// 			channel->write_file(remotepath.string(), localpath.string(),
+	// 				[channel, localpath, this](asio_system_ns::error_code ec, size_t bytes_transfered)
+	// 				{
+	// 					if (ec)
+	// 					{
+	// 						eIOStatus("");
+	// 						ReportError(ec);
+	// 					}
+	// 					else
+	// 						eIOStatus(FormatString("Uploaded ^0", localpath.filename().string()));
+	// 				});
+	// 		}
+	// 	});
 }
 
 // --------------------------------------------------------------------

@@ -232,7 +232,7 @@ std::list<MTerminalView *> MTerminalView::sTerminalList;
 MTerminalView::MTerminalView(const std::string &inID, MRect inBounds,
 	MStatusbar *inStatusbar, MScrollbar *inScrollbar, MSearchPanel *inSearchPanel,
 	MTerminalChannel *inTerminalChannel, const std::vector<std::string> &inArgv)
-	: MCanvas(inID, inBounds)
+	: MCanvas(inID, inBounds, MCanvasDropTypes::File | MCanvasDropTypes::Text)
 	, eScroll(this, &MTerminalView::Scroll)
 	, eSearch(this, &MTerminalView::FindNext)
 	, ePreferencesChanged(this, &MTerminalView::PreferencesChanged)
@@ -1094,9 +1094,19 @@ void MTerminalView::Draw()
 	}
 
 	dev.SetBackColor(bc);
-	dev.SetForeColor(fc);
 
-	dev.EraseRect(mBounds);
+	if (mDragWithin)
+	{
+		dev.SetForeColor(selectionColor);
+		dev.FillRect(mBounds);
+		MRect b(mBounds);
+		b.InsetBy(4, 4);
+		dev.EraseRect(b);
+	}
+	else
+		dev.EraseRect(mBounds);
+
+	dev.SetForeColor(fc);
 	dev.SetFont(mFont);
 
 	// fill text layout with a line of spaces
@@ -5339,6 +5349,10 @@ void MTerminalView::EscapeAPC(uint8_t inChar)
 				break;
 			}
 
+			case 9:
+				mTerminalCWD = mArgString;
+				break;
+
 			default:
 				PRINT(("Ignored %d APC option", mArgs[0]));
 				break;
@@ -5801,3 +5815,55 @@ void MTerminalView::OnIOStatus(std::string inMessage)
 		mStatusbar->SetStatusText(0, inMessage, false);
 	});
 }
+
+// --------------------------------------------------------------------
+
+bool MTerminalView::DragAcceptsMimeType(const std::string &inMimeType)
+{
+	return IsOpen() and inMimeType == "text/plain";
+}
+
+bool MTerminalView::DragAcceptsFile() 
+{
+	return IsOpen() and mTerminalChannel->CanDownloadFiles();
+}
+
+void MTerminalView::DragEnter(int32_t inX, int32_t inY)
+{
+	mDragWithin = true;
+	Invalidate();
+}
+
+void MTerminalView::DragMotion(int32_t inX, int32_t inY)
+{
+}
+
+void MTerminalView::DragLeave() 
+{
+	mDragWithin = false;
+	Invalidate();
+}
+
+bool MTerminalView::DragAcceptData(int32_t inX, int32_t inY, const std::string &inData)
+{
+	bool result = false;
+	if (IsOpen())
+	{
+		DoPaste(inData);
+		result = true;
+	}
+	return result;
+}
+
+bool MTerminalView::DragAcceptFile(int32_t inX, int32_t inY, const std::filesystem::path &inFile)
+{
+	bool result = false;
+	if (IsOpen() and mTerminalChannel->CanDownloadFiles())
+	{
+		mTerminalChannel->UploadFileTo(inFile, mTerminalCWD);
+		result = true;
+	}
+
+	return result;
+}
+

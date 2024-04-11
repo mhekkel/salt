@@ -116,6 +116,15 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 
 	bool DoPaste(const std::string &inText);
 
+	// Drop support
+	bool DragAcceptsMimeType(const std::string &inMimeType) override;
+	bool DragAcceptsFile() override;
+	void DragEnter(int32_t inX, int32_t inY) override;
+	void DragMotion(int32_t inX, int32_t inY) override;
+	void DragLeave() override;
+	bool DragAcceptData(int32_t inX, int32_t inY, const std::string &inData) override;
+	bool DragAcceptFile(int32_t inX, int32_t inY, const std::filesystem::path &inFile) override;
+
   private:
 	void ActivateSelf() override;
 	void DeactivateSelf() override;
@@ -448,6 +457,9 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 
 	void OnIOStatus(std::string inMessage);
 	MEventIn<void(std::string)> eIOStatus;
+
+	bool mDragWithin = false;
+	std::filesystem::path mTerminalCWD;
 
 #if DEBUG
 	bool mDebugUpdate;
