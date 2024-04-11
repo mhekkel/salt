@@ -119,12 +119,6 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	, mPort(inPort)
 	, mSSHCommand(inSSHCommand)
 {
-	using namespace std::placeholders;
-
-	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
-
-	using namespace std::placeholders;
-
 	mConnection->set_connection_callback_interface(this);
 
 	std::stringstream title;

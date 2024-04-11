@@ -1052,7 +1052,7 @@ int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
 {
 	int result = 0;
 
-	if (inColumn > mWidth)
+	if (static_cast<uint32_t>(inColumn) > mWidth)
 		return 0;
 
 	if (inLine >= 0)

@@ -74,7 +74,6 @@ std::regex kRecentRE("^" USER HOST PORT "(?:;" USER HOST PORT ";(.+)"
 
 MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 	: MApplication(inImpl)
-	, mIOContext(1)
 
 	, cNew(this, "new-terminal", &MSaltApp::OnNew, 'n', kControlKey | kShiftKey)
 	, cConnect(this, "connect", &MSaltApp::OnConnect, 's', kControlKey | kShiftKey)
@@ -91,6 +90,7 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 
 	, ePreferencesChanged(this, &MSaltApp::OnPreferencesChanged)
 
+	, mIOContext(1)
 	, mConnectionPool(mIOContext)
 {
 }
@@ -249,7 +249,7 @@ void MSaltApp::OnSelectTerminal(int inTerminalNr)
 {
 	for (auto w = MTerminalWindow::GetFirstTerminal(); w != nullptr; w = w->GetNextTerminal())
 	{
-		if (w->GetTerminalNr() != inTerminalNr)
+		if (w->GetTerminalNr() != static_cast<uint32_t>(inTerminalNr))
 			continue;
 
 		w->Select();
@@ -269,7 +269,7 @@ void MSaltApp::OnOpenRecent(int inConnectionNr)
 {
 	for (const auto &[ci, nr] : mRecent)
 	{
-		if (nr != inConnectionNr)
+		if (static_cast<int>(nr) != inConnectionNr)
 			continue;
 
 		Open(ci);
@@ -343,7 +343,7 @@ void MSaltApp::Open(const ConnectInfo &inRecent, const std::string &inCommand)
 		break;
 	}
 
-	while (mRecent.size() > MPrefs::GetInteger("recent-count", 10))
+	while (static_cast<int>(mRecent.size()) > MPrefs::GetInteger("recent-count", 10))
 		mRecent.pop_back();
 
 	UpdateRecentSessionMenu();

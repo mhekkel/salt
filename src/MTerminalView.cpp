@@ -2306,7 +2306,7 @@ void MTerminalView::OnEnterTOTP(int inItemIndex)
 	// silently break on errors
 	for (;;)
 	{
-		if (inItemIndex >= totp.size())
+		if (static_cast<std::size_t>(inItemIndex) >= totp.size())
 			break;
 
 		auto s = totp[inItemIndex].rfind(';');
@@ -2651,7 +2651,13 @@ void MTerminalView::GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool
 	uint32_t &outWidth, uint32_t &outHeight)
 {
 	MDevice dev;
-	dev.SetFont(MPrefs::GetString("font", MPrefs::GetString("font", "Consolas 10")));
+	dev.SetFont(MPrefs::GetString("font", MPrefs::GetString("font",
+#if defined _MSC_VER
+		"Consolas 10"
+#else
+		"DejaVu Sans Mono 11"
+#endif
+	)));
 
 	float charWidth = dev.GetXWidth();
 	uint32_t lineHeight = dev.GetLineHeight();

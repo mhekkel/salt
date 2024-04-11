@@ -226,7 +226,7 @@ void MPreferencesDialog::Apply()
 		MPrefs::SetInteger("recent-count", recentCount);
 
 		auto recent = MPrefs::GetArray("recent-sessions");
-		if (recent.size() > recentCount)
+		if (recent.size() > static_cast<std::size_t>(recentCount))
 		{
 			recent.resize(recentCount);
 			MPrefs::SetArray("recent-sesions", recent);

@@ -47,7 +47,13 @@ MSearchPanel::MSearchPanel(const std::string &inID, MRect inBounds)
 	, mTextBox(nullptr)
 {
 	MDevice dev;
-	dev.SetFont("Segoe UI 9");
+	dev.SetFont(
+#if defined _MSC_VER
+		"Segoe UI 9"
+#else
+		"Sans Regular 10"
+#endif
+	);
 
 	std::string captionString(_("Find:"));
 	dev.SetText(captionString);
