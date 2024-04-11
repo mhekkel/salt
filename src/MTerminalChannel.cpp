@@ -93,7 +93,7 @@ class MSshTerminalChannel : public MTerminalChannel
 
 	bool IsOpen() const override;
 
-	bool CanDisconnect() const override { return true;}
+	bool CanDisconnect() const override { return true; }
 	void Disconnect(bool disconnectProxy) override;
 
 	void SendData(string &&inData) override;
@@ -105,7 +105,9 @@ class MSshTerminalChannel : public MTerminalChannel
 	void UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath) override;
 	void UploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_directory) override;
 
-	asio_ns::awaitable<void> DoUploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_directory);
+	asio_ns::awaitable<void> DoDownloadFile(std::filesystem::path remotepath, std::filesystem::path localpath);
+	asio_ns::awaitable<void> DoUploadFile(std::filesystem::path remotepath, std::filesystem::path localpath);
+	asio_ns::awaitable<void> DoUploadFileTo(std::filesystem::path localpath, std::filesystem::path remote_directory);
 
   private:
 	shared_ptr<pinch::terminal_channel> mChannel;
@@ -220,131 +222,128 @@ void MSshTerminalChannel::ReadData(const ReadCallback &inCallback)
 void ReportError(asio_system_ns::error_code ec)
 {
 	MSaltApp::Instance().execute([ec]()
-	{
-		DisplayError(ec);
-	});
+		{ DisplayError(ec); });
 }
 
 void MSshTerminalChannel::DownloadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath)
 {
-	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+	asio_ns::co_spawn(MSaltApp::Instance().get_io_context(), DoDownloadFile(remotepath, localpath), asio_ns::detached);
+}
 
-	p->async_init(3,
-		[channel = p, remotepath, localpath, this](const asio_system_ns::error_code &ec, int version)
-		{
-			if (ec or version != 3)
-			{
-				ReportError(ec);
-				channel->close();
-			}
-			else
-			{
-				eIOStatus(FormatString("Downloading ^0", remotepath.filename().string()));
-				channel->read_file(remotepath.string(), localpath.string(),
-					[channel, this, localpath](asio_system_ns::error_code ec, size_t bytes_transfered)
-					{
-						if (ec)
-						{
-							eIOStatus("");
-							ReportError(ec);
-						}
-						else
-							eIOStatus(FormatString("Downloaded ^0", localpath.filename().string()));
-					});
-			}
-		});
+asio_ns::awaitable<void> MSshTerminalChannel::DoDownloadFile(std::filesystem::path remotepath, std::filesystem::path localpath)
+{
+	try
+	{
+		auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+
+		auto version = co_await p->async_init(3, asio_ns::use_awaitable);
+		if (version != 3)
+			throw std::runtime_error("Wrong SFTP version");
+
+		eIOStatus(FormatString("Downloading ^0", remotepath.filename().string()));
+		co_await p->read_file(remotepath.string(), localpath.string(), asio_ns::use_awaitable);
+		eIOStatus(FormatString("Downloaded ^0", localpath.filename().string()));
+	}
+	catch (const std::exception &ex)
+	{
+		eIOStatus(ex.what());
+		std::cerr << "error: " << ex.what() << "\n";
+	}
 }
 
 void MSshTerminalChannel::UploadFile(const std::filesystem::path &remotepath, const std::filesystem::path &localpath)
 {
-	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+	asio_ns::co_spawn(MSaltApp::Instance().get_io_context(), DoUploadFile(remotepath, localpath), asio_ns::detached);
+}
 
-	p->async_init(3,
-		[channel = p, remotepath, localpath, this](const asio_system_ns::error_code &ec, int version)
-		{
-			if (ec or version != 3)
-			{
-				ReportError(ec);
-				channel->close();
-			}
-			else
-			{
-				eIOStatus(FormatString("Uploading ^0", remotepath.filename().string()));
-				channel->write_file(remotepath.string(), localpath.string(),
-					[channel, localpath, this](asio_system_ns::error_code ec, size_t bytes_transfered)
-					{
-						if (ec)
-						{
-							eIOStatus("");
-							ReportError(ec);
-						}
-						else
-							eIOStatus(FormatString("Uploaded ^0", localpath.filename().string()));
-					});
-			}
-		});
+asio_ns::awaitable<void> MSshTerminalChannel::DoUploadFile(std::filesystem::path remotepath, std::filesystem::path localpath)
+{
+	try
+	{
+		auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+
+		auto version = co_await p->async_init(3, asio_ns::use_awaitable);
+		if (version != 3)
+			throw std::runtime_error("Wrong SFTP version");
+
+		eIOStatus(FormatString("Uploading ^0", remotepath.filename().string()));
+		co_await p->write_file(remotepath.string(), localpath.string(), asio_ns::use_awaitable);
+		eIOStatus(FormatString("Uploaded ^0", localpath.filename().string()));
+	}
+	catch (const std::exception &ex)
+	{
+		eIOStatus(ex.what());
+		std::cerr << "error: " << ex.what() << "\n";
+	}
 }
 
 void MSshTerminalChannel::UploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_dir)
 {
-	asio_ns::io_context &context = MSaltApp::Instance().get_io_context();
-
-	asio_ns::co_spawn(context, DoUploadFileTo(localpath, remote_dir), asio_ns::detached);
+	asio_ns::co_spawn(MSaltApp::Instance().get_io_context(), DoUploadFileTo(localpath, remote_dir), asio_ns::detached);
 }
 
-asio_ns::awaitable<void> MSshTerminalChannel::DoUploadFileTo(const std::filesystem::path &localpath, const std::filesystem::path &remote_dir)
+asio_ns::awaitable<void> MSshTerminalChannel::DoUploadFileTo(std::filesystem::path localpath, std::filesystem::path remote_dir)
 {
-	auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
-
-	auto version = co_await p->async_init(3, asio_ns::use_awaitable);
-	if (version == 3)
+	try
 	{
+		auto p = std::make_shared<pinch::sftp_channel>(mChannel->get_connection().shared_from_this());
+
+		auto version = co_await p->async_init(3, asio_ns::use_awaitable);
+		if (version != 3)
+			throw std::runtime_error("Wrong SFTP version");
+
+		if (remote_dir.empty())
+			remote_dir = ".";
+		else if (not remote_dir.is_absolute())
+			remote_dir = "." / remote_dir;
+
+		co_await p->make_dir(remote_dir, asio_ns::use_awaitable);
+
 		auto files = co_await p->read_dir(remote_dir, asio_ns::use_awaitable);
 
 		// see if filename needs a trailing number
 
-		std::string filename = localpath.filename().string();
+		auto filename = localpath.filename();
+
+		eIOStatus(FormatString("Uploading ^0", filename.string()));
+
 		int nr = 0;
 		for (;;)
 		{
-			
+			bool exists = false;
+			for (const auto &[name, longname, attr] : files)
 			{
+				if (name != filename.string())
+					continue;
 
+				exists = true;
+				break;
 			}
+
+			if (not exists)
+				break;
+
+			filename = localpath.filename().stem().string() + '-' + std::to_string(++nr) + localpath.filename().extension().string();
 		}
-		
 
-		// std::size_t = co_await p->async_get_file_size()
+		auto written = co_await p->write_file((remote_dir / filename).string(), localpath, asio_ns::use_awaitable);
+
+		eIOStatus(FormatString("Uploaded ^0", filename.string()));
 	}
-
-
-
-	// p->async_init(3,
-	// 	[channel = p, localpath, remotedir, this](const asio_system_ns::error_code &ec, int version)
-	// 	{
-	// 		if (ec or version != 3)
-	// 		{
-	// 			ReportError(ec);
-	// 			channel->close();
-	// 		}
-	// 		else
-	// 		{
-				
-
-	// 			eIOStatus(FormatString("Uploading ^0", remotepath.filename().string()));
-	// 			channel->write_file(remotepath.string(), localpath.string(),
-	// 				[channel, localpath, this](asio_system_ns::error_code ec, size_t bytes_transfered)
-	// 				{
-	// 					if (ec)
-	// 					{
-	// 						eIOStatus("");
-	// 						ReportError(ec);
-	// 					}
-	// 					else
-	// 						eIOStatus(FormatString("Uploaded ^0", localpath.filename().string()));
-	// 				});
-	// 		}
-	// 	});
+	catch (const asio_system_ns::system_error &e)
+	{
+		eIOStatus(e.what());
+		std::cerr << "system error: " << e.what() << "\n";
+	}
+	catch (const std::exception &ex)
+	{
+		eIOStatus(ex.what());
+		std::cerr << "error: " << ex.what() << "\n";
+	}
+	catch (...)
+	{
+		std::cerr << "exception\n";
+	}
 }
 
 // --------------------------------------------------------------------

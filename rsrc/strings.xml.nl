@@ -357,8 +357,18 @@
 	</localstring>
 	
 	<localstring context="prefs-dialog">
+		<key>File Transfer</key>
+		<value>Bestandsuitwisseling</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
 		<key>Downloads</key>
-		<value>Downloads</value>
+		<value>Downloaden</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Uploads</key>
+		<value>Uploaden</value>
 	</localstring>
 
 	<localstring context="prefs-dialog">
@@ -374,6 +384,16 @@
 	<localstring context="prefs-dialog">
 		<key>Always ask where to save downloaded files</key>
 		<value>Altijd vragen waar bestanden moeten worden opgeslagen</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Relative paths are accepted as relative to your home at the remote server</key>
+		<value>Relatieve paden zijn relatief ten opzichte van de thuis map op de server</value>
+	</localstring>
+
+	<localstring context="prefs-dialog">
+		<key>Use current working directory (if known, see documentation)</key>
+		<value>Gebruik huidige werk map, indine bekend (zie documentatie)</value>
 	</localstring>
 
 	<localstring context="tunnel-dialog">

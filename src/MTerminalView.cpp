@@ -5723,8 +5723,6 @@ void MTerminalView::DownloadFile(const std::filesystem::path &path)
 {
 	if (mTerminalChannel->CanDownloadFiles())
 	{
-		auto downloadDir = GetDownloadDirectory();
-
 		auto lambda = [path, channel = mTerminalChannel](std::filesystem::path dir)
 		{
 			auto localFile = dir / path.filename();
@@ -5847,6 +5845,8 @@ void MTerminalView::DragLeave()
 bool MTerminalView::DragAcceptData(int32_t inX, int32_t inY, const std::string &inData)
 {
 	bool result = false;
+	mDragWithin = false;
+
 	if (IsOpen())
 	{
 		DoPaste(inData);
@@ -5858,11 +5858,24 @@ bool MTerminalView::DragAcceptData(int32_t inX, int32_t inY, const std::string &
 bool MTerminalView::DragAcceptFile(int32_t inX, int32_t inY, const std::filesystem::path &inFile)
 {
 	bool result = false;
-	if (IsOpen() and mTerminalChannel->CanDownloadFiles())
+	mDragWithin = false;
+
+	if (IsOpen() and mTerminalChannel->CanDownloadFiles() and
+		std::filesystem::is_regular_file(inFile))
 	{
-		mTerminalChannel->UploadFileTo(inFile, mTerminalCWD);
+		std::filesystem::path dest;
+		if (MPrefs::GetBoolean("use-cwd-as-upload-dir", true))
+			dest = mTerminalCWD;
+		else
+			dest = MPrefs::GetString("upload-dir", "." );
+		if (dest.empty())
+			dest = ".";
+
+		mTerminalChannel->UploadFileTo(inFile, dest);
 		result = true;
 	}
+
+	Invalidate();
 
 	return result;
 }

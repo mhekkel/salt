@@ -170,6 +170,9 @@ MPreferencesDialog::MPreferencesDialog()
 	SetText("download-dir", MPrefs::GetString("download-dir", GetDownloadDirectory().string() ));
 	SetChecked("always-ask-download-dir", MPrefs::GetBoolean("always-ask-download-dir", false));
 
+	SetText("upload-dir", MPrefs::GetString("upload-dir", "." ));
+	SetChecked("use-cwd-as-upload-dir", MPrefs::GetBoolean("use-cwd-as-upload-dir", true));
+
 	//	SetEnabled("apply", false);
 }
 
@@ -336,6 +339,9 @@ void MPreferencesDialog::Apply()
 
 	MPrefs::SetString("download-dir", GetText("download-dir"));
 	MPrefs::SetBoolean("always-ask-download-dir", IsChecked("always-ask-download-dir"));
+
+	MPrefs::SetString("upload-dir", GetText("upload-dir"));
+	MPrefs::SetBoolean("use-cwd-as-upload-dir", IsChecked("use-cwd-as-upload-dir"));
 
 	ePreferencesChanged();
 }

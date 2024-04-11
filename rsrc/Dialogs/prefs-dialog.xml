@@ -9,7 +9,7 @@
 				<listitem>Beeps</listitem>
 				<listitem>Environment</listitem>
 				<listitem>Protocols</listitem>
-				<listitem>Downloads</listitem>
+				<listitem>File Transfer</listitem>
 			</listbox>
 			<pager id="pages" bind="left top" margin-left="2">
 				<page id="page1">
@@ -103,6 +103,18 @@
 					</hbox>
 					
 					<checkbox bind="top left" id="always-ask-download-dir" title="Always ask where to save downloaded files" />
+
+					<caption margin-top="10" text="Uploads"/>
+
+					<caption margin-top="5" text="Relative paths are accepted as relative to your home at the remote server"/>
+
+					<hbox>
+						<caption margin-top="5" width="55" text="Save file in"/>
+						<edittext id="upload-dir" />
+					</hbox>
+					
+					<checkbox bind="top left" id="use-cwd-as-upload-dir" title="Use current working directory (if known, see documentation)" />
+
 				</page>
 			</pager>
 		</hbox>
