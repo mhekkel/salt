@@ -91,7 +91,7 @@ MPreferencesDialog::MPreferencesDialog()
 	SetChecked("blink-cursor", MPrefs::GetBoolean("blink-cursor", false));
 	SetText("terminal-type", MPrefs::GetString("terminal-type", "xterm"));
 	SetChecked("ignore-color", MPrefs::GetBoolean("ignore-color", false));
-	SetChecked("show-status-bar", MPrefs::GetBoolean("show-status-bar", false));
+	SetChecked("show-status-bar", MPrefs::GetBoolean("show-status-bar", true));
 
 	// connection page
 #if defined _MSC_VER
