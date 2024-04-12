@@ -51,7 +51,7 @@
 // ------------------------------------------------------------------
 //
 
-class MSshTerminalWindow : public MTerminalWindow, public pinch::connection_callback_interface
+class MSshTerminalWindow : public MTerminalWindow
 {
   public:
 	MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
@@ -72,19 +72,13 @@ class MSshTerminalWindow : public MTerminalWindow, public pinch::connection_call
 
   protected:
 
-	callback_executor_type get_executor() override
-	{
-		MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
-		return my_executor;
-	}
-
 	void accepts_hostkey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
-		pinch::host_key_state state, std::promise<pinch::host_key_reply> result) override;
+		pinch::host_key_state state, std::promise<pinch::host_key_reply> result);
 
-	void provide_password(std::promise<std::string> result) override;
+	void provide_password(std::promise<std::string> result);
 
 	void provide_credentials(const std::string &name, const std::string &instruction, const std::string &lang,
-		const std::vector<pinch::prompt> &prompts, std::promise<std::vector<std::string>> result) override;
+		const std::vector<pinch::prompt> &prompts, std::promise<std::vector<std::string>> result);
 
 	MCommand<void()> cDisconnect;
 	MCommand<void()> cRenewKeys;
@@ -119,7 +113,16 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	, mPort(inPort)
 	, mSSHCommand(inSSHCommand)
 {
-	mConnection->set_connection_callback_interface(this);
+	using namespace std::placeholders;
+
+	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
+
+	mConnection->set_callbacks(
+		my_executor,
+		std::bind(&MSshTerminalWindow::accepts_hostkey, this, _1, _2, _3, _4, _5),
+		std::bind(&MSshTerminalWindow::provide_password, this, _1),
+		std::bind(&MSshTerminalWindow::provide_credentials, this, _1, _2, _3, _4, _5)
+	);
 
 	std::stringstream title;
 	title << mUser << '@' << mServer;
