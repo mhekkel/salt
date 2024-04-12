@@ -120,8 +120,8 @@
 		</hbox>
 	</vbox>
 	<hbox margin-top="4" bind="left right bottom">
+		<button bind="right bottom" title="Apply" id="apply" />
 		<button bind="right bottom" title="OK" id="ok" default="true" />
 		<button bind="right bottom" title="Cancel" id="cancel" />
-		<button bind="right bottom" title="Apply" id="apply" />
 	</hbox>
 </dialog>
