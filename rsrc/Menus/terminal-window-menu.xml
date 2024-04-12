@@ -96,11 +96,10 @@
 		<item label="First" />
 	</menu>
 	<menu id='' label="Help">
+
+		<item label="Manual…" cmd='app.manual'/>
+		<separator />
 		<item label="About…" cmd='app.about'/>
-		
-		
-		<!--		-->
-		<!--		<item label="Test" cmd='test'/>-->
-		<!--		-->
+
 	</menu>
 </menubar>

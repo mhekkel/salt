@@ -101,6 +101,7 @@ class MSaltApp : public MApplication
 	void OnAddNewTOTP();
 	void OnQuit();
 	void OnShowPreferences();
+	void OnManual();
 	void OnAbout();
 	void OnSelectTerminal(int inTerminalNr);
 	void OnClearRecentMenu();
@@ -111,6 +112,7 @@ class MSaltApp : public MApplication
 	MCommand<void()> cAddNewTOTP;
 	MCommand<void()> cQuit;
 	MCommand<void()> cShowPreferences;
+	MCommand<void()> cManual;
 	MCommand<void()> cAbout;
 	MCommand<void(int)> cSelectTerminal;
 	MCommand<void()> cClearRecentMenu;

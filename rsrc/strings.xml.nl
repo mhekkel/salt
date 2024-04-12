@@ -712,4 +712,8 @@
 		<value>Het plakken van de volgende karakters niet toestaan</value>
 	</localstring>
 	
+	<localstring>
+		<key>Manual…</key>
+		<value>Handleiding…</value>
+	</localstring>
 </strings>

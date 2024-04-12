@@ -4,3 +4,6 @@ build/
 src/revision.hpp
 libmcfp/cmake
 service-bell-ring-14610.aup3
+docroot/
+manual/conf.py
+doc/salt.1

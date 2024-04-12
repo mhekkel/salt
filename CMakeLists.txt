@@ -40,6 +40,7 @@ elseif(MSVC)
 endif()
 
 option(USE_BOOST_ASIO "Use the asio library from Boost instead of the non-boost version" OFF)
+option(BUILD_DOCUMENTATION "Build manual page" OFF)
 
 set(ZEEP_USE_BOOST_ASIO OFF)
 
@@ -88,6 +89,9 @@ add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
 add_subdirectory(libpinch EXCLUDE_FROM_ALL)
 add_subdirectory(libmgui EXCLUDE_FROM_ALL)
 
+# Generate the manual first
+add_subdirectory(manual)
+
 add_executable(salt
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.cpp
 	${CMAKE_SOURCE_DIR}/src/MAddTOTPHashDialog.hpp
@@ -130,9 +134,9 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/salt.desktop.in
 	${CMAKE_SOURCE_DIR}/rsrc/Dialogs
 	${CMAKE_SOURCE_DIR}/rsrc/strings.xml.nl
-	${CMAKE_SOURCE_DIR}/rsrc/MakeRes.pl
 	${CMAKE_SOURCE_DIR}/rsrc/Sounds
-	${CMAKE_SOURCE_DIR}/rsrc/Icons)
+	${CMAKE_SOURCE_DIR}/rsrc/Icons
+	${CMAKE_CURRENT_BINARY_DIR}/manual/salt.1)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui zeep::zeep)
@@ -154,3 +158,4 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/salt.desktop
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rsrc/Icons/appicon.png
 	RENAME com.hekkelman.salt.png
 	DESTINATION share/icons/hicolor/48x48/apps/)
+

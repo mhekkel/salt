@@ -82,7 +82,9 @@ MSaltApp::MSaltApp(MApplicationImpl *inImpl)
 
 	, cShowPreferences(this, "preferences", &MSaltApp::OnShowPreferences)
 
+	, cManual(this, "manual", &MSaltApp::OnManual)
 	, cAbout(this, "about", &MSaltApp::OnAbout)
+
 	, cSelectTerminal(this, "select-terminal", &MSaltApp::OnSelectTerminal)
 
 	, cClearRecentMenu(this, "clear-recent", &MSaltApp::OnClearRecentMenu)
@@ -238,6 +240,21 @@ void MSaltApp::OnShowPreferences()
 	auto &dlog = MPreferencesDialog::Instance();
 	AddRoute(ePreferencesChanged, dlog.ePreferencesChanged);
 	dlog.Select();
+}
+
+void MSaltApp::OnManual()
+{
+	mrsrc::istream manual("salt.1");
+	if (manual)
+	{
+		auto manpage = std::filesystem::temp_directory_path() / "salt.1";
+		std::ofstream f(manpage);
+		f << manual.rdbuf();
+		f.close();
+
+		MWindow *w = MTerminalWindow::Create({ "man", manpage.string() });
+		w->Select();
+	}
 }
 
 void MSaltApp::OnAbout()
@@ -523,6 +540,7 @@ void Install(const std::string &inPrefix)
 	fs::path datadir = prefix / "share";
 	fs::path icondir = datadir / "icons" / "hicolor" / "48x48" / "apps";
 	fs::path appdir = datadir / "applications";
+	fs::path mandir = datadir / "man" / "man1";
 
 	// Create directories
 	for (auto &p : { bindir, datadir, icondir, appdir })
@@ -587,6 +605,26 @@ void Install(const std::string &inPrefix)
 	if (file.bad())
 	{
 		std::cout << "Writing icon failed\n";
+		exit(1);
+	}
+	file.close();
+
+	// Copy man page
+
+	mrsrc::rsrc manpage("salt.1");
+	if (not manpage)
+	{
+		std::cout << "Manual page is missing\n";
+		exit(1);
+	}
+
+	std::cout << "writing manual page " << (mandir / "salt.1") << '\n';
+
+	file.open((mandir / "salt.1"), std::ios::trunc | std::ios::binary);
+	file.write(manpage.data(), manpage.size());
+	if (file.bad())
+	{
+		std::cout << "Writing manpage failed\n";
 		exit(1);
 	}
 	file.close();
