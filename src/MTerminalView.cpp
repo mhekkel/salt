@@ -5486,7 +5486,7 @@ void MTerminalView::Beep()
 
 	if (mAudibleBeep and now - mLastBeep > 500ms)
 	{
-		PlaySound("warning");
+		PlaySound("bell");
 		beeped = true;
 	}
 
