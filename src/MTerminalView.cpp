@@ -1339,8 +1339,6 @@ void MTerminalView::Draw()
 
 			if (drawCaret)
 			{
-				caretRect = GetCharacterBounds(mCursor.y, mCursor.x);
-
 				if (mCursor.block)
 				{
 					backC = mTerminalColors[eBold];
@@ -1348,6 +1346,7 @@ void MTerminalView::Draw()
 				}
 				else
 				{
+					caretRect = GetCharacterBounds(mCursor.y, mCursor.x);
 					caretRect.height = 2;
 					caretRect.y += static_cast<int32_t>(ceil(dev.GetAscent()));
 					caretColor = mTerminalColors[eBold].Distinct(backC);
