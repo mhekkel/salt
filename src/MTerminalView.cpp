@@ -1045,6 +1045,10 @@ void MTerminalView::SecondaryMouseButtonClick(int32_t inX, int32_t inY)
 
 void MTerminalView::Draw()
 {
+	// Start by marking the buffer clean
+	// This will also do some post processing like highlighting URL's
+	mBuffer->SetDirty(false);
+
 	int32_t selLine1, selLine2, selCol1, selCol2;
 	bool blockSelection;
 	mBuffer->GetSelection(selLine1, selCol1, selLine2, selCol2, blockSelection);
@@ -1418,8 +1422,6 @@ void MTerminalView::Draw()
 
 		y += mLineHeight;
 	}
-
-	mBuffer->SetDirty(false);
 }
 
 void MTerminalView::AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers)

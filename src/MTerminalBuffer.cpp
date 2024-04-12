@@ -33,9 +33,11 @@
 #include "MUnicode.hpp"
 
 #include <algorithm>
+#include <functional>
+#include <regex>
 #include <set>
 
-using namespace std;
+#include <zeep/unicode-support.hpp>
 
 // --------------------------------------------------------------------
 
@@ -59,7 +61,7 @@ MLine::MLine(const MLine &rhs)
 	, mDoubleHeight(rhs.mDoubleHeight)
 	, mDoubleHeightTop(rhs.mDoubleHeightTop)
 {
-	copy(rhs.mCharacters, rhs.mCharacters + mSize, mCharacters);
+	std::copy(rhs.mCharacters, rhs.mCharacters + mSize, mCharacters);
 }
 
 MLine::~MLine()
@@ -146,6 +148,8 @@ const MLine &MTerminalBuffer::GetLine(int32_t inLine) const
 
 void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnchorLine)
 {
+	ScanForHyperLinks();
+
 	if (inWidth == mWidth)
 	{
 		// simple case, shift lines from mBuffer to/from mLines
@@ -181,8 +185,8 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnc
 		for (MLine &line : mLines)
 			mBuffer.push_front(line);
 
-		deque<MLine> rewrapped;
-		vector<MChar> chars;
+		std::deque<MLine> rewrapped;
+		std::vector<MChar> chars;
 
 		// then pull the lines out of the buffer, starting by the oldest
 		do
@@ -199,7 +203,7 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnc
 			}
 
 			// strip off trailing spaces of old line
-			vector<MChar>::iterator e = chars.end();
+			std::vector<MChar>::iterator e = chars.end();
 			while (e != chars.begin() and *(e - 1) == ' ')
 				--e;
 			if (e != chars.end())
@@ -242,11 +246,11 @@ void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnc
 		} while (not mBuffer.empty());
 
 		mWidth = inWidth;
-		mLines = vector<MLine>(inHeight, MLine(inWidth, mForeColor, mBackColor));
+		mLines = std::vector<MLine>(inHeight, MLine(inWidth, mForeColor, mBackColor));
 		swap(mBuffer, rewrapped);
 
 		// fill the mLines array from the new buffer
-		for (vector<MLine>::reverse_iterator line = mLines.rbegin(); line != mLines.rend(); ++line)
+		for (std::vector<MLine>::reverse_iterator line = mLines.rbegin(); line != mLines.rend(); ++line)
 		{
 			if (mBuffer.empty())
 				break;
@@ -273,6 +277,9 @@ void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
 
 	if (inLeftMargin == 0 and inRightMargin == mWidth - 1)
 	{
+		// last chance for the lines moving into the buffer
+		ScanForHyperLinks();
+
 		mBuffer.push_front(mLines[inFromLine]);
 		while (mBuffer.size() > mBufferSize)
 			mBuffer.pop_back();
@@ -288,7 +295,7 @@ void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
 			MLine &b = mLines[line + 1];
 
 			for (uint32_t col = inLeftMargin; col <= inRightMargin; ++col)
-				swap(a[col], b[col]);
+				std::swap(a[col], b[col]);
 		}
 	}
 
@@ -322,7 +329,7 @@ void MTerminalBuffer::ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
 			MLine &b = mLines[line - 1];
 
 			for (uint32_t col = inLeftMargin; col <= inRightMargin; ++col)
-				swap(a[col], b[col]);
+				std::swap(a[col], b[col]);
 		}
 	}
 
@@ -337,6 +344,7 @@ void MTerminalBuffer::ScrollBackward(uint32_t inFromLine, uint32_t inToLine,
 void MTerminalBuffer::Clear()
 {
 	mBuffer.clear();
+	mHyperLinks.clear();
 	EraseDisplay(0, 0, 2, false);
 }
 
@@ -526,6 +534,17 @@ void MTerminalBuffer::WrapLine(uint32_t inLine)
 		mLines[inLine].SetSoftWrapped(true);
 }
 
+void MTerminalBuffer::SetDirty(bool inDirty)
+{
+	if (inDirty != mDirty)
+	{
+		mDirty = inDirty;
+
+		if (not mDirty)
+			ScanForHyperLinks();
+	}
+}
+
 void MTerminalBuffer::FillWithE()
 {
 	for (uint32_t l = 0; l < mLines.size(); ++l)
@@ -701,7 +720,7 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 	}
 
 	// collect the unicode string for this line
-	vector<MChar> s;
+	std::vector<MChar> s;
 	int32_t lineNr = inLine;
 	for (;;)
 	{
@@ -786,9 +805,9 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 	}
 }
 
-string MTerminalBuffer::GetSelectedText() const
+std::string MTerminalBuffer::GetSelectedText() const
 {
-	string result;
+	std::string result;
 
 	for (int32_t l = mBeginLine; l <= mEndLine; ++l)
 	{
@@ -800,7 +819,7 @@ string MTerminalBuffer::GetSelectedText() const
 			c1 = mBeginColumn;
 			c2 = mEndColumn;
 			if (c1 > c2)
-				swap(c1, c2);
+				std::swap(c1, c2);
 		}
 		else
 		{
@@ -856,15 +875,15 @@ unicode MTerminalBuffer::GetChar(uint32_t inOffset, bool inToLower) const
 // Implement forward and backward searching in separate routines to
 // keep code readable.
 
-bool MTerminalBuffer::FindNext(int32_t &ioLine, int32_t &ioColumn, const string &inWhat,
+bool MTerminalBuffer::FindNext(int32_t &ioLine, int32_t &ioColumn, const std::string &inWhat,
 	bool inIgnoreCase, bool inWrapAround)
 {
 	// q is a rather large prime, d is the alphabet size (of Unicode)
 	const int64_t q = 33554393, d = 1114112;
 
 	// convert the search string to unicode's
-	vector<unicode> what;
-	for (string::const_iterator w = inWhat.begin(); w != inWhat.end();)
+	std::vector<unicode> what;
+	for (std::string::const_iterator w = inWhat.begin(); w != inWhat.end();)
 	{
 		unicode ch;
 		uint32_t l;
@@ -940,15 +959,15 @@ bool MTerminalBuffer::FindNext(int32_t &ioLine, int32_t &ioColumn, const string 
 	return result;
 }
 
-bool MTerminalBuffer::FindPrevious(int32_t &ioLine, int32_t &ioColumn, const string &inWhat,
+bool MTerminalBuffer::FindPrevious(int32_t &ioLine, int32_t &ioColumn, const std::string &inWhat,
 	bool inIgnoreCase, bool inWrapAround)
 {
 	// q is a rather large prime, d is the alphabet size (of Unicode)
 	const int64_t q = 33554393, d = 1114112;
 
 	// convert the search string to unicode's
-	vector<unicode> what;
-	for (string::const_iterator w = inWhat.begin(); w != inWhat.end();)
+	std::vector<unicode> what;
+	for (std::string::const_iterator w = inWhat.begin(); w != inWhat.end();)
 	{
 		unicode ch;
 		uint32_t l;
@@ -1031,7 +1050,7 @@ int MTerminalBuffer::AddHyperLink(const std::string &inURI, const std::string &i
 	{
 		if (uri == inURI)
 			return nr;
-		
+
 		if (id == inID and not id.empty())
 		{
 			uri = inURI;
@@ -1063,7 +1082,7 @@ int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
 	else
 	{
 		inLine = -inLine - 1;
-		if (static_cast<size_t>(inLine) < mBuffer.size())
+		if (static_cast<std::size_t>(inLine) < mBuffer.size())
 			result = mBuffer[inLine][inColumn].GetHyperLink();
 	}
 
@@ -1092,7 +1111,7 @@ void MTerminalBuffer::GarbageCollectHyperlinks()
 			if (int link = ch.GetHyperLink())
 				inUse.insert(link);
 		}
-	}	
+	}
 
 	for (auto &line : mBuffer)
 	{
@@ -1101,14 +1120,67 @@ void MTerminalBuffer::GarbageCollectHyperlinks()
 			if (int link = ch.GetHyperLink())
 				inUse.insert(link);
 		}
-	}	
+	}
 
 	mHyperLinks.erase(
 		std::remove_if(mHyperLinks.begin(), mHyperLinks.end(),
-			[&inUse](const MHyperLink &link) 
+			[&inUse](const MHyperLink &link)
 			{
 				return not inUse.contains(link.nr);
 			}),
-		mHyperLinks.end()
-	);
+		mHyperLinks.end());
+}
+
+// Very simple scan, we only support http and https links for now
+void MTerminalBuffer::ScanForHyperLinks()
+{
+	static std::wregex rx(L"https?://[^ ]+", std::regex::icase);
+
+	for (std::size_t l = 0; l < mLines.size(); ++l)
+	{
+		std::wstring s;
+		auto sl = l;
+
+		for (;;)
+		{
+			for (auto &ch : mLines[l])
+			{
+				if (ch <= std::numeric_limits<wchar_t>::max())
+					s += static_cast<wchar_t>(ch);
+				else
+					s += u' ';
+			}
+			
+			if (l + 1 < mLines.size() and mLines[l].IsSoftWrapped())
+			{
+				++l;
+				continue;
+			}
+
+			break;
+		}
+
+		l = sl;
+
+		std::wsmatch m;
+		if (std::regex_search(s, m, rx))
+		{
+			std::string uri;
+			for (auto ch : m[0].str())
+				zeep::append(uri, ch);
+			
+			int nr = AddHyperLink(uri, "");
+
+			auto b = m[0].first - s.begin();
+			auto n = m[0].second - m[0].first;
+			
+			while (n-- > 0)
+			{
+				auto &ch = mLines[l + (b / mWidth)][b % mWidth];
+				if (ch.GetHyperLink() == 0)
+					ch.SetHyperLink(nr);
+				++b;
+			}
+		}
+	}
 }

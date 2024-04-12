@@ -299,10 +299,8 @@ asio_ns::awaitable<void> MSshTerminalChannel::DoUploadFileTo(std::filesystem::pa
 
 		co_await p->make_dir(remote_dir, asio_ns::use_awaitable);
 
-		auto files = co_await p->read_dir(remote_dir, asio_ns::use_awaitable);
-
 		// see if filename needs a trailing number
-
+		auto files = co_await p->read_dir(remote_dir, asio_ns::use_awaitable);
 		auto filename = localpath.filename();
 
 		eIOStatus(FormatString("Uploading ^0", filename.string()));

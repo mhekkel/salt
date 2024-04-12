@@ -464,7 +464,7 @@ class MTerminalBuffer
 
 	void FillWithE(); // for DECALN
 
-	void SetDirty(bool inDirty) { mDirty = inDirty; }
+	void SetDirty(bool inDirty);
 	bool IsDirty() const { return mDirty; }
 
 	bool IsSelectionEmpty() const;
@@ -506,6 +506,7 @@ class MTerminalBuffer
 	unicode GetChar(uint32_t inOffset, bool inToLower) const;
 
 	void GarbageCollectHyperlinks();
+	void ScanForHyperLinks();
 
 	std::deque<MLine> mBuffer;
 	uint32_t mBufferSize;
