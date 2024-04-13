@@ -59,6 +59,17 @@
 #include <chrono>
 #include <cmath>
 #include <map>
+#include <source_location>
+#include <thread>
+
+// --------------------------------------------------------------------
+
+#ifndef NDEBUG
+extern char this_thread_name();
+#define PRINT_THREAD_ID do { std::cout << std::source_location::current().function_name() << "In thread: " << this_thread_name() << "\n"; } while (false)
+#else
+#define PRINT_THREAD_ID
+#endif
 
 namespace
 {
@@ -2152,6 +2163,8 @@ bool MTerminalView::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t 
 
 void MTerminalView::HandleMessage(const std::string &inMessage, const std::string &inLanguage)
 {
+	PRINT_THREAD_ID;
+
 	mInputBuffer.insert(mInputBuffer.end(), inMessage.begin(), inMessage.end());
 
 	std::string tail("\r\n");
@@ -2836,6 +2849,8 @@ void MTerminalView::DeactivateSelf()
 
 void MTerminalView::HandleOpened(const std::error_code &ec)
 {
+	PRINT_THREAD_ID;
+
 	if (ec)
 	{
 		const std::string &msg = ec.message();
@@ -2863,6 +2878,8 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 
 void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &inData)
 {
+	PRINT_THREAD_ID;
+
 	if (ec)
 	{
 		const std::string &msg = ec.message();
@@ -5810,7 +5827,10 @@ void MTerminalView::LinkClicked(std::string inLink)
 
 void MTerminalView::OnIOStatus(std::string inMessage)
 {
+	PRINT_THREAD_ID;
+
 	MSaltApp::Instance().execute([this, inMessage](){
+		PRINT_THREAD_ID;
 		mStatusbar->SetStatusText(0, inMessage, false);
 	});
 }
