@@ -48,6 +48,37 @@
 
 #include <zeep/crypto.hpp>
 
+#include <source_location>
+#include <thread>
+
+// --------------------------------------------------------------------
+
+#ifndef NDEBUG
+
+char this_thread_name()
+{
+	static std::mutex m_mutex;
+	std::lock_guard lock(m_mutex);
+
+	static std::map<std::thread::id, char> m_names;
+
+	std::thread::id id = std::this_thread::get_id();
+
+	auto i = m_names.find(id);
+	if (i == m_names.end())
+		return m_names[id] = 'A' + m_names.size();
+	else
+		return i->second;
+}
+
+#define PRINT_THREAD_ID do { std::cout << std::source_location::current().function_name() << "In thread: " << this_thread_name() << "\n"; } while (false)
+
+#else
+
+#define PRINT_THREAD_ID
+
+#endif
+
 // ------------------------------------------------------------------
 //
 
@@ -72,12 +103,12 @@ class MSshTerminalWindow : public MTerminalWindow
 
   protected:
 
-	void accepts_hostkey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
+	void AcceptsHostKey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
 		pinch::host_key_state state, std::promise<pinch::host_key_reply> result);
 
-	void provide_password(std::promise<std::string> result);
+	void ProvidePassword(std::promise<std::string> result);
 
-	void provide_credentials(const std::string &name, const std::string &instruction, const std::string &lang,
+	void ProvideCredentials(const std::string &name, const std::string &instruction, const std::string &lang,
 		const std::vector<pinch::prompt> &prompts, std::promise<std::vector<std::string>> result);
 
 	MCommand<void()> cDisconnect;
@@ -115,13 +146,14 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 {
 	using namespace std::placeholders;
 
+	PRINT_THREAD_ID;
+
 	MAppExecutor my_executor{ &MSaltApp::Instance().get_context() };
 
 	mConnection->set_callbacks(
-		my_executor,
-		std::bind(&MSshTerminalWindow::accepts_hostkey, this, _1, _2, _3, _4, _5),
-		std::bind(&MSshTerminalWindow::provide_password, this, _1),
-		std::bind(&MSshTerminalWindow::provide_credentials, this, _1, _2, _3, _4, _5)
+		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::AcceptsHostKey, this, _1, _2, _3, _4, _5)),
+		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::ProvidePassword, this, _1)),
+		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::ProvideCredentials, this, _1, _2, _3, _4, _5))
 	);
 
 	std::stringstream title;
@@ -187,9 +219,12 @@ void MSshTerminalWindow::OnProxyHTTP()
 	new MHTTPProxyDialog(this, mConnection);
 }
 
-void MSshTerminalWindow::accepts_hostkey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
+void MSshTerminalWindow::AcceptsHostKey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
 	pinch::host_key_state state, std::promise<pinch::host_key_reply> reply)
 {
+
+	PRINT_THREAD_ID;
+
 	std::string_view hsv(reinterpret_cast<const char *>(key.data()), key.size());
 
 	std::string value = zeep::encode_base64(hsv);
@@ -239,15 +274,19 @@ void MSshTerminalWindow::accepts_hostkey(const std::string &host, const std::str
 	}
 }
 
-void MSshTerminalWindow::provide_password(std::promise<std::string> result)
+void MSshTerminalWindow::ProvidePassword(std::promise<std::string> result)
 {
+	PRINT_THREAD_ID;
+
 	auto dlog = new MAuthDialog(_("Logging in"), this, std::move(result));
 	dlog->Select();
 }
 
-void MSshTerminalWindow::provide_credentials(const std::string &name, const std::string &instruction, const std::string &lang,
+void MSshTerminalWindow::ProvideCredentials(const std::string &name, const std::string &instruction, const std::string &lang,
 	const std::vector<pinch::prompt> &prompts, std::promise<std::vector<std::string>> result)
 {
+	PRINT_THREAD_ID;
+
 	auto dlog = new MAuthDialog(_("Logging in"), name,
 		instruction.empty() ? FormatString("Please enter the requested info for account ^0", name) : instruction,
 		prompts, this, std::move(result));
