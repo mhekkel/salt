@@ -12,3 +12,6 @@
 [submodule "libzeep"]
 	path = libzeep
 	url = git@github.com:mhekkel/libzeep.git
+[submodule "mxml"]
+	path = mxml
+	url = git@github.com:mhekkel/mxml.git
