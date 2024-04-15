@@ -1134,53 +1134,88 @@ void MTerminalBuffer::GarbageCollectHyperlinks()
 // Very simple scan, we only support http and https links for now
 void MTerminalBuffer::ScanForHyperLinks()
 {
-	static std::wregex rx(L"https?://[^ ]+", std::regex::icase);
+	std::string uri;
+	auto add_uri = [&](std::size_t start, std::size_t length, int nr)
+	{
+		while (length-- > 0)
+		{
+			auto &ch = mLines[start / mWidth][start % mWidth];
+			if (ch.GetHyperLink() == 0)
+				ch.SetHyperLink(nr);
+			++start;
+
+			uri.clear();
+		}
+	};
+
+	// clang-format off
+	enum State { nope, maybe, h, t1, t2, p, s, colon, slash1, rest } state = maybe;
+	// clang-format on
+	
+	std::size_t start;
 
 	for (std::size_t l = 0; l < mLines.size(); ++l)
 	{
-		std::wstring s;
-		auto sl = l;
-
-		for (;;)
+		auto &line = mLines[l];
+		for (std::size_t c = 0; c < mWidth; ++c)
 		{
-			for (auto &ch : mLines[l])
-			{
-				if (ch <= std::numeric_limits<wchar_t>::max())
-					s += static_cast<wchar_t>(ch);
-				else
-					s += u' ';
-			}
-			
-			if (l + 1 < mLines.size() and mLines[l].IsSoftWrapped())
-			{
-				++l;
-				continue;
-			}
+			auto ch = line[c];
 
-			break;
-		}
-
-		l = sl;
-
-		std::wsmatch m;
-		if (std::regex_search(s, m, rx))
-		{
-			std::string uri;
-			for (auto ch : m[0].str())
+			if (state != nope)
 				zeep::append(uri, ch);
-			
-			int nr = AddHyperLink(uri, "");
+			else
+				uri.clear();
 
-			auto b = m[0].first - s.begin();
-			auto n = m[0].second - m[0].first;
-			
-			while (n-- > 0)
+			switch (state)
 			{
-				auto &ch = mLines[l + (b / mWidth)][b % mWidth];
-				if (ch.GetHyperLink() == 0)
-					ch.SetHyperLink(nr);
-				++b;
+				case nope:
+					if (std::isspace(ch) or std::ispunct(ch))
+						state = maybe;
+					break;
+
+				case maybe:
+					if ((ch | 0x0020) == 'h')
+					{
+						state = h;
+						start = l * mWidth + c;
+					}
+					else
+						uri.clear();
+					break;
+				case h: state = ((ch | 0x002) == 't') ? t1 : nope; break;
+				case t1: state = ((ch | 0x002) == 't') ? t2 : nope; break;
+				case t2: state = ((ch | 0x002) == 'p') ? p : nope; break;
+				case p:
+					if ((ch | 0x002) == 's')
+						state = s;
+					else if (ch == ':')
+						state = colon;
+					else
+						state = nope;
+					break;
+				case s: state = ch == ':' ? colon : nope; break;
+				case colon: state = ch == '/' ? slash1 : nope; break;
+				case slash1: state = ch == '/' ? rest : nope; break;
+				case rest:
+					if (std::isspace(ch))
+					{
+						if (uri.length() > 10)
+						{
+							int nr = AddHyperLink(uri, "");
+							add_uri(start, l * mWidth + c - start, nr);
+						}
+						state = nope;
+					}
+					break;
 			}
 		}
+
+		break;
+	}
+
+	if (uri.length() > 10)
+	{
+		int nr = AddHyperLink(uri, "");
+		add_uri(start, mLines.size() * mWidth - start, nr);
 	}
 }
