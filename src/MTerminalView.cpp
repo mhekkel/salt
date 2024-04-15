@@ -5741,19 +5741,23 @@ void MTerminalView::DownloadFile(const std::filesystem::path &path)
 {
 	if (mTerminalChannel->CanDownloadFiles())
 	{
-		auto lambda = [path, channel = mTerminalChannel](std::filesystem::path dir)
+		auto lambda = [path, channel = mTerminalChannel](std::filesystem::path inLocalFile, bool inReplace = true)
 		{
-			auto localFile = dir / path.filename();
-			for (std::size_t i = 1; std::filesystem::exists(localFile); ++i)
-				localFile = dir / (path.filename().stem().string() + "-(" + std::to_string(i) + ")" + path.filename().extension().string());
+			if (not inReplace)
+			{
+				auto filename = path.filename();
+				auto dir = inLocalFile.parent_path();
+				for (std::size_t i = 1; std::filesystem::exists(inLocalFile); ++i)
+					inLocalFile = dir / (filename.stem().string() + "-(" + std::to_string(i) + ")" + filename.extension().string());
+			}
 
-			channel->DownloadFile(path, localFile);
+			channel->DownloadFile(path, inLocalFile);
 		};
 
 		if (MPrefs::GetBoolean("always-ask-download-dir", false))
 			MFileDialogs::SaveFileAs(GetWindow(), path, std::move(lambda));
 		else
-			lambda(GetDownloadDirectory());
+			lambda(GetDownloadDirectory() / path.filename(), false);
 	}
 }
 

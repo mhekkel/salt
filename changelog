@@ -1,3 +1,6 @@
+Version 4.0.2
+- Fix downloading file when 'Always ask where' is in use
+
 Version 4.0.1
 - Changes to connection callbacks
 
