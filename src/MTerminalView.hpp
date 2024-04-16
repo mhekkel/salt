@@ -401,8 +401,8 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 		eTripleClick,
 		eTrackClick,
 		eLinkClick
-	} mMouseClick;
-	bool mMouseBlockSelect;
+	} mMouseClick = eNoClick;
+	bool mMouseBlockSelect = false;
 	std::chrono::system_clock::time_point mLastMouseDown;
 	int32_t mLastMouseX, mLastMouseY;
 	int32_t mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol;
