@@ -1171,6 +1171,10 @@ void MTerminalView::Draw()
 
 		int32_t lineNr = GetTopLine() + l;
 
+		int32_t hvc1 = 0, hvc2 = 0;
+		if (mCurrentLink == -1)
+			std::tie(hvc1, hvc2) = mBuffer->GetHoveredLinkColumBounds(lineNr);
+
 		// being paranoid
 		if (l != mTerminalHeight and
 			lineNr < 0 and -lineNr > static_cast<int32_t>(mBuffer->BufferedLines()))
@@ -1374,7 +1378,8 @@ void MTerminalView::Draw()
 				style |= MDevice::eTextStyleUnderline;
 
 			// hyper link tracking
-			if (linkNr != 0 and linkNr == mCurrentLink)
+			if ((linkNr != 0 and linkNr == mCurrentLink) or
+				(mCurrentLink == -1 and c >= hvc1 and c < hvc2))
 			{
 				style |= MDevice::eTextStyleDoubleUnderline;
 				if (mMouseClick == eLinkClick)

@@ -487,9 +487,10 @@ class MTerminalBuffer
 	}
 
 	void FindWord(int32_t inLine, int32_t inColumn, int32_t &outBeginLine, int32_t &outBeginColumn,
-		int32_t &outEndLine, int32_t &outEndColumn);
+		int32_t &outEndLine, int32_t &outEndColumn) const;
 
 	std::string GetSelectedText() const;
+	std::string GetText(int32_t inLine1, int32_t inColumn1, int32_t inLine2, int32_t inColumn2, bool inBlock) const;
 
 	int32_t BufferedLines() const { return static_cast<int32_t>(mBuffer.size()); }
 
@@ -499,14 +500,23 @@ class MTerminalBuffer
 		bool inIgnoreCase, bool inWrapAround);
 
 	int AddHyperLink(const std::string &inURI, const std::string &inID);
-	int GetHoveredLink(int32_t inLine, int32_t inColumn) const;
+	int GetHoveredLink(int32_t inLine, int32_t inColumn);
+
+	std::string GetURIAtPosition(int32_t inLine, int32_t inColumn,
+		int32_t &outBeginLine, int32_t &outBeginColumn,
+		int32_t &outEndLine, int32_t &outEndColumn) const;
+
 	std::string GetHyperLink(int inNr) const;
+
+	std::tuple<int32_t, int32_t> GetHoveredLinkColumBounds(int32_t inLine) const;
 
   private:
 	unicode GetChar(uint32_t inOffset, bool inToLower) const;
 
+	unicode GetChar(int32_t inLine, int32_t inColumn, bool inToLower) const;
+
 	void GarbageCollectHyperlinks();
-	void ScanForHyperLinks();
+	// void ScanForHyperLinks();
 
 	std::deque<MLine> mBuffer;
 	uint32_t mBufferSize;
@@ -527,4 +537,6 @@ class MTerminalBuffer
 	};
 
 	std::vector<MHyperLink> mHyperLinks;
+	std::string mHoveredLink;
+	int32_t mHoverdLinkBeginLine, mHoverdLinkBeginColumn, mHoverdLinkEndLine, mHoverdLinkEndColumn;
 };

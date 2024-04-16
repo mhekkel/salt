@@ -37,6 +37,7 @@
 #include <regex>
 #include <set>
 
+#include <zeep/http/uri.hpp>
 #include <zeep/unicode-support.hpp>
 
 // --------------------------------------------------------------------
@@ -148,8 +149,6 @@ const MLine &MTerminalBuffer::GetLine(int32_t inLine) const
 
 void MTerminalBuffer::Resize(uint32_t inWidth, uint32_t inHeight, int32_t &ioAnchorLine)
 {
-	ScanForHyperLinks();
-
 	if (inWidth == mWidth)
 	{
 		// simple case, shift lines from mBuffer to/from mLines
@@ -278,8 +277,6 @@ void MTerminalBuffer::ScrollForward(uint32_t inFromLine, uint32_t inToLine,
 	if (inLeftMargin == 0 and inRightMargin == mWidth - 1)
 	{
 		// last chance for the lines moving into the buffer
-		ScanForHyperLinks();
-
 		mBuffer.push_front(mLines[inFromLine]);
 		while (mBuffer.size() > mBufferSize)
 			mBuffer.pop_back();
@@ -537,12 +534,7 @@ void MTerminalBuffer::WrapLine(uint32_t inLine)
 void MTerminalBuffer::SetDirty(bool inDirty)
 {
 	if (inDirty != mDirty)
-	{
 		mDirty = inDirty;
-
-		if (not mDirty)
-			ScanForHyperLinks();
-	}
 }
 
 void MTerminalBuffer::FillWithE()
@@ -690,7 +682,7 @@ TerminalWordBreakClass GetTerminalWordBreakClass(unicode inUnicode)
 } // namespace
 
 void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
-	int32_t &outLine1, int32_t &outColumn1, int32_t &outLine2, int32_t &outColumn2)
+	int32_t &outLine1, int32_t &outColumn1, int32_t &outLine2, int32_t &outColumn2) const
 {
 	// sensible defaults:
 	outLine1 = outLine2 = inLine;
@@ -785,7 +777,7 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 	}
 
 	// check if we did find anything
-	if (prevColumn < inColumn and nextColumn > inColumn)
+	if (prevColumn <= inColumn and nextColumn > inColumn)
 	{
 		outColumn1 = prevColumn;
 		outColumn2 = nextColumn;
@@ -805,35 +797,35 @@ void MTerminalBuffer::FindWord(int32_t inLine, int32_t inColumn,
 	}
 }
 
-std::string MTerminalBuffer::GetSelectedText() const
+std::string MTerminalBuffer::GetText(int32_t inBeginLine, int32_t inBeginColumn, int32_t inEndLine, int32_t inEndColumn, bool inBlock) const
 {
 	std::string result;
 
-	for (int32_t l = mBeginLine; l <= mEndLine; ++l)
+	for (int32_t l = inBeginLine; l <= inEndLine; ++l)
 	{
 		const MLine &line(GetLine(l));
 
 		int32_t c1 = 1, c2 = 0;
-		if (mBlockSelection)
+		if (inBlock)
 		{
-			c1 = mBeginColumn;
-			c2 = mEndColumn;
+			c1 = inBeginColumn;
+			c2 = inEndColumn;
 			if (c1 > c2)
 				std::swap(c1, c2);
 		}
 		else
 		{
-			if (l == mBeginLine or mBlockSelection)
-				c1 = mBeginColumn;
+			if (l == inBeginLine or inBlock)
+				c1 = inBeginColumn;
 			else
 				c1 = 0;
-			if (l == mEndLine or mBlockSelection)
-				c2 = mEndColumn;
+			if (l == inEndLine or inBlock)
+				c2 = inEndColumn;
 			else
 				c2 = mWidth;
 		}
 
-		if (not mBlockSelection and (l == mEndLine or not line.IsSoftWrapped()))
+		if (not inBlock and (l == inEndLine or not line.IsSoftWrapped()))
 		{
 			while (c2 > c1 and line[c2 - 1] == ' ')
 				--c2;
@@ -844,10 +836,23 @@ std::string MTerminalBuffer::GetSelectedText() const
 		for (int32_t c = c1; c < c2; ++c)
 			MEncodingTraits<kEncodingUTF8>::WriteUnicode(iter, (unicode)line[c]);
 
-		if (mBlockSelection or (l != mEndLine and not line.IsSoftWrapped()))
+		if (mBlockSelection or (l != inEndLine and not line.IsSoftWrapped()))
 			result += '\n';
 	}
 
+	return result;
+}
+
+std::string MTerminalBuffer::GetSelectedText() const
+{
+	return GetText(mBeginLine, mBeginColumn, mEndLine, mEndColumn, mBlockSelection);
+}
+
+unicode MTerminalBuffer::GetChar(int32_t inLine, int32_t inColumn, bool inToLower) const
+{
+	char32_t result = GetLine(inLine)[inColumn];
+	if (inToLower)
+		result = ToLower(result);
 	return result;
 }
 
@@ -1067,9 +1072,105 @@ int MTerminalBuffer::AddHyperLink(const std::string &inURI, const std::string &i
 	return result;
 }
 
-int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
+std::string MTerminalBuffer::GetURIAtPosition(int32_t inLine, int32_t inColumn,
+	int32_t &outBeginLine, int32_t &outBeginColumn,
+	int32_t &outEndLine, int32_t &outEndColumn) const
+{
+	std::string uri;
+
+	if (GetChar(inLine, inColumn, false) == ':' and inColumn > 1)
+	{
+		int32_t l1, l2, c1, c2;
+		FindWord(inLine, inColumn + 1, l1, c1, l2, c2);
+
+		uri = GetText(l1, c1, l2, c2, false);
+
+		if (uri.starts_with("//"))
+		{
+			outEndLine = l2;
+			outEndColumn = c2;
+
+			FindWord(l1, inColumn - 1, l1, c1, l2, c2);
+
+			auto scheme = GetText(l1, c1, l2, c2, true);
+			if (not scheme.empty())
+			{
+				uri = scheme + ':' + uri;
+
+				if (not zeep::http::is_valid_uri(uri))
+					uri.clear();
+				else
+				{
+					outBeginLine = l1;
+					outBeginColumn = c1;
+				}
+			}
+		}
+	}
+	else
+	{
+		int32_t l1, l2, c1, c2;
+		FindWord(inLine, inColumn, l1, c1, l2, c2);
+
+		uri = GetText(l1, c1, l2, c2, false);
+
+		if (uri.starts_with("//") and c1 > 1 and GetChar(l1, c1 - 1, false) == ':')
+		{
+			outEndLine = l2;
+			outEndColumn = c2;
+
+			FindWord(l1, c1 - 2, l1, c1, l2, c2);
+
+			auto scheme = GetText(l1, c1, l2, c2, false);
+			if (not scheme.empty())
+			{
+				uri = scheme + ':' + uri;
+
+				if (not zeep::http::is_valid_uri(uri))
+					uri.clear();
+				else
+				{
+					outBeginLine = l1;
+					outBeginColumn = c1;
+				}
+			}
+		}
+		else if (c2 + 3 < mWidth and GetChar(l2, c2 + 1, false) == ':' and
+				 GetChar(l2, c2 + 2, false) == '/' and GetChar(l2, c2 + 3, false) == '/')
+		{
+			outBeginLine = l1;
+			outBeginColumn = c1;
+
+			uri = GetText(l1, c1, l2, c2, false) + ':';
+
+			FindWord(l2, c2 + 2, l1, c1, l2, c2);
+
+			if (l2 > l1 or c2 > c1)
+			{
+				uri += GetText(l1, c1, l2, c2, false);
+
+				if (not zeep::http::is_valid_uri(uri))
+					uri.clear();
+				else
+				{
+					outEndLine = l2;
+					outEndColumn = c2;
+				}
+			}
+		}
+	}
+
+	return uri;
+}
+
+int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn)
 {
 	int result = 0;
+
+	mHoverdLinkBeginLine = 0;
+	mHoverdLinkBeginColumn = 0;
+	mHoverdLinkEndLine = 0;
+	mHoverdLinkEndColumn = 0;
 
 	if (static_cast<uint32_t>(inColumn) > mWidth)
 		return 0;
@@ -1081,9 +1182,19 @@ int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
 	}
 	else
 	{
-		inLine = -inLine - 1;
-		if (static_cast<std::size_t>(inLine) < mBuffer.size())
-			result = mBuffer[inLine][inColumn].GetHyperLink();
+		auto line = -inLine - 1;
+		if (static_cast<std::size_t>(line) < mBuffer.size())
+			result = mBuffer[line][inColumn].GetHyperLink();
+	}
+
+	// Not a registered hyperlink, see if there's something underneath the pointer
+	// that looks like a hyperlink
+	if (result == 0 and inColumn + 1 < mWidth)
+	{
+		mHoveredLink = GetURIAtPosition(inLine, inColumn,
+			mHoverdLinkBeginLine, mHoverdLinkBeginColumn, mHoverdLinkEndLine, mHoverdLinkEndColumn);
+		if (not mHoveredLink.empty())
+			result = -1;
 	}
 
 	return result;
@@ -1091,6 +1202,9 @@ int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn) const
 
 std::string MTerminalBuffer::GetHyperLink(int inNr) const
 {
+	if (inNr == -1)
+		return mHoveredLink;
+
 	for (auto &&[nr, id, uri] : mHyperLinks)
 	{
 		if (nr == inNr)
@@ -1098,6 +1212,18 @@ std::string MTerminalBuffer::GetHyperLink(int inNr) const
 	}
 
 	return {};
+}
+
+std::tuple<int32_t, int32_t> MTerminalBuffer::GetHoveredLinkColumBounds(int32_t inLine) const
+{
+	int32_t c1 = 0, c2 = 0;
+	if (inLine >= mHoverdLinkBeginLine and inLine <= mHoverdLinkEndLine)
+	{
+		c1 = inLine > mHoverdLinkBeginLine ? 0 : mHoverdLinkBeginColumn;
+		c2 = inLine < mHoverdLinkBeginLine ? mWidth : mHoverdLinkEndColumn;
+	}
+	
+	return { c1, c2 };
 }
 
 void MTerminalBuffer::GarbageCollectHyperlinks()
@@ -1131,91 +1257,90 @@ void MTerminalBuffer::GarbageCollectHyperlinks()
 		mHyperLinks.end());
 }
 
-// Very simple scan, we only support http and https links for now
-void MTerminalBuffer::ScanForHyperLinks()
-{
-	std::string uri;
-	auto add_uri = [&](std::size_t start, std::size_t length, int nr)
-	{
-		while (length-- > 0)
-		{
-			auto &ch = mLines[start / mWidth][start % mWidth];
-			if (ch.GetHyperLink() == 0)
-				ch.SetHyperLink(nr);
-			++start;
+// // Very simple scan, we only support http and https links for now
+// void MTerminalBuffer::ScanForHyperLinks()
+// {
+// 	std::string uri;
+// 	auto add_uri = [&](std::size_t start, std::size_t length, int nr)
+// 	{
+// 		while (length-- > 0)
+// 		{
+// 			auto &ch = mLines[start / mWidth][start % mWidth];
+// 			if (ch.GetHyperLink() == 0)
+// 				ch.SetHyperLink(nr);
+// 			++start;
+// 		}
+// 	};
 
-			uri.clear();
-		}
-	};
+// 	// clang-format off
+// 	enum State { nope, maybe, h, t1, t2, p, s, colon, slash1, rest } state = maybe;
+// 	// clang-format on
 
-	// clang-format off
-	enum State { nope, maybe, h, t1, t2, p, s, colon, slash1, rest } state = maybe;
-	// clang-format on
-	
-	std::size_t start;
+// 	std::size_t start;
 
-	for (std::size_t l = 0; l < mLines.size(); ++l)
-	{
-		auto &line = mLines[l];
-		for (std::size_t c = 0; c < mWidth; ++c)
-		{
-			auto ch = line[c];
+// 	for (std::size_t l = 0; l < mLines.size(); ++l)
+// 	{
+// 		auto &line = mLines[l];
+// 		for (std::size_t c = 0; c < mWidth; ++c)
+// 		{
+// 			auto ch = line[c];
 
-			if (state != nope)
-				zeep::append(uri, ch);
-			else
-				uri.clear();
+// 			if (state != nope)
+// 				zeep::append(uri, ch);
+// 			else
+// 				uri.clear();
 
-			switch (state)
-			{
-				case nope:
-					if (std::isspace(ch) or std::ispunct(ch))
-						state = maybe;
-					break;
+// 			switch (state)
+// 			{
+// 				case nope:
+// 					if (std::isspace(ch) or std::ispunct(ch))
+// 						state = maybe;
+// 					break;
 
-				case maybe:
-					if ((ch | 0x0020) == 'h')
-					{
-						state = h;
-						start = l * mWidth + c;
-					}
-					else
-						uri.clear();
-					break;
-				case h: state = ((ch | 0x002) == 't') ? t1 : nope; break;
-				case t1: state = ((ch | 0x002) == 't') ? t2 : nope; break;
-				case t2: state = ((ch | 0x002) == 'p') ? p : nope; break;
-				case p:
-					if ((ch | 0x002) == 's')
-						state = s;
-					else if (ch == ':')
-						state = colon;
-					else
-						state = nope;
-					break;
-				case s: state = ch == ':' ? colon : nope; break;
-				case colon: state = ch == '/' ? slash1 : nope; break;
-				case slash1: state = ch == '/' ? rest : nope; break;
-				case rest:
-					if (std::isspace(ch))
-					{
-						if (uri.length() > 10)
-						{
-							int nr = AddHyperLink(uri, "");
-							add_uri(start, l * mWidth + c - start, nr);
-						}
-						state = nope;
-					}
-					break;
-			}
-		}
+// 				case maybe:
+// 					if ((ch | 0x0020) == 'h')
+// 					{
+// 						state = h;
+// 						start = l * mWidth + c;
+// 					}
+// 					else
+// 						uri.clear();
+// 					break;
+// 				case h: state = ((ch | 0x0020) == 't') ? t1 : nope; break;
+// 				case t1: state = ((ch | 0x0020) == 't') ? t2 : nope; break;
+// 				case t2: state = ((ch | 0x0020) == 'p') ? p : nope; break;
+// 				case p:
+// 					if ((ch | 0x0020) == 's')
+// 						state = s;
+// 					else if (ch == ':')
+// 						state = colon;
+// 					else
+// 						state = nope;
+// 					break;
+// 				case s: state = ch == ':' ? colon : nope; break;
+// 				case colon: state = ch == '/' ? slash1 : nope; break;
+// 				case slash1: state = ch == '/' ? rest : nope; break;
+// 				case rest:
+// 					if (std::isspace(ch))
+// 					{
+// 						uri.pop_back();
+// 						if (uri.length() > 10)
+// 						{
+// 							int nr = AddHyperLink(uri, "");
+// 							add_uri(start, l * mWidth + c - start, nr);
+// 						}
+// 						state = nope;
+// 					}
+// 					break;
+// 			}
+// 		}
 
-		break;
-	}
+// 		break;
+// 	}
 
-	if (uri.length() > 10)
-	{
-		int nr = AddHyperLink(uri, "");
-		add_uri(start, mLines.size() * mWidth - start, nr);
-	}
-}
+// 	if (uri.length() > 10)
+// 	{
+// 		int nr = AddHyperLink(uri, "");
+// 		add_uri(start, mLines.size() * mWidth - start, nr);
+// 	}
+// }
