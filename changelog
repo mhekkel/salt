@@ -1,5 +1,9 @@
 Version 4.0.2
 - Fix downloading file when 'Always ask where' is in use
+- Copy from terminal now remembers tabs
+- Revived cursor position panel
+- Much better detection of urls in text
+- mxml as sub module
 
 Version 4.0.1
 - Changes to connection callbacks
