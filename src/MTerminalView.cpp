@@ -5379,7 +5379,7 @@ void MTerminalView::EscapeAPC(uint8_t inChar)
 			}
 
 			case 9:
-				mTerminalCWD = mArgString;
+				mTerminalCWD = zeep::decode_base64({ mArgString.data(), mArgString.length() });
 				break;
 
 			default:
