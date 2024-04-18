@@ -369,10 +369,11 @@ MTerminalWindow::MTerminalWindow(MTerminalChannel *inTerminalChannel, const std:
 	MStatusBarElement parts[] = {
 		{ 250, { 4, 0, 4, 0 }, false },
 		{ 275, { 4, 0, 4, 0 }, true },
+		{ 60, { 4, 0, 4, 0 }, false },
 		{ 60, { 4, 0, 4, 0 }, false }
 	};
 
-	mStatusbar = new MStatusbar("status", bounds, 3, parts);
+	mStatusbar = new MStatusbar("status", bounds, 4, parts);
 	mMainVBox->AddChild(mStatusbar);
 	bounds = mStatusbar->GetBounds();
 

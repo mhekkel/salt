@@ -204,20 +204,9 @@ class MChar
 	{
 	}
 
-	MChar(const MChar &inChar) noexcept
-		: mUnicode(inChar.mUnicode)
-		, mStyle(inChar.mStyle)
-		, mHyperLink(inChar.mHyperLink)
-	{
-	}
+	MChar(const MChar &inChar) noexcept = default;
 
-	MChar &operator=(const MChar &inChar) noexcept
-	{
-		mUnicode = inChar.mUnicode;
-		mStyle = inChar.mStyle;
-		mHyperLink = inChar.mHyperLink;
-		return *this;
-	}
+	MChar &operator=(const MChar &inChar) noexcept = default;
 
 	MChar &operator=(unicode inChar) noexcept
 	{
@@ -256,12 +245,15 @@ class MChar
 	operator unicode() const { return mUnicode; }
 	operator MStyle() const { return mStyle; }
 
-	void SetHyperLink(int inLinkNr)
+	bool IsTab() const { return mUnicode == ' ' and mIsTab; }
+	void SetTab(bool inIsTab) { assert(mUnicode == ' '); mIsTab = inIsTab; }
+
+	void SetHyperLink(int16_t inLinkNr)
 	{
 		mHyperLink = inLinkNr;
 	}
 
-	int GetHyperLink() const
+	int16_t GetHyperLink() const
 	{
 		return mHyperLink;
 	}
@@ -269,7 +261,8 @@ class MChar
   private:
 	char32_t mUnicode = ' ';
 	MStyle mStyle{};
-	int mHyperLink = 0;
+	int16_t mHyperLink = 0;
+	bool mIsTab = false;
 };
 
 static_assert(sizeof(MChar) == 12, "MChar should be 12 bytes");
@@ -384,6 +377,7 @@ class MLine
 
 	iterator begin() { return iterator(mCharacters); }
 	iterator end() { return iterator(mCharacters + mSize); }
+	std::size_t size() const { return mSize; }
 
   private:
 	MChar *mCharacters = nullptr;
@@ -416,6 +410,8 @@ class MTerminalBuffer
 
 	void SetCharacter(uint32_t inLine, uint32_t inColumn, unicode inChar,
 		MStyle inStyle = MStyle(), int inHyperLink = 0);
+
+	void SetIsTab(uint32_t inLine, uint32_t inColumn, bool inIsTab);
 
 	template <typename Handler>
 	void ForeachInRectangle(int32_t inFromLine, int32_t inFromColumn,
@@ -478,6 +474,7 @@ class MTerminalBuffer
 	void SetSelection(int32_t inBeginLine, int32_t inBeginColumn,
 		int32_t inEndLine, int32_t inEndColumn, bool inBlock = false);
 	void SelectAll();
+	void SelectCharacter(int32_t inLine, int32_t inColumn);
 	void ClearSelection();
 
 	void SetColors(MXTermColor inForeColor, MXTermColor inBackColor)

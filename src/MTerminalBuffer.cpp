@@ -357,6 +357,18 @@ void MTerminalBuffer::SetCharacter(uint32_t inLine, uint32_t inColumn, unicode i
 	mDirty = true;
 }
 
+void MTerminalBuffer::SetIsTab(uint32_t inLine, uint32_t inColumn, bool inIsTab)
+{
+	if (inLine >= mLines.size())
+		return;
+
+	MLine &line(mLines[inLine]);
+	if (auto &ch = line[inColumn]; ch == char32_t(' '))
+		ch.SetTab(inIsTab);
+
+	mDirty = true;
+}
+
 void MTerminalBuffer::ReverseFlag(uint32_t inFromLine, uint32_t inFromColumn,
 	uint32_t inToLine, uint32_t inToColumn, MCharStyle inFlags)
 {
@@ -602,6 +614,21 @@ void MTerminalBuffer::SelectAll()
 	mBlockSelection = false;
 }
 
+void MTerminalBuffer::SelectCharacter(int32_t inLine, int32_t inColumn)
+{
+	mBeginLine = mEndLine = inLine;
+	mBeginColumn = inColumn;
+	mEndColumn = inColumn + 1;
+
+	auto &line = GetLine(inLine);
+
+	while (mBeginColumn > 0 and line[mBeginColumn].IsTab())
+		--mBeginColumn;
+	
+	while (mEndColumn + 1 < line.size() and line[mEndColumn].IsTab())
+		++mEndColumn;
+}
+
 void MTerminalBuffer::ClearSelection()
 {
 	mBeginLine = mBeginColumn = mEndLine = mEndColumn = 0;
@@ -833,8 +860,28 @@ std::string MTerminalBuffer::GetText(int32_t inBeginLine, int32_t inBeginColumn,
 
 		auto iter = back_inserter(result);
 
+		bool tab = false;
 		for (int32_t c = c1; c < c2; ++c)
-			MEncodingTraits<kEncodingUTF8>::WriteUnicode(iter, (unicode)line[c]);
+		{
+			auto ch = line[c];
+
+			char32_t cc = ch;
+			if (not inBlock)
+			{
+				if (tab and ch.IsTab())
+					continue;
+				
+				if (cc == ' ' and c + 1 < c2 and line[c + 1].IsTab())
+				{
+					cc = '\t';
+					tab = true;
+				}
+				else
+					tab = false;
+			}
+
+			MEncodingTraits<kEncodingUTF8>::WriteUnicode(iter, cc);
+		}
 
 		if (mBlockSelection or (l != inEndLine and not line.IsSoftWrapped()))
 			result += '\n';

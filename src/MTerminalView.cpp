@@ -615,8 +615,6 @@ void MTerminalView::Reset()
 
 	ResetCursor();
 
-	mBracketedPaste = MPrefs::GetBoolean("enable-bracketed-paste", true);
-
 	mIRM = false;
 	mKAM = false;
 	mLNM = false;
@@ -873,7 +871,15 @@ void MTerminalView::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount,
 				GetCharacterForPosition(mLastMouseX, mLastMouseY, line, column);
 				mBuffer->FindWord(line, column, mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol);
 
-				mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+				if (mMinSelLine != mMaxSelLine or mMinSelCol != mMaxSelCol)
+					mBuffer->SetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, false);
+				else
+				{
+					mBuffer->SelectCharacter(line, column);
+					bool isBlock;
+					mBuffer->GetSelection(mMinSelLine, mMinSelCol, mMaxSelLine, mMaxSelCol, isBlock);
+				}
+
 				Invalidate();
 				break;
 			}
@@ -1453,8 +1459,7 @@ void MTerminalView::Idle()
 	bool update = false;
 	int32_t savedCursorX = mCursor.x, savedCursorY = mCursor.y;
 
-	if (not mInputBuffer.empty() and
-		(not mNextSmoothScroll.has_value() or *mNextSmoothScroll < now))
+	if (not mInputBuffer.empty() and mNextSmoothScroll.value_or(now) <= now)
 	{
 		mScrollForwardCount = 0;
 		int32_t topLine = GetTopLine();
@@ -1501,11 +1506,11 @@ void MTerminalView::Idle()
 		}
 	}
 
-	//	if (mBuffer->IsDirty())
-	//	{
-	//		std::string desc = (MFormat("%d,%d", mCursor.x + 1, mCursor.y + 1));
-	//		mStatusbar->SetStatusText(3, desc, false);
-	//	}
+	if (mBuffer->IsDirty())
+	{
+		std::string desc = (MFormat("%d,%d", mCursor.x + 1, mCursor.y + 1));
+		mStatusbar->SetStatusText(3, desc, false);
+	}
 
 	if (update or mBuffer->IsDirty())
 		Invalidate();
@@ -2883,7 +2888,7 @@ void MTerminalView::HandleOpened(const std::error_code &ec)
 
 void MTerminalView::HandleReceived(const std::error_code &ec, std::streambuf &inData)
 {
-	PRINT_THREAD_ID;
+	// PRINT_THREAD_ID;
 
 	if (ec)
 	{
@@ -3058,6 +3063,7 @@ void MTerminalView::MoveCursor(MCursorMovement inDirection)
 				++mCursor.x;
 				if (mTabStops[mCursor.x])
 					break;
+				mBuffer->SetIsTab(mCursor.y, mCursor.x, true);
 			}
 			break;
 
