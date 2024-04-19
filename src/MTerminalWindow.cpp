@@ -71,11 +71,15 @@ char this_thread_name()
 		return i->second;
 }
 
-#define PRINT_THREAD_ID do { std::cout << std::source_location::current().function_name() << "In thread: " << this_thread_name() << "\n"; } while (false)
+# define PRINT_THREAD_ID                                                                                              \
+	 do                                                                                                               \
+	 {                                                                                                                \
+		 std::cout << std::source_location::current().function_name() << "In thread: " << this_thread_name() << "\n"; \
+	 } while (false)
 
 #else
 
-#define PRINT_THREAD_ID
+# define PRINT_THREAD_ID
 
 #endif
 
@@ -86,11 +90,11 @@ class MSshTerminalWindow : public MTerminalWindow
 {
   public:
 	MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
-		const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection);
+		std::shared_ptr<pinch::basic_connection> inConnection, std::vector<std::string> inArgv);
 
 	MTerminalWindow *Clone(MTerminalWindow *) override
 	{
-		return new MSshTerminalWindow(mUser, mServer, mPort, mSSHCommand, mConnection);
+		return new MSshTerminalWindow(mUser, mServer, mPort, mConnection, mArgv);
 	}
 
 	void OnDisconnect();
@@ -102,7 +106,6 @@ class MSshTerminalWindow : public MTerminalWindow
 	void OnProxyHTTP();
 
   protected:
-
 	void AcceptsHostKey(const std::string &host, const std::string &algorithm, const pinch::blob &key,
 		pinch::host_key_state state, std::promise<pinch::host_key_reply> result);
 
@@ -122,13 +125,13 @@ class MSshTerminalWindow : public MTerminalWindow
 	std::shared_ptr<pinch::basic_connection> mConnection;
 	std::string mUser, mServer;
 	uint16_t mPort;
-	std::string mSSHCommand;
+	std::vector<std::string> mArgv;
 	pinch::channel_ptr mKeyDropper;
 };
 
 MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::string &inHost, uint16_t inPort,
-	const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
-	: MTerminalWindow(MTerminalChannel::Create(inConnection), { inSSHCommand })
+	std::shared_ptr<pinch::basic_connection> inConnection, std::vector<std::string> inArgv)
+	: MTerminalWindow(MTerminalChannel::Create(inConnection), inArgv)
 
 	, cDisconnect(this, "disconnect", &MSshTerminalWindow::OnDisconnect)
 	, cRenewKeys(this, "renew-keys", &MSshTerminalWindow::OnRenewKeys)
@@ -142,7 +145,7 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	, mUser(inUser)
 	, mServer(inHost)
 	, mPort(inPort)
-	, mSSHCommand(inSSHCommand)
+	, mArgv(inArgv)
 {
 	using namespace std::placeholders;
 
@@ -153,8 +156,7 @@ MSshTerminalWindow::MSshTerminalWindow(const std::string &inUser, const std::str
 	mConnection->set_callbacks(
 		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::AcceptsHostKey, this, _1, _2, _3, _4, _5)),
 		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::ProvidePassword, this, _1)),
-		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::ProvideCredentials, this, _1, _2, _3, _4, _5))
-	);
+		asio_ns::bind_executor(my_executor, std::bind(&MSshTerminalWindow::ProvideCredentials, this, _1, _2, _3, _4, _5)));
 
 	std::stringstream title;
 	title << mUser << '@' << mServer;
@@ -574,5 +576,7 @@ MTerminalWindow *MTerminalWindow::Create(const std::vector<std::string> &inArgv)
 MTerminalWindow *MTerminalWindow::Create(const std::string &inUser, const std::string &inHost, uint16_t inPort,
 	const std::string &inSSHCommand, std::shared_ptr<pinch::basic_connection> inConnection)
 {
-	return new MSshTerminalWindow(inUser, inHost, inPort, inSSHCommand, inConnection);
+	return inSSHCommand.empty()
+	           ? new MSshTerminalWindow(inUser, inHost, inPort, inConnection, {})
+	           : new MSshTerminalWindow(inUser, inHost, inPort, inConnection, { inSSHCommand });
 }
