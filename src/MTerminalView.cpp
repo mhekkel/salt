@@ -66,9 +66,13 @@
 
 #ifndef NDEBUG
 extern char this_thread_name();
-#define PRINT_THREAD_ID do { std::cout << std::source_location::current().function_name() << "In thread: " << this_thread_name() << "\n"; } while (false)
+# define PRINT_THREAD_ID                                                                                              \
+	 do                                                                                                               \
+	 {                                                                                                                \
+		 std::cout << std::source_location::current().function_name() << "In thread: " << this_thread_name() << "\n"; \
+	 } while (false)
 #else
-#define PRINT_THREAD_ID
+# define PRINT_THREAD_ID
 #endif
 
 namespace
@@ -2687,11 +2691,11 @@ void MTerminalView::GetTerminalMetrics(uint32_t inColumns, uint32_t inRows, bool
 	MDevice dev;
 	dev.SetFont(MPrefs::GetString("font", MPrefs::GetString("font",
 #if defined _MSC_VER
-		"Consolas 10"
+											  "Consolas 10"
 #else
-		"DejaVu Sans Mono 11"
+											  "DejaVu Sans Mono 11"
 #endif
-	)));
+											  )));
 
 	float charWidth = dev.GetXWidth();
 	uint32_t lineHeight = dev.GetLineHeight();
@@ -2842,6 +2846,19 @@ void MTerminalView::Closed()
 
 	MStoryboard *storyboard = mAnimationManager->CreateStoryboard();
 	storyboard->AddTransition(mDisabledFactor, 1, 1000ms, "acceleration-decelleration");
+
+	if (not mArgv.empty())
+	{
+		std::weak_ptr<MTerminalView> self(shared_from_this());
+		storyboard->AddFinishedCallback([self]
+			{
+			if (auto tv = self.lock())
+			{
+				MSaltApp::Instance().execute([w = tv->GetWindow()]
+					{ w->Close(); });
+			} });
+	}
+
 	mAnimationManager->Schedule(storyboard);
 }
 
@@ -5824,7 +5841,7 @@ void MTerminalView::LinkClicked(std::string inLink)
 			std::string user = uri.get_userinfo();
 			if (auto c = user.find(':'); c != std::string::npos)
 				user.resize(c);
-			
+
 			uint16_t port = uri.get_port();
 			if (port == 0)
 				port = 22;
@@ -5844,10 +5861,10 @@ void MTerminalView::OnIOStatus(std::string inMessage)
 {
 	PRINT_THREAD_ID;
 
-	MSaltApp::Instance().execute([this, inMessage](){
+	MSaltApp::Instance().execute([this, inMessage]()
+		{
 		PRINT_THREAD_ID;
-		mStatusbar->SetStatusText(0, inMessage, false);
-	});
+		mStatusbar->SetStatusText(0, inMessage, false); });
 }
 
 // --------------------------------------------------------------------
@@ -5857,7 +5874,7 @@ bool MTerminalView::DragAcceptsMimeType(const std::string &inMimeType)
 	return IsOpen() and inMimeType == "text/plain";
 }
 
-bool MTerminalView::DragAcceptsFile() 
+bool MTerminalView::DragAcceptsFile()
 {
 	return IsOpen() and mTerminalChannel->CanDownloadFiles();
 }
@@ -5872,7 +5889,7 @@ void MTerminalView::DragMotion(int32_t inX, int32_t inY)
 {
 }
 
-void MTerminalView::DragLeave() 
+void MTerminalView::DragLeave()
 {
 	mDragWithin = false;
 	Invalidate();
@@ -5903,7 +5920,7 @@ bool MTerminalView::DragAcceptFile(int32_t inX, int32_t inY, const std::filesyst
 		if (MPrefs::GetBoolean("use-cwd-as-upload-dir", true))
 			dest = mTerminalCWD;
 		else
-			dest = MPrefs::GetString("upload-dir", "." );
+			dest = MPrefs::GetString("upload-dir", ".");
 		if (dest.empty())
 			dest = ".";
 
@@ -5915,4 +5932,3 @@ bool MTerminalView::DragAcceptFile(int32_t inX, int32_t inY, const std::filesyst
 
 	return result;
 }
-

@@ -14,7 +14,7 @@
 			<pager id="pages" bind="left top" margin-left="2">
 				<page id="page1">
 					<hbox>
-						<caption margin-top="3" width="50" text="Font"/>
+						<caption margin-top="3" width="55" text="Font"/>
 						<popup bind="left top" id="font" width="80" />
 						<popup bind="left top" id="size" width="25">
 							<option>8</option>
@@ -29,15 +29,15 @@
 						</popup>
 					</hbox>
 					<hbox>
-						<caption margin-top="3" width="50" text="Background Color"/>
+						<caption margin-top="3" width="55" text="Background Color"/>
 						<swatch id="back-color" color="#aaaaaa" />
 					</hbox>
 					<hbox>
-						<caption margin-top="3" width="50" text="Selection Color"/>
+						<caption margin-top="3" width="55" text="Selection Color"/>
 						<swatch id="selection-color" color="#aaaaaa" />
 					</hbox>
 					<hbox>
-						<caption margin-top="3" width="50" text="Buffer"/>
+						<caption margin-top="3" width="55" text="Buffer"/>
 						<edittext style="number" id="buffer" width="30" />
 						<caption margin-top="3" text="lines" />
 					</hbox>

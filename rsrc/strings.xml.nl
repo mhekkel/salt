@@ -393,7 +393,7 @@
 
 	<localstring context="prefs-dialog">
 		<key>Use current working directory (if known, see documentation)</key>
-		<value>Gebruik huidige werk map, indine bekend (zie documentatie)</value>
+		<value>Gebruik huidige werk map, indien bekend (zie documentatie)</value>
 	</localstring>
 
 	<localstring context="tunnel-dialog">
