@@ -324,7 +324,7 @@ asio_ns::awaitable<void> MSshTerminalChannel::DoUploadFileTo(std::filesystem::pa
 			filename = localpath.filename().stem().string() + '-' + std::to_string(++nr) + localpath.filename().extension().string();
 		}
 
-		auto written = co_await p->write_file((remote_dir / filename).string(), localpath, asio_ns::use_awaitable);
+		[[maybe_unused]] auto written = co_await p->write_file((remote_dir / filename).string(), localpath, asio_ns::use_awaitable);
 
 		eIOStatus(FormatString("Uploaded ^0", filename.string()));
 	}

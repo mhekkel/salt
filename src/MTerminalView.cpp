@@ -5817,7 +5817,7 @@ void MTerminalView::LinkClicked(std::string inLink)
 		if (uri.get_scheme() == "file" and mTerminalChannel->CanDownloadFiles())
 		{
 			// TODO: validate hostname in uri. Should be either empty, localhost or the actual hostname of the host we're connected to
-			DownloadFile(uri.get_path().string());
+			DownloadFile(uri.get_path().unencoded_string());
 		}
 		else if (uri.get_scheme() == "ssh")
 		{

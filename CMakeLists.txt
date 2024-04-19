@@ -87,7 +87,7 @@ find_package(Threads REQUIRED)
 add_subdirectory(libzeep EXCLUDE_FROM_ALL)
 add_subdirectory(libmcfp EXCLUDE_FROM_ALL)
 add_subdirectory(libpinch EXCLUDE_FROM_ALL)
-add_subdirectory(mxml EXCLUDE_FROM_ALL)
+add_subdirectory(libmxml EXCLUDE_FROM_ALL)
 add_subdirectory(libmgui EXCLUDE_FROM_ALL)
 
 # Generate the manual first

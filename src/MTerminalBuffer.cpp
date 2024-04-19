@@ -624,8 +624,8 @@ void MTerminalBuffer::SelectCharacter(int32_t inLine, int32_t inColumn)
 
 	while (mBeginColumn > 0 and line[mBeginColumn].IsTab())
 		--mBeginColumn;
-	
-	while (mEndColumn + 1 < line.size() and line[mEndColumn].IsTab())
+
+	while (mEndColumn + 1 < static_cast<int32_t>(line.size()) and line[mEndColumn].IsTab())
 		++mEndColumn;
 }
 
@@ -870,7 +870,7 @@ std::string MTerminalBuffer::GetText(int32_t inBeginLine, int32_t inBeginColumn,
 			{
 				if (tab and ch.IsTab())
 					continue;
-				
+
 				if (cc == ' ' and c + 1 < c2 and line[c + 1].IsTab())
 				{
 					cc = '\t';
@@ -1182,7 +1182,8 @@ std::string MTerminalBuffer::GetURIAtPosition(int32_t inLine, int32_t inColumn,
 				}
 			}
 		}
-		else if (c2 + 3 < mWidth and GetChar(l2, c2 + 1, false) == ':' and
+		else if (c2 + 3 < static_cast<int32_t>(mWidth) and
+				 GetChar(l2, c2 + 1, false) == ':' and
 				 GetChar(l2, c2 + 2, false) == '/' and GetChar(l2, c2 + 3, false) == '/')
 		{
 			outBeginLine = l1;
@@ -1236,7 +1237,7 @@ int MTerminalBuffer::GetHoveredLink(int32_t inLine, int32_t inColumn)
 
 	// Not a registered hyperlink, see if there's something underneath the pointer
 	// that looks like a hyperlink
-	if (result == 0 and inColumn + 1 < mWidth)
+	if (result == 0 and inColumn + 1 < static_cast<int32_t>(mWidth))
 	{
 		mHoveredLink = GetURIAtPosition(inLine, inColumn,
 			mHoverdLinkBeginLine, mHoverdLinkBeginColumn, mHoverdLinkEndLine, mHoverdLinkEndColumn);
@@ -1269,7 +1270,7 @@ std::tuple<int32_t, int32_t> MTerminalBuffer::GetHoveredLinkColumBounds(int32_t 
 		c1 = inLine > mHoverdLinkBeginLine ? 0 : mHoverdLinkBeginColumn;
 		c2 = inLine < mHoverdLinkBeginLine ? mWidth : mHoverdLinkEndColumn;
 	}
-	
+
 	return { c1, c2 };
 }
 

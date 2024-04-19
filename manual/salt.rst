@@ -105,13 +105,13 @@ I'm afraid.)
 	  else
 	    user+='\u'
 	  fi
-  	  # Standard prompt with red notification of non-zero exit status
-	  PS1="${debian_chroot:+($debian_chroot)}${user}@\[\e[4m\]\h\[\e[24m\]:\[\e[1m\]\w\[\e[0m\]\$ "
-  	  # Set the title to user@host:dir
-	  PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-  	  # Add command for salt to know the current directory
-	  printf -v cwd "\033_9;%s\x9c" $PWD
-	  PS1="$cwd$PS1"
+	  # Standard prompt with red notification of non-zero exit status
+	  PS1="${user}@\[\e[4m\]\h\[\e[24m\]:\[\e[1m\]\w\[\e[0m\]\$ "
+	  # Set the title to user@host:dir
+	  PS1="\[\e]0;\u@\h: \w\a\]$PS1"
+	  # Add command for salt to know the current directory
+	  printf -v cwd "\033_9;%s\x9c" $(echo -n "$PWD" | base64 -w0);
+	  PS1="\[${cwd}\]$PS1"
 	}
 	PROMPT_COMMAND=_prompt_cmd
 
