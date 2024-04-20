@@ -1,10 +1,7 @@
 te doen?
 
-- PlaySound
 - kopiëren van kleurtjes (RTF? HTML?)
-- drag&drop?
 - Telnet, rlogin, seriële poort
 - meer documentatie
-- Link klikken
 - clippen van regel (voor dubbele hoogte tekst)
 

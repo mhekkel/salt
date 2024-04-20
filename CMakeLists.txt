@@ -137,7 +137,7 @@ set(RESOURCES
 	${CMAKE_SOURCE_DIR}/rsrc/strings.xml.nl
 	${CMAKE_SOURCE_DIR}/rsrc/Sounds
 	${CMAKE_SOURCE_DIR}/rsrc/Icons
-	${CMAKE_CURRENT_BINARY_DIR}/manual/salt.1)
+	${CMAKE_BINARY_DIR}/manual/salt.1)
 
 target_include_directories(salt PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 target_link_libraries(salt pinch::pinch libmcfp::libmcfp Threads::Threads mgui::mgui zeep::zeep)

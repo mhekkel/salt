@@ -1,8 +1,8 @@
 find_package(Sphinx REQUIRED)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in ${CMAKE_CURRENT_SOURCE_DIR}/conf.py @ONLY)
+configure_file(conf.py.in ${CMAKE_CURRENT_SOURCE_DIR}/conf.py @ONLY)
 
-set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+# set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
 # set(SPHINX_BUILD ${PROJECT_SOURCE_DIR}/docroot)
 
 # add_custom_target("Sphinx-${PROJECT_NAME}-html" ALL
@@ -11,10 +11,10 @@ set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
 # 	BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}
 # 	COMMENT "Generating documentation with Sphinx")
 
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/salt.1
-	COMMAND ${SPHINX_EXECUTABLE} -b man ${SPHINX_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/salt.rst
+add_custom_target(
+	COMMAND ${SPHINX_EXECUTABLE} -b man ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/salt.rst
+	BYPRODUCTS salt.1
+	DEPENDS salt.rst
 	COMMENT "Generating manual pages with Sphinx")
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/salt.1
