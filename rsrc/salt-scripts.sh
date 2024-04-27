@@ -6,6 +6,21 @@
 # Only run in interactive shell, test if 'i' is in $- (the startup options)
 [[ $- == *i* ]] || return 0
 
+# These two commands can be used in a terminal to up- and download files
+
+# Use get to download a file from the server to your local computer
+get() {
+	file="$1";
+	printf "\033_7;%s\x9c" $(realpath -qez "$file" | base64 -w0)
+}
+
+# Use get to upload a file from your local computer to the server.
+# Note that this may overwrite an existing file.
+put() {
+	file="$1";
+	printf "\033_8;%s\x9c" $(realpath -qz "$file" | base64 -w0)
+}
+
 # Enocde URL
 encodeurl() {
     LC_ALL=C
