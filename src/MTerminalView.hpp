@@ -74,8 +74,8 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 
 	// virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	virtual void PointerLeave() override;
+	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void PointerLeave() override;
 
 	void MiddleMouseButtonClick(int32_t inX, int32_t inY) override;
 	void SecondaryMouseButtonClick(int32_t inX, int32_t inY) override;
