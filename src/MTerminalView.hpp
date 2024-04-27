@@ -305,7 +305,7 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 	MEncoding mEncoding;
 	std::vector<bool> mTabStops;
 
-	struct MCursor
+	struct MCursorState
 	{
 		bool saved;
 		int x, y;
@@ -318,8 +318,7 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 		bool blink, block;
 	} mCursor, mSaved, mAlternate, mSavedSL;
 
-	std::map<int, bool>
-		mSavedPrivateMode;
+	std::map<int, bool> mSavedPrivateMode;
 
 	// DEC modes
 	bool mDECCKM;
@@ -459,7 +458,9 @@ class MTerminalView : public MCanvas, public std::enable_shared_from_this<MTermi
 	MEventIn<void(std::string)> eIOStatus;
 
 	bool mDragWithin = false;
-	std::filesystem::path mTerminalCWD;
+
+	// OSC 7 support, used in up and downloading files
+	std::filesystem::path mTerminalHost, mTerminalCWD;
 
 #if DEBUG
 	bool mDebugUpdate;

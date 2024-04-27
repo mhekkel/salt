@@ -927,10 +927,18 @@ void MTerminalView::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers
 	// shortcuts
 	if (mMouseClick == eNoClick)
 	{
+		if (std::abs(mLastMouseX - inX) or std::abs(mLastMouseY - inY))
+			SetCursor(MCursor::eNormalCursor);
+		
+		mLastMouseX = inX;
+		mLastMouseY = inY;
+
 		if (std::exchange(mCurrentLink, hoveredLink) != hoveredLink)
 			Invalidate();
 		return;
 	}
+
+	SetCursor(MCursor::eNormalCursor);
 
 	if (mMouseClick == eLinkClick)
 	{
@@ -5263,8 +5271,31 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 				}
 				break;
 
+			case 7:
+			{
+				try
+				{
+					zeep::http::uri uri(mArgString);
+					if (uri.get_scheme() == "file")
+					{
+						mTerminalHost = uri.get_host();
+						mTerminalCWD = uri.get_path().unencoded_string();
+					}
+				}
+				catch (const std::exception &e)
+				{
+					mTerminalHost.clear();
+					mTerminalCWD.clear();
+				}
+				break;
+			}
+
 			case 8:
 				SetHyperLink(mArgString);
+				break;
+
+			case 9:
+				mStatusbar->SetStatusText(0, mArgString, false);
 				break;
 
 			case 10:
@@ -5312,6 +5343,17 @@ void MTerminalView::EscapeOSC(uint8_t inChar)
 						MClipboard::Instance().SetData(s /* , false */);
 					}
 				}
+				break;
+
+			case 1337:
+				if (mArgString.starts_with("CurrentDir="))
+					mTerminalCWD = mArgString.substr(strlen("CurrentDir="));
+				else if (mArgString == "StealFocus")
+					GetWindow()->Select();
+				else if (mArgString == "CursorShape=0")
+					mBlockCursor = true;
+				else if (mArgString == "CursorShape=1" or mArgString == "CursorShape=2")
+					mBlockCursor = false;
 				break;
 
 			default:
@@ -5831,9 +5873,8 @@ void MTerminalView::LinkClicked(std::string inLink)
 	{
 		zeep::http::uri uri(inLink);
 
-		if (uri.get_scheme() == "file" and mTerminalChannel->CanDownloadFiles())
+		if (uri.get_scheme() == "file" and mTerminalChannel->CanDownloadFiles() and uri.get_host() == mTerminalHost)
 		{
-			// TODO: validate hostname in uri. Should be either empty, localhost or the actual hostname of the host we're connected to
 			DownloadFile(uri.get_path().unencoded_string());
 		}
 		else if (uri.get_scheme() == "ssh")
