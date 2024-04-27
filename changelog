@@ -1,3 +1,8 @@
+Version 4.0.3
+- Added support for OSC 7, a more standard way or
+  providing the current working directory to a
+  terminal.
+
 Version 4.0.2
 - Fix downloading file when 'Always ask where' is in use
 - Copy from terminal now remembers tabs

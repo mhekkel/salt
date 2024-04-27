@@ -91,29 +91,76 @@ link and the file will be downloaded.
 
 Upload and download locations can be specified in the preferences
 dialog. Salt can find out where to upload files by using a trick
-similar to the one used to set a window title. To do so, add
-the following to your **PS1** variable. (This works for bash only
-I'm afraid.)
+similar to the one used to set a window title. To do so, you can source
+the following script in your .bashrc or .zschrc file.
 
 .. code:: bash
 
-	_prompt_cmd() {
-	  local EXIT="$?"
-	  local user=""
-	  if [ $EXIT != 0 ]; then
-	    user+='\[\e[37;1;41m\]\u\[\e[0m\]'
-	  else
-	    user+='\u'
-	  fi
-	  # Standard prompt with red notification of non-zero exit status
-	  PS1="${user}@\[\e[4m\]\h\[\e[24m\]:\[\e[1m\]\w\[\e[0m\]\$ "
-	  # Set the title to user@host:dir
-	  PS1="\[\e]0;\u@\h: \w\a\]$PS1"
-	  # Add command for salt to know the current directory
-	  printf -v cwd "\033_9;%s\x9c" $(echo -n "$PWD" | base64 -w0);
-	  PS1="\[${cwd}\]$PS1"
+	# A script that produces a prompt containing useful information
+
+	# Only works with zsh and bash
+	[ -n $BASH_VERSION -o -n $ZSH_VERSION ] || return 0
+
+	# Only run in interactive shell, test if 'i' is in $- (the startup options)
+	[[ $- == *i* ]] || return 0
+
+	# Enocde URL
+	encodeurl() {
+		LC_ALL=C
+		local str="$1"
+		local enc="" safe o
+		
+		while [ -n "$str" ]; do
+			safe="${str%%[!a-zA-Z0-9/:_\.\-\!\'\(\)~]*}"
+			enc+=$safe
+			str="${str#"$safe"}"
+			if [ -n "$str" ]; then
+				printf -v o "%%%02X" "'$str"
+				enc+=$o
+				str="${str#?}"
+			fi
+		done
+		
+		echo "${enc}"
 	}
-	PROMPT_COMMAND=_prompt_cmd
+
+	# Generic OSC 7 writing command 
+	osc7_cmd () {
+		# Add command for salt to know the current directory
+		# HOSTNAME is not set in zsh, by default, but HOST is
+		printf "\033]7;file://%s%s\x9c" "${HOSTNAME:-${HOST}}" "$(encodeurl "${PWD}")"
+	}
+
+	# The prompt command function for use in bash
+	prompt_cmd () {
+		local EXIT="$?"
+		local user=""
+		if [ $EXIT != 0 ]; then
+			user+='\[\e[37;1;41m\]\u\[\e[0m\]'
+		else
+			user+='\u'
+		fi
+
+		# Standard prompt with red notification of non-zero exit status
+		PS1="${user}@\[\e[4m\]\h\[\e[24m\]:\[\e[1m\]\w\[\e[0m\]\$ "
+
+		# Set the title to user@host:dir
+		PS1="\[\e]0;\u@\h: \w\a\]$PS1"
+
+		# And add the OSC 7 command to notify the current host and dir
+		cwd=$(osc7_cmd)
+		PS1="\[$(osc7_cmd)\]$PS1"
+	}
+
+	# And add this command to the prompt, depending on the shell
+	case "$TERM" in
+	xterm*|vte*|salt*)
+		[ -n "$BASH_VERSION" ] && PROMPT_COMMAND="prompt_cmd"
+		[ -n "$ZSH_VERSION"  ] && precmd_functions+=(osc7_cmd)
+		;;
+	esac
+
+	true
 
 An alternative way of up- and downloading files is by using some
 bash scripts. Add these two functions to your *.bashrc* file and
@@ -149,9 +196,6 @@ The commands recognized by Salt are:
 | 7                 | Download the specified file                 |
 +-------------------+---------------------------------------------+
 | 8                 | Upload a file to the specified location     |
-+-------------------+---------------------------------------------+
-| 9                 | Use the specified location as default       |
-|                   | location for uploads                        |
 +-------------------+---------------------------------------------+
 
 Bugs
