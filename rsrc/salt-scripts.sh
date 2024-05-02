@@ -1,7 +1,7 @@
 # A script that produces a prompt containing useful information
 
 # Only works with zsh and bash
-[ -n $BASH_VERSION -o -n $ZSH_VERSION ] || return 0
+[ -n "$BASH_VERSION" -o -n "$ZSH_VERSION" ] || return 0
 
 # Only run in interactive shell, test if 'i' is in $- (the startup options)
 [[ $- == *i* ]] || return 0
